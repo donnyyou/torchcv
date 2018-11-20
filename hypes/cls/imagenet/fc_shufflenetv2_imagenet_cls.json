@@ -1,0 +1,121 @@
+{
+    "dataset": "imagenet",
+    "task": "cls",
+    "method": "fc_classifier",
+    "data": {
+      "num_classes": 1000,
+      "data_dir": "~/DataSet/ImageNet",
+      "image_tool": "pil",
+      "input_mode": "RGB",
+      "workers": 16
+    },
+    "train": {
+      "batch_size": 1024,
+      "data_transformer": {
+        "size_mode": "fix_size",
+        "input_size": [224, 224],
+        "align_method": "only_pad"
+      }
+    },
+    "val": {
+      "batch_size": 1024,
+      "data_transformer": {
+        "size_mode": "fix_size",
+        "input_size": [224, 224],
+        "align_method": "only_pad"
+      }
+    },
+    "test": {
+    },
+    "train_trans": {
+      "trans_seq": ["random_hflip", "resize", "random_crop"],
+      "random_hflip": {
+        "ratio": 0.5,
+        "swap_pair": []
+      },
+      "random_resized_crop": {
+        "crop_size": [224, 224]
+      },
+      "resize": {
+        "min_side_length": 256
+      },
+      "random_crop": {
+        "ratio": 1.0,
+        "crop_size": [224, 224],
+        "method": "center",
+        "allow_outside_center": false
+      }
+    },
+    "val_trans": {
+      "trans_seq": ["resize", "random_crop"],
+      "resize": {
+        "min_side_length": 256
+      },
+      "random_crop": {
+        "ratio": 1.0,
+        "crop_size": [224, 224],
+        "method": "center",
+        "allow_outside_center": false
+      }
+    },
+    "normalize": {
+      "div_value": 255,
+      "mean_value": [124, 116, 104],
+      "mean": [0.485, 0.456, 0.406],
+      "std": [0.229, 0.224, 0.225]
+    },
+    "details": {
+      "color_list": [[255, 0, 0], [255, 85, 0], [255, 170, 0], [255, 255, 0], [170, 255, 0],
+                     [85, 255, 0], [0, 255, 0], [0, 255, 85], [0, 255, 170], [0, 255, 255],
+                     [0, 170, 255], [0, 85, 255], [0, 0, 255], [85, 0, 255], [170, 0, 255],
+                     [255, 0, 255], [255, 0, 170], [255, 0, 85], [255, 0, 170], [255, 0, 85]]
+    },
+    "checkpoints": {
+      "checkpoints_name": "fc_shufflenetv2_imagenet_cls",
+      "checkpoints_dir": "checkpoints/cls/imagenet",
+      "save_iters": 2000
+    },
+
+    "network":{
+      "model_name": "shufflenetv2",
+      "stride": 32,
+      "model_scale": 0.5,
+      "shuffle_group": 2,
+      "pooled_size": [7, 7]
+    },
+    "logging": {
+      "logfile_level": "info",
+      "stdout_level": "info",
+      "log_file": "./log/cls/fc_shufflenetv2_imagenet_cls.log",
+      "log_format": "%(asctime)s %(levelname)-7s %(message)s",
+      "rewrite": true
+    },
+    "lr": {
+      "base_lr": 0.5,
+      "lr_policy": "lambda_linear",
+      "step": {
+        "gamma": 0.1,
+        "step_size": 30
+      }
+    },
+    "solver": {
+      "display_iter": 100,
+      "test_interval": 2000,
+      "max_epoch": 250
+    },
+    "optim": {
+      "optim_method": "sgd",
+      "adam": {
+        "betas": [0.9, 0.999],
+        "eps": 1e-08,
+        "weight_decay": 0.0001
+      },
+      "sgd":{
+        "weight_decay": 0.00004,
+        "momentum": 0.9
+      }
+    },
+    "cross_entropy_loss": {
+      "reduction": "elementwise_mean"
+    }
+}

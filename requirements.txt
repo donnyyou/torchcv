@@ -1,0 +1,15 @@
+cython
+numpy
+cffi
+opencv-python
+scipy
+easydict
+matplotlib
+Pillow
+pyyaml
+visdom
+bs4
+html5lib
+ninja
+torch
+torchvision

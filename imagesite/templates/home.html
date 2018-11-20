@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<head>
+</head>
+<body>
+<h2>共{{total}}张</h2></br>
+<h2>分页:</h2>
+{% for name,size,pageid in page_link_list%}
+
+{% if tag=="" %}
+<a href='/dataset/{{name}}?size={{size}}&page={{pageid}}'>{{pageid}}</a>  
+{% else %}
+<a href='/dataset/{{name}}?size={{size}}&page={{pageid}}&tag={{tag}}'>{{pageid}}</a>  
+
+{% endif %}
+
+{% endfor %}
+
+{% for action_url, image_url in url_list  %}
+
+{% if tag=="" %}
+<a href="{{action_url}}"  ><img src="{{image_url}}"></a>
+{% else %}
+<div action_url="{{action_url}}" class='ajax_link' style="cursor: pointer" ><img src="{{image_url}}"></div>
+
+{% endif %}
+
+{% endfor %}
+</body>
+<script type=text/javascript src="{{url_for('static', filename='jquery-3.2.1.min.js') }}"></script>
+<script>
+$(document).ready(function(){
+    $('.ajax_link').click(function(e){
+        var tt = $(this);
+        $.ajax({
+            type: 'GET',
+            url: $(this).attr('action_url'),
+            dataType: 'text',
+            error: function(xhr) {
+                alert("error");
+                //do something about the error
+            },
+            success: function (response) {
+                tt.css("opacity", "0.2");
+                // NOT worsk: $(this).css("opacity", "0.2");
+            }
+        });
+        //e.preventDefault()
+    });
+});
+</script>
+

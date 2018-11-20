@@ -1,0 +1,156 @@
+{
+    "dataset": "coco",
+    "task": "pose",
+    "method": "open_pose",
+    "data": {
+      "num_kpts": 18,
+      "data_dir": "~/DataSet/COCO_KPTS",
+      "image_tool": "pil",
+      "input_mode": "RGB",
+      "workers": 8
+    },
+    "train": {
+      "batch_size": 15,
+      "data_transformer": {
+        "size_mode": "fix_size",
+        "input_size": [368, 368],
+        "align_method": "only_pad"
+      }
+    },
+    "val": {
+      "batch_size": 15,
+      "data_transformer": {
+        "size_mode": "fix_size",
+        "input_size": [368, 368],
+        "align_method": "only_pad"
+      }
+    },
+    "test": {
+      "input_size": [368, 368],
+      "scale_search": [0.5, 1.0, 1.5, 2.0]
+    },
+    "train_trans": {
+      "trans_seq": ["random_hflip", "random_resize", "random_rotate", "random_crop"],
+      "random_hflip": {
+        "ratio": 0.5,
+        "swap_pair": [[3, 6], [4, 7], [5, 8], [9, 12], [10, 13], [11, 14], [15, 16], [17, 18]]
+      },
+      "random_resize": {
+        "ratio": 1.0,
+        "scale_range": [0.5, 1.1],
+        "method": "focus",
+        "target_size": [368, 368]
+      },
+      "random_rotate": {
+        "ratio": 0.5,
+        "rotate_degree": 40
+      },
+      "random_crop":{
+        "ratio": 1.0,
+        "crop_size": [368, 368],
+        "method": "focus",
+        "grid":[3, 2],
+        "center_jitter": 20,
+        "allow_outside_center": true
+      }
+    },
+    "val_trans": {
+      "trans_seq": ["random_crop"],
+      "random_crop":{
+        "ratio": 1.0,
+        "crop_size": [368, 368],
+        "method": "focus",
+        "grid":[3, 2],
+        "center_jitter": 20,
+        "allow_outside_center": true
+      }
+    },
+    "normalize": {
+      "div_value": 255,
+      "mean_value": [124, 116, 104],
+      "mean": [0.485, 0.456, 0.406],
+      "std": [0.229, 0.224, 0.225]
+    },
+    "details": {
+      "coco_to_ours": [0, 15, 14, 17, 16, 5, 2, 6, 3, 7, 4, 11, 8, 12, 9, 13, 10],
+      "ours_to_coco": [1, 0, 7, 9, 11, 6, 8, 10, 13, 15, 17, 12, 14, 16, 3, 2, 5, 4],
+      "limb_seq": [[3,4], [4,5], [6,7], [7,8], [9,10], [10,11], [12,13], [13,14],
+                   [1,2], [2,9], [2,12], [2,3], [2,6], [1,16], [1,15], [16,18], [15,17],
+                   [3,17], [6,18]],
+      "map_index": [6, 10, 7, 8, 11, 12, 0, 1, 2, 3, 4, 5, 14, 15, 17, 16, 18, 9, 13],
+      "mini_tree":[11, 12, 0, 1, 2, 3, 9, 4, 5, 10, 6, 7, 8, 14, 16, 13, 15, 17, 18],
+      "color_list": [[255, 0, 0], [255, 85, 0], [255, 170, 0], [255, 255, 0], [170, 255, 0],
+                     [85, 255, 0], [0, 255, 0], [0, 255, 85], [0, 255, 170], [0, 255, 255],
+                     [0, 170, 255], [0, 85, 255], [0, 0, 255], [85, 0, 255], [170, 0, 255],
+                     [255, 0, 255], [255, 0, 170], [255, 0, 85], [255, 0, 170], [255, 0, 85]],
+      "pose_id_dict": {
+        "nose":1, "neck":2, "rsho":3, "relb":4, "rwri":5, "lsho":6,
+        "lelb":7, "lwri":8, "rhip":9, "rkne":10, "rank":11, "lhip":12,
+        "lkne":13, "lank":14, "reye":15, "leye":16, "rear":17, "lear":18
+      },
+      "pose_name_seq": ["nose", "neck", "rsho", "relb", "rwri", "lsho",
+                        "lelb", "lwri", "rhip", "rkne", "rank", "lhip",
+                        "lkne", "lank", "reye", "leye", "rear", "lear"]
+    },
+    "checkpoints": {
+      "checkpoints_name": "op_vgg19_coco_pose",
+      "checkpoints_dir": "checkpoints/pose/coco",
+      "save_iters": 5000
+    },
+
+    "network":{
+      "backbone": "vgg19_dilated8",
+      "model_name": "open_pose",
+      "stride": 8,
+      "loss_weights": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+      "paf_out": 38,
+      "heatmap_out": 19
+    },
+    "logging": {
+      "logfile_level": "info",
+      "stdout_level": "info",
+      "log_file": "./log/pose/op_vgg19_coco_pose.log",
+      "log_format": "%(asctime)s %(levelname)-7s %(message)s",
+      "rewrite": true
+    },
+    "lr": {
+      "base_lr": 0.00004,
+      "lr_policy": "step",
+      "step": {
+        "gamma": 0.333,
+        "step_size": 30
+      }
+    },
+    "solver": {
+      "display_iter": 100,
+      "test_interval": 1000,
+      "max_epoch": 150
+    },
+    "optim": {
+      "optim_method": "sgd",
+      "adam": {
+        "betas": [0.9, 0.999],
+        "eps": 1e-08,
+        "weight_decay": 0.0001
+      },
+      "sgd":{
+        "weight_decay": 0.0005,
+        "momentum": 0.9
+      }
+    },
+    "heatmap": {
+      "sigma": 7.0,
+      "theta": 1.0,
+      "method": "gaussian"
+    },
+    "vis": {
+      "num_threshold":3,
+      "avg_threshold": 0.10,
+      "stick_width": 4,
+      "circle_radius": 4,
+      "part_threshold": 0.1,
+      "limb_threshold": 0.2,
+      "mid_point_num": 10,
+      "limb_pos_ratio": 0.8
+    }
+}

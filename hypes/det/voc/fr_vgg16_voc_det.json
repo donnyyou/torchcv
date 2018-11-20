@@ -1,0 +1,163 @@
+{
+    "dataset": "voc",
+    "task": "det",
+    "method": "faster_rcnn",
+    "data": {
+      "num_classes": 21,
+      "data_dir": "~/DataSet/VOC07_DET",
+      "image_tool": "cv2",
+      "input_mode": "BGR",
+      "keep_difficult": false,
+      "workers": 8
+    },
+    "train": {
+      "batch_size": 1,
+      "data_transformer": {
+        "size_mode": "random_size"
+      }
+    },
+    "val": {
+      "batch_size": 1,
+      "use_07_metric": true,
+      "data_transformer": {
+        "size_mode": "random_size"
+      }
+    },
+    "test": {
+    },
+    "train_trans": {
+      "trans_seq": ["random_hflip", "random_resize"],
+      "random_hflip": {
+        "ratio": 0.5,
+        "swap_pair": []
+      },
+      "random_resize": {
+        "ratio": 1.0,
+        "method": "bound",
+        "resize_bound": [600, 1000]
+      }
+    },
+    "val_trans": {
+      "trans_seq": ["random_resize"],
+      "random_resize": {
+        "ratio": 1.0,
+        "method": "bound",
+        "resize_bound": [600, 1000]
+      }
+    },
+    "trans_params": {
+
+      "normalize": {
+        "div_value": 1.0,
+        "mean_value": [123, 116, 103],
+        "mean": [122.7717, 115.9465, 102.9801],
+        "std": [1.0, 1.0, 1.0]
+      }
+    },
+    "rpn": {
+      "head_index_list": [0],
+      "anchor_sizes_list": [
+        [[128, 128], [256, 256], [512, 512]]
+      ],
+      "num_anchor_list": [9],
+      "aspect_ratio_list": [[2]],
+      "stride_list": [16],
+      "num_feature_list": [512],
+      "nms_threshold": 0.7,
+      "min_size": 16,
+      "loss": {
+        "n_sample": 256,
+        "pos_ratio": 0.5,
+        "pos_iou_thresh": 0.7,
+        "neg_iou_thresh": 0.3
+      },
+      "n_train_pre_nms": 12000,
+      "n_train_post_nms": 2000,
+      "n_test_pre_nms": 6000,
+      "n_test_post_nms": 300
+
+    },
+    "roi": {
+      "method": "roipool",
+      "pooled_width": 7,
+      "pooled_height": 7,
+      "spatial_stride": 16,
+      "loc_normalize_mean": [0.0, 0.0, 0.0, 0.0],
+      "loc_normalize_std": [0.1, 0.1, 0.2, 0.2],
+      "loss": {
+        "n_sample": 128,
+        "pos_ratio": 0.25,
+        "pos_iou_thresh": 0.5,
+        "neg_iou_thresh_hi": 0.5,
+        "neg_iou_thresh_lo": 0.0
+      }
+    },
+    "details": {
+      "color_list": [[255, 170, 30], [0, 0, 70], [244, 35, 232]],
+      "name_id_dict": {
+        "aeroplane": 1, "bicycle": 2, "bird": 3, "boat": 4, "bottle": 5, "bus": 6, "car": 7,
+        "cat": 8, "chair": 9, "cow": 10, "diningtable": 11, "dog": 12, "horse": 13, "motorbike": 14,
+        "person": 15, "pottedplant": 16, "sheep": 17, "sofa": 18, "train": 19, "tvmonitor": 20
+      },
+      "name_seq": ["aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair",
+                   "cow", "diningtable", "dog", "horse", "motorbike", "person", "pottedplant",
+                   "sheep", "sofa", "train", "tvmonitor"]
+    },
+    "checkpoints": {
+      "checkpoints_name": "fr_vgg16_voc_det",
+      "checkpoints_dir": "checkpoints/det/voc",
+      "save_iters": 5000
+    },
+    "network":{
+      "backbone": "vgg16",
+      "model_name": "faster_rcnn",
+      "use_drop": false,
+      "loss_weights": {
+        "rpn_loss": 1.0,
+        "roi_loss": 1.0
+      }
+    },
+    "logging": {
+      "logfile_level": "info",
+      "stdout_level": "info",
+      "log_file": "./log/det/fr_vgg16_voc_det.log",
+      "log_format": "%(asctime)s %(levelname)-7s %(message)s",
+      "rewrite": true
+    },
+    "lr": {
+      "base_lr": 0.001,
+      "lr_policy": "step",
+      "step": {
+        "gamma": 0.1,
+        "step_size": 9
+      }
+    },
+    "solver": {
+      "display_iter": 100,
+      "test_interval": 5000,
+      "max_epoch": 15
+    },
+    "optim": {
+      "optim_method": "sgd",
+      "adam": {
+        "betas": [0.9, 0.999],
+        "eps": 1e-08,
+        "weight_decay": 0.0001
+      },
+      "sgd":{
+        "weight_decay": 0.0005,
+        "momentum": 0.9
+      }
+    },
+    "nms": {
+      "mode": "union",
+      "overlap_threshold": 0.45
+    },
+    "vis": {
+      "conf_threshold": 0.01
+    },
+    "fr_loss": {
+      "rpn_sigma": 3.0,
+      "roi_sigma": 1.0
+    }
+}
