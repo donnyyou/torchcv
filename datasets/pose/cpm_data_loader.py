@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Donny You(donnyyou@163.com)
+# Author: Donny You(youansheng@gmail.com)
 # Class for the Lane Pose Loader.
 
 
@@ -12,6 +12,7 @@ import numpy as np
 import torch
 import torch.utils.data as data
 
+from extensions.parallel.data_container import DataContainer
 from utils.layers.pose.heatmap_generator import HeatmapGenerator
 from utils.helpers.json_helper import JsonHelper
 from utils.helpers.image_helper import ImageHelper
@@ -43,7 +44,10 @@ class CPMDataLoader(data.Dataset):
         if self.img_transform is not None:
             img = self.img_transform(img)
 
-        return img, heatmap
+        return dict(
+            img=DataContainer(img, stack=True),
+            heatmap=DataContainer(heatmap, stack=True),
+        )
 
     def __len__(self):
 

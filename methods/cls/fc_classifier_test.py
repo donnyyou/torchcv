@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Donny You (donnyyou@163.com)
+# Author: Donny You (youansheng@gmail.com)
 # Class Definition for Image Classifier.
 
 
@@ -17,7 +17,7 @@ from PIL import Image
 
 from datasets.cls_data_loader import ClsDataLoader
 from methods.tools.blob_helper import BlobHelper
-from methods.tools.module_utilizer import ModuleUtilizer
+from methods.tools.runner_helper import RunnerHelper
 from models.cls_model_manager import ClsModelManager
 from utils.helpers.file_helper import FileHelper
 from utils.helpers.image_helper import ImageHelper
@@ -33,7 +33,6 @@ class FCClassifierTest(object):
         self.blob_helper = BlobHelper(configer)
         self.cls_model_manager = ClsModelManager(configer)
         self.cls_data_loader = ClsDataLoader(configer)
-        self.module_utilizer = ModuleUtilizer(configer)
         self.cls_parser = ClsParser(configer)
         self.device = torch.device('cpu' if self.configer.get('gpu') is None else 'cuda')
         self.cls_net = None
@@ -42,13 +41,13 @@ class FCClassifierTest(object):
                                    'datasets/cls/imagenet/imagenet_class_index.json')) as json_stream:
                 name_dict = json.load(json_stream)
                 name_seq = [name_dict[str(i)][1] for i in range(self.configer.get('data', 'num_classes'))]
-                self.configer.add_key_value(['details', 'name_seq'], name_seq)
+                self.configer.add(['details', 'name_seq'], name_seq)
 
         self._init_model()
 
     def _init_model(self):
         self.cls_net = self.cls_model_manager.image_classifier()
-        self.cls_net = self.module_utilizer.load_net(self.cls_net)
+        self.cls_net = RunnerHelper.load_net(self, self.cls_net)
         self.cls_net.eval()
 
     def __test_img(self, image_path, json_path, raw_path, vis_path):
@@ -96,65 +95,17 @@ class FCClassifierTest(object):
         topk = (1, 3, 5)
         maxk = max(topk)
 
-        _, pred = outputs.topk(maxk, 1, True, True)
-        pred = pred.t()
+        _, pred = outputs.topk(maxk, 0, True, True)
         for k in topk:
             if k == 1:
-                json_dict['label'] = pred[0][0]
+                json_dict['label'] = pred[0]
 
             else:
-                json_dict['label_top{}'.format(k)] = pred[0][:k]
+                json_dict['label_top{}'.format(k)] = pred[:k]
 
         return json_dict
 
-    def test(self):
-        base_dir = os.path.join(self.configer.get('project_dir'),
-                                'val/results/cls', self.configer.get('dataset'))
-
-        test_img = self.configer.get('test_img')
-        test_dir = self.configer.get('test_dir')
-        if test_img is None and test_dir is None:
-            Log.error('test_img & test_dir not exists.')
-            exit(1)
-
-        if test_img is not None and test_dir is not None:
-            Log.error('Either test_img or test_dir.')
-            exit(1)
-
-        if test_img is not None:
-            base_dir = os.path.join(base_dir, 'test_img')
-            filename = test_img.rstrip().split('/')[-1]
-            json_path = os.path.join(base_dir, 'json', '{}.json'.format('.'.join(filename.split('.')[:-1])))
-            raw_path = os.path.join(base_dir, 'raw', filename)
-            vis_path = os.path.join(base_dir, 'vis', '{}_vis.png'.format('.'.join(filename.split('.')[:-1])))
-            FileHelper.make_dirs(json_path, is_file=True)
-            FileHelper.make_dirs(raw_path, is_file=True)
-            FileHelper.make_dirs(vis_path, is_file=True)
-
-            self.__test_img(test_img, json_path, raw_path, vis_path)
-
-        else:
-            base_dir = os.path.join(base_dir, 'test_dir', test_dir.rstrip('/').split('/')[-1])
-            FileHelper.make_dirs(base_dir)
-
-            for filename in FileHelper.list_dir(test_dir):
-                image_path = os.path.join(test_dir, filename)
-                json_path = os.path.join(base_dir, 'json', '{}.json'.format('.'.join(filename.split('.')[:-1])))
-                raw_path = os.path.join(base_dir, 'raw', filename)
-                vis_path = os.path.join(base_dir, 'vis', '{}_vis.png'.format('.'.join(filename.split('.')[:-1])))
-                FileHelper.make_dirs(json_path, is_file=True)
-                FileHelper.make_dirs(raw_path, is_file=True)
-                FileHelper.make_dirs(vis_path, is_file=True)
-
-                self.__test_img(image_path, json_path, raw_path, vis_path)
-
-    def debug(self):
-        base_dir = os.path.join(self.configer.get('project_dir'),
-                                'vis/results/cls', self.configer.get('dataset'), 'debug')
-
-        if not os.path.exists(base_dir):
-            os.makedirs(base_dir)
-
+    def debug(self, vis_dir):
         count = 0
         for i, data_dict in enumerate(self.cls_data_loader.get_trainloader()):
             inputs = data_dict['img']
@@ -169,9 +120,9 @@ class FCClassifierTest(object):
 
                 ori_img_bgr = self.blob_helper.tensor2bgr(inputs[j])
 
-                json_dict = self.__get_info_tree(labels_target)
+                json_dict = self.__get_info_tree(labels_target[j])
                 image_canvas = self.cls_parser.draw_label(ori_img_bgr.copy(), json_dict['label'])
 
-                cv2.imwrite(os.path.join(base_dir, '{}_{}_vis.png'.format(i, j)), image_canvas)
+                cv2.imwrite(os.path.join(vis_dir, '{}_{}_vis.png'.format(i, j)), image_canvas)
                 cv2.imshow('main', image_canvas)
                 cv2.waitKey()

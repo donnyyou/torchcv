@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Donny You(donnyyou@163.com)
+# Author: Donny You(youansheng@gmail.com)
 
 
 from __future__ import absolute_import
@@ -58,13 +58,6 @@ CLS_TEST_DICT = {
     'fc_classifier': FCClassifierTest,
 }
 
-MULTITASK_METHOD_DICT = {
-
-}
-MULTITASK_TEST_DICT = {
-
-}
-
 
 class MethodSelector(object):
     def __init__(self, configer):
@@ -114,13 +107,3 @@ class MethodSelector(object):
         else:
             return CLS_TEST_DICT[key](self.configer)
 
-    def select_multitask_method(self):
-        key = self.configer.get('method')
-        if key not in MULTITASK_METHOD_DICT or key not in MULTITASK_TEST_DICT:
-            Log.error('Multitask Method: {} is not valid.'.format(key))
-            exit(1)
-
-        if self.configer.get('phase') == 'train':
-            return MULTITASK_METHOD_DICT[key](self.configer)
-        else:
-            return MULTITASK_TEST_DICT[key](self.configer)

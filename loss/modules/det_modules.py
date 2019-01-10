@@ -1,14 +1,12 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Donny You(donnyyou@163.com)
+# Author: Donny You(youansheng@gmail.com)
 
 
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import math
-import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -61,7 +59,7 @@ class SSDFocalLoss(nn.Module):
 
         return conf_loss
 
-    def forward(self, loc_preds, loc_targets, cls_preds, cls_targets):
+    def forward(self, outputs, *targets, **kwargs):
         """Compute loss between (loc_preds, loc_targets) and (cls_preds, cls_targets).
 
         Args:
@@ -73,6 +71,8 @@ class SSDFocalLoss(nn.Module):
           (tensor) loss = SmoothL1Loss(loc_preds, loc_targets) + FocalLoss(cls_preds, cls_targets).
 
         """
+        _, loc_preds, cls_preds = outputs
+        loc_targets, cls_targets = targets
 
         pos = cls_targets > 0  # [N,#anchors]
         num_pos = pos.data.long().sum()
@@ -81,7 +81,7 @@ class SSDFocalLoss(nn.Module):
         mask = pos.unsqueeze(2).expand_as(loc_preds)  # [N,#anchors,4]
         masked_loc_preds = loc_preds[mask].view(-1, 4)  # [#pos,4]
         masked_loc_targets = loc_targets[mask].view(-1, 4)  # [#pos,4]
-        loc_loss = F.smooth_l1_loss(masked_loc_preds, masked_loc_targets, size_average=False)
+        loc_loss = F.smooth_l1_loss(masked_loc_preds, masked_loc_targets, reduction='sum')
 
         # cls_loss = FocalLoss(loc_preds, loc_targets)
         pos_neg = cls_targets > -1  # exclude ignored anchors
@@ -143,7 +143,15 @@ class SSDMultiBoxLoss(nn.Module):
         neg = rank < num_neg.unsqueeze(1).expand_as(rank)  # [N,8732]
         return neg
 
-    def forward(self, loc_preds, loc_targets, conf_preds, conf_targets):
+    @staticmethod
+    def smooth_l1_loss(x, t):
+        diff = (x - t)
+        abs_diff = diff.abs()
+        flag = (abs_diff.data < 1.).float()
+        y = flag * (diff ** 2) * 0.5 + (1 - flag) * (abs_diff - 0.5)
+        return y.sum()
+
+    def forward(self, outputs, *targets, **kwargs):
         """Compute loss between (loc_preds, loc_targets) and (conf_preds, conf_targets).
 
         Args:
@@ -161,6 +169,8 @@ class SSDMultiBoxLoss(nn.Module):
                     + CrossEntropyLoss(neg_conf_preds, neg_conf_targets)
 
         """
+        _, loc_preds, conf_preds = outputs
+        loc_targets, conf_targets = targets
         batch_size, num_boxes, _ = loc_preds.size()
 
         pos = conf_targets > 0  # [N,8732], pos means the box matched.
@@ -172,7 +182,7 @@ class SSDMultiBoxLoss(nn.Module):
         pos_mask = pos.unsqueeze(2).expand_as(loc_preds)  # [N, 8732, 4]
         pos_loc_preds = loc_preds[pos_mask].view(-1, 4)  # [pos,4]
         pos_loc_targets = loc_targets[pos_mask].view(-1, 4)  # [pos,4]
-        loc_loss = F.smooth_l1_loss(pos_loc_preds, pos_loc_targets, size_average=False)
+        loc_loss = self.smooth_l1_loss(pos_loc_preds, pos_loc_targets)  # F.smooth_l1_loss(pos_loc_preds, pos_loc_targets, reduction='sum')
 
         # conf_loss.
         conf_loss = self._cross_entropy_loss(conf_preds.view(-1, self.num_classes), conf_targets.view(-1))  # [N*8732,]
@@ -183,7 +193,7 @@ class SSDMultiBoxLoss(nn.Module):
         pos_and_neg = (pos + neg).gt(0)
         preds = conf_preds[mask].view(-1, self.num_classes)  # [pos + neg,21]
         targets = conf_targets[pos_and_neg]                  # [pos + neg,]
-        conf_loss = F.cross_entropy(preds, targets, size_average=False, ignore_index=-1)
+        conf_loss = F.cross_entropy(preds, targets, reduction='sum', ignore_index=-1)
 
         if num_matched_boxes > 0:
             loc_loss = loc_loss / num_matched_boxes
@@ -200,7 +210,7 @@ class YOLOv3Loss(nn.Module):
     def __init__(self, configer):
         super(YOLOv3Loss, self).__init__()
         self.configer = configer
-        self.mse_loss = nn.MSELoss(reduction='sum')
+        self.mse_loss = nn.MSELoss(reduction='sum')  # 'sum'
         self.bce_loss = nn.BCELoss(reduction='sum')
 
     def forward(self, prediction, targets, objmask, noobjmask):
@@ -220,21 +230,24 @@ class YOLOv3Loss(nn.Module):
         tcls = targets[..., 5:]  # Cls pred.
 
         #  losses.
-        loss_x = self.bce_loss(x[objmask == 1], tx[objmask == 1])
-        loss_y = self.bce_loss(y[objmask == 1], ty[objmask == 1])
-        loss_w = self.mse_loss(w[objmask == 1], tw[objmask == 1])
-        loss_h = self.mse_loss(h[objmask == 1], th[objmask == 1])
-        loss_obj = self.bce_loss(conf[objmask == 1], objmask[objmask == 1])
-        loss_noobj = self.bce_loss(conf[noobjmask == 1], objmask[noobjmask == 1])
-        loss_cls = self.bce_loss(pred_cls[objmask == 1], tcls[objmask == 1])
+        obj_cnt = max(objmask.sum(), 1.0)
+        loss_x = self.bce_loss(x * objmask, tx * objmask)
+        loss_y = self.bce_loss(y * objmask, ty * objmask)
+        loss_w = self.mse_loss(w * objmask, tw * objmask)
+        loss_h = self.mse_loss(h * objmask, th * objmask)
+        loss_coord = (loss_x + loss_y + 0.5 * loss_w + 0.5 * loss_h) / obj_cnt
+        loss_hasobj = self.bce_loss(conf * objmask, objmask)
+        loss_noobj = self.bce_loss(conf * noobjmask, noobjmask * 0.0)
+        loss_obj = (loss_hasobj + 0.2 * loss_noobj) / obj_cnt
+        loss_cls = self.bce_loss(pred_cls * objmask.unsqueeze(2), tcls * objmask.unsqueeze(2))
+        loss_cls = loss_cls / obj_cnt
 
         #  total loss = losses * weight
-        loss = (loss_x + loss_y + loss_w + loss_h) * self.configer.get('network', 'loss_weights')['coord_loss'] + \
+        loss = loss_coord * self.configer.get('network', 'loss_weights')['coord_loss'] + \
                loss_obj * self.configer.get('network', 'loss_weights')['obj_loss'] + \
-               loss_noobj * self.configer.get('network', 'loss_weights')['noobj_loss'] + \
                loss_cls * self.configer.get('network', 'loss_weights')['cls_loss']
 
-        return loss / targets.size(0)
+        return loss
 
 
 class FRLocLoss(nn.Module):
@@ -272,20 +285,20 @@ class FRLoss(nn.Module):
         self.configer = configer
         self.fr_loc_loss = FRLocLoss(configer)
 
-    def forward(self, output_list, target_list):
+    def forward(self, pred_group, target_group):
         # output_list: rpn_locs, rpn_scores, roi_cls_locs, roi_scores
-        pred_rpn_locs, pred_rpn_scores, pred_roi_cls_locs, pred_roi_scores = output_list
-        gt_rpn_locs, gt_rpn_labels, gt_roi_cls_locs, gt_roi_labels = target_list
+        pred_rpn_locs, pred_rpn_scores, pred_roi_cls_locs, pred_roi_scores = pred_group
+        gt_rpn_locs, gt_rpn_labels, gt_roi_cls_locs, gt_roi_labels = target_group
         gt_rpn_labels = gt_rpn_labels.contiguous().view(-1)
         pred_rpn_scores = pred_rpn_scores.contiguous().view(-1, 2)
         rpn_loc_loss = self.fr_loc_loss(pred_rpn_locs, gt_rpn_locs,
-                                        gt_rpn_labels, self.configer.get('fr_loss', 'rpn_sigma'))
+                                        gt_rpn_labels, self.configer.get('loss', 'params')['rpn_sigma'])
 
         # NOTE: default value of ignore_index is -100 ...
         rpn_cls_loss = F.cross_entropy(pred_rpn_scores, gt_rpn_labels, ignore_index=-1)
 
         roi_loc_loss = self.fr_loc_loss(pred_roi_cls_locs, gt_roi_cls_locs,
-                                        gt_roi_labels, self.configer.get('fr_loss', 'roi_sigma'))
+                                        gt_roi_labels, self.configer.get('loss', 'params')['roi_sigma'])
         roi_cls_loss = F.cross_entropy(pred_roi_scores, gt_roi_labels, ignore_index=-1)
         # Log.info('rpn loc {}'.format(rpn_loc_loss))
         # Log.info('rpn cls {}'.format(rpn_cls_loss))
@@ -294,3 +307,4 @@ class FRLoss(nn.Module):
         rpn_loss = (rpn_loc_loss + rpn_cls_loss) * self.configer.get('network', 'loss_weights')['rpn_loss']
         roi_loss = (roi_loc_loss + roi_cls_loss) * self.configer.get('network', 'loss_weights')['roi_loss']
         return rpn_loss + roi_loss
+

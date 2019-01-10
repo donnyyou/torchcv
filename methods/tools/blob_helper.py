@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Donny You (donnyyou@163.com)
+# Author: Donny You (youansheng@gmail.com)
 # Generate the inputs.
 
 
@@ -30,12 +30,25 @@ class BlobHelper(object):
 
     def make_input(self, image=None, input_size=None,
                    min_side_length=None, max_side_length=None, scale=None):
-        in_width, in_height = None, None
-        if input_size is None and min_side_length is None and max_side_length is None:
-            in_width, in_height = ImageHelper.get_size(image)
+        if input_size is not None and min_side_length is None and max_side_length is None:
+            if input_size[0] == -1 and input_size[1] == -1:
+                in_width, in_height = ImageHelper.get_size(image)
 
-        elif input_size is not None and min_side_length is None and max_side_length is None:
-            in_width, in_height = input_size
+            elif input_size[0] != -1 and input_size[1] != -1:
+                in_width, in_height = input_size
+
+            elif input_size[0] == -1 and input_size[1] != -1:
+                width, height = ImageHelper.get_size(image)
+                scale_ratio = input_size[1] / height
+                w_scale_ratio, h_scale_ratio = scale_ratio, scale_ratio
+                in_width, in_height = int(round(width * w_scale_ratio)), int(round(height * h_scale_ratio))
+
+            else:
+                assert input_size[0] != -1 and input_size[1] == -1
+                width, height = ImageHelper.get_size(image)
+                scale_ratio = input_size[0] / width
+                w_scale_ratio, h_scale_ratio = scale_ratio, scale_ratio
+                in_width, in_height = int(round(width * w_scale_ratio)), int(round(height * h_scale_ratio))
 
         elif input_size is None and min_side_length is not None and max_side_length is None:
             width, height = ImageHelper.get_size(image)
@@ -50,33 +63,16 @@ class BlobHelper(object):
             in_width, in_height = int(round(width * w_scale_ratio)), int(round(height * h_scale_ratio))
 
         else:
-            Log.error('Incorrect target size setting.')
-            exit(1)
+            in_width, in_height = ImageHelper.get_size(image)
 
-        if not isinstance(scale, (list, tuple)):
-            image = ImageHelper.resize(image, (int(in_width * scale), int(in_height * scale)), interpolation='linear')
-            img_tensor = ToTensor()(image)
-            img_tensor = Normalize(div_value=self.configer.get('normalize', 'div_value'),
-                                   mean=self.configer.get('normalize', 'mean'),
-                                   std=self.configer.get('normalize', 'std'))(img_tensor)
-            img_tensor = img_tensor.unsqueeze(0).to(torch.device('cpu' if self.configer.get('gpu') is None else 'cuda'))
+        image = ImageHelper.resize(image, (int(in_width * scale), int(in_height * scale)), interpolation='linear')
+        img_tensor = ToTensor()(image)
+        img_tensor = Normalize(div_value=self.configer.get('normalize', 'div_value'),
+                               mean=self.configer.get('normalize', 'mean'),
+                               std=self.configer.get('normalize', 'std'))(img_tensor)
+        img_tensor = img_tensor.unsqueeze(0).to(torch.device('cpu' if self.configer.get('gpu') is None else 'cuda'))
 
-            return img_tensor
-
-        else:
-            img_tensor_list = []
-            for s in scale:
-                image = ImageHelper.resize(image, (int(in_width * s), int(in_height * s)), interpolation='linear')
-                img_tensor = ToTensor()(image)
-                img_tensor = Normalize(div_value=self.configer.get('normalize', 'div_value'),
-                                       mean=self.configer.get('normalize', 'mean'),
-                                       std=self.configer.get('normalize', 'std'))(img_tensor)
-                img_tensor = img_tensor.unsqueeze(0).to(
-                    torch.device('cpu' if self.configer.get('gpu') is None else 'cuda'))
-
-                img_tensor_list.append(img_tensor)
-
-            return img_tensor_list
+        return img_tensor
 
     def tensor2bgr(self, tensor):
         assert len(tensor.size()) == 3

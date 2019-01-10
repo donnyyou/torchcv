@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Donny You (donnyyou@163.com)
+# Author: Donny You (youansheng@gmail.com)
 # Repackage some file operations.
 
 
@@ -17,6 +17,7 @@ class FileHelper(object):
 
     @staticmethod
     def make_dirs(dir_path, is_file=False):
+        dir_path = os.path.expanduser(dir_path)
         dir_name = FileHelper.dir_name(dir_path) if is_file else dir_path
         if not os.path.exists(dir_name):
             os.makedirs(dir_name)
@@ -33,6 +34,22 @@ class FileHelper(object):
     def shotname(file_name):
         shotname, extension = os.path.splitext(file_name)
         return shotname
+
+    @staticmethod
+    def scandir(dir_path, suffix=None):
+        for entry in os.scandir(dir_path):
+            if not entry.is_file():
+                continue
+            filename = entry.name
+            if suffix is None:
+                yield filename
+            elif filename.endswith(suffix):
+                yield filename
+
+    @staticmethod
+    def check_file_exist(filename, msg_tmpl='file "{}" does not exist'):
+        if not os.path.isfile(filename):
+            raise FileNotFoundError(msg_tmpl.format(filename))
 
     @staticmethod
     def list_dir(dir_name, prefix=''):

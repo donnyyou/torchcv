@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Donny You(donnyyou@163.com)
+# Author: Donny You(youansheng@gmail.com)
 
 
 from __future__ import absolute_import
@@ -10,195 +10,58 @@ from __future__ import print_function
 import numpy as np
 import torch
 
-import extensions.layers.nms.src.cython_nms as cython_nms
-import extensions.layers.iou.src.cython_iou as cython_iou
-from utils.tools.logger import Logger as Log
+from extensions.nms.nms_wrapper import nms
+from extensions.nms.nms_wrapper import soft_nms
 
 
 class DetHelper(object):
 
     @staticmethod
-    def cython_nms(bboxes, scores=None, nms_threshold=0.3):
-        """Apply classic DPM-style greedy NMS."""
-        is_torch = False
-        if not isinstance(bboxes, np.ndarray):
-            bboxes = bboxes.cpu().numpy()
-            if scores is None:
-                scores = len(bboxes) - np.arange(len(bboxes), dtype=np.float32)
-            else:
-                scores = scores.cpu().numpy()
+    def cls_nms(dets, labels, max_threshold=0.0, cls_keep_num=None, device_id=None):
+        if isinstance(labels, torch.Tensor):
+            labels = labels.detach().cpu().numpy()
 
-            is_torch = True
+        assert isinstance(labels, np.ndarray)
 
-        if scores is None:
-            scores = len(bboxes) - np.arange(len(bboxes), dtype=np.float32)
-
-        bboxes = bboxes.reshape(-1, 4)
-        scores = scores.reshape(-1, 1)
-
-        dets = np.concatenate((bboxes, scores), 1)
-        if dets.shape[0] == 0:
-            return []
-
-        keep = cython_nms.nms(dets, nms_threshold)
-        return keep if not is_torch else torch.from_numpy(keep).long()
-
-    @staticmethod
-    def cython_soft_nms(bboxes, scores=None, nms_threshold=0.0, score_threshold=0.001, sigma=0.5, method='linear'):
-        """Apply the soft NMS algorithm from https://arxiv.org/abs/1704.04503."""
-        is_torch = False
-        if not isinstance(bboxes, np.ndarray):
-            bboxes = bboxes.cpu().numpy()
-            if scores is None:
-                scores = len(bboxes) - np.arange(len(bboxes), dtype=np.float32)
-            else:
-                scores = scores.cpu().numpy()
-
-            is_torch = True
-
-        if scores is None:
-            scores = len(bboxes) - np.arange(len(bboxes), dtype=np.float32)
-
-        bboxes = bboxes.reshape(-1, 4)
-        scores = scores.reshape(-1, 1)
-
-        dets = np.concatenate((bboxes, scores), 1)
-
-        if dets.shape[0] == 0:
-            return dets, []
-
-        methods = {'hard': 0, 'linear': 1, 'gaussian': 2}
-        assert method in methods, 'Unknown soft_nms method: {}'.format(method)
-
-        dets, keep = cython_nms.soft_nms(
-            np.ascontiguousarray(dets, dtype=np.float32),
-            np.float32(sigma),
-            np.float32(nms_threshold),
-            np.float32(score_threshold),
-            np.uint8(methods[method])
-        )
-        return keep if not is_torch else torch.from_numpy(keep).long()
-
-    @staticmethod
-    def nms(bboxes, scores=None, nms_threshold=0.0, mode='union'):
-        """Non maximum suppression.
-
-        Args:
-          bboxes(tensor): bounding boxes, sized [N,4].
-          scores(tensor): bbox scores, sized [N,].
-          threshold(float): overlap threshold.
-          mode(str): 'union' or 'min'.
-
-        Returns:
-          keep(tensor): selected indices.
-
-        Ref:
-          https://github.com/rbgirshick/py-faster-rcnn/blob/master/lib/nms/py_cpu_nms.py
-        """
-        bboxes = bboxes.contiguous().view(-1, 4)
-        if scores is not None:
-            scores = scores.contiguous().view(-1,)
-
-        x1 = bboxes[:, 0]
-        y1 = bboxes[:, 1]
-        x2 = bboxes[:, 2]
-        y2 = bboxes[:, 3]
-
-        areas = (x2 - x1) * (y2 - y1)
-        if scores is not None:
-            _, order = scores.sort(0, descending=True)
-        else:
-            order = np.arange(len(bboxes), dtype=np.int32)
-
-        keep = []
-        while order.numel() > 0:
-            if order.numel() == 1:
-                keep.append(order.item())
-                break
-
-            i = order[0]
-            keep.append(i)
-            xx1 = x1[order[1:]].clamp(min=x1[i].item())
-            yy1 = y1[order[1:]].clamp(min=y1[i].item())
-            xx2 = x2[order[1:]].clamp(max=x2[i].item())
-            yy2 = y2[order[1:]].clamp(max=y2[i].item())
-
-            w = (xx2-xx1).clamp(min=0)
-            h = (yy2-yy1).clamp(min=0)
-            inter = w*h
-
-            if mode == 'union':
-                ovr = inter / (areas[i] + areas[order[1:]] - inter)
-            elif mode == 'min':
-                ovr = inter / areas[order[1:]].clamp(max=areas[i])
-            else:
-                raise TypeError('Unknown nms mode: %s.' % mode)
-
-            ids = (ovr <= nms_threshold).nonzero().squeeze()
-            if ids.numel() == 0:
-                break
-
-            order = order[ids + 1]
-
-        return torch.LongTensor(keep)
-
-    @staticmethod
-    def cls_nms(bboxes, scores=None, labels=None, nms_threshold=0.0,
-                iou_mode='union', cls_keep_num=None, nms_mode='nms',
-                score_threshold=0.001, soft_sigma=0.5, soft_method='linear'):
-        unique_labels = labels.cpu().unique()
-        bboxes = bboxes.contiguous().view(-1, 4)
-        if scores is not None:
-            scores = scores.contiguous().view(-1,)
-
-        if labels is not None:
-            labels = labels.contiguous().view(-1,)
-
-        unique_labels = unique_labels.to(bboxes.device)
+        unique_labels = np.unique(labels)
 
         cls_keep_list = list()
         for c in unique_labels:
-            cls_index = torch.nonzero(labels == c).squeeze(1)
-            if nms_mode == 'nms':
-                cls_keep = DetHelper.nms(bboxes[cls_index],
-                                         scores=None if scores is None else scores[cls_index],
-                                         nms_threshold=nms_threshold,
-                                         mode=iou_mode)
-
-            elif nms_mode == 'cython_nms':
-                cls_keep = DetHelper.cython_nms(bboxes[cls_index],
-                                                scores=None if scores is None else scores[cls_index],
-                                                nms_threshold=nms_threshold)
-
-            elif nms_mode == 'cython_soft_nms':
-                cls_keep = DetHelper.cython_soft_nms(bboxes[cls_index],
-                                                    scores=None if scores is None else scores[cls_index],
-                                                    nms_threshold=nms_threshold,
-                                                    score_threshold=score_threshold,
-                                                    sigma=soft_sigma,
-                                                    method=soft_method)
-
-            else:
-                Log.error('Not supported NMS mode: {}.'.format(nms_mode))
-                exit(1)
+            cls_index = np.where(labels == c)[0]
+            cls_keep = nms(dets[cls_index], thresh=max_threshold, device_id=device_id)
 
             if cls_keep_num is not None:
                 cls_keep = cls_keep[:cls_keep_num]
 
             cls_keep_list.append(cls_index[cls_keep])
 
-        return torch.cat(cls_keep_list, 0)
+        keep_index = np.concatenate(cls_keep_list, 0)
+        return dets[keep_index]
 
     @staticmethod
-    def cython_bbox_iou(bbox1, bbox2):
-        is_torch = False
-        if not isinstance(bbox1, np.ndarray):
-            is_torch = True
-            bbox1 = bbox1.numpy()
-            bbox2 = bbox2.numpy()
+    def cls_softnms(dets, labels, max_threshold=0.0, min_score=0.001, sigma=0.5, method='linear', cls_keep_num=None):
+        if isinstance(labels, torch.Tensor):
+            labels = labels.detach().cpu().numpy()
 
-        iou_matrix = cython_iou.bbox_overlaps(bbox1, bbox2)
-        return iou_matrix if not is_torch else torch.from_numpy(iou_matrix)
+        assert isinstance(labels, np.ndarray)
+
+        unique_labels = np.unique(labels)
+
+        cls_dets_list = list()
+        for c in unique_labels:
+            cls_index = np.where(labels == c)[0]
+            _, cls_dets = soft_nms(dets[cls_index], max_threshold=max_threshold,
+                                method=method, sigma=sigma, min_score=min_score)
+
+            if cls_keep_num is not None:
+                cls_dets = cls_dets[:cls_keep_num]
+
+            cls_dets_list.append(cls_dets)
+
+        if isinstance(cls_dets_list[0], torch.Tensor):
+            return torch.cat(cls_dets_list, 0)
+
+        return np.concatenate(cls_dets_list, 0)
 
     @staticmethod
     def bbox_iou(box1, box2):
@@ -245,7 +108,7 @@ class DetHelper(object):
         return iou
 
     @staticmethod
-    def bbox_kmeans(bboxes, cluster_number, dist=np.median):
+    def bbox_kmeans(bboxes, cluster_number, dist=np.mean):
         box_number = bboxes.shape[0]
         last_nearest = np.zeros((box_number,))
         np.random.seed()

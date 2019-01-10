@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
-# Author: Donny You (donnyyou@163.com)
+# Author: Donny You (youansheng@gmail.com)
 # Utils to store the average and current value.
 
 

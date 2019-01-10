@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Donny You(donnyyou@163.com)
+# Author: Donny You(youansheng@gmail.com)
 # Parse json file of keypoints.
 
 
@@ -37,7 +37,7 @@ class PoseParser(object):
         with open(json_file, 'r') as json_stream:
             info_tree = json.load(json_stream)
             image_canvas = self.draw_points(image_canvas, info_tree)
-            if not self.configer.is_empty('details', 'limb_seq'):
+            if self.configer.exists('details', 'limb_seq'):
                 image_canvas = self.link_points(image_canvas, info_tree)
 
         if mask_file is not None:
@@ -63,7 +63,7 @@ class PoseParser(object):
             with open(os.path.join(json_dir, '{}.json'.format(shotname)), 'r') as json_stream:
                 info_tree = json.load(json_stream)
                 image_canvas = self.draw_points(image_canvas, info_tree)
-                if not self.configer.is_empty('details', 'limb_seq'):
+                if self.configer.exists('details', 'limb_seq'):
                     image_canvas = self.link_points(image_canvas, info_tree)
 
             if mask_dir is not None:
@@ -81,7 +81,7 @@ class PoseParser(object):
                     continue
 
                 cv2.circle(image_canvas, (int(object['kpts'][i][0]), int(object['kpts'][i][1])),
-                           self.configer.get('vis', 'circle_radius'),
+                           self.configer.get('res', 'vis_circle_radius'),
                            self.configer.get('details', 'color_list')[i], thickness=-1)
 
         return image_canvas
@@ -103,7 +103,7 @@ class PoseParser(object):
                 angle = math.degrees(math.atan2(Y[0] - Y[1], X[0] - X[1]))
                 polygon = cv2.ellipse2Poly((int(mX), int(mY)),
                                            (int(length / 2),
-                                            self.configer.get('vis', 'stick_width')), int(angle), 0, 360, 1)
+                                            self.configer.get('res', 'vis_stick_width')), int(angle), 0, 360, 1)
                 cv2.fillConvexPoly(cur_canvas, polygon, self.configer.get('details', 'color_list')[i])
                 image_canvas = cv2.addWeighted(image_canvas, 0.4, cur_canvas, 0.6, 0)
 

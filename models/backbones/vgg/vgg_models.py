@@ -1,21 +1,15 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
-# Author: Donny You(donnyyou@163.com)
+# Author: Donny You(youansheng@gmail.com)
 
 
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import os
-import torch
 import torch.nn as nn
 
-try:
-    from urllib import urlretrieve
-except ImportError:
-    from urllib.request import urlretrieve
-
+from models.tools.module_helper import ModuleHelper
 from utils.tools.logger import Logger as Log
 
 
@@ -88,68 +82,14 @@ class VGGModels(object):
         """
         backbone = self.configer.get('network', 'backbone')
         model = VGG(cfg_name=backbone, vgg_cfg=vgg_cfg, bn=False)
-        if self.configer.get('network', 'pretrained') or self.configer.get('network', 'pretrained_model') is not None:
-            if self.configer.get('network', 'pretrained_model') is not None:
-                Log.info('Loading pretrained model:{}'.format(self.configer.get('network', 'pretrained_model')))
-                pretrained_dict = torch.load(self.configer.get('network', 'pretrained_model'))
-            else:
-                pretrained_dict = self.load_url(model_urls[backbone.split('_')[0]])
-
-            model_dict = model.state_dict()
-            load_dict = dict()
-            for k, v in pretrained_dict.items():
-                new_key = k
-                if 'features' not in k:
-                    new_key = 'features.{}'.format(k)
-
-                if new_key in model_dict:
-                    load_dict[new_key] = v
-
-            Log.info('Matched Keys: {}'.format(load_dict.keys()))
-            model_dict.update(load_dict)
-            model.load_state_dict(model_dict)
-
+        model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'), all_match=False)
         return model
 
     def vgg_bn(self, vgg_cfg=None):
         backbone = self.configer.get('network', 'backbone')
         model = VGG(cfg_name=backbone, vgg_cfg=vgg_cfg, bn=True)
-        if self.configer.get('network', 'pretrained') or self.configer.get('network', 'pretrained_model') is not None:
-            if self.configer.get('network', 'pretrained_model') is not None:
-                Log.info('Loading pretrained model:{}'.format(self.configer.get('network', 'pretrained_model')))
-                pretrained_dict = torch.load(self.configer.get('network', 'pretrained_model'))
-            else:
-                pretrained_dict = self.load_url(model_urls['{}_bn'.format(backbone.split('_')[0])])
-
-            model_dict = model.state_dict()
-            load_dict = dict()
-            for k, v in pretrained_dict.items():
-                new_key = k
-                if 'features' not in k:
-                    new_key = 'features.{}'.format(k)
-
-                if new_key in model_dict:
-                    load_dict[new_key] = v
-
-            Log.info('Matched Keys: {}'.format(load_dict.keys()))
-            model_dict.update(load_dict)
-            model.load_state_dict(model_dict)
-
+        model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'), all_match=False)
         return model
-
-    def load_url(self, url, map_location=None):
-        model_dir = os.path.join(self.configer.get('project_dir'), 'models/backbones/vgg/pretrained')
-        if not os.path.exists(model_dir):
-            os.makedirs(model_dir)
-
-        filename = url.split('/')[-1]
-        cached_file = os.path.join(model_dir, filename)
-        if not os.path.exists(cached_file):
-            Log.info('Downloading: "{}" to {}\n'.format(url, cached_file))
-            urlretrieve(url, cached_file)
-
-        Log.info('Loading pretrained model:{}'.format(cached_file))
-        return torch.load(cached_file, map_location=map_location)
 
 
 if __name__ == "__main__":

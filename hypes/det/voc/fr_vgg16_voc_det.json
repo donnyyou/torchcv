@@ -13,17 +13,25 @@
     "train": {
       "batch_size": 1,
       "data_transformer": {
-        "size_mode": "random_size"
+        "size_mode": "random_size",
+        "fit_stride": 16,
+        "align_method": "only_pad",
+        "pad_mode": "pad_right_down"
       }
     },
     "val": {
       "batch_size": 1,
       "use_07_metric": true,
       "data_transformer": {
-        "size_mode": "random_size"
+        "size_mode": "random_size",
+        "fit_stride": 16,
+        "align_method": "only_pad",
+        "pad_mode": "pad_right_down"
       }
     },
     "test": {
+      "resize_bound": [600, 1000],
+      "fit_stride": 16
     },
     "train_trans": {
       "trans_seq": ["random_hflip", "random_resize"],
@@ -34,7 +42,8 @@
       "random_resize": {
         "ratio": 1.0,
         "method": "bound",
-        "resize_bound": [600, 1000]
+        "resize_bound": [600, 1000],
+        "aspect_range": [0.9, 1.1]
       }
     },
     "val_trans": {
@@ -42,17 +51,15 @@
       "random_resize": {
         "ratio": 1.0,
         "method": "bound",
-        "resize_bound": [600, 1000]
+        "resize_bound": [600, 1000],
+        "aspect_range": [1.0, 1.0]
       }
     },
-    "trans_params": {
-
-      "normalize": {
-        "div_value": 1.0,
-        "mean_value": [123, 116, 103],
-        "mean": [122.7717, 115.9465, 102.9801],
-        "std": [1.0, 1.0, 1.0]
-      }
+    "normalize": {
+      "div_value": 1.0,
+      "mean_value": [123, 116, 103],
+      "mean": [122.7717, 115.9465, 102.9801],
+      "std": [1.0, 1.0, 1.0]
     },
     "rpn": {
       "head_index_list": [0],
@@ -125,6 +132,7 @@
       "rewrite": true
     },
     "lr": {
+      "metric": "epoch",
       "base_lr": 0.001,
       "lr_policy": "step",
       "step": {
@@ -146,18 +154,23 @@
       },
       "sgd":{
         "weight_decay": 0.0005,
-        "momentum": 0.9
+        "momentum": 0.9,
+        "nesterov": false
       }
     },
     "nms": {
       "mode": "union",
-      "overlap_threshold": 0.45
+      "max_threshold": 0.45
     },
-    "vis": {
-      "conf_threshold": 0.01
+    "res": {
+      "val_conf_thre": 0.05,
+      "vis_conf_thre": 0.5
     },
-    "fr_loss": {
-      "rpn_sigma": 3.0,
-      "roi_sigma": 1.0
+    "loss": {
+      "loss_type": "fr_loss",
+      "params": {
+        "rpn_sigma": 3.0,
+        "roi_sigma": 1.0
+      }
     }
 }

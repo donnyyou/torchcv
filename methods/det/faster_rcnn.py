@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Donny You (donnyyou@163.com)
+# Author: Donny You (youansheng@gmail.com)
 # Class Definition for Faster R-CNN.
 
 
@@ -10,20 +10,19 @@ from __future__ import print_function
 
 import time
 import torch
-import torch.backends.cudnn as cudnn
 
 from datasets.det_data_loader import DetDataLoader
-from loss.det_loss_manager import DetLossManager
+from loss.loss_manager import LossManager
 from methods.det.faster_rcnn_test import FastRCNNTest
-from methods.tools.module_utilizer import ModuleUtilizer
-from methods.tools.optim_scheduler import OptimScheduler
+from methods.tools.runner_helper import RunnerHelper
+from methods.tools.trainer import Trainer
 from models.det_model_manager import DetModelManager
 from utils.layers.det.fr_priorbox_layer import FRPriorBoxLayer
-from utils.layers.det.rpn_target_generator import RPNTargetGenerator
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
 from val.scripts.det.det_running_score import DetRunningScore
 from vis.visualizer.det_visualizer import DetVisualizer
+from utils.helpers.dc_helper import DCHelper
 
 
 class FasterRCNN(object):
@@ -37,33 +36,29 @@ class FasterRCNN(object):
         self.train_losses = AverageMeter()
         self.val_losses = AverageMeter()
         self.det_visualizer = DetVisualizer(configer)
-        self.det_loss_manager = DetLossManager(configer)
+        self.det_loss_manager = LossManager(configer)
         self.det_model_manager = DetModelManager(configer)
         self.det_data_loader = DetDataLoader(configer)
         self.fr_priorbox_layer = FRPriorBoxLayer(configer)
-        self.rpn_target_generator = RPNTargetGenerator(configer)
         self.det_running_score = DetRunningScore(configer)
-        self.module_utilizer = ModuleUtilizer(configer)
-        self.optim_scheduler = OptimScheduler(configer)
 
         self.det_net = None
         self.train_loader = None
         self.val_loader = None
         self.optimizer = None
         self.scheduler = None
+        self.runner_state = dict()
 
         self._init_model()
 
     def _init_model(self):
         self.det_net = self.det_model_manager.object_detector()
-        self.det_net = self.module_utilizer.load_net(self.det_net)
+        self.det_net = RunnerHelper.load_net(self, self.det_net)
 
-        self.optimizer, self.scheduler = self.optim_scheduler.init_optimizer(self._get_parameters())
+        self.optimizer, self.scheduler = Trainer.init(self, self._get_parameters())
 
         self.train_loader = self.det_data_loader.get_trainloader()
         self.val_loader = self.det_data_loader.get_valloader()
-
-        self.fr_loss = self.det_loss_manager.get_det_loss('fr_loss')
 
     def _get_parameters(self):
         lr_1 = []
@@ -80,50 +75,38 @@ class FasterRCNN(object):
                   {'params': lr_2, 'lr': self.configer.get('lr', 'base_lr') * 2., 'weight_decay': 0}]
         return params
 
-    def __train(self):
+    def train(self):
         """
           Train function of every epoch during train phase.
         """
         self.det_net.train()
         start_time = time.time()
         # Adjust the learning rate after every epoch.
-        self.configer.plus_one('epoch')
-        self.scheduler.step(self.configer.get('epoch'))
+        self.runner_state['epoch'] += 1
 
         for i, data_dict in enumerate(self.train_loader):
-            inputs = data_dict['img']
-            img_scale = data_dict['imgscale']
+            Trainer.update(self)
             batch_gt_bboxes = data_dict['bboxes']
             batch_gt_labels = data_dict['labels']
+            metas = data_dict['meta']
+            data_dict['bboxes'] = DCHelper.todc(batch_gt_bboxes, gpu_list=self.configer.get('gpu'), cpu_only=True)
+            data_dict['labels'] = DCHelper.todc(batch_gt_labels, gpu_list=self.configer.get('gpu'), cpu_only=True)
+            data_dict['meta'] = DCHelper.todc(metas, gpu_list=self.configer.get('gpu'), cpu_only=True)
             self.data_time.update(time.time() - start_time)
-            # Change the data type.
-            gt_bboxes, gt_nums, gt_labels = self.__make_tensor(batch_gt_bboxes, batch_gt_labels)
-
-            gt_bboxes, gt_num, gt_labels = self.module_utilizer.to_device(gt_bboxes, gt_nums, gt_labels)
-            inputs = self.module_utilizer.to_device(inputs)
             # Forward pass.
-            feat_list, train_group = self.det_net(inputs, gt_bboxes, gt_num, gt_labels, img_scale)
-            gt_rpn_locs, gt_rpn_labels = self.rpn_target_generator(feat_list,
-                                                                   batch_gt_bboxes, [inputs.size(3), inputs.size(2)])
-            gt_rpn_locs, gt_rpn_labels = self.module_utilizer.to_device(gt_rpn_locs, gt_rpn_labels)
-
-            rpn_locs, rpn_scores, sample_roi_locs, sample_roi_scores, gt_roi_bboxes, gt_roi_labels = train_group
-
-            # Compute the loss of the train batch & backward.
-            loss = self.fr_loss([rpn_locs, rpn_scores, sample_roi_locs, sample_roi_scores],
-                                [gt_rpn_locs, gt_rpn_labels, gt_roi_bboxes, gt_roi_labels])
-
-            self.train_losses.update(loss.item(), inputs.size(0))
+            loss = self.det_net(data_dict)
+            loss = loss.mean()
+            self.train_losses.update(loss.item(), data_dict['img'].size(0))
 
             self.optimizer.zero_grad()
             loss.backward()
-            self.module_utilizer.clip_grad(self.det_net, 10.)
+            RunnerHelper.clip_grad(self.det_net, 10.)
             self.optimizer.step()
 
             # Update the vars of the train phase.
             self.batch_time.update(time.time() - start_time)
             start_time = time.time()
-            self.configer.plus_one('iters')
+            self.runner_state['iters'] += 1
 
             # Print the log info & reset the states.
             if self.configer.get('iters') % self.configer.get('solver', 'display_iter') == 0:
@@ -131,20 +114,23 @@ class FasterRCNN(object):
                          'Time {batch_time.sum:.3f}s / {2}iters, ({batch_time.avg:.3f})\t'
                          'Data load {data_time.sum:.3f}s / {2}iters, ({data_time.avg:3f})\n'
                          'Learning rate = {3}\tLoss = {loss.val:.8f} (ave = {loss.avg:.8f})\n'.format(
-                    self.configer.get('epoch'), self.configer.get('iters'),
+                    self.runner_state['epoch'], self.runner_state['iters'],
                     self.configer.get('solver', 'display_iter'),
-                    self.scheduler.get_lr(), batch_time=self.batch_time,
+                    RunnerHelper.get_lr(self.optimizer), batch_time=self.batch_time,
                     data_time=self.data_time, loss=self.train_losses))
                 self.batch_time.reset()
                 self.data_time.reset()
                 self.train_losses.reset()
 
-            # Check to val the current model.
-            if self.val_loader is not None and \
-               (self.configer.get('iters')) % self.configer.get('solver', 'test_interval') == 0:
-                self.__val()
+            if self.configer.get('lr', 'metric') == 'iters' \
+                    and self.runner_state['iters'] == self.configer.get('solver', 'max_iters'):
+                break
 
-    def __val(self):
+            # Check to val the current model.
+            if self.runner_state['iters'] % self.configer.get('solver', 'test_interval') == 0:
+                self.val()
+
+    def val(self):
         """
           Validation function during the train phase.
         """
@@ -153,27 +139,17 @@ class FasterRCNN(object):
         with torch.no_grad():
             for j, data_dict in enumerate(self.val_loader):
                 inputs = data_dict['img']
-                img_scale = data_dict['imgscale']
                 batch_gt_bboxes = data_dict['bboxes']
                 batch_gt_labels = data_dict['labels']
-                # Change the data type.
-                gt_bboxes, gt_nums, gt_labels = self.__make_tensor(batch_gt_bboxes, batch_gt_labels)
-                gt_bboxes, gt_num, gt_labels = self.module_utilizer.to_device(gt_bboxes, gt_nums, gt_labels)
-                inputs = self.module_utilizer.to_device(inputs)
-
+                metas = data_dict['meta']
+                data_dict['bboxes'] = DCHelper.todc(batch_gt_bboxes, gpu_list=self.configer.get('gpu'), cpu_only=True)
+                data_dict['labels'] = DCHelper.todc(batch_gt_labels, gpu_list=self.configer.get('gpu'), cpu_only=True)
+                data_dict['meta'] = DCHelper.todc(metas, gpu_list=self.configer.get('gpu'), cpu_only=True)
                 # Forward pass.
-                feat_list, train_group, test_group = self.det_net(inputs, gt_bboxes, gt_nums, gt_labels, img_scale)
-                rpn_locs, rpn_scores, sample_roi_locs, sample_roi_scores, gt_roi_bboxes, gt_roi_labels = train_group
-
-                gt_rpn_locs, gt_rpn_labels = self.rpn_target_generator(feat_list,
-                                                                       batch_gt_bboxes,
-                                                                       [inputs.size(3), inputs.size(2)])
-                gt_rpn_locs, gt_rpn_labels = self.module_utilizer.to_device(gt_rpn_locs, gt_rpn_labels)
-
+                inputs = RunnerHelper.to_device(self, inputs)
+                loss, test_group = self.det_net(data_dict)
                 # Compute the loss of the train batch & backward.
-                loss = self.fr_loss([rpn_locs, rpn_scores, sample_roi_locs, sample_roi_scores],
-                                    [gt_rpn_locs, gt_rpn_labels,  gt_roi_bboxes, gt_roi_labels])
-
+                loss = loss.mean()
                 self.val_losses.update(loss.item(), inputs.size(0))
                 test_indices_and_rois, test_roi_locs, test_roi_scores, test_rois_num = test_group
                 batch_detections = FastRCNNTest.decode(test_roi_locs,
@@ -181,7 +157,7 @@ class FasterRCNN(object):
                                                        test_indices_and_rois,
                                                        test_rois_num,
                                                        self.configer,
-                                                       [inputs.size(3), inputs.size(2)])
+                                                       metas)
                 batch_pred_bboxes = self.__get_object_list(batch_detections)
                 self.det_running_score.update(batch_pred_bboxes, batch_gt_bboxes, batch_gt_labels)
 
@@ -189,7 +165,7 @@ class FasterRCNN(object):
                 self.batch_time.update(time.time() - start_time)
                 start_time = time.time()
 
-            self.module_utilizer.save_net(self.det_net, save_mode='iters')
+            RunnerHelper.save_net(self, self.det_net, iters=self.runner_state['iters'])
             # Print the log info & reset the states.
             Log.info(
                 'Test Time {batch_time.sum:.3f}s, ({batch_time.avg:.3f})\t'
@@ -200,21 +176,6 @@ class FasterRCNN(object):
             self.batch_time.reset()
             self.val_losses.reset()
             self.det_net.train()
-
-    def __make_tensor(self, gt_bboxes, gt_labels):
-        len_arr = [gt_labels[i].numel() for i in range(len(gt_bboxes))]
-        batch_maxlen = max(max(len_arr), 1)
-        target_bboxes = torch.zeros((len(gt_bboxes), batch_maxlen, 4)).float()
-        target_labels = torch.zeros((len(gt_bboxes), batch_maxlen)).long()
-        for i in range(len(gt_bboxes)):
-            if len_arr[i] == 0:
-                continue
-
-            target_bboxes[i, :len_arr[i], :] = gt_bboxes[i].clone()
-            target_labels[i, :len_arr[i]] = gt_labels[i].clone()
-
-        target_bboxes_num = torch.Tensor(len_arr).long()
-        return target_bboxes, target_bboxes_num, target_labels
 
     def __get_object_list(self, batch_detections):
         batch_pred_bboxes = list()
@@ -233,16 +194,6 @@ class FasterRCNN(object):
             batch_pred_bboxes.append(object_list)
 
         return batch_pred_bboxes
-
-    def train(self):
-        cudnn.benchmark = True
-        if self.configer.get('network', 'resume') is not None and self.configer.get('network', 'resume_val'):
-            self.__val()
-
-        while self.configer.get('epoch') < self.configer.get('solver', 'max_epoch'):
-            self.__train()
-            if self.configer.get('epoch') == self.configer.get('solver', 'max_epoch'):
-                break
 
 
 if __name__ == "__main__":

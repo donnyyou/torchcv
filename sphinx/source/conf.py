@@ -49,7 +49,7 @@ master_doc = 'index'
 # project = '简单粗暴TensorFlow'
 project = 'PyTorchCV'
 copyright = '2018, Donny You'
-author = 'Donny You (donnyyou@163.com)'
+author = 'Donny You (youansheng@gmail.com)'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

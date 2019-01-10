@@ -3,88 +3,89 @@
     "task": "det",
     "method": "single_shot_detector",
     "data": {
-      "train_batch_size": 6,
-      "val_batch_size": 2,
-      "train_input_size": [1024, 1024],
-      "val_input_size": [1024, 1024],
       "num_classes": 81,
-      "data_dir": "~/DataSet/COCO_DET",
+      "data_dir": "~/DataSet/COCO_INS_2014",
+      "image_tool": "cv2",
+      "input_mode": "BGR",
+      "keep_difficult": false,
       "workers": 8
     },
+    "train": {
+      "batch_size": 32,
+      "data_transformer": {
+        "size_mode": "fix_size",
+        "input_size": [512, 512],
+        "align_method": "only_scale"
+      }
+    },
+    "val": {
+      "batch_size": 32,
+      "use_07_metric": false,
+      "start_val": 20,
+      "data_transformer": {
+        "size_mode": "fix_size",
+        "input_size": [512, 512],
+        "align_method": "only_scale"
+      }
+    },
     "test": {
-      "test_input_size": [1024, 1024],
-      "scale_search": [0.5, 1.0, 1.5, 2.0],
-      "mirror": true
+      "input_size": [512, 512],
+      "scale_search": [1.0]
     },
     "train_trans": {
-      "pad_ratio": 0.0,
-      "brightness_ratio": 0.0,
-      "blur_ratio": 0.0,
-      "hsv_ratio": 0.0,
-      "flip_ratio": 0.0,
-      "resize_ratio": 0.0,
-      "rotate_ratio": 0.0,
-      "crop_ratio": 0.0,
-      "trans_seq": ["random_brightness", "random_gauss_blur", "random_hsv",
-                    "random_hflip", "random_resize", "random_rotate",
-                    "random_crop", "resize"]
-    },
-    "val_trans": {
-      "pad_ratio":0.0,
-      "brightness_ratio": 0.0,
-      "blur_ratio": 0.0,
-      "hsv_ratio": 0.0,
-      "flip_ratio": 0.0,
-      "resize_ratio": 0.0,
-      "rotate_ratio": 0.0,
-      "crop_ratio": 0.0,
-      "trans_seq": ["random_brightness", "random_gauss_blur", "random_hsv",
-                    "random_hflip", "random_resize", "random_rotate",
-                    "random_crop", "resize"]
-    },
-    "trans_params": {
-      "random_shift":{
-        "shift_pixel": 2
+      "shuffle_trans_seq": ["random_contrast", "random_hue", "random_saturation", "random_brightness", "random_perm"],
+      "trans_seq": ["random_hflip", "random_pad", "random_crop"],
+      "random_saturation": {
+        "ratio": 0.5,
+        "lower": 0.5,
+        "upper": 1.5
+      },
+      "random_hue": {
+        "ratio": 0.5,
+        "delta": 18
+      },
+      "random_contrast": {
+        "ratio": 0.5,
+        "lower": 0.5,
+        "upper": 1.5
       },
       "random_pad": {
+        "ratio": 0.6,
         "up_scale_range": [1.0, 4.0]
       },
       "random_brightness": {
-        "shift_value": 30
+        "ratio": 0.5,
+        "shift_value": 32
       },
-      "random_gauss_blur": {
-        "max_blur": 4
-      },
-      "random_hsv": {
-        "h_range": [1.0, 1.0],
-        "s_range": [0.7, 1.3],
-        "v_range": [0.7, 1.3]
+      "random_perm": {
+        "ratio": 0.5
       },
       "random_hflip": {
+        "ratio": 0.5,
         "swap_pair": []
       },
-      "random_resize": {
-        "scale_min": 0.75,
-        "scale_max": 1.25
-      },
-      "random_rotate": {
-        "rotate_degree": 40
-      },
       "random_crop":{
-        "crop_size": [1024, 512],
-        "method": "grid",
+        "ratio": 1.0,
+        "method": "det",
         "grid":[3, 2],
         "center_jitter": 20
-      },
-      "mean": [0.485, 0.456, 0.406],
-      "std": [0.229, 0.224, 0.225]
+      }
+    },
+    "val_trans": {
+      "trans_seq": []
+    },
+    "normalize": {
+      "div_value": 1,
+      "mean_value": [104, 117, 123],
+      "mean": [104.0, 117.0, 123.0],
+      "std": [1.0, 1.0, 1.0]
     },
     "gt": {
       "anchor_method": "ssd",
       "iou_threshold": 0.5,
       "num_anchor_list": [4, 6, 6, 6, 6, 4, 4],
       "feature_maps_wh": [[64, 64], [32, 32], [16, 16], [8, 8], [4, 4], [2, 2], [1, 1]],
-      "cur_anchor_sizes": [20, 51, 133, 215, 296, 278, 460, 543],
+      "cur_anchor_sizes": [20, 51, 133, 215, 296, 378, 460, 543],
       "aspect_ratio_list": [[2], [2, 3], [2, 3], [2, 3], [2, 3], [2], [2]]
     },
     "details": {
@@ -124,15 +125,14 @@
     "checkpoints": {
       "checkpoints_name": "ssd_vgg512_coco_det",
       "checkpoints_dir": "checkpoints/det/coco",
-      "save_iters": 3000
+      "save_iters": 5000
     },
     "network":{
-      "backbone": "vgg19_bn",
-      "width_mult": 1.0,
-      "model_name": "vgg512_ssd",
+      "backbone": "vgg16",
+      "model_name": "vgg300_ssd",
       "num_feature_list": [512, 1024, 512, 256, 256, 256, 256],
       "stride_list": [8, 16, 32, 64, 128, 256, 512],
-      "init": "kaiming_normal"
+      "head_index_list": [0, 1, 2, 3, 4, 5, 6]
     },
     "logging": {
       "logfile_level": "info",
@@ -142,35 +142,53 @@
       "rewrite": true
     },
     "lr": {
-      "base_lr": 0.0005,
-      "lr_policy": "step",
+      "metric": "epoch",
+      "is_warm": true,
+      "warm": {
+        "warm_epoch": 1,
+        "freeze_backbone": false
+      },
+      "base_lr": 0.001,
+      "lr_policy": "multistep",
       "step": {
-        "gamma": 0.3,
-        "step_size": 20
+        "gamma": 0.1,
+        "step_size": 500
+      },
+      "multistep": {
+        "gamma": 0.1,
+        "stepvalue": [90, 120, 140]
       }
     },
     "solver": {
       "display_iter": 100,
-      "test_interval": 1000,
-      "max_epoch": 100
+      "test_interval": 5000,
+      "max_epoch": 142
     },
     "optim": {
-      "optim_method": "adam",
+      "optim_method": "sgd",
       "adam": {
         "betas": [0.9, 0.999],
         "eps": 1e-08,
         "weight_decay": 0.0001
       },
       "sgd":{
-        "weight_decay": 0.0001,
-        "momentum": 0.9
+        "weight_decay": 0.0005,
+        "momentum": 0.9,
+        "nesterov": false
       }
     },
     "nms": {
       "mode": "union",
-      "overlap_threshold": 0.5
+      "max_threshold": 0.45,
+      "pre_nms": 3000
     },
-    "vis": {
-      "conf_threshold": 0.0
+    "res": {
+      "val_conf_thre": 0.01,
+      "vis_conf_thre": 0.5,
+      "max_per_image": 200,
+      "cls_keep_num": 50
+    },
+    "loss": {
+      "loss_type": "ssd_multibox_loss"
     }
 }

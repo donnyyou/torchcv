@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Donny You(donnyyou@163.com)
+# Author: Donny You(youansheng@gmail.com)
 
 
 from __future__ import absolute_import
@@ -11,6 +11,7 @@ import os
 import numpy as np
 from torch.utils import data
 
+from extensions.parallel.data_container import DataContainer
 from utils.helpers.image_helper import ImageHelper
 from utils.tools.logger import Logger as Log
 
@@ -33,10 +34,10 @@ class FSDataLoader(data.Dataset):
                                      mode=self.configer.get('data', 'input_mode'))
         labelmap = ImageHelper.read_image(self.label_list[index],
                                           tool=self.configer.get('data', 'image_tool'), mode='P')
-        if not self.configer.is_empty('data', 'label_list'):
+        if self.configer.exists('data', 'label_list'):
             labelmap = self._encode_label(labelmap)
 
-        if not self.configer.is_empty('data', 'reduce_zero_label'):
+        if self.configer.exists('data', 'reduce_zero_label'):
             labelmap = self._reduce_zero_label(labelmap)
 
         if self.aug_transform is not None:
@@ -48,7 +49,10 @@ class FSDataLoader(data.Dataset):
         if self.label_transform is not None:
             labelmap = self.label_transform(labelmap)
 
-        return img, labelmap
+        return dict(
+            img=DataContainer(img, stack=True),
+            labelmap=DataContainer(labelmap, stack=True),
+        )
 
     def _reduce_zero_label(self, labelmap):
         if not self.configer.get('data', 'reduce_zero_label'):
@@ -66,7 +70,7 @@ class FSDataLoader(data.Dataset):
 
         shape = labelmap.shape
         encoded_labelmap = np.ones(shape=(shape[0], shape[1]), dtype=np.float32) * 255
-        for i in range(self.configer.get('data', 'num_classes')):
+        for i in range(len(self.configer.get('data', 'label_list'))):
             class_id = self.configer.get('data', 'label_list')[i]
             encoded_labelmap[labelmap == class_id] = i
 

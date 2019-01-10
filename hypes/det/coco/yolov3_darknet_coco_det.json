@@ -4,23 +4,23 @@
     "method": "yolov3",
     "data": {
       "num_classes": 80,
-      "data_dir": "~/DataSet/COCO_INS",
+      "data_dir": "~/DataSet/COCO_INS_2014",
       "image_tool": "pil",
       "input_mode": "RGB",
       "keep_difficult": false,
       "workers": 8
     },
     "train": {
-      "batch_size": 32,
+      "batch_size": 64,
       "data_transformer": {
         "size_mode": "multi_size",
-        "ms_input_size": [[320, 320], [416, 416], [608, 608]],
+        "ms_input_size": [[416, 416]],
         "align_method": "only_scale"
       }
     },
     "val": {
-      "batch_size": 32,
-      "use_07_metric": true,
+      "batch_size": 64,
+      "use_07_metric": false,
       "data_transformer": {
         "size_mode": "fix_size",
         "input_size": [416, 416],
@@ -28,12 +28,12 @@
       }
     },
     "test": {
-      "test_input_size": [416, 416],
+      "input_size": [416, 416],
       "scale_search": [1.0]
     },
     "train_trans": {
       "shuffle_trans_seq": ["random_contrast", "random_hue", "random_saturation", "random_brightness", "random_perm"],
-      "trans_seq": ["random_hflip"],
+      "trans_seq": ["random_hflip", "random_pad", "random_crop"],
       "random_saturation": {
         "ratio": 0.5,
         "lower": 0.5,
@@ -50,7 +50,7 @@
       },
       "random_pad": {
         "ratio": 0.6,
-        "up_scale_range": [1.0, 4.0]
+        "up_scale_range": [1.0, 3.0]
       },
       "random_brightness": {
         "ratio": 0.5,
@@ -131,9 +131,8 @@
       "model_name": "darknet_yolov3",
       "stride_list": [32, 16, 8],
       "loss_weights": {
-        "coord_loss": 0.5,
-        "obj_loss": 2.5,
-        "noobj_loss": 0.5,
+        "coord_loss": 1.0,
+        "obj_loss": 5.0,
         "cls_loss": 1.0
       }
     },
@@ -145,22 +144,26 @@
       "rewrite": true
     },
     "lr": {
+      "metric": "epoch",
       "is_warm": true,
       "warm": {
-        "warm_lr": 0.000001,
-        "warm_epoch": 2
+        "warm_epoch": 0.2
       },
-      "base_lr": 0.001,
-      "lr_policy": "step",
+      "base_lr": 0.0004,
+      "lr_policy": "multistep",
       "step": {
         "gamma": 0.1,
-        "step_size": 20
+        "step_size": 30
+      },
+      "multistep": {
+        "gamma": 0.1,
+        "stepvalue": [50, 60, 70]
       }
     },
     "solver": {
       "display_iter": 100,
       "test_interval": 5000,
-      "max_epoch": 100
+      "max_epoch": 72
     },
     "optim": {
       "optim_method": "sgd",
@@ -170,15 +173,20 @@
         "weight_decay": 0.0001
       },
       "sgd":{
-        "weight_decay": 0.00004,
-        "momentum": 0.9
+        "weight_decay": 0.0005,
+        "momentum": 0.9,
+        "nesterov": true
       }
     },
     "nms": {
       "mode": "union",
       "max_threshold": 0.45
     },
-    "vis": {
-      "obj_threshold": 0.5
+    "res": {
+      "val_conf_thre": 0.5,
+      "vis_conf_thre": 0.5
+    },
+    "loss": {
+      "loss_type": "yolov3_loss"
     }
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Donny You(donnyyou@163.com)
+# Author: Donny You(youansheng@gmail.com)
 # Single Shot Detector data loader
 
 
@@ -13,6 +13,7 @@ import torch
 import numpy as np
 import torch.utils.data as data
 
+from extensions.parallel.data_container import DataContainer
 from utils.helpers.json_helper import JsonHelper
 from utils.helpers.image_helper import ImageHelper
 from utils.tools.logger import Logger as Log
@@ -44,7 +45,11 @@ class SSDDataLoader(data.Dataset):
         if self.img_transform is not None:
             img = self.img_transform(img)
 
-        return img, bboxes, labels
+        return dict(
+            img=DataContainer(img, stack=True),
+            bboxes=DataContainer(bboxes, stack=False),
+            labels=DataContainer(labels, stack=False),
+        )
 
     def __len__(self):
 

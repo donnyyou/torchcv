@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Donny You(donnyyou@163.com)
+# Author: Donny You(youansheng@gmail.com)
 # DenseNet models.
 
 
@@ -14,11 +14,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from collections import OrderedDict
-
-try:
-    from urllib import urlretrieve
-except ImportError:
-    from urllib.request import urlretrieve
 
 from models.tools.module_helper import ModuleHelper
 from utils.tools.logger import Logger as Log
@@ -45,28 +40,7 @@ class DenseNetModels(object):
         """
         model = DenseNet(num_init_features=64, growth_rate=32,
                          block_config=(6, 12, 24, 16), bn_type=self.configer.get('network', 'bn_type'), **kwargs)
-        if self.configer.get('network', 'pretrained') or self.configer.get('network', 'pretrained_model') is not None:
-            # '.'s are no longer allowed in module names, but pervious _DenseLayer
-            # has keys 'norm.1', 'relu.1', 'conv.1', 'norm.2', 'relu.2', 'conv.2'.
-            # They are also in the checkpoints in model_urls. This pattern is used
-            # to find such keys.
-            pattern = re.compile(
-                r'^(.*denselayer\d+\.(?:norm|relu|conv))\.((?:[12])\.(?:weight|bias|running_mean|running_var))$')
-            if self.configer.get('network', 'pretrained_model') is not None:
-                Log.info('Loading pretrained model:{}'.format(self.configer.get('network', 'pretrained_model')))
-                pretrained_dict = torch.load(self.configer.get('network', 'pretrained_model'))
-            else:
-                pretrained_dict = self.load_url(model_urls['densenet121'])
-
-            for key in list(pretrained_dict.keys()):
-                res = pattern.match(key)
-                if res:
-                    new_key = res.group(1) + res.group(2)
-                    pretrained_dict[new_key] = pretrained_dict[key]
-                    del pretrained_dict[key]
-
-            model.load_state_dict(pretrained_dict)
-
+        model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'))
         return model
 
     def densenet169(self, **kwargs):
@@ -77,28 +51,7 @@ class DenseNetModels(object):
         """
         model = DenseNet(num_init_features=64, growth_rate=32,
                          block_config=(6, 12, 32, 32), bn_type=self.configer.get('network', 'bn_type'), **kwargs)
-        if self.configer.get('network', 'pretrained') or self.configer.get('network', 'pretrained_model') is not None:
-            # '.'s are no longer allowed in module names, but pervious _DenseLayer
-            # has keys 'norm.1', 'relu.1', 'conv.1', 'norm.2', 'relu.2', 'conv.2'.
-            # They are also in the checkpoints in model_urls. This pattern is used
-            # to find such keys.
-            pattern = re.compile(
-                r'^(.*denselayer\d+\.(?:norm|relu|conv))\.((?:[12])\.(?:weight|bias|running_mean|running_var))$')
-            if self.configer.get('network', 'pretrained_model') is not None:
-                Log.info('Loading pretrained model:{}'.format(self.configer.get('network', 'pretrained_model')))
-                pretrained_dict = torch.load(self.configer.get('network', 'pretrained_model'))
-            else:
-                pretrained_dict = self.load_url(model_urls['densenet169'])
-
-            for key in list(pretrained_dict.keys()):
-                res = pattern.match(key)
-                if res:
-                    new_key = res.group(1) + res.group(2)
-                    pretrained_dict[new_key] = pretrained_dict[key]
-                    del pretrained_dict[key]
-
-            model.load_state_dict(pretrained_dict)
-
+        model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'))
         return model
 
     def densenet201(self, **kwargs):
@@ -109,28 +62,7 @@ class DenseNetModels(object):
         """
         model = DenseNet(num_init_features=64, growth_rate=32,
                          block_config=(6, 12, 48, 32), bn_type=self.configer.get('network', 'bn_type'), **kwargs)
-        if self.configer.get('network', 'pretrained') or self.configer.get('network', 'pretrained_model') is not None:
-            # '.'s are no longer allowed in module names, but pervious _DenseLayer
-            # has keys 'norm.1', 'relu.1', 'conv.1', 'norm.2', 'relu.2', 'conv.2'.
-            # They are also in the checkpoints in model_urls. This pattern is used
-            # to find such keys.
-            pattern = re.compile(
-                r'^(.*denselayer\d+\.(?:norm|relu|conv))\.((?:[12])\.(?:weight|bias|running_mean|running_var))$')
-            if self.configer.get('network', 'pretrained_model') is not None:
-                Log.info('Loading pretrained model:{}'.format(self.configer.get('network', 'pretrained_model')))
-                pretrained_dict = torch.load(self.configer.get('network', 'pretrained_model'))
-            else:
-                pretrained_dict = self.load_url(model_urls['densenet201'])
-
-            for key in list(pretrained_dict.keys()):
-                res = pattern.match(key)
-                if res:
-                    new_key = res.group(1) + res.group(2)
-                    pretrained_dict[new_key] = pretrained_dict[key]
-                    del pretrained_dict[key]
-
-            model.load_state_dict(pretrained_dict)
-
+        model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'))
         return model
 
     def densenet161(self, **kwargs):
@@ -141,44 +73,8 @@ class DenseNetModels(object):
         """
         model = DenseNet(num_init_features=96, growth_rate=48,
                          block_config=(6, 12, 36, 24), bn_type=self.configer.get('network', 'bn_type'), **kwargs)
-        if self.configer.get('network', 'pretrained') or self.configer.get('network', 'pretrained_model') is not None:
-            # '.'s are no longer allowed in module names, but pervious _DenseLayer
-            # has keys 'norm.1', 'relu.1', 'conv.1', 'norm.2', 'relu.2', 'conv.2'.
-            # They are also in the checkpoints in model_urls. This pattern is used
-            # to find such keys.
-            pattern = re.compile(
-                r'^(.*denselayer\d+\.(?:norm|relu|conv))\.((?:[12])\.(?:weight|bias|running_mean|running_var))$')
-            if self.configer.get('network', 'pretrained_model') is not None:
-                Log.info('Loading pretrained model:{}'.format(self.configer.get('network', 'pretrained_model')))
-                pretrained_dict = torch.load(self.configer.get('network', 'pretrained_model'))
-            else:
-                pretrained_dict = self.load_url(model_urls['densenet161'])
-
-            for key in list(pretrained_dict.keys()):
-                res = pattern.match(key)
-                if res:
-                    new_key = res.group(1) + res.group(2)
-                    pretrained_dict[new_key] = pretrained_dict[key]
-                    del pretrained_dict[key]
-
-            model.load_state_dict(pretrained_dict)
-
+        model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'))
         return model
-
-    def load_url(self, url, map_location=None):
-        model_dir = os.path.join(self.configer.get('project_dir'), 'models/backbones/densenet/pretrained')
-        if not os.path.exists(model_dir):
-            os.makedirs(model_dir)
-
-        filename = url.split('/')[-1]
-        cached_file = os.path.join(model_dir, filename)
-        if not os.path.exists(cached_file):
-            Log.info('Downloading: "{}" to {}\n'.format(url, cached_file))
-            urlretrieve(url, cached_file)
-
-        Log.info('Loading pretrained model:{}'.format(cached_file))
-
-        return torch.load(cached_file, map_location=map_location)
 
 
 class _DenseLayer(nn.Sequential):

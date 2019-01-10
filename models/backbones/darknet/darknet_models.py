@@ -1,14 +1,15 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+# Author: Donny You(youansheng@gmail.com)
+
+
 import os
 import torch
 import torch.nn as nn
 import math
 from collections import OrderedDict
 
-try:
-    from urllib import urlretrieve
-except ImportError:
-    from urllib.request import urlretrieve
-
+from models.tools.module_helper import ModuleHelper
 from utils.tools.logger import Logger as Log
 
 
@@ -106,19 +107,7 @@ class DarkNetModels(object):
         """Constructs a darknet-21 model.
         """
         model = DarkNet([1, 1, 2, 2, 1])
-        if self.configer.get('network', 'pretrained') or self.configer.get('network', 'pretrained_model') is not None:
-            if self.configer.get('network', 'pretrained_model') is not None:
-                Log.info('Loading pretrained model:{}'.format(self.configer.get('network', 'pretrained_model')))
-                pretrained_dict = torch.load(self.configer.get('network', 'pretrained_model'))
-            else:
-                pretrained_dict = self.load_url(model_urls['darknet21'])
-
-            model_dict = model.state_dict()
-            matched_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
-            Log.info('Matched Keys:{}'.format(matched_dict.keys()))
-            model_dict.update(matched_dict)
-            model.load_state_dict(model_dict)
-
+        model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'), all_match=False)
         return model
 
 
@@ -126,32 +115,5 @@ class DarkNetModels(object):
         """Constructs a darknet-53 model.
         """
         model = DarkNet([1, 2, 8, 8, 4])
-        if self.configer.get('network', 'pretrained') or self.configer.get('network', 'pretrained_model') is not None:
-            if self.configer.get('network', 'pretrained_model') is not None:
-                Log.info('Loading pretrained model:{}'.format(self.configer.get('network', 'pretrained_model')))
-                pretrained_dict = torch.load(self.configer.get('network', 'pretrained_model'))
-            else:
-                pretrained_dict = self.load_url(model_urls['darknet53'])
-
-            model_dict = model.state_dict()
-            matched_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
-            Log.info('Matched Keys:{}'.format(matched_dict.keys()))
-            model_dict.update(matched_dict)
-            model.load_state_dict(model_dict)
-
+        model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'), all_match=False)
         return model
-
-    def load_url(self, url, map_location=None):
-        model_dir = os.path.join(self.configer.get('project_dir'), 'models/backbones/darknet/pretrained')
-        if not os.path.exists(model_dir):
-            os.makedirs(model_dir)
-
-        filename = url.split('/')[-1]
-        cached_file = os.path.join(model_dir, filename)
-        if not os.path.exists(cached_file):
-            Log.info('Downloading: "{}" to {}\n'.format(url, cached_file))
-            urlretrieve(url, cached_file)
-
-        Log.info('Loading pretrained model:{}'.format(cached_file))
-
-        return torch.load(cached_file, map_location=map_location)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Donny You(donnyyou@163.com)
+# Author: Donny You(youansheng@gmail.com)
 # Priorbox layer for Detection.
 
 
@@ -10,12 +10,11 @@ from __future__ import print_function
 
 import torch
 
-from extensions.layers.nms.module import NMS
+from extensions.nms.nms_wrapper import nms
 from utils.layers.det.fr_priorbox_layer import FRPriorBoxLayer
-from utils.tools.logger import Logger as Log
 
 
-class FRRoiGenerator(object):
+class FRROIGenerator(object):
     # unNOTE: I'll make it undifferential
     # unTODO: make sure it's ok
     # It's ok
@@ -53,7 +52,7 @@ class FRRoiGenerator(object):
         self.configer = configer
         self.fr_priorbox_layer = FRPriorBoxLayer(self.configer)
 
-    def __call__(self, feat_list, loc, score, n_pre_nms, n_post_nms, input_size, img_scale):
+    def __call__(self, feat_list, loc, score, n_pre_nms, n_post_nms, meta):
         """input should  be ndarray
         Propose RoIs.
         Inputs :obj:`loc, score, anchor` refer to the same anchor when indexed
@@ -87,21 +86,16 @@ class FRRoiGenerator(object):
         # to set self.traing = False
         device = loc.device
 
-        default_boxes = self.fr_priorbox_layer(feat_list, input_size).unsqueeze(0).repeat(loc.size(0), 1, 1).to(device)
+        anchors = self.fr_priorbox_layer(feat_list, meta[0]['input_size'])
+        default_boxes = anchors.unsqueeze(0).repeat(loc.size(0), 1, 1).to(device)
 
         # loc = loc[:, :, [1, 0, 3, 2]]
         # Convert anchors into proposal via bbox transformations.
         wh = torch.exp(loc[:, :, 2:]) * default_boxes[:, :, 2:]
         cxcy = loc[:, :, :2] * default_boxes[:, :, 2:] + default_boxes[:, :, :2]
         dst_bbox = torch.cat([cxcy - wh / 2, cxcy + wh / 2], 2)  # [b, 8732,4]
-
-        dst_bbox[:, :, 0] = (dst_bbox[:, :, 0]).clamp_(min=0, max=input_size[0]-1)
-        dst_bbox[:, :, 2] = (dst_bbox[:, :, 2]).clamp_(min=0, max=input_size[0]-1)
-        dst_bbox[:, :, 1] = (dst_bbox[:, :, 1]).clamp_(min=0, max=input_size[1]-1)
-        dst_bbox[:, :, 3] = (dst_bbox[:, :, 3]).clamp_(min=0, max=input_size[1]-1)
-
-        dst_bbox = dst_bbox.cpu().detach()
-        score = score.cpu().detach()
+        dst_bbox = dst_bbox.detach()
+        score = score.detach()
         # cls_prob = F.softmax(score, dim=-1)
         rpn_fg_scores = score[:, :, 1]
 
@@ -111,12 +105,14 @@ class FRRoiGenerator(object):
 
         for i in range(loc.size(0)):
             tmp_dst_bbox = dst_bbox[i]
+            tmp_dst_bbox[:, 0::2] = tmp_dst_bbox[:, 0::2].clamp_(min=0, max=meta[i]['aug_img_size'][0] - 1)
+            tmp_dst_bbox[:, 1::2] = tmp_dst_bbox[:, 1::2].clamp_(min=0, max=meta[i]['aug_img_size'][1] - 1)
             tmp_scores = rpn_fg_scores[i]
             # Remove predicted boxes with either height or width < threshold.
             ws = tmp_dst_bbox[:, 2] - tmp_dst_bbox[:, 0] + 1
             hs = tmp_dst_bbox[:, 3] - tmp_dst_bbox[:, 1] + 1
             min_size = self.configer.get('rpn', 'min_size')
-            keep = (hs >= img_scale[i] * min_size) & (ws >= img_scale[i] * min_size)
+            keep = (hs >= meta[i]['img_scale'] * min_size) & (ws >= meta[i]['img_scale'] * min_size)
             rois = tmp_dst_bbox[keep]
             tmp_scores = tmp_scores[keep]
             # Sort all (proposal, score) pairs by score from highest to lowest.
@@ -139,9 +135,8 @@ class FRRoiGenerator(object):
 
             # unNOTE: somthing is wrong here!
             # TODO: remove cuda.to_gpu
-            keep = NMS()(rois,
-                         scores=tmp_scores,
-                         max_threshold=self.configer.get('rpn', 'nms_threshold'))
+            keep = nms(torch.cat((rois, tmp_scores.unsqueeze(1)), 1),
+                       thresh=self.configer.get('rpn', 'nms_threshold'))
             # keep = DetHelper.nms(rois,
             #                      scores=tmp_scores,
             #                      nms_threshold=self.configer.get('rpn', 'nms_threshold'))
@@ -161,6 +156,6 @@ class FRRoiGenerator(object):
         if rois.numel() == 0:
             indices_and_rois = rois
         else:
-            indices_and_rois = torch.cat([roi_indices.unsqueeze(1), rois], dim=1).contiguous()
+            indices_and_rois = torch.cat([roi_indices.unsqueeze(1).to(device), rois.to(device)], dim=1).contiguous()
 
         return indices_and_rois.to(device), batch_rois_num.long().to(device)

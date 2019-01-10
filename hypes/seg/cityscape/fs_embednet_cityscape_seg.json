@@ -47,7 +47,8 @@
       "random_resize": {
         "ratio": 1.0,
         "method": "random",
-        "scale_range": [0.5, 2.0]
+        "scale_range": [0.5, 2.0],
+        "aspect_range": [0.9, 1.1]
       },
       "random_crop":{
         "ratio": 1.0,
@@ -118,7 +119,8 @@
       },
       "sgd":{
         "weight_decay": 0.0001,
-        "momentum": 0.9
+        "momentum": 0.9,
+        "nesterov": false
       }
     },
     "cross_entropy_loss": {
@@ -126,6 +128,6 @@
                  1.0192,  0.8528,  0.9771,  0.9139,  0.9744,  1.1098,  0.8883,
                  1.0639,  1.2476,  1.0729,  1.1323,  1.0365],
       "reduction": "elementwise_mean",
-      "ignore_index": 19
+      "ignore_index": -1
     }
 }

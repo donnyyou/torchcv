@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Donny You(donnyyou@163.com)
+# Author: Donny You(youansheng@gmail.com)
 
 
 from __future__ import absolute_import
@@ -17,8 +17,7 @@ import datasets.tools.transforms as trans
 from datasets.det.ssd_data_loader import SSDDataLoader
 from datasets.det.fr_data_loader import FRDataLoader
 from datasets.det.yolo_data_loader import YOLODataLoader
-from datasets.det.aa_data_loader import AADataLoader
-from datasets.tools.collate_functions import CollateFunctions
+from datasets.tools.collate import collate
 from utils.tools.logger import Logger as Log
 
 
@@ -58,25 +57,9 @@ class DetDataLoader(object):
                               configer=self.configer),
                 batch_size=self.configer.get('train', 'batch_size'), shuffle=True,
                 num_workers=self.configer.get('data', 'workers'), pin_memory=True,
-                collate_fn=lambda *args: CollateFunctions.our_collate(
-                    *args, data_keys=['img', 'bboxes', 'labels'],
-                    trans_dict=self.configer.get('train', 'data_transformer')
-                )
-            )
-
-            return trainloader
-
-        elif self.configer.get('method') == 'adaptive_anchor':
-            trainloader = data.DataLoader(
-                AADataLoader(root_dir=os.path.join(self.configer.get('data', 'data_dir'), 'train'),
-                              aug_transform=self.aug_train_transform,
-                              img_transform=self.img_transform,
-                              configer=self.configer),
-                batch_size=self.configer.get('train', 'batch_size'), shuffle=True,
-                num_workers=self.configer.get('data', 'workers'), pin_memory=True,
-                collate_fn=lambda *args: CollateFunctions.our_collate(
-                    *args, data_keys=['img', 'bboxes', 'labels'],
-                    trans_dict=self.configer.get('train', 'data_transformer')
+                drop_last=self.configer.get('data', 'drop_last'),
+                collate_fn=lambda *args: collate(
+                    *args, trans_dict=self.configer.get('train', 'data_transformer')
                 )
             )
 
@@ -90,9 +73,9 @@ class DetDataLoader(object):
                              configer=self.configer),
                 batch_size=self.configer.get('train', 'batch_size'), shuffle=True,
                 num_workers=self.configer.get('data', 'workers'), pin_memory=True,
-                collate_fn=lambda *args: CollateFunctions.our_collate(
-                    *args, data_keys=['img', 'imgscale', 'bboxes', 'labels'],
-                    trans_dict=self.configer.get('train', 'data_transformer')
+                drop_last=self.configer.get('data', 'drop_last'),
+                collate_fn=lambda *args: collate(
+                    *args, trans_dict=self.configer.get('train', 'data_transformer')
                 )
             )
 
@@ -106,9 +89,9 @@ class DetDataLoader(object):
                                configer=self.configer),
                 batch_size=self.configer.get('train', 'batch_size'), shuffle=True,
                 num_workers=self.configer.get('data', 'workers'), pin_memory=True,
-                collate_fn=lambda *args: CollateFunctions.our_collate(
-                    *args, data_keys=['img', 'bboxes', 'labels'],
-                    trans_dict=self.configer.get('train', 'data_transformer')
+                drop_last=self.configer.get('data', 'drop_last'),
+                collate_fn=lambda *args: collate(
+                    *args, trans_dict=self.configer.get('train', 'data_transformer')
                 )
             )
 
@@ -127,25 +110,9 @@ class DetDataLoader(object):
                               configer=self.configer),
                 batch_size=self.configer.get('val', 'batch_size'), shuffle=False,
                 num_workers=self.configer.get('data', 'workers'), pin_memory=True,
-                collate_fn=lambda *args: CollateFunctions.our_collate(
-                    *args, data_keys=['img', 'bboxes', 'labels'],
-                    trans_dict=self.configer.get('val', 'data_transformer')
-                )
-            )
-
-            return valloader
-
-        elif self.configer.get('method') == 'adaptive_anchor':
-            valloader = data.DataLoader(
-                AADataLoader(root_dir=os.path.join(self.configer.get('data', 'data_dir'), 'val'),
-                              aug_transform=self.aug_val_transform,
-                              img_transform=self.img_transform,
-                              configer=self.configer),
-                batch_size=self.configer.get('val', 'batch_size'), shuffle=False,
-                num_workers=self.configer.get('data', 'workers'), pin_memory=True,
-                collate_fn=lambda *args: CollateFunctions.our_collate(
-                    *args, data_keys=['img', 'bboxes', 'labels'],
-                    trans_dict=self.configer.get('val', 'data_transformer')
+                drop_last=self.configer.get('data', 'drop_last'),
+                collate_fn=lambda *args: collate(
+                    *args, trans_dict=self.configer.get('val', 'data_transformer')
                 )
             )
 
@@ -159,9 +126,9 @@ class DetDataLoader(object):
                              configer=self.configer),
                 batch_size=self.configer.get('val', 'batch_size'), shuffle=False,
                 num_workers=self.configer.get('data', 'workers'), pin_memory=True,
-                collate_fn=lambda *args: CollateFunctions.our_collate(
-                    *args, data_keys=['img', 'imgscale', 'bboxes', 'labels'],
-                    trans_dict=self.configer.get('val', 'data_transformer')
+                drop_last=self.configer.get('data', 'drop_last'),
+                collate_fn=lambda *args: collate(
+                    *args, trans_dict=self.configer.get('val', 'data_transformer')
                 )
             )
 
@@ -175,9 +142,9 @@ class DetDataLoader(object):
                                configer=self.configer),
                 batch_size=self.configer.get('val', 'batch_size'), shuffle=False,
                 num_workers=self.configer.get('data', 'workers'), pin_memory=True,
-                collate_fn=lambda *args: CollateFunctions.our_collate(
-                    *args, data_keys=['img', 'bboxes', 'labels'],
-                    trans_dict=self.configer.get('val', 'data_transformer')
+                drop_last=self.configer.get('data', 'drop_last'),
+                collate_fn=lambda *args: collate(
+                    *args, trans_dict=self.configer.get('val', 'data_transformer')
                 )
             )
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Donny You(donnyyou@163.com)
+# Author: Donny You(youansheng@gmail.com)
 # Loss function for Pose Estimation.
 
 
@@ -13,13 +13,17 @@ import torch.nn as nn
 from torch.autograd import Variable
 
 
-class MseLoss(nn.Module):
+class OPMseLoss(nn.Module):
     def __init__(self, configer):
-        super(MseLoss, self).__init__()
+        super(OPMseLoss, self).__init__()
         self.configer = configer
-        self.mse_loss = nn.MSELoss(reduction='sum')
+        reduction = 'elementwise_mean'
+        if self.configer.exists('loss', 'params') and 'mse_reduction' in self.configer.get('loss', 'params'):
+            reduction = self.configer.get('loss', 'params')['mse_reduction']
 
-    def forward(self, inputs, targets, mask=None, weights=None):
+        self.mse_loss = nn.MSELoss(reduction=reduction)
+
+    def forward(self, inputs, *targets, mask=None, weights=None):
         loss = 0.0
         if isinstance(inputs, list):
             if weights is not None:
@@ -41,7 +45,9 @@ class MseLoss(nn.Module):
             else:
                 loss = self.mse_loss(inputs, targets)
 
-        loss = loss / targets.size(0)
+        if self.configer.get('mse_loss', 'reduction') == 'sum':
+            loss = loss / targets.size(0)
+
         return loss
 
 
@@ -66,7 +72,7 @@ class CapsuleLoss(nn.Module):
     def __init__(self, configer):
         super(CapsuleLoss, self).__init__()
         self.configer = configer
-        self.mse_loss = nn.MSELoss(size_average=self.configer.get('capsule_loss', 'size_average'))
+        self.mse_loss = nn.MSELoss(reduction=self.configer.get('capsule_loss', 'reduction'))
 
     def forward(self, inputs, targets, masks=None, is_focal=False):
         preds = torch.sqrt((inputs**2).sum(dim=1, keepdim=False))
@@ -134,48 +140,4 @@ class EmbeddingLoss(nn.Module):
             for i in range(len(loss_list)-1):
                 loss += loss_list[i+1]
 
-        return loss
-
-
-class MarginLoss(nn.Module):
-
-    def __init__(self, configer):
-        super(MarginLoss, self).__init__()
-        self.configer = configer
-        self.num_keypoints = self.configer.get('data', 'num_keypoints') + 1
-        self.l_vec = self.configer.get('capsule', 'l_vec')
-
-    def forward(self, inputs, targets, mask, size_average=True):
-        batch_size = inputs.size(0)
-        inputs = inputs.view(inputs.size(0), self.num_keypoints,
-                             self.l_vec, inputs.size(2), inputs.size(3))
-        # ||vc|| from the paper.
-        v_mag = torch.sqrt((inputs**2).sum(dim=2, keepdim=False))
-        # Calculate left and right max() terms from equation 4 in the paper.
-        zero = Variable(torch.zeros(1)).cuda()
-        m_plus = 0.9
-        m_minus = 0.1
-        max_l = torch.max(m_plus - v_mag, zero)**2
-        # max_r.max() may be much bigger.
-        max_r = torch.max(v_mag - m_minus, zero)**2
-        # This is equation 4 from the paper.
-        loss_lambda = 1.0
-        T_c = targets
-        # bugs when targets!=0 or 1
-        L_c = T_c * max_l + loss_lambda * (1.0 - T_c) * max_r
-        if size_average:
-            L_c = L_c.mean()
-
-        return L_c
-
-
-class VoteLoss(nn.Module):
-    def __init__(self, configer):
-        super(VoteLoss, self).__init__()
-        self.configer = configer
-        self.mse_loss = nn.MSELoss()
-
-    def forward(self, inputs, targets):
-        inputs = torch.sqrt((inputs ** 2).sum(dim=-1, keepdim=False))
-        loss = self.mse_loss(inputs, targets)
         return loss

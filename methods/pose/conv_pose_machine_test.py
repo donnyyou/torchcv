@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Donny You (donnyyou@163.com)
+# Author: Donny You (youansheng@gmail.com)
 # Test class for convolutional pose machine.
 
 
@@ -15,11 +15,9 @@ import torch
 from scipy.ndimage.filters import gaussian_filter
 
 from datasets.pose_data_loader import PoseDataLoader
-from datasets.tools.data_transformer import DataTransformer
 from methods.tools.blob_helper import BlobHelper
-from methods.tools.module_utilizer import ModuleUtilizer
+from methods.tools.runner_helper import RunnerHelper
 from models.pose_model_manager import PoseModelManager
-from utils.helpers.file_helper import FileHelper
 from utils.helpers.image_helper import ImageHelper
 from utils.layers.pose.heatmap_generator import HeatmapGenerator
 from utils.tools.logger import Logger as Log
@@ -33,8 +31,6 @@ class ConvPoseMachineTest(object):
         self.pose_vis = PoseVisualizer(configer)
         self.pose_model_manager = PoseModelManager(configer)
         self.pose_data_loader = PoseDataLoader(configer)
-        self.module_utilizer = ModuleUtilizer(configer)
-        self.data_transformer = DataTransformer(configer)
         self.heatmap_generator = HeatmapGenerator(configer)
         self.device = torch.device('cpu' if self.configer.get('gpu') is None else 'cuda')
         self.pose_net = None
@@ -43,7 +39,7 @@ class ConvPoseMachineTest(object):
 
     def _init_model(self):
         self.pose_net = self.pose_model_manager.multi_pose_detector()
-        self.pose_net = self.module_utilizer.load_net(self.pose_net)
+        self.pose_net = RunnerHelper.load_net(self, self.pose_net)
         self.pose_net.eval()
 
     def __test_img(self, image_path, save_path):
@@ -111,17 +107,11 @@ class ConvPoseMachineTest(object):
 
         return img_canvas
 
-    def debug(self):
-        base_dir = os.path.join(self.configer.get('project_dir'),
-                                'vis/results/pose', self.configer.get('dataset'), 'debug')
-
-        if not os.path.exists(base_dir):
-            os.makedirs(base_dir)
+    def debug(self, vis_dir):
 
         for i, data_dict in enumerate(self.pose_data_loader.get_trainloader()):
             inputs = data_dict['img']
-            input_size = [inputs.size(3), inputs.size(2)]
-            heatmap = self.heatmap_generator(data_dict['kpts'], input_size)
+            heatmap = data_dict['heatmap']
 
             for j in range(inputs.size(0)):
                 image_bgr = self.blob_helper.tensor2bgr(inputs[j])
@@ -130,41 +120,6 @@ class ConvPoseMachineTest(object):
                                      fy=self.configer.get('network', 'stride'), interpolation=cv2.INTER_CUBIC)
                 all_peaks = self.__extract_heatmap_info(heatmap_avg)
                 image_save = self.__draw_key_point(all_peaks, image_bgr)
-                cv2.imwrite(os.path.join(base_dir, '{}_{}_result.jpg'.format(i, j)), image_save)
+                cv2.imwrite(os.path.join(vis_dir, '{}_{}_result.jpg'.format(i, j)), image_save)
 
-    def test(self):
-        base_dir = os.path.join(self.configer.get('project_dir'),
-                                'val/results/pose', self.configer.get('dataset'))
-
-        test_img = self.configer.get('test_img')
-        test_dir = self.configer.get('test_dir')
-        if test_img is None and test_dir is None:
-            Log.error('test_img & test_dir not exists.')
-            exit(1)
-
-        if test_img is not None and test_dir is not None:
-            Log.error('Either test_img or test_dir.')
-            exit(1)
-
-        if test_img is not None:
-            base_dir = os.path.join(base_dir, 'test_img')
-            if not os.path.exists(base_dir):
-                os.makedirs(base_dir)
-
-            filename = test_img.rstrip().split('/')[-1]
-            save_path = os.path.join(base_dir, filename)
-            self.__test_img(test_img, save_path)
-
-        else:
-            base_dir = os.path.join(base_dir, 'test_dir',  test_dir.rstrip('/').split('/')[-1])
-            if not os.path.exists(base_dir):
-                os.makedirs(base_dir)
-
-            for filename in FileHelper.list_dir(test_dir):
-                image_path = os.path.join(test_dir, filename)
-                save_path = os.path.join(base_dir, filename)
-                if not os.path.exists(os.path.dirname(save_path)):
-                    os.makedirs(os.path.dirname(save_path))
-
-                self.__test_img(image_path, save_path)
 

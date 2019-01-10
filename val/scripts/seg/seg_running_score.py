@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#-*- coding:utf-8 -*-
-# Author: Donny You(donnyyou@163.com)
+# -*- coding:utf-8 -*-
+# Author: Donny You(youansheng@gmail.com)
 # Segmentation running score.
 
 
@@ -51,6 +51,9 @@ class SegRunningScore(object):
 
     def get_mean_iou(self):
         return self._get_scores()[3]
+
+    def get_pixel_acc(self):
+        return self._get_scores()[0]
 
     def reset(self):
         self.confusion_matrix = np.zeros((self.n_classes, self.n_classes))

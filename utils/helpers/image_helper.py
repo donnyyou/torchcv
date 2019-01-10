@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Donny You (donnyyou@163.com)
+# Author: Donny You (youansheng@gmail.com)
 # Repackage some image operations.
 
 
@@ -93,6 +93,37 @@ class ImageHelper(object):
 
         img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
         return img_rgb
+
+    @staticmethod
+    def bgr2gray(img, keepdim=False):
+        """Convert a BGR image to grayscale image.
+
+        Args:
+            img (ndarray): The input image.
+            keepdim (bool): If False (by default), then return the grayscale image
+                with 2 dims, otherwise 3 dims.
+
+        Returns:
+            ndarray: The converted grayscale image.
+        """
+        out_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        if keepdim:
+            out_img = out_img[..., None]
+        return out_img
+
+    @staticmethod
+    def gray2bgr(img):
+        """Convert a grayscale image to BGR image.
+
+        Args:
+            img (ndarray or str): The input image.
+
+        Returns:
+            ndarray: The converted BGR image.
+        """
+        img = img[..., None] if img.ndim == 2 else img
+        out_img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+        return out_img
 
     @staticmethod
     def get_cv2_bgr(img, mode='RGB'):
@@ -239,6 +270,27 @@ class ImageHelper(object):
         # canvas.tostring_argb give pixmap in ARGB mode. Roll the ALPHA channel to have it in RGBA mode
         buf = np.roll(buf, 3, axis=2)
         return buf.reshape(h, w, 4)
+
+    @staticmethod
+    def imfrombytes(content, flag='color'):
+        """Read an image from bytes.
+
+        Args:
+            content (bytes): Image bytes got from files or other streams.
+            flag (str): Same as :func:`imread`.
+
+        Returns:
+            ndarray: Loaded image array.
+        """
+        imread_flags = {
+            'color': cv2.IMREAD_COLOR,
+            'grayscale': cv2.IMREAD_GRAYSCALE,
+            'unchanged': cv2.IMREAD_UNCHANGED
+        }
+        img_np = np.fromstring(content, np.uint8)
+        flag = imread_flags[flag] if isinstance(flag, str) else flag
+        img = cv2.imdecode(img_np, flag)
+        return img
 
     @staticmethod
     def is_img(img_name):

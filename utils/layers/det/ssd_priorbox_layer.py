@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Donny You(donnyyou@163.com)
+# Author: Donny You(youansheng@gmail.com)
 # Priorbox layer for Detection.
 
 
@@ -40,15 +40,11 @@ class SSDPriorBoxLayer(object):
                 s_w = self.configer.get('gt', 'cur_anchor_sizes')[i]
                 s_h = self.configer.get('gt', 'cur_anchor_sizes')[i]
                 boxes.append((stride_offset_w, stride_offset_h, s_w, s_h))
+                extra_s = math.sqrt(self.configer.get('gt', 'cur_anchor_sizes')[i]
+                                    * self.configer.get('gt', 'cur_anchor_sizes')[i + 1])
 
-                base_s = math.sqrt(self.configer.get('gt', 'cur_anchor_sizes')[i]
-                                   * self.configer.get('gt', 'cur_anchor_sizes')[i+1])
+                boxes.append((stride_offset_w, stride_offset_h, extra_s, extra_s))
 
-                s_w, s_h = base_s, base_s
-                boxes.append((stride_offset_w, stride_offset_h, s_w, s_h))
-
-                s_w = self.configer.get('gt', 'cur_anchor_sizes')[i]
-                s_h = self.configer.get('gt', 'cur_anchor_sizes')[i]
                 for ar in self.configer.get('gt', 'aspect_ratio_list')[i]:
                     boxes.append((stride_offset_w, stride_offset_h, s_w * math.sqrt(ar), s_h / math.sqrt(ar)))
                     boxes.append((stride_offset_w, stride_offset_h, s_w / math.sqrt(ar), s_h * math.sqrt(ar)))
@@ -62,9 +58,9 @@ class SSDPriorBoxLayer(object):
                     for ar in self.configer.get('gt', 'aspect_ratio_list'):
                         boxes.append((stride_offset_w, stride_offset_h, s_w * ar, s_h / ar))
 
-                else:
-                    Log.error('Anchor Method {} not valid.'.format(self.configer.get('gt', 'anchor_method')))
-                    exit(1)
+            else:
+                Log.error('Anchor Method {} not valid.'.format(self.configer.get('gt', 'anchor_method')))
+                exit(1)
 
             anchor_bases = torch.FloatTensor(np.array(boxes))
             assert anchor_bases.size(0) == self.configer.get('gt', 'num_anchor_list')[i]

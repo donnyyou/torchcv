@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Donny You(donnyyou@163.com)
+# Author: Donny You(youansheng@gmail.com)
 # OpenPose data loader for keypoints detection.
 
 
@@ -12,8 +12,8 @@ import os
 import torch
 import numpy as np
 import torch.utils.data as data
-from PIL import Image
 
+from extensions.parallel.data_container import DataContainer
 from utils.layers.pose.heatmap_generator import HeatmapGenerator
 from utils.layers.pose.paf_generator import PafGenerator
 from utils.helpers.json_helper import JsonHelper
@@ -68,7 +68,12 @@ class OPDataLoader(data.Dataset):
         if self.img_transform is not None:
             img = self.img_transform(img)
 
-        return img, maskmap, heatmap, vecmap
+        return dict(
+            img=DataContainer(img, stack=True),
+            heatmap=DataContainer(heatmap, stack=True),
+            maskmap=DataContainer(maskmap, stack=True),
+            vecmap=DataContainer(vecmap, stack=True)
+        )
 
     def __len__(self):
 

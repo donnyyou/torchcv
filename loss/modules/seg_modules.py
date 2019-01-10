@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Donny You(donnyyou@163.com)
+# Author: Donny You(youansheng@gmail.com)
 # Loss function for Semantic Segmentation.
 
 
@@ -8,55 +8,182 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import cv2
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 
-class CrossEntropyLoss(nn.Module):
+class FSCELoss(nn.Module):
     def __init__(self, configer=None):
-        super(CrossEntropyLoss, self).__init__()
+        super(FSCELoss, self).__init__()
         self.configer = configer
         weight = None
-        if not self.configer.is_empty('cross_entropy_loss', 'weight'):
-            weight = self.configer.get('cross_entropy_loss', 'weight')
+        if self.configer.exists('loss', 'params') and 'ce_weight' in self.configer.get('loss', 'params'):
+            weight = self.configer.get('loss', 'params')['ce_weight']
             weight = torch.FloatTensor(weight).cuda()
 
         reduction = 'elementwise_mean'
-        if not self.configer.is_empty('cross_entropy_loss', 'reduction'):
-            reduction = self.configer.get("cross_entropy_loss", "reduction")
+        if self.configer.exists('loss', 'params') and 'ce_reduction' in self.configer.get('loss', 'params'):
+            reduction = self.configer.get('loss', 'params')['ce_reduction']
 
         ignore_index = -100
-        if not self.configer.is_empty('cross_entropy_loss', 'ignore_index'):
-            ignore_index = self.configer.get('cross_entropy_loss', 'ignore_index')
+        if self.configer.exists('loss', 'params') and 'ce_ignore_index' in self.configer.get('loss', 'params'):
+            ignore_index = self.configer.get('loss', 'params')['ce_ignore_index']
 
         self.ce_loss = nn.CrossEntropyLoss(weight=weight, ignore_index=ignore_index, reduction=reduction)
 
-    def forward(self, inputs, targets, weights=None):
+    def forward(self, inputs, *targets, weights=None, **kwargs):
         loss = 0.0
         if isinstance(inputs, list):
             if weights is None:
                 weights = [1.0] * len(inputs)
 
             for i in range(len(inputs)):
-                if isinstance(targets, list):
-                    loss += weights[i] * self.ce_loss(inputs[i], targets[i])
+                if len(targets) > 1:
+                    target = self._scale_target(targets[i], (inputs[i].size(2), inputs[i].size(3)))
+                    loss += weights[i] * self.ce_loss(inputs[i], target)
                 else:
-                    loss += weights[i] * self.ce_loss(inputs[i], targets)
+                    target = self._scale_target(targets[0], (inputs[i].size(2), inputs[i].size(3)))
+                    loss += weights[i] * self.ce_loss(inputs[i], target)
 
         else:
-            loss = self.ce_loss(inputs, targets)
+            target = self._scale_target(targets[0], (inputs.size(2), inputs.size(3)))
+            loss = self.ce_loss(inputs, target)
 
         return loss
 
+    @staticmethod
+    def _scale_target(targets_, scaled_size):
+        targets = targets_.clone().unsqueeze(1).float()
+        targets = F.interpolate(targets, size=scaled_size, mode='nearest')
+        return targets.squeeze(1).long()
 
-class FocalLoss(nn.Module):
+
+class FSOhemCELoss(nn.Module):
     def __init__(self, configer):
-        super(FocalLoss, self).__init__()
+        super(FSOhemCELoss, self).__init__()
+        self.configer = configer
+        self.thresh = self.configer.get('loss', 'params')['ohem_thresh']
+        self.min_kept = max(1, self.configer.get('loss', 'params')['ohem_minkeep'])
+        weight = None
+        if self.configer.exists('loss', 'params') and 'ce_weight' in self.configer.get('loss', 'params'):
+            weight = self.configer.get('loss', 'params')['ce_weight']
+            weight = torch.FloatTensor(weight).cuda()
+
+        self.reduction = 'elementwise_mean'
+        if self.configer.exists('loss', 'params') and 'ce_reduction' in self.configer.get('loss', 'params'):
+            self.reduction = self.configer.get('loss', 'params')['ce_reduction']
+
+        ignore_index = -100
+        if self.configer.exists('loss', 'params') and 'ce_ignore_index' in self.configer.get('loss', 'params'):
+            ignore_index = self.configer.get('loss', 'params')['ce_ignore_index']
+
+        self.ignore_label = ignore_index
+        self.ce_loss = nn.CrossEntropyLoss(weight=weight, ignore_index=ignore_index, reduction='none')
+
+    def forward(self, predict, target, **kwargs):
+        """
+            Args:
+                predict:(n, c, h, w)
+                target:(n, h, w)
+                weight (Tensor, optional): a manual rescaling weight given to each class.
+                                           If given, has to be a Tensor of size "nclasses"
+        """
+        prob_out = F.softmax(predict, dim=1)
+        tmp_target = target.clone()
+        tmp_target[tmp_target < 0] = 0
+        prob = prob_out.gather(1, tmp_target.unsqueeze(1))
+        mask = target.contiguous().view(-1,).ge(0)
+        sort_prob, sort_indices = prob.contiguous().view(-1,)[mask].contiguous().sort()
+        min_threshold = sort_prob[self.min_kept]
+        threshold = max(min_threshold, self.thresh)
+        loss_matirx = self.ce_loss(predict, target).contiguous().view(-1,)
+        sort_loss_matirx = loss_matirx[mask][sort_indices]
+        select_loss_matrix = sort_loss_matirx[sort_prob < threshold]
+        if self.reduction == 'sum':
+            return select_loss_matrix.sum()
+        elif self.reduction == 'elementwise_mean':
+            return select_loss_matrix.mean()
+        else:
+            raise NotImplementedError('Reduction Error!')
+
+
+class FSAuxOhemCELoss(nn.Module):
+    def __init__(self, configer=None):
+        super(FSAuxOhemCELoss, self).__init__()
+        self.configer = configer
+        self.ce_loss = FSCELoss(self.configer)
+        self.ohem_ce_loss = FSOhemCELoss(self.configer)
+
+    def forward(self, inputs, targets, **kwargs):
+        aux_out, seg_out = inputs
+        seg_loss = self.ohem_ce_loss(seg_out, targets)
+        aux_targets = self._scale_target(targets, (aux_out.size(2), aux_out.size(3)))
+        aux_loss = self.ce_loss(aux_out, aux_targets)
+        loss = self.configer.get('network', 'loss_weights')['seg_loss'] * seg_loss
+        loss = loss + self.configer.get('network', 'loss_weights')['aux_loss'] * aux_loss
+        return loss
+
+    @staticmethod
+    def _scale_target(targets_, scaled_size):
+        targets = targets_.clone().unsqueeze(1).float()
+        targets = F.interpolate(targets, size=scaled_size, mode='nearest')
+        return targets.squeeze(1).long()
+
+
+class FSAuxCELoss(nn.Module):
+    def __init__(self, configer=None):
+        super(FSAuxCELoss, self).__init__()
+        self.configer = configer
+        self.ce_loss = FSCELoss(self.configer)
+
+    def forward(self, inputs, targets, **kwargs):
+        aux_out, seg_out = inputs
+        seg_loss = self.ce_loss(seg_out, targets)
+        aux_targets = self._scale_target(targets, (aux_out.size(2), aux_out.size(3)))
+        aux_loss = self.ce_loss(aux_out, aux_targets)
+        loss = self.configer.get('network', 'loss_weights')['seg_loss'] * seg_loss
+        loss = loss + self.configer.get('network', 'loss_weights')['aux_loss'] * aux_loss
+        return loss
+
+    @staticmethod
+    def _scale_target(targets_, scaled_size):
+        targets = targets_.clone().unsqueeze(1).float()
+        targets = F.interpolate(targets, size=scaled_size, mode='nearest')
+        return targets.squeeze(1).long()
+
+
+class FSAuxEncCELoss(nn.Module):
+    def __init__(self, configer=None):
+        super(FSAuxEncCELoss, self).__init__()
+        self.configer = configer
+        self.ce_loss = FSCELoss(self.configer)
+        self.se_loss = FSEncLoss(self.configer)
+
+    def forward(self, outputs, targets, **kwargs):
+        aux_out, enc_out, seg_out = outputs
+        seg_loss = self.ce_loss(seg_out, targets)
+        aux_targets = self._scale_target(targets, (aux_out.size(2), aux_out.size(3)))
+        aux_loss = self.ce_loss(aux_out, aux_targets)
+        loss = self.configer.get('network', 'loss_weights')['seg_loss'] * seg_loss
+        loss = loss + self.configer.get('network', 'loss_weights')['aux_loss'] * aux_loss
+        enc_loss = self.enc_loss(enc_out, aux_targets, self.configer.get('network', 'enc_size'))
+        loss = loss + self.configer.get('network', 'loss_weights')['enc_loss'] * enc_loss
+        return loss
+
+    @staticmethod
+    def _scale_target(targets_, scaled_size):
+        targets = targets_.clone().unsqueeze(1).float()
+        targets = F.interpolate(targets, size=scaled_size, mode='nearest')
+        return targets.squeeze(1).long()
+
+
+class FSFocalLoss(nn.Module):
+    def __init__(self, configer):
+        super(FSFocalLoss, self).__init__()
         self.configer = configer
 
-    def forward(self, output, target):
+    def forward(self, output, target, **kwargs):
         self.y = self.configer.get('focal_loss', 'y')
         P = F.softmax(output)
         f_out = F.log_softmax(output)
@@ -69,26 +196,22 @@ class FocalLoss(nn.Module):
         return loss
 
 
-class SegEncodeLoss(nn.Module):
+class FSEncLoss(nn.Module):
     def __init__(self, configer):
-        super(SegEncodeLoss, self).__init__()
+        super(FSEncLoss, self).__init__()
         self.configer = configer
         weight = None
-        if not self.configer.is_empty('seg_encode_loss', 'weight'):
-            weight = self.configer.get('seg_encode_loss', 'weight')
+        if self.configer.exists('loss', 'params') and 'enc_weight' in self.configer.get('loss', 'params'):
+            weight = self.configer.get('loss', 'params')['enc_weight']
             weight = torch.FloatTensor(weight).cuda()
 
-        size_average = True
-        if not self.configer.is_empty('seg_encode_loss', 'size_average'):
-            size_average = self.configer.get('seg_encode_loss', 'size_average')
+        reduction = 'elementwise_mean'
+        if self.configer.exists('loss', 'params') and 'enc_reduction' in self.configer.get('loss', 'params'):
+            reduction = self.configer.get('loss', 'params')['enc_reduction']
 
-        reduce = True
-        if not self.configer.is_empty('seg_encode_loss', 'reduce'):
-            reduce = self.configer.get("seg_encode_loss", "reduce")
+        self.bce_loss = nn.BCELoss(weight, reduction=reduction)
 
-        self.bce_loss = nn.BCELoss(weight, size_average, reduce=reduce)
-
-    def forward(self, preds, targets, grid_size=None):
+    def forward(self, preds, targets, grid_size=None, **kwargs):
         if len(targets.size()) == 2:
             return self.bce_loss(F.sigmoid(preds), targets)
 
@@ -123,13 +246,13 @@ class SegEncodeLoss(nn.Module):
         return tvect
 
 
-class EmbeddingLoss(nn.Module):
+class FSEmbedLoss(nn.Module):
     def __init__(self, configer):
-        super(EmbeddingLoss, self).__init__()
+        super(FSEmbedLoss, self).__init__()
         self.num_classes = configer.get('data', 'num_classes')
         self.cosine_loss = nn.CosineEmbeddingLoss()
 
-    def forward(self, inputs, targets):
+    def forward(self, inputs, targets, **kwargs):
         inputs = inputs.transpose(0, 1)
         center_array = torch.zeros((self.num_classes, inputs.size()[0]), requires_grad=True).cuda()
         sim_loss = torch.Tensor([0.0]).cuda()
@@ -194,63 +317,6 @@ class EmbeddingLoss(nn.Module):
         return targets_cp
 
 
-class FCNSegLoss(nn.Module):
-    def __init__(self, configer):
-        super(FCNSegLoss, self).__init__()
-        self.configer = configer
-        self.ce_loss = CrossEntropyLoss(self.configer)
-        self.se_loss = SegEncodeLoss(self.configer)
-        self.focal_loss = FocalLoss(self.configer)
-        self.embed_loss = EmbeddingLoss(self.configer)
-
-    def forward(self, outputs, targets):
-        if self.configer.get('network', 'model_name') == 'grid_encnet':
-            seg_out, se_out, aux_out = outputs
-            seg_loss = self.ce_loss(seg_out, targets)
-            aux_targets = self._scale_target(targets, (aux_out.size(2), aux_out.size(3)))
-            aux_loss = self.ce_loss(aux_out, aux_targets)
-            loss = self.configer.get('network', 'loss_weights')['seg_loss'] * seg_loss
-            loss = loss + self.configer.get('network', 'loss_weights')['aux_loss'] * aux_loss
-            se_loss = self.se_loss(se_out, aux_targets, self.configer.get('network', 'enc_size'))
-            loss = loss + self.configer.get('network', 'loss_weights')['se_loss'] * se_loss
-
-            return loss
-
-        elif self.configer.get('network', 'model_name') == 'pspnet':
-            seg_out, aux_out = outputs
-            seg_loss = self.ce_loss(seg_out, targets)
-            aux_targets = self._scale_target(targets, (aux_out.size(2), aux_out.size(3)))
-            aux_loss = self.ce_loss(aux_out, aux_targets)
-            loss = self.configer.get('network', 'loss_weights')['seg_loss'] * seg_loss
-            loss = loss + self.configer.get('network', 'loss_weights')['aux_loss'] * aux_loss
-            return loss
-
-        elif self.configer.get('network', 'model_name') == 'embednet':
-            seg_out, aux_out, embed_out = outputs
-            seg_loss = self.ce_loss(seg_out, targets)
-            aux_targets = self._scale_target(targets, (aux_out.size(2), aux_out.size(3)))
-            aux_loss = self.ce_loss(aux_out, aux_targets)
-            loss = self.configer.get('network', 'loss_weights')['seg_loss'] * seg_loss
-            loss = loss + self.configer.get('network', 'loss_weights')['aux_loss'] * aux_loss
-            embed_loss = self.embed_loss(embed_out, aux_targets)
-            loss = loss + self.configer.get('network', 'loss_weights')['embed_loss'] * embed_loss
-            return loss
-
-        else:
-            return self.ce_loss(outputs, targets)
-
-    @staticmethod
-    def _scale_target(targets_, scaled_size):
-        targets = targets_.clone().unsqueeze(1).float()
-        targets = F.interpolate(targets, size=scaled_size, mode='nearest')
-        return targets.squeeze(1).long()
-
-
-
-
-
 if __name__ == "__main__":
     inputs = torch.ones((3, 5, 6, 6)).cuda()
     targets = torch.ones((3, 6, 6)).cuda()
-    embed_loss = EmbeddingLoss(2)
-    print(embed_loss(inputs, targets))

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Donny You(donnyyou@163.com)
+# Author: Donny You(youansheng@gmail.com)
 # Select Cls Model for pose detection.
 
 
@@ -8,16 +8,16 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from models.cls.img.mlp import MLP
-from models.cls.img.vgg import VGG19
-from models.cls.img.shufflenetv2 import ShuffleNetV2, ShuffleResNetV2
-from models.cls.img.mobilenet import MobileNet
+from models.cls.nets.mobilenet import MobileNet
+from models.cls.nets.vgg import VGG
+from models.cls.nets.shufflenetv2 import ShuffleNetV2, ShuffleResNetV2
 from utils.tools.logger import Logger as Log
 
-
 CLS_MODEL_DICT = {
-    'mlp': MLP,
-    'vgg19': VGG19,
+    'vgg11': VGG,
+    'vgg13': VGG,
+    'vgg16': VGG,
+    'vgg19': VGG,
     'mobilenet': MobileNet,
     'shufflenetv2': ShuffleNetV2,
     'shufflenetv2-50': ShuffleResNetV2,

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Donny You(donnyyou@163.com)
+# Author: Donny You(youansheng@gmail.com)
 # CityScape Seg data generator.
 
 
@@ -126,7 +126,7 @@ class CityscapeSegGenerator(object):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--coarse', type=str2bool, nargs='?', const=True,
+    parser.add_argument('--coarse', type=str2bool, nargs='?', default=False,
                         dest='coarse', help='Whether is the coarse data.')
     parser.add_argument('--save_dir', default=None, type=str,
                         dest='save_dir', help='The directory to save the data.')

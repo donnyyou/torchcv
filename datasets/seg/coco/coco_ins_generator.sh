@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # -*- coding:utf-8 -*-
-# Author: Donny You(donnyyou@163.com)
+# Author: Donny You(youansheng@gmail.com)
 # Generate train & val data.
 
 

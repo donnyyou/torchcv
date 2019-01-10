@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Donny You (donnyyou@163.com)
+# Author: Donny You (youansheng@gmail.com)
 # Class Definition for Semantic Segmentation.
 
 
@@ -10,14 +10,11 @@ from __future__ import print_function
 
 import time
 import torch
-import torch.backends.cudnn as cudnn
 
 from datasets.seg_data_loader import SegDataLoader
-from datasets.tools.data_transformer import DataTransformer
-from extensions.layers.syncbn.parallel import DataParallelCriterion
-from loss.seg_loss_manager import SegLossManager
-from methods.tools.module_utilizer import ModuleUtilizer
-from methods.tools.optim_scheduler import OptimScheduler
+from loss.loss_manager import LossManager
+from methods.tools.runner_helper import RunnerHelper
+from methods.tools.trainer import Trainer
 from models.seg_model_manager import SegModelManager
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
@@ -37,38 +34,36 @@ class FCNSegmentor(object):
         self.val_losses = AverageMeter()
         self.seg_running_score = SegRunningScore(configer)
         self.seg_visualizer = SegVisualizer(configer)
-        self.seg_loss_manager = SegLossManager(configer)
-        self.module_utilizer = ModuleUtilizer(configer)
-        self.data_transformer = DataTransformer(configer)
+        self.seg_loss_manager = LossManager(configer)
         self.seg_model_manager = SegModelManager(configer)
         self.seg_data_loader = SegDataLoader(configer)
-        self.optim_scheduler = OptimScheduler(configer)
 
         self.seg_net = None
         self.train_loader = None
         self.val_loader = None
         self.optimizer = None
         self.scheduler = None
+        self.runner_state = dict()
 
         self._init_model()
 
     def _init_model(self):
         self.seg_net = self.seg_model_manager.semantic_segmentor()
-        self.seg_net = self.module_utilizer.load_net(self.seg_net)
+        self.seg_net = RunnerHelper.load_net(self, self.seg_net)
 
-        self.optimizer, self.scheduler = self.optim_scheduler.init_optimizer(self._get_parameters())
+        self.optimizer, self.scheduler = Trainer.init(self, self._get_parameters())
 
         self.train_loader = self.seg_data_loader.get_trainloader()
         self.val_loader = self.seg_data_loader.get_valloader()
 
-        self.pixel_loss = self.seg_loss_manager.get_seg_loss('fcn_seg_loss')
+        self.pixel_loss = self.seg_loss_manager.get_seg_loss()
 
     def _get_parameters(self):
         lr_1 = []
         lr_10 = []
         params_dict = dict(self.seg_net.named_parameters())
         for key, value in params_dict.items():
-            if 'backbone.' not in key:
+            if 'backbone' not in key:
                 lr_10.append(value)
             else:
                 lr_1.append(value)
@@ -77,7 +72,7 @@ class FCNSegmentor(object):
                   {'params': lr_10, 'lr': self.configer.get('lr', 'base_lr') * 1.0}]
         return params
 
-    def __train(self):
+    def train(self):
         """
           Train function of every epoch during train phase.
         """
@@ -85,22 +80,20 @@ class FCNSegmentor(object):
         start_time = time.time()
         # Adjust the learning rate after every epoch.
 
-        self.scheduler.step(self.configer.get('epoch'))
-
         for i, data_dict in enumerate(self.train_loader):
+            Trainer.update(self, backbone_list=(0, ))
             inputs = data_dict['img']
             targets = data_dict['labelmap']
             self.data_time.update(time.time() - start_time)
             # Change the data type.
 
-            inputs, targets = self.module_utilizer.to_device(inputs, targets)
+            inputs, targets = RunnerHelper.to_device(self, inputs, targets)
 
             # Forward pass.
             outputs = self.seg_net(inputs)
-            outputs = self.module_utilizer.gather(outputs)
-
+            # outputs = self.module_utilizer.gather(outputs)
             # Compute the loss of the train batch & backward.
-            loss = self.pixel_loss(outputs, targets)
+            loss = self.pixel_loss(outputs, targets, gathered=self.configer.get('network', 'gathered'))
             self.train_losses.update(loss.item(), inputs.size(0))
             self.optimizer.zero_grad()
             loss.backward()
@@ -109,7 +102,7 @@ class FCNSegmentor(object):
             # Update the vars of the train phase.
             self.batch_time.update(time.time() - start_time)
             start_time = time.time()
-            self.configer.plus_one('iters')
+            self.runner_state['iters'] += 1
 
             # Print the log info & reset the states.
             if self.configer.get('iters') % self.configer.get('solver', 'display_iter') == 0:
@@ -117,22 +110,25 @@ class FCNSegmentor(object):
                          'Time {batch_time.sum:.3f}s / {2}iters, ({batch_time.avg:.3f})\t'
                          'Data load {data_time.sum:.3f}s / {2}iters, ({data_time.avg:3f})\n'
                          'Learning rate = {3}\tLoss = {loss.val:.8f} (ave = {loss.avg:.8f})\n'.format(
-                         self.configer.get('epoch'), self.configer.get('iters'),
+                         self.runner_state['epoch'], self.runner_state['iters'],
                          self.configer.get('solver', 'display_iter'),
-                         self.scheduler.get_lr(), batch_time=self.batch_time,
+                         RunnerHelper.get_lr(self.optimizer), batch_time=self.batch_time,
                          data_time=self.data_time, loss=self.train_losses))
                 self.batch_time.reset()
                 self.data_time.reset()
                 self.train_losses.reset()
 
+            if self.configer.get('lr', 'metric') == 'iters' \
+                    and self.runner_state['iters'] == self.configer.get('solver', 'max_iters'):
+                break
+
             # Check to val the current model.
-            if self.val_loader is not None and \
-               self.configer.get('iters') % self.configer.get('solver', 'test_interval') == 0:
-                self.__val()
+            if self.runner_state['iters'] % self.configer.get('solver', 'test_interval') == 0:
+                self.val()
 
-        self.configer.plus_one('epoch')
+        self.runner_state['epoch'] += 1
 
-    def __val(self):
+    def val(self):
         """
           Validation function during the train phase.
         """
@@ -145,13 +141,12 @@ class FCNSegmentor(object):
 
             with torch.no_grad():
                 # Change the data type.
-                inputs, targets = self.module_utilizer.to_device(inputs, targets)
+                inputs, targets = RunnerHelper.to_device(self, inputs, targets)
                 # Forward pass.
                 outputs = self.seg_net(inputs)
-                outputs = self.module_utilizer.gather(outputs)
                 # Compute the loss of the val batch.
-                loss = self.pixel_loss(outputs, targets)
-
+                loss = self.pixel_loss(outputs, targets, gathered=self.configer.get('network', 'gathered'))
+                outputs = RunnerHelper.gather(self, outputs)
                 pred = outputs[0]
 
             self.val_losses.update(loss.item(), inputs.size(0))
@@ -161,10 +156,11 @@ class FCNSegmentor(object):
             self.batch_time.update(time.time() - start_time)
             start_time = time.time()
 
-        self.configer.update_value(['performance'], self.seg_running_score.get_mean_iou())
-        self.configer.update_value(['val_loss'], self.val_losses.avg)
-        self.module_utilizer.save_net(self.seg_net, save_mode='performance')
-        self.module_utilizer.save_net(self.seg_net, save_mode='val_loss')
+        self.runner_state['performance'] = self.seg_running_score.get_mean_iou()
+        self.runner_state['val_loss'] = self.val_losses.avg
+        RunnerHelper.save_net(self, self.seg_net,
+                              performance=self.seg_running_score.get_mean_iou(),
+                              val_loss=self.val_losses.avg)
 
         # Print the log info & reset the states.
         Log.info(
@@ -172,20 +168,11 @@ class FCNSegmentor(object):
             'Loss {loss.avg:.8f}\n'.format(
                 batch_time=self.batch_time, loss=self.val_losses))
         Log.info('Mean IOU: {}\n'.format(self.seg_running_score.get_mean_iou()))
+        Log.info('Pixel ACC: {}\n'.format(self.seg_running_score.get_pixel_acc()))
         self.batch_time.reset()
         self.val_losses.reset()
         self.seg_running_score.reset()
         self.seg_net.train()
-
-    def train(self):
-        cudnn.benchmark = True
-        if self.configer.get('network', 'resume') is not None and self.configer.get('network', 'resume_val'):
-            self.__val()
-
-        while self.configer.get('epoch') < self.configer.get('solver', 'max_epoch'):
-            self.__train()
-            if self.configer.get('epoch') == self.configer.get('solver', 'max_epoch'):
-                break
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Donny You(donnyyou@163.com)
+# Author: Donny You(youansheng@gmail.com)
 # Data loader for Image Classification.
 
 
@@ -10,9 +10,9 @@ from __future__ import print_function
 
 import json
 import os
-
 import torch.utils.data as data
 
+from extensions.parallel.data_container import DataContainer
 from utils.helpers.image_helper import ImageHelper
 
 
@@ -37,7 +37,10 @@ class FCDataLoader(data.Dataset):
         if self.img_transform is not None:
             img = self.img_transform(img)
 
-        return img, label
+        return dict(
+            img=DataContainer(img, stack=True),
+            label=DataContainer(label, stack=True),
+        )
 
     def __len__(self):
 

@@ -27,7 +27,8 @@
     },
     "test": {
       "input_size": [368, 368],
-      "scale_search": [0.5, 1.0, 1.5, 2.0]
+      "scale_search": [0.5, 1.0, 1.5, 2.0, 2.5],
+      "fit_stride": 8
     },
     "train_trans": {
       "trans_seq": ["random_hflip", "random_resize", "random_rotate", "random_crop"],
@@ -39,7 +40,8 @@
         "ratio": 1.0,
         "scale_range": [0.5, 1.1],
         "method": "focus",
-        "target_size": [368, 368]
+        "target_size": [368, 368],
+        "aspect_range": [0.9, 1.1]
       },
       "random_rotate": {
         "ratio": 0.5,
@@ -77,7 +79,6 @@
       "limb_seq": [[3,4], [4,5], [6,7], [7,8], [9,10], [10,11], [12,13], [13,14],
                    [1,2], [2,9], [2,12], [2,3], [2,6], [1,16], [1,15], [16,18], [15,17],
                    [3,17], [6,18]],
-      "map_index": [6, 10, 7, 8, 11, 12, 0, 1, 2, 3, 4, 5, 14, 15, 17, 16, 18, 9, 13],
       "mini_tree":[11, 12, 0, 1, 2, 3, 9, 4, 5, 10, 6, 7, 8, 14, 16, 13, 15, 17, 18],
       "color_list": [[255, 0, 0], [255, 85, 0], [255, 170, 0], [255, 255, 0], [170, 255, 0],
                      [85, 255, 0], [0, 255, 0], [0, 255, 85], [0, 255, 170], [0, 255, 255],
@@ -95,7 +96,7 @@
     "checkpoints": {
       "checkpoints_name": "op_vgg19_coco_pose",
       "checkpoints_dir": "checkpoints/pose/coco",
-      "save_iters": 5000
+      "save_iters": 3000
     },
 
     "network":{
@@ -114,17 +115,33 @@
       "rewrite": true
     },
     "lr": {
-      "base_lr": 0.00004,
-      "lr_policy": "step",
+      "metric": "epoch",
+      "is_warm": true,
+      "warm": {
+        "warm_epoch": 5,
+        "freeze_backbone": true
+      },
+      "base_lr": 0.0001,
+      "lr_policy": "plateau",
       "step": {
         "gamma": 0.333,
-        "step_size": 30
+        "step_size": 50
+      },
+      "plateau": {
+        "mode": "min",
+        "factor": 0.8,
+        "patience": 5,
+        "threshold": 0.0001,
+        "thre_mode": "rel",
+        "cooldown": 3,
+        "min_lr": 0,
+        "eps": 1e-08
       }
     },
     "solver": {
       "display_iter": 100,
-      "test_interval": 1000,
-      "max_epoch": 150
+      "test_interval": 3000,
+      "max_epoch": 200
     },
     "optim": {
       "optim_method": "sgd",
@@ -135,7 +152,8 @@
       },
       "sgd":{
         "weight_decay": 0.0005,
-        "momentum": 0.9
+        "momentum": 0.9,
+        "nesterov": false
       }
     },
     "heatmap": {
@@ -143,14 +161,20 @@
       "theta": 1.0,
       "method": "gaussian"
     },
-    "vis": {
+    "res": {
       "num_threshold":3,
-      "avg_threshold": 0.10,
-      "stick_width": 4,
-      "circle_radius": 4,
+      "avg_threshold": 0.2,
+      "vis_stick_width": 4,
+      "vis_circle_radius": 4,
       "part_threshold": 0.1,
-      "limb_threshold": 0.2,
+      "limb_threshold": 0.05,
       "mid_point_num": 10,
       "limb_pos_ratio": 0.8
+    },
+    "loss": {
+      "loss_type": "op_mse_loss",
+      "params": {
+        "mse_reduction": "sum"
+      }
     }
 }

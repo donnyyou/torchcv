@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Donny You (donnyyou@163.com)
+# Author: Donny You (youansheng@gmail.com)
 # Class Definition for Single Shot Detector.
 
 
@@ -13,12 +13,10 @@ import cv2
 import torch
 
 from datasets.det_data_loader import DetDataLoader
-from datasets.tools.data_transformer import DataTransformer
 from methods.tools.blob_helper import BlobHelper
-from methods.tools.module_utilizer import ModuleUtilizer
+from methods.tools.runner_helper import RunnerHelper
 from models.det_model_manager import DetModelManager
 from utils.helpers.det_helper import DetHelper
-from utils.helpers.file_helper import FileHelper
 from utils.helpers.image_helper import ImageHelper
 from utils.helpers.json_helper import JsonHelper
 from utils.layers.det.yolo_detection_layer import YOLODetectionLayer
@@ -37,8 +35,6 @@ class YOLOv3Test(object):
         self.det_model_manager = DetModelManager(configer)
         self.det_data_loader = DetDataLoader(configer)
         self.yolo_target_generator = YOLOTargetGenerator(configer)
-        self.module_utilizer = ModuleUtilizer(configer)
-        self.data_transformer = DataTransformer(configer)
         self.yolo_detection_layer = YOLODetectionLayer(configer)
         self.device = torch.device('cpu' if self.configer.get('gpu') is None else 'cuda')
         self.det_net = None
@@ -47,7 +43,7 @@ class YOLOv3Test(object):
 
     def _init_model(self):
         self.det_net = self.det_model_manager.object_detector()
-        self.det_net = self.module_utilizer.load_net(self.det_net)
+        self.det_net = RunnerHelper.load_net(self, self.det_net)
         self.det_net.eval()
 
     def __test_img(self, image_path, json_path, raw_path, vis_path):
@@ -69,7 +65,7 @@ class YOLOv3Test(object):
 
         image_canvas = self.det_parser.draw_bboxes(ori_img_bgr.copy(),
                                                    json_dict,
-                                                   conf_threshold=self.configer.get('vis', 'conf_threshold'))
+                                                   conf_threshold=self.configer.get('res', 'vis_conf_thre'))
         ImageHelper.save(ori_img_bgr, raw_path)
         ImageHelper.save(image_canvas, vis_path)
 
@@ -78,7 +74,7 @@ class YOLOv3Test(object):
         return json_dict
 
     @staticmethod
-    def decode(batch_pred_bboxes, configer):
+    def decode(batch_pred_bboxes, configer, input_size):
         box_corner = batch_pred_bboxes.new(batch_pred_bboxes.shape)
         box_corner[:, :, 0] = batch_pred_bboxes[:, :, 0] - batch_pred_bboxes[:, :, 2] / 2
         box_corner[:, :, 1] = batch_pred_bboxes[:, :, 1] - batch_pred_bboxes[:, :, 3] / 2
@@ -90,11 +86,12 @@ class YOLOv3Test(object):
         box_corner[:, :, 1::2] = box_corner[:, :, 1::2].clamp(min=0, max=1.0)
 
         batch_pred_bboxes[:, :, :4] = box_corner[:, :, :4]
-
+        batch_pred_bboxes[:, :, 0::2] *= input_size[0]
+        batch_pred_bboxes[:, :, 1::2] *= input_size[1]
         output = [None for _ in range(len(batch_pred_bboxes))]
         for image_i, image_pred in enumerate(batch_pred_bboxes):
             # Filter out confidence scores below threshold
-            conf_mask = (image_pred[:, 4] > configer.get('vis', 'obj_threshold')).squeeze()
+            conf_mask = (image_pred[:, 4] > configer.get('res', 'val_conf_thre')).squeeze()
             image_pred = image_pred[conf_mask]
             # If none are remaining => process next image
             if image_pred.numel() == 0:
@@ -105,27 +102,23 @@ class YOLOv3Test(object):
                 image_pred[:, 5:5 + configer.get('data', 'num_classes')], 1, keepdim=True)
             # Detections ordered as (x1, y1, x2, y2, obj_conf, class_conf, class_pred)
             detections = torch.cat((image_pred[:, :5], class_conf.float(), class_pred.float()), 1)
-            keep_index = DetHelper.cls_nms(image_pred[:, :4],
-                                           scores=image_pred[:, 4],
-                                           labels=class_pred.squeeze(1),
-                                           nms_threshold=configer.get('nms', 'max_threshold'),
-                                           iou_mode=configer.get('nms', 'mode'), nms_mode='cython_nms')
-
-            output[image_i] = detections[keep_index]
+            output[image_i] = DetHelper.cls_nms(detections,
+                                                labels=class_pred.squeeze(1),
+                                                max_threshold=configer.get('nms', 'max_threshold'))
 
         return output
 
-    def __get_info_tree(self, detections, image_raw):
+    def __get_info_tree(self, detections, image_raw, input_size):
         height, width, _ = image_raw.shape
         json_dict = dict()
         object_list = list()
         if detections is not None:
             for x1, y1, x2, y2, conf, cls_conf, cls_pred in detections:
                 object_dict = dict()
-                xmin = x1.cpu().item() * width
-                ymin = y1.cpu().item() * height
-                xmax = x2.cpu().item() * width
-                ymax = y2.cpu().item() * height
+                xmin = x1.cpu().item() / input_size[0] * width
+                ymin = y1.cpu().item() / input_size[1] * height
+                xmax = x2.cpu().item() / input_size[0] * width
+                ymax = y2.cpu().item() / input_size[1] * height
                 object_dict['bbox'] = [xmin, ymin, xmax, ymax]
                 object_dict['label'] = int(cls_pred.cpu().item())
                 object_dict['score'] = float('%.2f' % conf.cpu().item())
@@ -136,55 +129,7 @@ class YOLOv3Test(object):
 
         return json_dict
 
-    def test(self):
-        base_dir = os.path.join(self.configer.get('project_dir'),
-                                'val/results/det', self.configer.get('dataset'))
-
-        test_img = self.configer.get('test_img')
-        test_dir = self.configer.get('test_dir')
-        if test_img is None and test_dir is None:
-            Log.error('test_img & test_dir not exists.')
-            exit(1)
-
-        if test_img is not None and test_dir is not None:
-            Log.error('Either test_img or test_dir.')
-            exit(1)
-
-        if test_img is not None:
-            base_dir = os.path.join(base_dir, 'test_img')
-            filename = test_img.rstrip().split('/')[-1]
-            json_path = os.path.join(base_dir, 'json', '{}.json'.format('.'.join(filename.split('.')[:-1])))
-            raw_path = os.path.join(base_dir, 'raw', filename)
-            vis_path = os.path.join(base_dir, 'vis', '{}_vis.png'.format('.'.join(filename.split('.')[:-1])))
-            FileHelper.make_dirs(json_path, is_file=True)
-            FileHelper.make_dirs(raw_path, is_file=True)
-            FileHelper.make_dirs(vis_path, is_file=True)
-
-            self.__test_img(test_img, json_path, raw_path, vis_path)
-
-        else:
-            base_dir = os.path.join(base_dir, 'test_dir', test_dir.rstrip('/').split('/')[-1])
-            if not os.path.exists(base_dir):
-                os.makedirs(base_dir)
-
-            for filename in FileHelper.list_dir(test_dir):
-                image_path = os.path.join(test_dir, filename)
-                json_path = os.path.join(base_dir, 'json', '{}.json'.format('.'.join(filename.split('.')[:-1])))
-                raw_path = os.path.join(base_dir, 'raw', filename)
-                vis_path = os.path.join(base_dir, 'vis', '{}_vis.png'.format('.'.join(filename.split('.')[:-1])))
-                FileHelper.make_dirs(json_path, is_file=True)
-                FileHelper.make_dirs(raw_path, is_file=True)
-                FileHelper.make_dirs(vis_path, is_file=True)
-
-                self.__test_img(image_path, json_path, raw_path, vis_path)
-
-    def debug(self):
-        base_dir = os.path.join(self.configer.get('project_dir'),
-                                'vis/results/det', self.configer.get('dataset'), 'debug')
-
-        if not os.path.exists(base_dir):
-            os.makedirs(base_dir)
-
+    def debug(self, vis_dir):
         count = 0
         for i, data_dict in enumerate(self.det_data_loader.get_trainloader()):
             inputs = data_dict['img']
@@ -212,7 +157,7 @@ class YOLOv3Test(object):
 
                 be_c += num_c
 
-            batch_detections = self.decode(self.yolo_detection_layer(output_list)[2], self.configer)
+            batch_detections = self.decode(self.yolo_detection_layer(output_list)[2], self.configer, input_size)
 
             for j in range(inputs.size(0)):
                 count = count + 1
@@ -221,12 +166,12 @@ class YOLOv3Test(object):
 
                 ori_img_bgr = self.blob_helper.tensor2bgr(inputs[j])
 
-                json_dict = self.__get_info_tree(batch_detections[j], ori_img_bgr)
+                json_dict = self.__get_info_tree(batch_detections[j], ori_img_bgr, input_size)
 
                 image_canvas = self.det_parser.draw_bboxes(ori_img_bgr.copy(),
                                                            json_dict,
                                                            conf_threshold=self.configer.get('vis', 'obj_threshold'))
 
-                cv2.imwrite(os.path.join(base_dir, '{}_{}_vis.png'.format(i, j)), image_canvas)
+                cv2.imwrite(os.path.join(vis_dir, '{}_{}_vis.png'.format(i, j)), image_canvas)
                 cv2.imshow('main', image_canvas)
                 cv2.waitKey()

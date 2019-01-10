@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Donny You (donnyyou@163.com)
+# Author: Donny You (youansheng@gmail.com)
 # Class Definition for Yolo v3.
 
 
@@ -10,13 +10,12 @@ from __future__ import print_function
 
 import time
 import torch
-import torch.backends.cudnn as cudnn
 
 from datasets.det_data_loader import DetDataLoader
-from loss.det_loss_manager import DetLossManager
+from loss.loss_manager import LossManager
 from methods.det.yolov3_test import YOLOv3Test
-from methods.tools.module_utilizer import ModuleUtilizer
-from methods.tools.optim_scheduler import OptimScheduler
+from methods.tools.runner_helper import RunnerHelper
+from methods.tools.trainer import Trainer
 from models.det_model_manager import DetModelManager
 from utils.layers.det.yolo_detection_layer import YOLODetectionLayer
 from utils.layers.det.yolo_target_generator import YOLOTargetGenerator
@@ -37,40 +36,39 @@ class YOLOv3(object):
         self.train_losses = AverageMeter()
         self.val_losses = AverageMeter()
         self.det_visualizer = DetVisualizer(configer)
-        self.det_loss_manager = DetLossManager(configer)
+        self.det_loss_manager = LossManager(configer)
         self.det_model_manager = DetModelManager(configer)
         self.det_data_loader = DetDataLoader(configer)
         self.yolo_detection_layer = YOLODetectionLayer(configer)
         self.yolo_target_generator = YOLOTargetGenerator(configer)
         self.det_running_score = DetRunningScore(configer)
-        self.module_utilizer = ModuleUtilizer(configer)
-        self.optim_scheduler = OptimScheduler(configer)
 
         self.det_net = None
         self.train_loader = None
         self.val_loader = None
         self.optimizer = None
         self.scheduler = None
+        self.runner_state = dict()
 
         self._init_model()
 
     def _init_model(self):
         self.det_net = self.det_model_manager.object_detector()
-        self.det_net = self.module_utilizer.load_net(self.det_net)
+        self.det_net = RunnerHelper.load_net(self, self.det_net)
 
-        self.optimizer, self.scheduler = self.optim_scheduler.init_optimizer(self._get_parameters())
+        self.optimizer, self.scheduler = Trainer.init(self, self._get_parameters())
 
         self.train_loader = self.det_data_loader.get_trainloader()
         self.val_loader = self.det_data_loader.get_valloader()
 
-        self.det_loss = self.det_loss_manager.get_det_loss('yolov3_loss')
+        self.det_loss = self.det_loss_manager.get_det_loss()
 
     def _get_parameters(self):
         lr_1 = []
         lr_10 = []
         params_dict = dict(self.det_net.named_parameters())
         for key, value in params_dict.items():
-            if 'backbone.' not in key:
+            if 'backbone' not in key:
                 lr_10.append(value)
             else:
                 lr_1.append(value)
@@ -80,37 +78,18 @@ class YOLOv3(object):
 
         return params
 
-    def warm_lr(self, batch_len):
-        """Sets the learning rate
-        # Adapted from PyTorch Imagenet example:
-        # https://github.com/pytorch/examples/blob/master/imagenet/main.py
-        """
-        warm_iters = self.configer.get('lr', 'warm')['warm_epoch'] * batch_len
-        if self.configer.get('iters') < warm_iters:
-            lr_ratio = (self.configer.get('iters') + 1) / warm_iters
-
-            base_lr_list = self.scheduler.get_lr()
-            for param_group, base_lr in zip(self.optimizer.param_groups, base_lr_list):
-                param_group['lr'] = base_lr * lr_ratio
-
-            if self.configer.get('iters') % self.configer.get('solver', 'display_iter') == 0:
-                Log.info('LR: {}'.format([param_group['lr'] for param_group in self.optimizer.param_groups]))
-
-    def __train(self):
+    def train(self):
         """
           Train function of every epoch during train phase.
         """
         self.det_net.train()
         start_time = time.time()
         # Adjust the learning rate after every epoch.
-        self.configer.plus_one('epoch')
-        self.scheduler.step(self.configer.get('epoch'))
+        self.runner_state['epoch'] += 1
 
         # data_tuple: (inputs, heatmap, maskmap, vecmap)
         for i, data_dict in enumerate(self.train_loader):
-            if not self.configer.is_empty('lr', 'is_warm') and self.configer.get('lr', 'is_warm'):
-                self.warm_lr(len(self.train_loader))
-
+            Trainer.update(self, backbone_list=(0, ))
             inputs = data_dict['img']
             batch_gt_bboxes = data_dict['bboxes']
             batch_gt_labels = data_dict['labels']
@@ -118,14 +97,14 @@ class YOLOv3(object):
 
             self.data_time.update(time.time() - start_time)
             # Change the data type.
-            inputs = self.module_utilizer.to_device(inputs)
+            inputs = RunnerHelper.to_device(self, inputs)
 
             # Forward pass.
             feat_list, predictions, _ = self.det_net(inputs)
 
             targets, objmask, noobjmask = self.yolo_target_generator(feat_list, batch_gt_bboxes,
                                                                      batch_gt_labels, input_size)
-            targets, objmask, noobjmask = self.module_utilizer.to_device(targets, objmask, noobjmask)
+            targets, objmask, noobjmask = RunnerHelper.to_device(self, targets, objmask, noobjmask)
             # Compute the loss of the train batch & backward.
             loss = self.det_loss(predictions, targets, objmask, noobjmask)
 
@@ -138,7 +117,7 @@ class YOLOv3(object):
             # Update the vars of the train phase.
             self.batch_time.update(time.time() - start_time)
             start_time = time.time()
-            self.configer.plus_one('iters')
+            self.runner_state['iters'] += 1
 
             # Print the log info & reset the states.
             if self.configer.get('iters') % self.configer.get('solver', 'display_iter') == 0:
@@ -146,20 +125,23 @@ class YOLOv3(object):
                          'Time {batch_time.sum:.3f}s / {2}iters, ({batch_time.avg:.3f})\t'
                          'Data load {data_time.sum:.3f}s / {2}iters, ({data_time.avg:3f})\n'
                          'Learning rate = {3}\tLoss = {loss.val:.8f} (ave = {loss.avg:.8f})\n'.format(
-                    self.configer.get('epoch'), self.configer.get('iters'),
+                    self.runner_state['epoch'], self.runner_state['iters'],
                     self.configer.get('solver', 'display_iter'),
-                    self.scheduler.get_lr(), batch_time=self.batch_time,
+                    RunnerHelper.get_lr(self.optimizer), batch_time=self.batch_time,
                     data_time=self.data_time, loss=self.train_losses))
                 self.batch_time.reset()
                 self.data_time.reset()
                 self.train_losses.reset()
 
-            # Check to val the current model.
-            if self.val_loader is not None and \
-               (self.configer.get('iters')) % self.configer.get('solver', 'test_interval') == 0:
-                self.__val()
+            if self.configer.get('lr', 'metric') == 'iters' \
+                    and self.runner_state['iters'] == self.configer.get('solver', 'max_iters'):
+                break
 
-    def __val(self):
+            # Check to val the current model.
+            if self.runner_state['iters'] % self.configer.get('solver', 'test_interval') == 0:
+                self.val()
+
+    def val(self):
         """
           Validation function during the train phase.
         """
@@ -172,18 +154,18 @@ class YOLOv3(object):
                 batch_gt_labels = data_dict['labels']
                 input_size = [inputs.size(3), inputs.size(2)]
                 # Forward pass.
-                inputs = self.module_utilizer.to_device(inputs)
+                inputs = RunnerHelper.to_device(self, inputs)
                 feat_list, predictions, detections = self.det_net(inputs)
 
                 targets, objmask, noobjmask = self.yolo_target_generator(feat_list, batch_gt_bboxes,
                                                                          batch_gt_labels, input_size)
-                targets, objmask, noobjmask = self.module_utilizer.to_device(targets, objmask, noobjmask)
+                targets, objmask, noobjmask = RunnerHelper.to_device(self, targets, objmask, noobjmask)
 
                 # Compute the loss of the val batch.
                 loss = self.det_loss(predictions, targets, objmask, noobjmask)
                 self.val_losses.update(loss.item(), inputs.size(0))
 
-                batch_detections = YOLOv3Test.decode(detections, self.configer)
+                batch_detections = YOLOv3Test.decode(detections, self.configer, input_size)
                 batch_pred_bboxes = self.__get_object_list(batch_detections, input_size)
 
                 self.det_running_score.update(batch_pred_bboxes, batch_gt_bboxes, batch_gt_labels)
@@ -192,7 +174,7 @@ class YOLOv3(object):
                 self.batch_time.update(time.time() - start_time)
                 start_time = time.time()
 
-            self.module_utilizer.save_net(self.det_net, save_mode='iters')
+            RunnerHelper.save_net(self, self.det_net, iters=self.runner_state['iters'])
             # Print the log info & reset the states.
             Log.info(
                 'Test Time {batch_time.sum:.3f}s, ({batch_time.avg:.3f})\t'
@@ -210,10 +192,10 @@ class YOLOv3(object):
             object_list = list()
             if detections is not None:
                 for x1, y1, x2, y2, conf, cls_conf, cls_pred in detections:
-                    xmin = x1.cpu().item() * input_size[0]
-                    ymin = y1.cpu().item() * input_size[1]
-                    xmax = x2.cpu().item() * input_size[0]
-                    ymax = y2.cpu().item() * input_size[1]
+                    xmin = x1.cpu().item()
+                    ymin = y1.cpu().item()
+                    xmax = x2.cpu().item()
+                    ymax = y2.cpu().item()
                     cf = conf.cpu().item()
                     cls_pred = cls_pred.cpu().item()
                     object_list.append([xmin, ymin, xmax, ymax, int(cls_pred), float('%.2f' % cf)])
@@ -221,16 +203,6 @@ class YOLOv3(object):
             batch_pred_bboxes.append(object_list)
 
         return batch_pred_bboxes
-
-    def train(self):
-        cudnn.benchmark = True
-        if self.configer.get('network', 'resume') is not None and self.configer.get('network', 'resume_val'):
-            self.__val()
-
-        while self.configer.get('epoch') < self.configer.get('solver', 'max_epoch'):
-            self.__train()
-            if self.configer.get('epoch') == self.configer.get('solver', 'max_epoch'):
-                break
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Donny You(donnyyou@163.com)
+# Author: Donny You(youansheng@gmail.com)
 # Parse label file of segmentation.
 
 
@@ -62,8 +62,9 @@ class SegParser(object):
     def colorize(self, label_map, image_canvas=None):
         height, width = label_map.shape
         color_dst = np.zeros((height, width, 3), dtype=np.uint8)
+        color_list = self.configer.get('details', 'color_list')
         for i in range(self.configer.get('data', 'num_classes')):
-            color_dst[label_map == i] = self.configer.get('details', 'color_list')[i]
+            color_dst[label_map == i] = color_list[i % len(color_list)]
 
         color_img_rgb = np.array(color_dst, dtype=np.uint8)
         color_img_bgr = cv2.cvtColor(color_img_rgb, cv2.COLOR_RGB2BGR)

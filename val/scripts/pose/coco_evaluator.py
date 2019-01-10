@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#-*- coding:utf-8 -*-
-# Author: Donny You(donnyyou@163.com)
+# -*- coding:utf-8 -*-
+# Author: Donny You(youansheng@gmail.com)
 # Evaluation of coco.
 
 

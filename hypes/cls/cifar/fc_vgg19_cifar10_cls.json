@@ -1,0 +1,118 @@
+{
+    "dataset": "cifar10",
+    "task": "cls",
+    "method": "fc_classifier",
+    "data": {
+      "num_classes": 10,
+      "data_dir": "~/DataSet/Cifar10",
+      "image_tool": "pil",
+      "input_mode": "RGB",
+      "workers": 8
+    },
+    "train": {
+      "batch_size": 128,
+      "data_transformer": {
+        "size_mode": "fix_size",
+        "input_size": [32, 32],
+        "align_method": "only_pad"
+      }
+    },
+    "val": {
+      "batch_size": 100,
+      "data_transformer": {
+        "size_mode": "fix_size",
+        "input_size": [32, 32],
+        "align_method": "only_pad"
+      }
+    },
+    "test": {
+    },
+    "train_trans": {
+      "trans_seq": ["random_hflip", "padding", "random_crop"],
+      "random_hflip": {
+        "ratio": 0.5,
+        "swap_pair": []
+      },
+      "padding": {
+        "ratio": 1.0,
+        "pad": [4, 4, 4, 4],
+        "allow_outside_center": false
+      },
+      "random_crop": {
+        "ratio": 1.0,
+        "crop_size": [32, 32],
+        "method": "random",
+        "allow_outside_center": false
+      }
+    },
+    "val_trans": {
+      "trans_seq": []
+    },
+    "normalize": {
+      "div_value": 255,
+      "mean_value": [124, 116, 104],
+      "mean": [0.485, 0.456, 0.406],
+      "std": [0.229, 0.224, 0.225]
+    },
+    "details": {
+      "name_seq": ["plane", "car", "bird", "cat", "deer", "dog", "frog", "horse", "ship", "truck"],
+      "color_list": [[255, 0, 0], [255, 85, 0], [255, 170, 0], [255, 255, 0], [170, 255, 0],
+                     [85, 255, 0], [0, 255, 0], [0, 255, 85], [0, 255, 170], [0, 255, 255],
+                     [0, 170, 255], [0, 85, 255], [0, 0, 255], [85, 0, 255], [170, 0, 255],
+                     [255, 0, 255], [255, 0, 170], [255, 0, 85], [255, 0, 170], [255, 0, 85]]
+    },
+    "checkpoints": {
+      "checkpoints_name": "fc_vgg19_cifar10_cls",
+      "checkpoints_dir": "checkpoints/cls/cifar10",
+      "save_iters": 2000
+    },
+
+    "network":{
+      "model_name": "vgg19",
+      "pooled_size": [1, 1]
+    },
+    "logging": {
+      "logfile_level": "info",
+      "stdout_level": "info",
+      "log_file": "./log/cls/fc_vgg19_cifar10_cls.log",
+      "log_format": "%(asctime)s %(levelname)-7s %(message)s",
+      "rewrite": true
+    },
+    "lr": {
+      "metric": "epoch",
+      "base_lr": 0.1,
+      "lr_policy": "multistep",
+      "step": {
+        "gamma": 0.1,
+        "step_size": 30
+      },
+      "multistep": {
+        "gamma": 0.1,
+        "stepvalue": [150, 250, 350]
+      }
+    },
+    "solver": {
+      "display_iter": 20,
+      "test_interval": 100,
+      "max_epoch": 360
+    },
+    "optim": {
+      "optim_method": "sgd",
+      "adam": {
+        "betas": [0.9, 0.999],
+        "eps": 1e-08,
+        "weight_decay": 0.0001
+      },
+      "sgd":{
+        "weight_decay": 0.00004,
+        "momentum": 0.9,
+        "nesterov": false
+      }
+    },
+    "loss": {
+      "loss_type": "fc_ce_loss",
+      "params": {
+        "ce_reduction": "elementwise_mean"
+      }
+    }
+}

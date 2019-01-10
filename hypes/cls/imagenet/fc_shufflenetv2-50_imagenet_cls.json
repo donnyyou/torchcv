@@ -34,7 +34,9 @@
         "swap_pair": []
       },
       "random_resized_crop": {
-        "crop_size": [224, 224]
+        "crop_size": [224, 224],
+        "scale_range": [0.08, 1.0],
+        "aspect_range": [0.75, 1.33]
       },
       "resize": {
         "min_side_length": 256
@@ -94,6 +96,7 @@
       "rewrite": true
     },
     "lr": {
+      "metric": "epoch",
       "base_lr": 0.5,
       "lr_policy": "step",
       "step": {
@@ -115,10 +118,14 @@
       },
       "sgd":{
         "weight_decay": 0.00004,
-        "momentum": 0.9
+        "momentum": 0.9,
+        "nesterov": false
       }
     },
-    "cross_entropy_loss": {
-      "reduction": "elementwise_mean"
+    "loss": {
+      "loss_type": "fc_ce_loss",
+      "params": {
+        "ce_reduction": "elementwise_mean"
+      }
     }
 }

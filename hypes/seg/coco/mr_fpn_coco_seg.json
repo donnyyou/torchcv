@@ -1,115 +1,71 @@
 {
     "dataset": "coco",
-    "task": "seg",
-    "method": "mask_rcnn",
+    "task": "det",
+    "method": "faster_rcnn",
     "data": {
-      "train_batch_size": 2,
-      "val_batch_size": 6,
-      "train_input_size": [720, 720],
-      "val_input_size": [720, 720],
       "num_classes": 81,
-      "data_dir": "~/DataSet/COCO_INS",
-      "image_tool": "cv2",
-      "input_mode": "BGR",
+      "data_dir": "~/DataSet/COCO_INS_2014",
+      "image_tool": "pil",
+      "input_mode": "RGB",
       "keep_difficult": false,
       "workers": 8
     },
+    "train": {
+      "batch_size": 16,
+      "data_transformer": {
+        "size_mode": "max_size",
+        "align_method": "only_pad"
+      }
+    },
+    "val": {
+      "batch_size": 16,
+      "use_07_metric": false,
+      "data_transformer": {
+        "size_mode": "max_size",
+        "align_method": "only_pad"
+      }
+    },
     "test": {
-      "test_input_size": [720, 720],
-      "scale_search": [0.5, 1.0, 1.5, 2.0],
-      "mirror": true
+      "resize_bound": [800, 1333],
+      "scale_search": [1.0]
     },
     "train_trans": {
-      "saturation_ratio": 0.0,
-      "hue_ratio": 0.0,
-      "perm_ratio": 0.0,
-      "contrast_ratio": 0.0,
-      "pad_ratio":0.0,
-      "brightness_ratio": 0.0,
-      "blur_ratio": 0.0,
-      "hsv_ratio": 0.0,
-      "flip_ratio": 0.5,
-      "resize_ratio": 1.0,
-      "rotate_ratio": 0.0,
-      "crop_ratio": 1.0,
-      "trans_seq": ["random_hflip", "random_resize", "random_crop", "resize"]
-    },
-    "val_trans": {
-      "saturation_ratio": 0.0,
-      "hue_ratio": 0.0,
-      "perm_ratio": 0.0,
-      "contrast_ratio": 0.0,
-      "pad_ratio":0.0,
-      "brightness_ratio": 0.0,
-      "blur_ratio": 0.0,
-      "hsv_ratio": 0.0,
-      "flip_ratio": 0.0,
-      "resize_ratio": 1.0,
-      "rotate_ratio": 0.0,
-      "crop_ratio": 1.0,
-      "trans_seq": ["random_hflip", "random_resize", "random_crop", "resize"]
-    },
-    "trans_params": {
-      "random_saturation": {
-        "lower": 0.5,
-        "upper": 1.5
-      },
-      "random_hue": {
-        "delta": 18
-      },
-      "random_contrast": {
-        "lower": 0.5,
-        "upper": 1.5
-      },
-      "random_pad": {
-        "up_scale_range": [1.0, 4.0]
-      },
-      "random_brightness": {
-        "shift_value": 32
-      },
-      "random_gauss_blur": {
-        "max_blur": 4
-      },
-      "random_hsv": {
-        "h_range": [0.7, 1.3],
-        "s_range": [0.7, 1.3],
-        "v_range": [0.7, 1.3]
-      },
+      "trans_seq": ["random_hflip", "random_resize"],
       "random_hflip": {
+        "ratio": 0.5,
         "swap_pair": []
       },
       "random_resize": {
+        "ratio": 1.0,
         "method": "bound",
-        "resize_bound": [600, 1000]
-      },
-      "random_rotate": {
-        "rotate_degree": 40
-      },
-      "random_crop":{
-        "crop_size": [720, 720],
-        "method": "random",
-        "grid":[3, 2],
-        "center_jitter": 20,
-        "allow_outside_center": false
-      },
-      "resize": {
-        "scale_resize": false,
-        "keep_scale": true
-      },
-      "normalize": {
-        "div_value": 1.0,
-        "mean_value": [123, 116, 103],
-        "mean": [122.7717, 115.9465, 102.9801],
-        "std": [1.0, 1.0, 1.0]
+        "resize_bound": [800, 1333],
+        "aspect_range": [0.9, 1.1]
       }
     },
+    "val_trans": {
+      "trans_seq": ["random_resize"],
+      "random_resize": {
+        "ratio": 1.0,
+        "method": "bound",
+        "resize_bound": [800, 1333],
+        "aspect_range": [0.9, 1.1]
+      }
+    },
+    "normalize": {
+      "div_value": 1.0,
+      "mean_value": [123, 116, 103],
+      "mean": [122.7717, 115.9465, 102.9801],
+      "std": [1.0, 1.0, 1.0]
+    },
     "rpn": {
+      "head_index_list": [0, 0, 0, 0, 0],
       "anchor_sizes_list": [
-        [[128, 128], [256, 256], [512, 512]]
+        [[32, 32]], [[64, 64]], [[128, 128]], [[256, 256]], [[512, 512]]
       ],
-      "num_anchor_list": [9],
-      "aspect_ratio_list": [[2]],
+      "num_anchor_list": [3, 3, 3, 3, 3],
+      "aspect_ratio_list": [[2], [2], [2], [2], [2]],
       "stride_list": [16],
+      "num_feature_list": [512, 512, 512, 512, 512],
       "nms_threshold": 0.7,
       "min_size": 16,
       "loss": {
@@ -126,6 +82,7 @@
     },
     "roi": {
       "method": "roialign",
+      "class_agnostic": false,
       "pooled_width": 7,
       "pooled_height": 7,
       "spatial_stride": 16,
@@ -174,14 +131,13 @@
                    "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush"]
     },
     "checkpoints": {
-      "checkpoints_name": "mr_fpn_coco_seg",
-      "checkpoints_dir": "checkpoints/seg/coco",
+      "checkpoints_name": "fpn_resnet101_coco_det",
+      "checkpoints_dir": "checkpoints/det/coco",
       "save_iters": 5000
     },
     "network":{
       "backbone": "resnet101",
-      "model_name": "mask_rcnn",
-      "use_drop": false,
+      "model_name": "fpn_rcnn",
       "loss_weights": {
         "rpn_loss": 1.0,
         "roi_loss": 1.0
@@ -190,22 +146,30 @@
     "logging": {
       "logfile_level": "info",
       "stdout_level": "info",
-      "log_file": "./log/det/mr_fpn_coco_seg.log",
+      "log_file": "./log/det/fpn_resnet101_coco_det.log",
       "log_format": "%(asctime)s %(levelname)-7s %(message)s",
       "rewrite": true
     },
     "lr": {
-      "base_lr": 0.001,
-      "lr_policy": "step",
+      "is_warm": true,
+      "warm": {
+        "warm_epoch": 0.1
+      },
+      "base_lr": 0.01,
+      "lr_policy": "multistep",
       "step": {
         "gamma": 0.1,
-        "step_size": 15
+        "step_size": 9
+      },
+      "multistep": {
+        "gamma": 0.1,
+        "stepvalue": [9, 12]
       }
     },
     "solver": {
       "display_iter": 100,
       "test_interval": 5000,
-      "max_epoch": 20
+      "max_epoch": 13
     },
     "optim": {
       "optim_method": "sgd",
@@ -215,16 +179,18 @@
         "weight_decay": 0.0001
       },
       "sgd":{
-        "weight_decay": 0.0005,
-        "momentum": 0.9
+        "weight_decay": 0.0001,
+        "momentum": 0.9,
+        "nesterov": false
       }
     },
     "nms": {
       "mode": "union",
       "overlap_threshold": 0.3
     },
-    "vis": {
-      "conf_threshold": 0.05
+    "res": {
+      "val_conf_thre": 0.05,
+      "vis_conf_thre": 0.5
     },
     "fr_loss": {
       "rpn_sigma": 3.0,

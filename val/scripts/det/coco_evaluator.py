@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
-# Author: Donny You(donnyyou@163.com)
+# Author: Donny You(youansheng@gmail.com)
 # Evaluation of coco.
 
 
@@ -30,6 +30,7 @@ class CocoEvaluator(object):
         for json_file in os.listdir(json_dir):
             json_path = os.path.join(json_dir, json_file)
             shotname, extensions = os.path.splitext(json_file)
+            shotname = shotname.rstrip().split('_')[-1]
             try:
                 img_id = int(shotname)
             except ValueError:
@@ -42,7 +43,7 @@ class CocoEvaluator(object):
                 for object in info_tree['objects']:
                     object_dict = dict()
                     object_dict['image_id'] = img_id
-                    object_dict['category_id'] = int(self.configer.get('data', 'coco_cat_seq')[object['label']])
+                    object_dict['category_id'] = int(self.configer.get('details', 'coco_cat_seq')[object['label']])
                     object_dict['score'] = object['score']
                     object_dict['bbox'] = [object['bbox'][0], object['bbox'][1],
                                            object['bbox'][2] - object['bbox'][0],

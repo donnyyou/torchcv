@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Donny You(donnyyou@163.com)
+# Author: Donny You(youansheng@gmail.com)
 
 
 from __future__ import absolute_import
@@ -11,6 +11,7 @@ import os
 import numpy as np
 from torch.utils import data
 
+from extensions.parallel.data_container import DataContainer
 from utils.helpers.image_helper import ImageHelper
 from utils.helpers.json_helper import JsonHelper
 from utils.tools.logger import Logger as Log
@@ -40,7 +41,12 @@ class MRDataLoader(data.Dataset):
         if self.img_transform is not None:
             img = self.img_transform(img)
 
-        return img, bboxes, labels, polygons
+        return dict(
+            img=DataContainer(img, stack=True),
+            bboxes=DataContainer(bboxes, stack=False),
+            labels=DataContainer(labels, stack=False),
+            polygons=DataContainer(polygons, stack=False, cpu_only=True)
+        )
 
     def __read_json_file(self, json_file):
         """

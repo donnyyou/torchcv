@@ -1,0 +1,141 @@
+{
+    "dataset": "ade20k",
+    "task": "seg",
+    "method": "fcn_segmentor",
+    "data": {
+      "image_tool": "pil",
+      "input_mode": "RGB",
+      "num_classes": 150,
+      "reduce_zero_label": true,
+      "data_dir": "~/DataSet/ADE20K",
+      "workers": 8
+    },
+   "train": {
+      "batch_size": 16,
+      "data_transformer": {
+        "size_mode": "fix_size",
+        "input_size": [480, 480],
+        "align_method": "only_pad"
+      }
+    },
+    "val": {
+      "batch_size": 16,
+      "data_transformer": {
+        "size_mode": "fix_size",
+        "input_size": [480, 480],
+        "align_method": "only_pad"
+      }
+    },
+    "test": {
+      "mode": "ss_test",
+      "min_side_length": 520,
+      "fit_stride": 8,
+      "scale_search": [1.0]
+    },
+    "train_trans": {
+      "trans_seq": ["random_hflip", "resize", "random_resize", "random_crop", "random_brightness"],
+      "random_brightness": {
+        "ratio": 1.0,
+        "shift_value": 10
+      },
+      "resize": {
+        "min_side_length": 520
+      },
+      "random_hflip": {
+        "ratio": 0.5,
+        "swap_pair": []
+      },
+      "random_resize": {
+        "ratio": 1.0,
+        "method": "random",
+        "scale_range": [0.5, 2.0],
+        "aspect_range": [0.9, 1.1]
+      },
+      "random_rotate": {
+        "ratio": 0.5,
+        "rotate_degree": 10
+      },
+      "random_crop":{
+        "ratio": 1.0,
+        "crop_size": [480, 480],
+        "method": "random",
+        "allow_outside_center": false
+      }
+    },
+    "val_trans": {
+      "trans_seq": ["resize", "random_crop"],
+      "resize": {
+        "min_side_length": 520
+      },
+      "random_crop": {
+        "ratio": 1.0,
+        "crop_size": [480, 480],
+        "method": "center",
+        "allow_outside_center": false
+      }
+    },
+    "normalize": {
+      "div_value": 255,
+      "mean_value": [124, 116, 104],
+      "mean": [0.485, 0.456, 0.406],
+      "std": [0.229, 0.224, 0.225]
+    },
+    "details": {
+      "color_list": [[128, 64, 128], [244, 35, 232], [70, 70, 70], [102, 102, 156], [190, 153, 153],
+                     [153, 153, 153], [250, 170, 30], [220, 220, 0], [107, 142, 35], [152, 251, 152],
+                     [70, 130, 180], [220, 20, 60], [255, 0, 0], [0, 0, 142], [0, 0, 70], [0, 60, 100],
+                     [0, 80, 100], [0, 0, 230], [119, 11, 32]]
+    },
+    "checkpoints": {
+      "checkpoints_name": "fs_pspnet_ade20k_seg",
+      "checkpoints_dir": "./checkpoints/seg/ade20k",
+      "save_iters": 2000
+    },
+    "network":{
+      "backbone": "resnet101_dilated8",
+      "model_name": "pspnet",
+      "bn_type": "syncbn",
+      "stride": 8,
+      "loss_weights": {
+        "aux_loss": 0.4,
+        "seg_loss": 1.0
+      }
+    },
+    "logging": {
+      "logfile_level": "info",
+      "stdout_level": "info",
+      "log_file": "./log/seg/fs_pspnet_ade20k_seg.log",
+      "log_format": "%(asctime)s %(levelname)-7s %(message)s",
+      "rewrite": true
+    },
+    "lr": {
+      "base_lr": 0.01,
+      "lr_policy": "lambda_poly",
+      "step": {
+        "gamma": 0.5,
+        "step_size": 100
+      }
+    },
+    "solver": {
+      "display_iter": 20,
+      "test_interval": 300,
+      "max_epoch": 120
+    },
+    "optim": {
+      "optim_method": "sgd",
+      "adam": {
+        "betas": [0.9, 0.999],
+        "eps": 1e-08,
+        "weight_decay": 0.0001
+      },
+      "sgd":{
+        "weight_decay": 0.0001,
+        "momentum": 0.9,
+        "nesterov": false
+      }
+    },
+    "cross_entropy_loss": {
+      "reduction": "elementwise_mean",
+      "ignore_index": -1
+    }
+}

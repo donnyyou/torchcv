@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Donny You(donnyyou@163.com)
+# Author: Donny You(youansheng@gmail.com)
 # Faster R-CNN data loader
 
 
@@ -13,6 +13,7 @@ import torch
 import numpy as np
 import torch.utils.data as data
 
+from extensions.parallel.data_container import DataContainer
 from utils.helpers.json_helper import JsonHelper
 from utils.helpers.image_helper import ImageHelper
 from utils.tools.logger import Logger as Log
@@ -39,17 +40,25 @@ class FRDataLoader(data.Dataset):
         if self.aug_transform is not None:
             img, bboxes, labels = self.aug_transform(img, bboxes=bboxes, labels=labels)
 
+        img_scale = ImageHelper.get_size(img)[0] / img_size[0]
+
         labels = torch.from_numpy(labels).long()
         bboxes = torch.from_numpy(bboxes).float()
 
-        scale1 = 600 / min(img_size)
-        scale2 = 1000 / max(img_size)
-        scale = min(scale1, scale2)
-
+        meta = dict(
+            ori_img_size=img_size,
+            aug_img_size=ImageHelper.get_size(img),
+            img_scale=img_scale,
+        )
         if self.img_transform is not None:
             img = self.img_transform(img)
 
-        return img, scale, bboxes, labels
+        return dict(
+            img=DataContainer(img, stack=True),
+            bboxes=DataContainer(bboxes, stack=False),
+            labels=DataContainer(labels, stack=False),
+            meta=DataContainer(meta, stack=False, cpu_only=True)
+        )
 
     def __len__(self):
 

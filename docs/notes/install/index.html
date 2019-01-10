@@ -1,0 +1,287 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en-US" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en-US" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>PyTorchCV Installation &mdash; PyTorchCV 0.1 beta documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex/" />
+    <link rel="search" title="Search" href="../../search/" />
+    <link rel="prev" title="Docs for PyTorch-Based CV Framework." href="../../" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../" class="icon icon-home"> PyTorchCV
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Notes</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">PyTorchCV Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#simple-installation">Simple Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#cuda-and-nvidia">Cuda and Nvidia</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pytorch-installation">PyTorch Installation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../">PyTorchCV</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../">Docs</a> &raquo;</li>
+        
+      <li>PyTorchCV Installation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/notes/install.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pytorchcv-installation">
+<h1>PyTorchCV Installation<a class="headerlink" href="#pytorchcv-installation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
+<p>This framework is developed with PyTorch, keeping up with the newest version. All the environments you need to install are listed below.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span>
+<span class="n">cython</span>
+<span class="n">numpy</span>
+<span class="n">cffi</span>
+<span class="n">opencv</span><span class="o">-</span><span class="n">python</span>
+<span class="n">scipy</span>
+<span class="n">easydict</span>
+<span class="n">matplotlib</span>
+<span class="n">Pillow</span>
+<span class="n">pyyaml</span>
+<span class="n">visdom</span>
+<span class="n">bs4</span>
+<span class="n">html5lib</span>
+<span class="n">ninja</span>
+<span class="n">torch</span>
+<span class="n">torchvision</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="simple-installation">
+<h2>Simple Installation<a class="headerlink" href="#simple-installation" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="cuda-and-nvidia">
+<h3>Cuda and Nvidia<a class="headerlink" href="#cuda-and-nvidia" title="Permalink to this headline">¶</a></h3>
+<p>Before installing PyTorch, we need to set up a proper environment with the following steps:</p>
+<ol class="arabic simple">
+<li>Check if your computer has an NVIDIA graphics card and install the GPU version of PyTorch in order to take
+advantages of its powerful capability of computation acceleration, or, just install CPU version if not so.
+To be more specific, the CUDA Computing Capability of your graphics card that you can
+check on <a class="reference external" href="https://developer.nvidia.com/cuda-gpus/">NVIDIA official website</a> should not be less than 3.0.</li>
+<li>Install the Python environment. Anaconda is recommended. It is an open-source release version of Python that
+provides a full environment for scientific computation including common libraries such as NumPy and SciPy, or
+you can choose your favorite ones of course.<ul>
+<li>You can choose to add the directory of Anaconda into the PATH (though not recommended by the installation
+wizard). It enables you to call all Anaconda commands under command line or Powershell directly. You can
+always call them under the Anaconda Prompt started in the Start Menu.</li>
+</ul>
+</li>
+<li>(For GPU version installation) Install the NVIDIA graphics driver, <a class="reference external" href="https://developer.nvidia.com/cuda-downloads">CUDA Toolkit</a> and <a class="reference external" href="https://developer.nvidia.com/cudnn">cuDNN</a>. You should note that:<ul>
+<li>We recommend you install it through the following order: 1) latest NVIDIA graphics driver 2) CUDA (without
+selecting the built-in driver when installing since the built-in ones may be out-of-date) 3) cuDNN;</li>
+<li>There is a quite simple way to install drivers in Ubuntu. First click “Software &amp; Updates” in “System Setting”,
+then toggle on “Using NVIDIA binary driver” option in “Additional Drivers” and click “Apply Changes” for system
+to install NVIDIA drivers automatically, otherwise, it won’t be peaceful for NVIDIA installation on Linux. You
+should disable the built-in graphics driver Nouveau and Secure Boot function of the motherboard. You can seek a
+more detailed guidance <a class="reference external" href="https://www.linkedin.com/pulse/installing-nvidia-cuda-80-ubuntu-1604-linux-gpu-new-victor/">here</a>;</li>
+<li>The version of CUDA Toolkit and cuDNN must agree with the requirements on TensorFlow official website which does not always require the latest version.</li>
+<li>You have to copy the downloaded files of cuDNN to the installation directory of CUDA to complete cuDNN installation.</li>
+</ul>
+</li>
+</ol>
+</div>
+<div class="section" id="pytorch-installation">
+<h3>PyTorch Installation<a class="headerlink" href="#pytorch-installation" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="n">requirements</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="../../" class="btn btn-neutral" title="Docs for PyTorch-Based CV Framework." accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Donny You.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.1 beta',
+            LANGUAGE:'en_US',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -118,10 +118,11 @@
       "rewrite": true
     },
     "lr": {
+      "metric": "epoch",
       "is_warm": true,
       "warm": {
-        "warm_lr": 0.000001,
-        "warm_epoch": 6
+        "warm_epoch": 6,
+        "freeze_backbone": false
       },
       "base_lr": 0.004,
       "lr_policy": "multistep",
@@ -148,16 +149,22 @@
       },
       "sgd":{
         "weight_decay": 0.0005,
-        "momentum": 0.9
+        "momentum": 0.9,
+        "nesterov": false
       }
     },
     "nms": {
       "mode": "union",
-      "max_threshold": 0.45
+      "max_threshold": 0.45,
+      "pre_nms": 1000
     },
-    "vis": {
-      "conf_threshold": 0.01,
+    "res": {
+      "val_conf_thre": 0.01,
+      "vis_conf_thre": 0.5,
       "max_per_image": 200,
       "cls_keep_num": 50
+    },
+    "loss": {
+      "loss_type": "ssd_multibox_loss"
     }
 }

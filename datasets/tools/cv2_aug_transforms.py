@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Donny You (donnyyou@163.com)
+# Author: Donny You (youansheng@gmail.com)
 
 
 from __future__ import absolute_import
@@ -64,22 +64,15 @@ class RandomPad(object):
         left_pad = random.randint(0, pad_width)  # pad_left
         up_pad = random.randint(0, pad_height)  # pad_up
 
-        expand_image = np.zeros((h, w, channels), dtype=img.dtype)
-        expand_image[:, :, :] = self.mean
-        expand_image[int(up_pad):int(up_pad + height), int(left_pad):int(left_pad + width)] = img
-        img = expand_image
-
+        img = cv2.copyMakeBorder(img, up_pad, pad_height-up_pad, left_pad, pad_width-left_pad,
+                                 cv2.BORDER_CONSTANT, value=self.mean)
         if labelmap is not None:
-            expand_labelmap = np.zeros((h, w), dtype=labelmap.dtype)
-            expand_labelmap[:, :] = 255
-            expand_labelmap[int(up_pad):int(up_pad + height), int(left_pad):int(left_pad + width)] = labelmap
-            labelmap = expand_labelmap
+            labelmap = cv2.copyMakeBorder(labelmap, up_pad, pad_height - up_pad, left_pad, pad_width - left_pad,
+                                          cv2.BORDER_CONSTANT, value=255)
 
         if maskmap is not None:
-            expand_maskmap = np.zeros((h, w), dtype=maskmap.dtype)
-            expand_maskmap[:, :] = 1
-            expand_maskmap[int(up_pad):int(up_pad + height), int(left_pad):int(left_pad + width)] = maskmap
-            maskmap = expand_maskmap
+            maskmap = cv2.copyMakeBorder(maskmap, up_pad, pad_height - up_pad, left_pad, pad_width - left_pad,
+                                         cv2.BORDER_CONSTANT, value=1)
 
         if polygons is not None:
             for object_id in range(len(polygons)):
@@ -98,7 +91,7 @@ class RandomPad(object):
         return img, labelmap, maskmap, kpts, bboxes, labels, polygons
 
 
-class RandomShift(object):
+class Padding(object):
     """ Padding the Image to proper size.
             Args:
                 stride: the stride of the network.
@@ -108,11 +101,11 @@ class RandomShift(object):
                 img: Image object.
     """
 
-    def __init__(self, shift_pixel=None, shift_ratio=0.5, mean=(104, 117, 123)):
-        assert isinstance(shift_pixel, int)
-        self.shift_pixel = int(shift_pixel)
-        self.ratio = shift_ratio
+    def __init__(self, pad=None, pad_ratio=0.5, mean=(104, 117, 123), allow_outside_center=True):
+        self.pad = pad
+        self.ratio = pad_ratio
         self.mean = mean
+        self.allow_outside_center = allow_outside_center
 
     def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
         assert isinstance(img, np.ndarray)
@@ -123,44 +116,78 @@ class RandomShift(object):
             return img, labelmap, maskmap, kpts, bboxes, labels, polygons
 
         height, width, channels = img.shape
-        left_pad = random.randint(0, self.shift_pixel * 2)  # pad_left
-        up_pad = random.randint(0, self.shift_pixel * 2)  # pad_up
+        left_pad, up_pad, right_pad, down_pad = self.pad
 
-        expand_image = np.zeros((height + self.shift_pixel * 2,
-                                 width + self.shift_pixel * 2, channels), dtype=img.dtype)
-        expand_image[:, :, :] = self.mean
-        expand_image[self.shift_pixel:self.shift_pixel + height, self.shift_pixel:self.shift_pixel + width] = img
-        img = expand_image[int(up_pad):int(up_pad + height), int(left_pad):int(left_pad + width)]
-
-        if labelmap is not None:
-            expand_labelmap = np.zeros((height + self.shift_pixel * 2,
-                                        width + self.shift_pixel * 2), dtype=labelmap.dtype)
-            expand_labelmap[:, :] = 255
-            expand_labelmap[self.shift_pixel:self.shift_pixel + height,
-                            self.shift_pixel:self.shift_pixel + width] = labelmap
-            labelmap = expand_labelmap[int(up_pad):int(up_pad + height), int(left_pad):int(left_pad + width)]
-
-        if maskmap is not None:
-            expand_maskmap = np.zeros((height + self.shift_pixel * 2,
-                                       width + self.shift_pixel * 2), dtype=maskmap.dtype)
-            expand_maskmap[:, :] = 1
-            expand_maskmap[self.shift_pixel:self.shift_pixel + height,
-                           self.shift_pixel:self.shift_pixel + width] = maskmap
-            maskmap = expand_maskmap[int(up_pad):int(up_pad + height), int(left_pad):int(left_pad + width)]
-
-        if polygons is not None:
-            for object_id in range(len(polygons)):
-                for polygon_id in range(len(polygons[object_id])):
-                    polygons[object_id][polygon_id][0::2] += (self.shift_pixel - left_pad)
-                    polygons[object_id][polygon_id][1::2] += (self.shift_pixel - up_pad)
+        target_size = [width + left_pad + right_pad, height + up_pad + down_pad]
+        offset_left = -left_pad
+        offset_up = -up_pad
 
         if kpts is not None and kpts.size > 0:
-            kpts[:, :, 0] += (self.shift_pixel - left_pad)
-            kpts[:, :, 1] += (self.shift_pixel - up_pad)
+            kpts[:, :, 0] -= offset_left
+            kpts[:, :, 1] -= offset_up
+            mask = np.logical_or.reduce((kpts[:, :, 0] >= target_size[0], kpts[:, :, 0] < 0,
+                                         kpts[:, :, 1] >= target_size[1], kpts[:, :, 1] < 0))
+            kpts[mask == 1, 2] = -1
 
         if bboxes is not None and bboxes.size > 0:
-            bboxes[:, 0::2] += (self.shift_pixel - left_pad)
-            bboxes[:, 1::2] += (self.shift_pixel - up_pad)
+            if self.allow_outside_center:
+                mask = np.ones(bboxes.shape[0], dtype=bool)
+            else:
+                crop_bb = np.array([offset_left, offset_up, offset_left + target_size[0], offset_up + target_size[1]])
+                center = (bboxes[:, :2] + bboxes[:, 2:]) / 2
+                mask = np.logical_and(crop_bb[:2] <= center, center < crop_bb[2:]).all(axis=1)
+
+            bboxes[:, 0::2] -= offset_left
+            bboxes[:, 1::2] -= offset_up
+            bboxes[:, 0::2] = np.clip(bboxes[:, 0::2], 0, target_size[0] - 1)
+            bboxes[:, 1::2] = np.clip(bboxes[:, 1::2], 0, target_size[1] - 1)
+
+            mask = np.logical_and(mask, (bboxes[:, :2] < bboxes[:, 2:]).all(axis=1))
+            bboxes = bboxes[mask]
+            if labels is not None:
+                labels = labels[mask]
+
+            if polygons is not None:
+                new_polygons = list()
+                for object_id in range(len(polygons)):
+                    if mask[object_id] == 1:
+                        for polygon_id in range(len(polygons[object_id])):
+                            polygons[object_id][polygon_id][0::2] -= offset_left
+                            polygons[object_id][polygon_id][1::2] -= offset_up
+                            polygons[object_id][polygon_id][0::2] = np.clip(polygons[object_id][polygon_id][0::2],
+                                                                            0, target_size[0] - 1)
+                            polygons[object_id][polygon_id][1::2] = np.clip(polygons[object_id][polygon_id][1::2],
+                                                                            0, target_size[1] - 1)
+
+                        new_polygons.append(polygons[object_id])
+
+                polygons = new_polygons
+
+        expand_image = np.zeros((max(height, target_size[1]) + abs(offset_up),
+                                 max(width, target_size[0]) + abs(offset_left), channels), dtype=img.dtype)
+        expand_image[:, :, :] = self.mean
+        expand_image[abs(min(offset_up, 0)):abs(min(offset_up, 0)) + height,
+        abs(min(offset_left, 0)):abs(min(offset_left, 0)) + width] = img
+        img = expand_image[max(offset_up, 0):max(offset_up, 0) + target_size[1],
+              max(offset_left, 0):max(offset_left, 0) + target_size[0]]
+
+        if maskmap is not None:
+            expand_maskmap = np.zeros((max(height, target_size[1]) + abs(offset_up),
+                                       max(width, target_size[0]) + abs(offset_left)), dtype=maskmap.dtype)
+            expand_maskmap[:, :] = 1
+            expand_maskmap[abs(min(offset_up, 0)):abs(min(offset_up, 0)) + height,
+            abs(min(offset_left, 0)):abs(min(offset_left, 0)) + width] = maskmap
+            maskmap = expand_maskmap[max(offset_up, 0):max(offset_up, 0) + target_size[1],
+                      max(offset_left, 0):max(offset_left, 0) + target_size[0]]
+
+        if labelmap is not None:
+            expand_labelmap = np.zeros((max(height, target_size[1]) + abs(offset_up),
+                                        max(width, target_size[0]) + abs(offset_left)), dtype=labelmap.dtype)
+            expand_labelmap[:, :] = 255
+            expand_labelmap[abs(min(offset_up, 0)):abs(min(offset_up, 0)) + height,
+            abs(min(offset_left, 0)):abs(min(offset_left, 0)) + width] = labelmap
+            labelmap = expand_labelmap[max(offset_up, 0):max(offset_up, 0) + target_size[1],
+                       max(offset_left, 0):max(offset_left, 0) + target_size[0]]
 
         return img, labelmap, maskmap, kpts, bboxes, labels, polygons
 
@@ -1066,6 +1093,7 @@ class Resize(object):
                     polygons[object_id][polygon_id][0::2] *= w_scale_ratio
                     polygons[object_id][polygon_id][1::2] *= h_scale_ratio
 
+        target_size = tuple(target_size)
         img = cv2.resize(img, target_size, interpolation=cv2.INTER_CUBIC)
         if labelmap is not None:
             labelmap = cv2.resize(labelmap, target_size, interpolation=cv2.INTER_NEAREST)
@@ -1095,7 +1123,7 @@ class CV2AugCompose(object):
         self.transforms = dict()
         if self.split == 'train':
             shuffle_train_trans = []
-            if not self.configer.is_empty('train_trans', 'shuffle_trans_seq'):
+            if self.configer.exists('train_trans', 'shuffle_trans_seq'):
                 if isinstance(self.configer.get('train_trans', 'shuffle_trans_seq')[0], list):
                     train_trans_seq_list = self.configer.get('train_trans', 'shuffle_trans_seq')
                     for train_trans_seq in train_trans_seq_list:
@@ -1136,11 +1164,12 @@ class CV2AugCompose(object):
                     mean=self.configer.get('normalize', 'mean_value')
                 )
 
-            if 'random_shift' in self.configer.get('train_trans', 'trans_seq') + shuffle_train_trans:
-                self.transforms['random_shift'] = RandomShift(
-                    shift_pixel=self.configer.get('train_trans', 'random_shift')['shift_pixel'],
-                    shift_ratio=self.configer.get('train_trans', 'random_shift')['ratio'],
-                    mean=self.configer.get('normalize', 'mean_value')
+            if 'padding' in self.configer.get('train_trans', 'trans_seq'):
+                self.transforms['padding'] = Padding(
+                    pad=self.configer.get('train_trans', 'padding')['pad'],
+                    pad_ratio=self.configer.get('train_trans', 'padding')['ratio'],
+                    mean=self.configer.get('normalize', 'mean_value'),
+                    allow_outside_center=self.configer.get('train_trans', 'padding')['allow_outside_center']
                 )
 
             if 'random_brightness' in self.configer.get('train_trans', 'trans_seq') + shuffle_train_trans:
@@ -1290,11 +1319,12 @@ class CV2AugCompose(object):
                     mean=self.configer.get('normalize', 'mean_value')
                 )
 
-            if 'random_shift' in self.configer.get('val_trans', 'trans_seq'):
-                self.transforms['random_shift'] = RandomShift(
-                    shift_pixel=self.configer.get('val_trans', 'random_shift')['shift_pixel'],
-                    shift_ratio=self.configer.get('val_trans', 'shift_ratio'),
-                    mean=self.configer.get('normalize', 'mean_value')
+            if 'padding' in self.configer.get('val_trans', 'trans_seq'):
+                self.transforms['padding'] = Padding(
+                    pad=self.configer.get('val_trans', 'padding')['pad'],
+                    pad_ratio=self.configer.get('val_trans', 'padding')['ratio'],
+                    mean=self.configer.get('normalize', 'mean_value'),
+                    allow_outside_center=self.configer.get('val_trans', 'padding')['allow_outside_center']
                 )
 
             if 'random_brightness' in self.configer.get('val_trans', 'trans_seq'):
@@ -1421,7 +1451,7 @@ class CV2AugCompose(object):
 
         if self.split == 'train':
             shuffle_trans_seq = []
-            if not self.configer.is_empty('train_trans', 'shuffle_trans_seq'):
+            if self.configer.exists('train_trans', 'shuffle_trans_seq'):
                 if isinstance(self.configer.get('train_trans', 'shuffle_trans_seq')[0], list):
                     shuffle_trans_seq_list = self.configer.get('train_trans', 'shuffle_trans_seq')
                     shuffle_trans_seq = shuffle_trans_seq_list[random.randint(0, len(shuffle_trans_seq_list))]
