@@ -76,8 +76,8 @@ class ModuleHelper(object):
             model_dict = model.state_dict()
             load_dict = dict()
             for k, v in pretrained_dict.items():
-                if 'resinit.{}'.format(k) in model_dict:
-                    load_dict['resinit.{}'.format(k)] = v
+                if 'prefix.{}'.format(k) in model_dict:
+                    load_dict['prefix.{}'.format(k)] = v
                 else:
                     load_dict[k] = v
 
