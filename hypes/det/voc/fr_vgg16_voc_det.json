@@ -11,6 +11,7 @@
       "workers": 8
     },
     "train": {
+      "loader": "fasterrcnn",
       "batch_size": 1,
       "data_transformer": {
         "size_mode": "random_size",
@@ -20,6 +21,7 @@
       }
     },
     "val": {
+      "loader": "fasterrcnn",
       "batch_size": 1,
       "use_07_metric": true,
       "data_transformer": {

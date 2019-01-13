@@ -9,8 +9,12 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+import json
 import time
+import random
 import argparse
+import torch
+import torch.backends.cudnn as cudnn
 
 from methods.method_selector import MethodSelector
 from methods.tools.controller import Controller
@@ -122,7 +126,26 @@ if __name__ == "__main__":
     parser.add_argument('--log_to_file', type=str2bool, nargs='?', default=True,
                         dest='logging:log_to_file', help='Whether to write logging into files.')
 
+    # ***********  Params for test or submission.  **********
+    parser.add_argument('--test_img', default=None, type=str,
+                        dest='test:test_img', help='The test path of image.')
+    parser.add_argument('--test_dir', default=None, type=str,
+                        dest='test:test_dir', help='The test directory of images.')
+    parser.add_argument('--out_dir', default='none', type=str,
+                        dest='test:out_dir', help='The test out directory of images.')
+
+    # ***********  Params for env.  **********
+    parser.add_argument('--seed', default=None, type=int, help='manual seed')
+    parser.add_argument('--cudnn', type=str2bool, nargs='?', default=True, help='Use CUDNN.')
+
     args_parser = parser.parse_args()
+
+    if args_parser.seed is not None:
+        random.seed(args_parser.seed)
+        torch.manual_seed(args_parser.seed)
+
+    cudnn.enabled = True
+    cudnn.benchmark = args_parser.cudnn
 
     configer = Configer(args_parser=args_parser)
     abs_data_dir = os.path.expanduser(configer.get('data', 'data_dir'))
@@ -134,9 +157,12 @@ if __name__ == "__main__":
     project_dir = os.path.dirname(os.path.realpath(__file__))
     configer.add(['project_dir'], project_dir)
 
-    log_file = configer.get('logging', 'log_file')
-    new_log_file = '{}_{}'.format(log_file, time.strftime("%Y-%m-%d_%X", time.localtime()))
-    configer.update(['logging', 'log_file'], new_log_file)
+    if configer.get('logging', 'log_to_file'):
+        log_file = configer.get('logging', 'log_file')
+        new_log_file = '{}_{}'.format(log_file, time.strftime("%Y-%m-%d_%X", time.localtime()))
+        configer.update(['logging', 'log_file'], new_log_file)
+    else:
+        configer.update(['logging', 'logfile_level'], None)
 
     Log.init(logfile_level=configer.get('logging', 'logfile_level'),
              stdout_level=configer.get('logging', 'stdout_level'),
@@ -144,6 +170,7 @@ if __name__ == "__main__":
              log_format=configer.get('logging', 'log_format'),
              rewrite=configer.get('logging', 'rewrite'))
 
+    Log.info('Config Dict: {}'.format(json.dumps(configer.to_dict(), indent=2)))
     method_selector = MethodSelector(configer)
     runner = None
     if configer.get('task') == 'pose':

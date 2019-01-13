@@ -60,14 +60,6 @@ class DenseASPP(nn.Module):
                       out_channels=self.configer.get('network', 'out_channels'), kernel_size=1, padding=0)
         )
 
-        for m in self.modules():
-            if isinstance(m, nn.Conv2d):
-                nn.init.xavier_uniform_(m.weight.data)
-
-            elif isinstance(m, ModuleHelper.BatchNorm2d(bn_type=self.configer.get('network', 'bn_type'))):
-                m.weight.data.fill_(1)
-                m.bias.data.zero_()
-
     def forward(self, x):
         feature = self.backbone(x)
 

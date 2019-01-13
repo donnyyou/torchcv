@@ -11,7 +11,7 @@ from __future__ import print_function
 import time
 import torch
 
-from datasets.det_data_loader import DetDataLoader
+from datasets.det.data_loader import DataLoader
 from loss.loss_manager import LossManager
 from methods.det.yolov3_test import YOLOv3Test
 from methods.tools.runner_helper import RunnerHelper
@@ -38,7 +38,7 @@ class YOLOv3(object):
         self.det_visualizer = DetVisualizer(configer)
         self.det_loss_manager = LossManager(configer)
         self.det_model_manager = DetModelManager(configer)
-        self.det_data_loader = DetDataLoader(configer)
+        self.det_data_loader = DataLoader(configer)
         self.yolo_detection_layer = YOLODetectionLayer(configer)
         self.yolo_target_generator = YOLOTargetGenerator(configer)
         self.det_running_score = DetRunningScore(configer)

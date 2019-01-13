@@ -174,7 +174,7 @@ def _criterion_parallel_apply(modules, inputs, targets, kwargs_tup=None, devices
         for thread in threads:
             thread.join()
     else:
-        _worker(0, modules[0], inputs[0], kwargs_tup[0], devices[0])
+        _worker(0, modules[0], inputs[0], targets[0], kwargs_tup[0], devices[0])
 
     outputs = []
     for i in range(len(inputs)):

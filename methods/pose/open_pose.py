@@ -11,7 +11,7 @@ from __future__ import print_function
 import time
 import torch
 
-from datasets.pose_data_loader import PoseDataLoader
+from datasets.pose.data_loader import DataLoader
 from loss.loss_manager import LossManager
 from methods.tools.runner_helper import RunnerHelper
 from methods.tools.trainer import Trainer
@@ -41,7 +41,7 @@ class OpenPose(object):
         self.pose_visualizer = PoseVisualizer(configer)
         self.pose_loss_manager = LossManager(configer)
         self.pose_model_manager = PoseModelManager(configer)
-        self.pose_data_loader = PoseDataLoader(configer)
+        self.pose_data_loader = DataLoader(configer)
         self.heatmap_generator = HeatmapGenerator(configer)
         self.paf_generator = PafGenerator(configer)
 

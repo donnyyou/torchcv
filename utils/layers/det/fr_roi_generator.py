@@ -105,8 +105,8 @@ class FRROIGenerator(object):
 
         for i in range(loc.size(0)):
             tmp_dst_bbox = dst_bbox[i]
-            tmp_dst_bbox[:, 0::2] = tmp_dst_bbox[:, 0::2].clamp_(min=0, max=meta[i]['aug_img_size'][0] - 1)
-            tmp_dst_bbox[:, 1::2] = tmp_dst_bbox[:, 1::2].clamp_(min=0, max=meta[i]['aug_img_size'][1] - 1)
+            tmp_dst_bbox[:, 0::2] = tmp_dst_bbox[:, 0::2].clamp_(min=0, max=meta[i]['border_size'][0] - 1)
+            tmp_dst_bbox[:, 1::2] = tmp_dst_bbox[:, 1::2].clamp_(min=0, max=meta[i]['border_size'][1] - 1)
             tmp_scores = rpn_fg_scores[i]
             # Remove predicted boxes with either height or width < threshold.
             ws = tmp_dst_bbox[:, 2] - tmp_dst_bbox[:, 0] + 1

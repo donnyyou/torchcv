@@ -11,7 +11,7 @@ from __future__ import print_function
 import time
 import torch
 
-from datasets.det_data_loader import DetDataLoader
+from datasets.det.data_loader import DataLoader
 from loss.loss_manager import LossManager
 from methods.det.faster_rcnn_test import FastRCNNTest
 from methods.tools.runner_helper import RunnerHelper
@@ -38,7 +38,7 @@ class FasterRCNN(object):
         self.det_visualizer = DetVisualizer(configer)
         self.det_loss_manager = LossManager(configer)
         self.det_model_manager = DetModelManager(configer)
-        self.det_data_loader = DetDataLoader(configer)
+        self.det_data_loader = DataLoader(configer)
         self.fr_priorbox_layer = FRPriorBoxLayer(configer)
         self.det_running_score = DetRunningScore(configer)
 
@@ -109,7 +109,7 @@ class FasterRCNN(object):
             self.runner_state['iters'] += 1
 
             # Print the log info & reset the states.
-            if self.configer.get('iters') % self.configer.get('solver', 'display_iter') == 0:
+            if self.runner_state['iters'] % self.configer.get('solver', 'display_iter') == 0:
                 Log.info('Train Epoch: {0}\tTrain Iteration: {1}\t'
                          'Time {batch_time.sum:.3f}s / {2}iters, ({batch_time.avg:.3f})\t'
                          'Data load {data_time.sum:.3f}s / {2}iters, ({data_time.avg:3f})\n'

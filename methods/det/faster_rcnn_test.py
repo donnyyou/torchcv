@@ -13,7 +13,7 @@ import cv2
 import torch
 import torch.nn.functional as F
 
-from datasets.det_data_loader import DetDataLoader
+from datasets.det.data_loader import DataLoader
 from methods.tools.blob_helper import BlobHelper
 from methods.tools.runner_helper import RunnerHelper
 from models.det_model_manager import DetModelManager
@@ -38,7 +38,7 @@ class FastRCNNTest(object):
         self.det_visualizer = DetVisualizer(configer)
         self.det_parser = DetParser(configer)
         self.det_model_manager = DetModelManager(configer)
-        self.det_data_loader = DetDataLoader(configer)
+        self.det_data_loader = DataLoader(configer)
         self.roi_sampler = FRROISampler(configer)
         self.rpn_target_generator = RPNTargetAssigner(configer)
         self.fr_priorbox_layer = FRPriorBoxLayer(configer)
@@ -144,8 +144,8 @@ class FastRCNNTest(object):
             # tmp_cls_label = cls_label[batch_index]
             tmp_dst_bbox = dst_bbox[start_index:start_index+test_rois_num[i]]
             # clip bounding box
-            tmp_dst_bbox[:, :, 0::2] = tmp_dst_bbox[:, :, 0::2].clamp(min=0, max=metas[i]['aug_img_size'][0] - 1)
-            tmp_dst_bbox[:, :, 1::2] = tmp_dst_bbox[:, :, 1::2].clamp(min=0, max=metas[i]['aug_img_size'][1] - 1)
+            tmp_dst_bbox[:, :, 0::2] = tmp_dst_bbox[:, :, 0::2].clamp(min=0, max=metas[i]['border_size'][0] - 1)
+            tmp_dst_bbox[:, :, 1::2] = tmp_dst_bbox[:, :, 1::2].clamp(min=0, max=metas[i]['border_size'][1] - 1)
 
             tmp_cls_prob = cls_prob[start_index:start_index+test_rois_num[i]]
             tmp_cls_label = cls_label[start_index:start_index+test_rois_num[i]]

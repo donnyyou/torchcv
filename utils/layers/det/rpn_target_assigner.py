@@ -37,8 +37,8 @@ class RPNTargetAssigner(object):
         for i in range(len(gt_bboxes)):
             index_inside = (((anchor_boxes[:, 0] - anchor_boxes[:, 2] / 2) >= 0)
                             & ((anchor_boxes[:, 1] - anchor_boxes[:, 3] / 2) >= 0)
-                            & ((anchor_boxes[:, 0] + anchor_boxes[:, 2] / 2) < meta[i]['aug_img_size'][0])
-                            & ((anchor_boxes[:, 1] + anchor_boxes[:, 3] / 2) < meta[i]['aug_img_size'][1]))
+                            & ((anchor_boxes[:, 0] + anchor_boxes[:, 2] / 2) < meta[i]['border_size'][0])
+                            & ((anchor_boxes[:, 1] + anchor_boxes[:, 3] / 2) < meta[i]['border_size'][1]))
             index_inside = index_inside.nonzero().contiguous().view(-1, )
             default_boxes = anchor_boxes[index_inside]
             loc = torch.zeros_like(default_boxes)

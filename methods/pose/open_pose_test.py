@@ -15,7 +15,7 @@ import numpy as np
 import torch
 from scipy.ndimage.filters import gaussian_filter
 
-from datasets.pose_data_loader import PoseDataLoader
+from datasets.pose.data_loader import DataLoader
 from methods.tools.blob_helper import BlobHelper
 from methods.tools.runner_helper import RunnerHelper
 from models.pose_model_manager import PoseModelManager
@@ -35,7 +35,7 @@ class OpenPoseTest(object):
         self.pose_visualizer = PoseVisualizer(configer)
         self.pose_parser = PoseParser(configer)
         self.pose_model_manager = PoseModelManager(configer)
-        self.pose_data_loader = PoseDataLoader(configer)
+        self.pose_data_loader = DataLoader(configer)
         self.heatmap_generator = HeatmapGenerator(configer)
         self.paf_generator = PafGenerator(configer)
         self.device = torch.device('cpu' if self.configer.get('gpu') is None else 'cuda')

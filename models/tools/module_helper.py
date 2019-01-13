@@ -7,6 +7,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import functools
 import os
 
 import torch
@@ -23,13 +24,42 @@ from utils.tools.logger import Logger as Log
 class ModuleHelper(object):
 
     @staticmethod
-    def BatchNorm2d(bn_type='torch'):
+    def BNReLU(num_features, bn_type=None, **kwargs):
+        if bn_type == 'torchbn':
+            return nn.Sequential(
+                nn.BatchNorm2d(num_features, **kwargs),
+                nn.ReLU()
+            )
+        elif bn_type == 'syncbn':
+            from extensions.syncbn.module import BatchNorm2d
+            return nn.Sequential(
+                BatchNorm2d(num_features, **kwargs),
+                nn.ReLU()
+            )
+        elif bn_type == 'inplace_abn':
+            from extensions.inplace_abn.bn import InPlaceABNSync
+            return InPlaceABNSync(num_features, **kwargs)
+        else:
+            Log.error('Not support BN type: {}.'.format(bn_type))
+            exit(1)
+
+    @staticmethod
+    def BatchNorm2d(bn_type='torch', ret_cls=False):
         if bn_type == 'torchbn':
             return nn.BatchNorm2d
 
         elif bn_type == 'syncbn':
             from extensions.syncbn.module import BatchNorm2d
             return BatchNorm2d
+
+        elif bn_type == 'inplace_abn':
+            torch_ver = torch.__version__[:3]
+            if torch_ver == '0.4':
+                from extensions.inplace_abn.bn import InPlaceABNSync
+                if ret_cls:
+                    return InPlaceABNSync
+
+                return functools.partial(InPlaceABNSync, activation='none')
 
         else:
             Log.error('Not support BN type: {}.'.format(bn_type))
@@ -46,8 +76,8 @@ class ModuleHelper(object):
             model_dict = model.state_dict()
             load_dict = dict()
             for k, v in pretrained_dict.items():
-                if 'prefix.{}'.format(k) in model_dict:
-                    load_dict['prefix.{}'.format(k)] = v
+                if 'resinit.{}'.format(k) in model_dict:
+                    load_dict['resinit.{}'.format(k)] = v
                 else:
                     load_dict[k] = v
 
@@ -58,7 +88,7 @@ class ModuleHelper(object):
             Log.info('Loading pretrained model:{}'.format(pretrained))
             pretrained_dict = torch.load(pretrained)
             model_dict = model.state_dict()
-            load_dict = {k:v for k, v in pretrained_dict.items() if k in model_dict}
+            load_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
             Log.info('Matched Keys: {}'.format(load_dict.keys()))
             model_dict.update(load_dict)
             model.load_state_dict(model_dict)
@@ -110,8 +140,8 @@ class ModuleHelper(object):
 
     @staticmethod
     def kaiming_init(module,
-                     mode='fan_out',
-                     nonlinearity='relu',
+                     mode='fan_in',
+                     nonlinearity='leaky_relu',
                      bias=0,
                      distribution='normal'):
         assert distribution in ['uniform', 'normal']

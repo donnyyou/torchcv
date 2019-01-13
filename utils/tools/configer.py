@@ -134,6 +134,9 @@ class Configer(object):
             Log.error('{} KeyError: {} !!!'.format(self._get_caller(), key))
             exit(1)
 
+    def resume(self, config_dict):
+        self.params_root = config_dict
+
     def to_dict(self):
         return self.params_root
 

@@ -12,7 +12,7 @@ import os
 import cv2
 import torch
 
-from datasets.det_data_loader import DetDataLoader
+from datasets.det.data_loader import DataLoader
 from methods.tools.blob_helper import BlobHelper
 from methods.tools.runner_helper import RunnerHelper
 from models.det_model_manager import DetModelManager
@@ -33,7 +33,7 @@ class YOLOv3Test(object):
         self.det_visualizer = DetVisualizer(configer)
         self.det_parser = DetParser(configer)
         self.det_model_manager = DetModelManager(configer)
-        self.det_data_loader = DetDataLoader(configer)
+        self.det_data_loader = DataLoader(configer)
         self.yolo_target_generator = YOLOTargetGenerator(configer)
         self.yolo_detection_layer = YOLODetectionLayer(configer)
         self.device = torch.device('cpu' if self.configer.get('gpu') is None else 'cuda')

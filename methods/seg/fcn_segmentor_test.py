@@ -14,7 +14,7 @@ import numpy as np
 import torch
 from PIL import Image
 
-from datasets.seg_data_loader import SegDataLoader
+from datasets.seg.data_loader import DataLoader
 from methods.tools.blob_helper import BlobHelper
 from methods.tools.runner_helper import RunnerHelper
 from models.seg_model_manager import SegModelManager
@@ -31,7 +31,7 @@ class FCNSegmentorTest(object):
         self.seg_visualizer = SegVisualizer(configer)
         self.seg_parser = SegParser(configer)
         self.seg_model_manager = SegModelManager(configer)
-        self.seg_data_loader = SegDataLoader(configer)
+        self.seg_data_loader = DataLoader(configer)
         self.device = torch.device('cpu' if self.configer.get('gpu') is None else 'cuda')
         self.seg_net = None
 
@@ -50,14 +50,20 @@ class FCNSegmentorTest(object):
                                                 input_size=self.configer.get('test', 'input_size'),
                                                 scale=scale)
 
-        elif self.configer.exists('test', 'min_side_length'):
+        elif self.configer.exists('test', 'min_side_length') and not self.configer.exists('test', 'max_side_length'):
             image = self.blob_helper.make_input(image=ori_image,
                                                 min_side_length=self.configer.get('test', 'min_side_length'),
                                                 scale=scale)
 
-        elif self.configer.exists('test', 'max_side_length'):
+        elif not self.configer.exists('test', 'min_side_length') and self.configer.exists('test', 'max_side_length'):
             image = self.blob_helper.make_input(image=ori_image,
-                                                min_side_length=self.configer.get('test', 'max_side_length'),
+                                                max_side_length=self.configer.get('test', 'max_side_length'),
+                                                scale=scale)
+
+        elif self.configer.exists('test', 'min_side_length') and self.configer.exists('test', 'max_side_length'):
+            image = self.blob_helper.make_input(image=ori_image,
+                                                min_side_length=self.configer.get('test', 'min_side_length'),
+                                                max_side_length=self.configer.get('test', 'max_side_length'),
                                                 scale=scale)
 
         else:
@@ -91,7 +97,7 @@ class FCNSegmentorTest(object):
             total_logits = self.sscrop_test(ori_image)
 
         elif self.configer.get('test', 'mode') == 'ms_test':
-            total_logits = self.ss_test(ori_image)
+            total_logits = self.ms_test(ori_image)
 
         elif self.configer.get('test', 'mode') == 'mscrop_test':
             total_logits = self.mscrop_test(ori_image)
@@ -164,7 +170,7 @@ class FCNSegmentorTest(object):
         for scale in self.configer.get('test', 'scale_search'):
             image, border_hw = self._get_blob(ori_image, scale=scale)
             results = self._predict(image)
-            results = cv2.resize(results[:-border_hw[0], :-border_hw[1]],
+            results = cv2.resize(results[:border_hw[0], :border_hw[1]],
                                  (ori_width, ori_height), interpolation=cv2.INTER_CUBIC)
             total_logits += results
 
@@ -175,7 +181,7 @@ class FCNSegmentorTest(object):
 
         image, border_hw = self._get_blob(mirror_image, scale=1.0)
         results = self._predict(image)
-        results = results[:-border_hw[0], :-border_hw[1]]
+        results = results[:border_hw[0], :border_hw[1]]
         results = cv2.resize(results[:, ::-1], (ori_width, ori_height), interpolation=cv2.INTER_CUBIC)
         total_logits += results
         return total_logits
@@ -195,7 +201,7 @@ class FCNSegmentorTest(object):
         inputs = torch.from_numpy(split_crops).permute(0, 3, 1, 2).to(self.device)
         with torch.no_grad():
             results = self.seg_net.forward(inputs)
-            results = results[0].permute(0, 2, 3, 1).cpu().numpy()
+            results = results[-1].permute(0, 2, 3, 1).cpu().numpy()
 
         reassemble = np.zeros((np_image.shape[0], np_image.shape[1], results.shape[-1]), np.float32)
         index = 0
@@ -221,7 +227,7 @@ class FCNSegmentorTest(object):
     def _predict(self, inputs):
         with torch.no_grad():
             results = self.seg_net.forward(inputs)
-            results = results[0].squeeze().permute(1, 2, 0).cpu().numpy()
+            results = results[-1].squeeze(0).permute(1, 2, 0).cpu().numpy()
 
         return results
 

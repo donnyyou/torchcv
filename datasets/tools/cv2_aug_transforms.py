@@ -647,39 +647,21 @@ class RandomCrop(object):
         else:
             raise TypeError('Got inappropriate size arg: {}'.format(crop_size))
 
-    def get_center(self, img_size):
-        max_center = [img_size[0] // 2, img_size[1] // 2]
-
+    def get_lefttop(self, crop_size, img_size):
         if self.method == 'center':
-            return max_center, -1
+            return [(img_size[0] - crop_size[0]) // 2, (img_size[1] - crop_size[1]) // 2]
 
         elif self.method == 'random':
-            if img_size[0] > self.size[0]:
-                x = random.randint(self.size[0] // 2, img_size[0] - self.size[0] // 2)
-            else:
-                x = img_size[0] // 2
-
-            if img_size[1] > self.size[1]:
-                y = random.randint(self.size[1] // 2, img_size[1] - self.size[1] // 2)
-            else:
-                y = img_size[1] // 2
-
-            return [x, y], -1
+            x = random.randint(0, img_size[0] - crop_size[0])
+            y = random.randint(0, img_size[1] - crop_size[1])
+            return [x, y]
 
         elif self.method == 'grid':
             grid_x = random.randint(0, self.grid[0] - 1)
             grid_y = random.randint(0, self.grid[1] - 1)
-            if img_size[0] - self.size[0] < 0:
-                x = img_size[0] // 2
-            else:
-                x = self.size[0] // 2 + grid_x * ((img_size[0] - self.size[0]) // (self.grid[0] - 1))
-
-            if img_size[1] - self.size[1] < 0:
-                y = img_size[1] // 2
-            else:
-                y = self.size[1] // 2 + grid_y * ((img_size[1] - self.size[1]) // (self.grid[1] - 1))
-
-            return [x, y], -1
+            x = grid_x * ((img_size[0] - crop_size[0]) // (self.grid[0] - 1))
+            y = grid_y * ((img_size[1] - crop_size[1]) // (self.grid[1] - 1))
+            return [x, y]
 
         else:
             Log.error('Crop method {} is invalid.'.format(self.method))
@@ -707,12 +689,9 @@ class RandomCrop(object):
         height, width, _ = img.shape
         target_size = [min(self.size[0], width), min(self.size[1], height)]
 
-        center, index = self.get_center([width, height])
+        offset_left, offset_up = self.get_lefttop(target_size, [width, height])
 
         # img = ImageHelper.draw_box(img, bboxes[index])
-        offset_left = center[0] - target_size[0] // 2
-        offset_up = center[1] - target_size[1] // 2
-
         if kpts is not None and kpts.size > 0:
             kpts[:, :, 0] -= offset_left
             kpts[:, :, 1] -= offset_up

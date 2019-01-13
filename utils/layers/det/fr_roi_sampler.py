@@ -41,7 +41,7 @@ class FRROISampler(object):
 
             if temp_gt_bboxes.numel() == 0:
                 min_size = self.configer.get('rpn', 'min_size')
-                roi_size = random.randint(min_size, min(meta[i]['aug_img_size']))
+                roi_size = random.randint(min_size, min(meta[i]['border_size']))
                 sample_roi = torch.zeros((1, 4), requires_grad=True).float().to(indices_and_rois.device)
                 sample_roi[0, 2:] = roi_size
                 gt_roi_loc = torch.zeros((1, 4), requires_grad=True).float().to(sample_roi.device)

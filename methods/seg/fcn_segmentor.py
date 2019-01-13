@@ -8,10 +8,11 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import cv2
 import time
 import torch
 
-from datasets.seg_data_loader import SegDataLoader
+from datasets.seg.data_loader import DataLoader
 from loss.loss_manager import LossManager
 from methods.tools.runner_helper import RunnerHelper
 from methods.tools.trainer import Trainer
@@ -36,7 +37,7 @@ class FCNSegmentor(object):
         self.seg_visualizer = SegVisualizer(configer)
         self.seg_loss_manager = LossManager(configer)
         self.seg_model_manager = SegModelManager(configer)
-        self.seg_data_loader = SegDataLoader(configer)
+        self.seg_data_loader = DataLoader(configer)
 
         self.seg_net = None
         self.train_loader = None
@@ -128,14 +129,15 @@ class FCNSegmentor(object):
 
         self.runner_state['epoch'] += 1
 
-    def val(self):
+    def val(self, data_loader=None):
         """
           Validation function during the train phase.
         """
         self.seg_net.eval()
         start_time = time.time()
 
-        for j, data_dict in enumerate(self.val_loader):
+        data_loader = self.val_loader if data_loader is None else data_loader
+        for j, data_dict in enumerate(data_loader):
             inputs = data_dict['img']
             targets = data_dict['labelmap']
 
@@ -147,10 +149,9 @@ class FCNSegmentor(object):
                 # Compute the loss of the val batch.
                 loss = self.pixel_loss(outputs, targets, gathered=self.configer.get('network', 'gathered'))
                 outputs = RunnerHelper.gather(self, outputs)
-                pred = outputs[0]
 
             self.val_losses.update(loss.item(), inputs.size(0))
-            self.seg_running_score.update(pred.max(1)[1].cpu().numpy(), targets.cpu().numpy())
+            self._update_running_score(outputs[-1], data_dict['meta'])
 
             # Update the vars of the val phase.
             self.batch_time.update(time.time() - start_time)
@@ -173,6 +174,17 @@ class FCNSegmentor(object):
         self.val_losses.reset()
         self.seg_running_score.reset()
         self.seg_net.train()
+
+    def _update_running_score(self, pred, metas):
+        pred = pred.permute(0, 2, 3, 1)
+        for i in range(pred.size(0)):
+            ori_img_size = metas[i]['ori_img_size']
+            border_size = metas[i]['border_size']
+            ori_target = metas[i]['ori_target']
+            total_logits = cv2.resize(pred[i, :border_size[1], :border_size[0]].cpu().numpy(),
+                                      tuple(ori_img_size), interpolation=cv2.INTER_CUBIC)
+            labelmap = np.argmax(total_logits, axis=-1)
+            self.seg_running_score.update(labelmap[None], ori_target[None])
 
 
 if __name__ == "__main__":

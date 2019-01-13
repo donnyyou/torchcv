@@ -95,8 +95,8 @@ def collate(batch, trans_dict):
                         batch[i]['polygons'].data[object_id][polygon_id][1::2] *= h_scale_ratio
 
             scaled_size = (int(round(width * w_scale_ratio)), int(round(height * h_scale_ratio)))
-            if 'meta' in data_keys and 'aug_img_size' in batch[i]['meta'].data:
-                batch[i]['meta'].data['aug_img_size'] = scaled_size
+            if 'meta' in data_keys and 'border_size' in batch[i]['meta'].data:
+                batch[i]['meta'].data['border_size'] = scaled_size
 
             scaled_size_hw = (scaled_size[1], scaled_size[0])
 
@@ -122,6 +122,14 @@ def collate(batch, trans_dict):
             if 'pad_mode' not in trans_dict or trans_dict['pad_mode'] == 'random':
                 left_pad = random.randint(0, pad_width)  # pad_left
                 up_pad = random.randint(0, pad_height)  # pad_up
+
+            elif trans_dict['pad_mode'] == 'pad_border':
+                if random.randint(0, 1) == 0:
+                    left_pad = pad_width
+                    up_pad = pad_height
+                else:
+                    left_pad = 0
+                    up_pad = 0
 
             elif trans_dict['pad_mode'] == 'pad_left_up':
                 left_pad = pad_width

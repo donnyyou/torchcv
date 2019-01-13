@@ -15,11 +15,10 @@ import torch
 import torchvision.transforms as transforms
 from PIL import Image
 
-from datasets.cls_data_loader import ClsDataLoader
+from datasets.cls.data_loader import DataLoader
 from methods.tools.blob_helper import BlobHelper
 from methods.tools.runner_helper import RunnerHelper
 from models.cls_model_manager import ClsModelManager
-from utils.helpers.file_helper import FileHelper
 from utils.helpers.image_helper import ImageHelper
 from utils.helpers.json_helper import JsonHelper
 from utils.tools.logger import Logger as Log
@@ -32,7 +31,7 @@ class FCClassifierTest(object):
         self.configer = configer
         self.blob_helper = BlobHelper(configer)
         self.cls_model_manager = ClsModelManager(configer)
-        self.cls_data_loader = ClsDataLoader(configer)
+        self.cls_data_loader = DataLoader(configer)
         self.cls_parser = ClsParser(configer)
         self.device = torch.device('cpu' if self.configer.get('gpu') is None else 'cuda')
         self.cls_net = None

@@ -14,7 +14,7 @@ import cv2
 import torch
 import torch.nn.functional as F
 
-from datasets.det_data_loader import DetDataLoader
+from datasets.det.data_loader import DataLoader
 from methods.tools.blob_helper import BlobHelper
 from methods.tools.runner_helper import RunnerHelper
 from models.det_model_manager import DetModelManager
@@ -35,7 +35,7 @@ class SingleShotDetectorTest(object):
         self.det_visualizer = DetVisualizer(configer)
         self.det_parser = DetParser(configer)
         self.det_model_manager = DetModelManager(configer)
-        self.det_data_loader = DetDataLoader(configer)
+        self.det_data_loader = DataLoader(configer)
         self.ssd_priorbox_layer = SSDPriorBoxLayer(configer)
         self.ssd_target_generator = SSDTargetGenerator(configer)
         self.device = torch.device('cpu' if self.configer.get('gpu') is None else 'cuda')

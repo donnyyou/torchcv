@@ -90,14 +90,14 @@ class FSOhemCELoss(nn.Module):
                                            If given, has to be a Tensor of size "nclasses"
         """
         prob_out = F.softmax(predict, dim=1)
-        tmp_target = target.clone()
-        tmp_target[tmp_target < 0] = 0
+        tmp_target = target.copy_()
+        tmp_target[tmp_target == self.ignore_label] = 0
         prob = prob_out.gather(1, tmp_target.unsqueeze(1))
-        mask = target.contiguous().view(-1,).ge(0)
-        sort_prob, sort_indices = prob.contiguous().view(-1,)[mask].contiguous().sort()
+        mask = target.contiguous().view(-1, ) != self.ignore_label
+        sort_prob, sort_indices = prob.contiguous().view(-1, )[mask].contiguous().sort()
         min_threshold = sort_prob[self.min_kept]
         threshold = max(min_threshold, self.thresh)
-        loss_matirx = self.ce_loss(predict, target).contiguous().view(-1,)
+        loss_matirx = self.ce_loss(predict, target).contiguous().view(-1, )
         sort_loss_matirx = loss_matirx[mask][sort_indices]
         select_loss_matrix = sort_loss_matirx[sort_prob < threshold]
         if self.reduction == 'sum':

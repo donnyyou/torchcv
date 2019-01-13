@@ -69,12 +69,7 @@ class RunnerHelper(object):
                 RunnerHelper.load_state_dict(net, checkpoint_dict, runner.configer.get('network', 'resume_strict'))
 
             if runner.configer.get('network', 'resume_continue'):
-                runner.runner_state['epoch'] = resume_dict['runner_state']['epoch']
-                runner.runner_state['iters'] = resume_dict['runner_state']['iters']
-                runner.runner_state['last_epoch'] = resume_dict['runner_state']['epoch']
-                runner.runner_state['last_iters'] = resume_dict['runner_state']['iters']
-                runner.runner_state['min_val_loss'] = resume_dict['runner_state']['val_loss']
-                runner.runner_state['max_performance'] = resume_dict['runner_state']['performance']
+                runner.configer.resume(resume_dict['config_dict'])
 
         return net
 
