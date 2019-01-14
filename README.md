@@ -47,12 +47,22 @@ This repository provides source code for some deep learning based cv problems. W
 - ResNet: Deep Residual Learning for Image Recognition
 
 #### Semantic Segmentation
-- PSPNet: Pyramid Scene Parsing Network
+- CityScapes (Single Scale Whole Image Test): Base LR 0.01, Crop Size 769
 
-| Model | Backbone | Training data  | Testing data | mIOU | Pixel Acc | Setting |
-|--------|:---------:|:------:|:------:|:------:|:------:|:------:|
-| [PSPNet Origin](https://github.com/hszhao/PSPNet) | 3x3-ResNet101 | ADE20K train | ADE20K val | 41.96 | 80.64 | - |
-| [PSPNet Ours](https://drive.google.com/open?id=1Q6oYBpq9Y53z_CJz7Km9BaiSVJjcHP4h) | [7x7-ResNet101](https://drive.google.com/open?id=1ROewKyaGPynox_-a50wHkSv1-0jYWyvc) | ADE20K train | ADE20K val | 44.18 | 80.91 | [PSPNet](https://github.com/donnyyou/PyTorchCV/blob/master/hypes/seg/ade20k/fs_pspnet_ade20k_seg.json) |
+| Checkpoints | Backbone | Train | Test | mIOU | BS | Iters | Scripts |
+|--------|:---------:|:------:|:------:|:------:|:------:|:------:|:------|
+| [PSPNet](https://drive.google.com/open?id=1bjQ8c-h1IBQPgp7DDwXl-U3tBo1lW6wB) | [3x3-Res101](https://drive.google.com/open?id=1bUzCKazlh8ElGVYWlABBAb0b0uIqFgtR) | train | val | 78.13 | 8 | 4W | [PSPNet](https://github.com/donnyyou/PyTorchCV-SemSeg/blob/master/scripts/cityscape/run_fs_pspnet_cityscape_seg.sh) |
+| [DeepLabV3](https://drive.google.com/open?id=15f--MUIMtiPHL8HyH_2A7EofJIPmA-oa) | [3x3-Res101](https://drive.google.com/open?id=1bUzCKazlh8ElGVYWlABBAb0b0uIqFgtR) | train | val | 79.15 | 8 | 4W | [DeepLabV3](https://github.com/donnyyou/PyTorchCV-SemSeg/blob/master/scripts/cityscape/run_fs_deeplabv3_cityscape_seg.sh) |
+
+
+- ADE20K (Single Scale Whole Image Test): Base LR 0.02, Crop Size 520
+
+| Checkpoints | Backbone | Train | Test | mIOU | PixelACC | BatchSize | Iters | Scripts |
+|--------|:---------:|:------:|:------:|:------:|:------:|:------:|:------:|:------|
+| [PSPNet]() | [3x3-Res50](https://drive.google.com/open?id=1zPQLFd9c1yHfkQn5CWBCcEKmjEEqxsWx) | train | val | 41.57 | 80.11 | 16 | 15W | [PSPNet](https://github.com/donnyyou/PyTorchCV-SemSeg/blob/master/scripts/ade20k/run_fs_res50_pspnet_ade20k_seg.sh) |
+| [DeepLabv3]() | [3x3-Res50](https://drive.google.com/open?id=1zPQLFd9c1yHfkQn5CWBCcEKmjEEqxsWx) | train | val | 42.07 | 80.37 | 16 | 15W | [DeepLabV3](https://github.com/donnyyou/PyTorchCV-SemSeg/blob/master/scripts/ade20k/run_fs_res50_deeplabv3_ade20k_seg.sh) |
+| [PSPNet]() | [3x3-Res101](https://drive.google.com/open?id=1bUzCKazlh8ElGVYWlABBAb0b0uIqFgtR) | train | val | 43.58 | 81.25 | 16 | 15W | [PSPNet](https://github.com/donnyyou/PyTorchCV-SemSeg/blob/master/scripts/ade20k/run_fs_res101_pspnet_ade20k_seg.sh) |
+| [DeepLabv3]() | [3x3-Res101](https://drive.google.com/open?id=1bUzCKazlh8ElGVYWlABBAb0b0uIqFgtR) | train | val | 44.39 | 81.39 | 16 | 15W | [DeepLabV3](https://github.com/donnyyou/PyTorchCV-SemSeg/blob/master/scripts/ade20k/run_fs_res101_deeplabv3_ade20k_seg.sh) |
 
 #### Object Detection
 - SSD: Single Shot MultiBox Detector
