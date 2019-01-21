@@ -21,7 +21,7 @@
     "val": {
       "batch_size": 1,
       "data_transformer": {
-        "size_mode": "random_size",
+        "size_mode": "max_size",
         "fit_stride": 8,
         "align_method": "only_pad",
         "pad_mode": "pad_right_down"
