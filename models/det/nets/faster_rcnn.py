@@ -101,7 +101,6 @@ class FasterRCNN(nn.Module):
         if self.configer.get('phase') == 'test' and not self.training:
             x = self.backbone(data_dict['img'])
             feat_list, rpn_locs, rpn_scores = self.rpn(x)
-
             indices_and_rois, test_rois_num = self.roi_generator(feat_list, rpn_locs, rpn_scores,
                                                                  self.configer.get('rpn', 'n_test_pre_nms'),
                                                                  self.configer.get('rpn', 'n_test_post_nms'),
@@ -113,21 +112,17 @@ class FasterRCNN(nn.Module):
             x = self.backbone(data_dict['img'])
             feat_list, rpn_locs, rpn_scores = self.rpn(x)
             gt_rpn_locs, gt_rpn_labels = self.rpn_target_assigner(feat_list, data_dict['bboxes'], data_dict['meta'])
-            gt_rpn_locs = gt_rpn_locs.to(rpn_scores.device)
-            gt_rpn_labels = gt_rpn_labels.to(rpn_scores.device)
 
             test_indices_and_rois, test_rois_num = self.roi_generator(feat_list, rpn_locs, rpn_scores,
                                                                       self.configer.get('rpn', 'n_test_pre_nms'),
                                                                       self.configer.get('rpn', 'n_test_post_nms'),
                                                                       data_dict['meta'])
             test_roi_cls_locs, test_roi_scores = self.bbox_head(x, test_indices_and_rois, data_dict['meta'])
-
             test_group = [test_indices_and_rois, test_roi_cls_locs, test_roi_scores, test_rois_num]
             train_indices_and_rois, _ = self.roi_generator(feat_list, rpn_locs, rpn_scores,
                                                            self.configer.get('rpn', 'n_train_pre_nms'),
                                                            self.configer.get('rpn', 'n_train_post_nms'),
                                                            data_dict['meta'])
-
             sample_rois, gt_roi_bboxes, gt_roi_labels = self.roi_sampler(train_indices_and_rois,
                                                                          data_dict['bboxes'],
                                                                          data_dict['labels'],
@@ -138,7 +133,6 @@ class FasterRCNN(nn.Module):
             sample_roi_locs = sample_roi_locs[
                 torch.arange(0, sample_roi_locs.size()[0]).long().to(sample_roi_locs.device),
                 gt_roi_labels.long().to(sample_roi_locs.device)].contiguous().view(-1, 4)
-
             train_group = [rpn_locs, rpn_scores, sample_roi_locs, sample_roi_scores]
             target_group = [gt_rpn_locs, gt_rpn_labels, gt_roi_bboxes, gt_roi_labels]
             return self.det_loss(train_group, target_group), test_group
@@ -147,25 +141,19 @@ class FasterRCNN(nn.Module):
             x = self.backbone(data_dict['img'])
             feat_list, rpn_locs, rpn_scores = self.rpn(x)
             gt_rpn_locs, gt_rpn_labels = self.rpn_target_assigner(feat_list, data_dict['bboxes'], data_dict['meta'])
-            gt_rpn_locs = gt_rpn_locs.to(rpn_scores.device)
-            gt_rpn_labels = gt_rpn_labels.to(rpn_scores.device)
-
             train_indices_and_rois, _ = self.roi_generator(feat_list, rpn_locs, rpn_scores,
                                                            self.configer.get('rpn', 'n_train_pre_nms'),
                                                            self.configer.get('rpn', 'n_train_post_nms'),
                                                            data_dict['meta'])
-
             sample_rois, gt_roi_bboxes, gt_roi_labels = self.roi_sampler(train_indices_and_rois,
                                                                          data_dict['bboxes'],
                                                                          data_dict['labels'],
                                                                          data_dict['meta'])
-
             sample_roi_locs, sample_roi_scores = self.bbox_head(x, sample_rois, data_dict['meta'])
             sample_roi_locs = sample_roi_locs.contiguous().view(-1, self.configer.get('data', 'num_classes'), 4)
             sample_roi_locs = sample_roi_locs[
                 torch.arange(0, sample_roi_locs.size()[0]).long().to(sample_roi_locs.device),
                 gt_roi_labels.long().to(sample_roi_locs.device)].contiguous().view(-1, 4)
-
             train_group = [rpn_locs, rpn_scores, sample_roi_locs, sample_roi_scores]
             target_group = [gt_rpn_locs, gt_rpn_labels, gt_roi_bboxes, gt_roi_labels]
             return self.det_loss(train_group, target_group)
@@ -182,7 +170,6 @@ class NaiveRPN(nn.Module):
         self.num_anchor_list = self.configer.get('rpn', 'num_anchor_list')
         self.conv1 = nn.Conv2d(512, 512, 3, 1, 1)
         self.rpn_detection_layer = RPNDetectionLayer(configer)
-
         for m in self.modules():
             if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
                 m.weight.data.normal_(0, 0.01)

@@ -88,13 +88,13 @@
                      [0, 80, 100], [0, 0, 230], [119, 11, 32]]
     },
     "checkpoints": {
-      "checkpoints_name": "fs_pspnet_ade20k_seg",
+      "checkpoints_name": "fs_deeplabv3_ade20k_seg",
       "checkpoints_dir": "./checkpoints/seg/ade20k",
       "save_iters": 10000
     },
     "network":{
       "backbone": "deepbase_resnet101_dilated8",
-      "model_name": "pspnet",
+      "model_name": "deeplabv3",
       "bn_type": "inplace_abn",
       "stride": 8,
       "loss_weights": {
@@ -105,7 +105,7 @@
     "logging": {
       "logfile_level": "info",
       "stdout_level": "info",
-      "log_file": "./log/seg/ade20k/fs_pspnet_ade20k_seg.log",
+      "log_file": "./log/seg/ade20k/fs_deeplabv3_ade20k_seg.log",
       "log_format": "%(asctime)s %(levelname)-7s %(message)s",
       "rewrite": true
     },
@@ -113,6 +113,10 @@
       "base_lr": 0.02,
       "metric": "iters",
       "lr_policy": "lambda_poly",
+      "warm": {
+        "warm_iters": 1000,
+        "freeze_backbone": false
+      },
       "step": {
         "gamma": 0.5,
         "step_size": 100

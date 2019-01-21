@@ -34,6 +34,8 @@ class RPNTargetAssigner(object):
         # whose size is speficied.
         target_bboxes = list()
         target_labels = list()
+        device = feat_list[0].device
+        anchor_boxes = anchor_boxes.to(device)
         for i in range(len(gt_bboxes)):
             index_inside = (((anchor_boxes[:, 0] - anchor_boxes[:, 2] / 2) >= 0)
                             & ((anchor_boxes[:, 1] - anchor_boxes[:, 3] / 2) >= 0)
@@ -42,7 +44,7 @@ class RPNTargetAssigner(object):
             index_inside = index_inside.nonzero().contiguous().view(-1, )
             default_boxes = anchor_boxes[index_inside]
             loc = torch.zeros_like(default_boxes)
-            label = torch.ones((default_boxes.size(0),)).mul_(-1).long()
+            label = torch.ones((default_boxes.size(0),)).mul_(-1).long().to(device)
 
             if gt_bboxes[i].numel() > 0:
                 # label: 1 is positive, 0 is negative, -1 is dont care
@@ -64,14 +66,14 @@ class RPNTargetAssigner(object):
 
                 # subsample positive labels if we have too many
                 n_pos = int(pos_ratio * n_sample)
-                pos_index = (label == 1).nonzero().contiguous().view(-1, ).numpy()
+                pos_index = (label == 1).nonzero().contiguous().view(-1, ).cpu().numpy()
                 if len(pos_index) > n_pos:
                     disable_index = np.random.choice(pos_index, size=(len(pos_index) - n_pos), replace=False)
                     label[disable_index] = -1
 
                 # subsample negative labels if we have too many
                 n_neg = n_sample - torch.sum(label == 1).item()
-                neg_index = (label == 0).nonzero().contiguous().view(-1, ).numpy()
+                neg_index = (label == 0).nonzero().contiguous().view(-1, ).cpu().numpy()
 
                 if len(neg_index) > n_neg:
                     disable_index = np.random.choice(neg_index, size=(len(neg_index) - n_neg), replace=False)
@@ -92,9 +94,9 @@ class RPNTargetAssigner(object):
                     disable_index = np.random.choice(neg_index, size=n_neg, replace=False)
                     label[disable_index] = 0
 
-            ret_label = torch.ones((anchor_boxes.size(0),), dtype=torch.long).mul_(-1)
-            ret_label[index_inside] = torch.LongTensor(label)
-            ret_loc = torch.zeros((anchor_boxes.size(0), 4))
+            ret_label = torch.ones((anchor_boxes.size(0),), dtype=torch.long).mul_(-1).to(device)
+            ret_label[index_inside] = label.long()
+            ret_loc = torch.zeros((anchor_boxes.size(0), 4)).to(device)
             ret_loc[index_inside] = loc
             target_bboxes.append(ret_loc)
             target_labels.append(ret_label)

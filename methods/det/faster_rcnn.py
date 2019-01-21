@@ -20,7 +20,7 @@ from models.det_model_manager import DetModelManager
 from utils.layers.det.fr_priorbox_layer import FRPriorBoxLayer
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
-from val.scripts.det.det_running_score import DetRunningScore
+from metric.det.det_running_score import DetRunningScore
 from vis.visualizer.det_visualizer import DetVisualizer
 from utils.helpers.dc_helper import DCHelper
 
@@ -86,17 +86,11 @@ class FasterRCNN(object):
 
         for i, data_dict in enumerate(self.train_loader):
             Trainer.update(self)
-            batch_gt_bboxes = data_dict['bboxes']
-            batch_gt_labels = data_dict['labels']
-            metas = data_dict['meta']
-            data_dict['bboxes'] = DCHelper.todc(batch_gt_bboxes, gpu_list=self.configer.get('gpu'), cpu_only=True)
-            data_dict['labels'] = DCHelper.todc(batch_gt_labels, gpu_list=self.configer.get('gpu'), cpu_only=True)
-            data_dict['meta'] = DCHelper.todc(metas, gpu_list=self.configer.get('gpu'), cpu_only=True)
             self.data_time.update(time.time() - start_time)
             # Forward pass.
             loss = self.det_net(data_dict)
             loss = loss.mean()
-            self.train_losses.update(loss.item(), data_dict['img'].size(0))
+            self.train_losses.update(loss.item(), len(DCHelper.tolist(data_dict['meta'])))
 
             self.optimizer.zero_grad()
             loss.backward()
@@ -138,19 +132,14 @@ class FasterRCNN(object):
         start_time = time.time()
         with torch.no_grad():
             for j, data_dict in enumerate(self.val_loader):
-                inputs = data_dict['img']
-                batch_gt_bboxes = data_dict['bboxes']
-                batch_gt_labels = data_dict['labels']
-                metas = data_dict['meta']
-                data_dict['bboxes'] = DCHelper.todc(batch_gt_bboxes, gpu_list=self.configer.get('gpu'), cpu_only=True)
-                data_dict['labels'] = DCHelper.todc(batch_gt_labels, gpu_list=self.configer.get('gpu'), cpu_only=True)
-                data_dict['meta'] = DCHelper.todc(metas, gpu_list=self.configer.get('gpu'), cpu_only=True)
+                batch_gt_bboxes = DCHelper.tolist(data_dict['bboxes'])
+                batch_gt_labels = DCHelper.tolist(data_dict['labels'])
+                metas = DCHelper.tolist(data_dict['meta'])
                 # Forward pass.
-                inputs = RunnerHelper.to_device(self, inputs)
                 loss, test_group = self.det_net(data_dict)
                 # Compute the loss of the train batch & backward.
                 loss = loss.mean()
-                self.val_losses.update(loss.item(), inputs.size(0))
+                self.val_losses.update(loss.item(), len(metas))
                 test_indices_and_rois, test_roi_locs, test_roi_scores, test_rois_num = test_group
                 batch_detections = FastRCNNTest.decode(test_roi_locs,
                                                        test_roi_scores,

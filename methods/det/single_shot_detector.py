@@ -21,7 +21,7 @@ from utils.layers.det.ssd_priorbox_layer import SSDPriorBoxLayer
 from utils.layers.det.ssd_target_generator import SSDTargetGenerator
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
-from val.scripts.det.det_running_score import DetRunningScore
+from metric.det.det_running_score import DetRunningScore
 from vis.visualizer.det_visualizer import DetVisualizer
 
 

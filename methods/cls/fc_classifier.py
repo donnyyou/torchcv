@@ -19,7 +19,7 @@ from methods.tools.trainer import Trainer
 from models.cls_model_manager import ClsModelManager
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
-from val.scripts.cls.cls_running_score import ClsRunningScore
+from metric.cls.cls_running_score import ClsRunningScore
 
 
 cudnn.benchmark = True

@@ -108,10 +108,10 @@ class DataParallelCriterion(DataParallel):
     def scatter(self, inputs, kwargs, device_ids):
         return scatter_kwargs(inputs, kwargs, device_ids, dim=self.dim)
 
-    def forward(self, inputs, *targets, gathered=True, **kwargs):
+    def forward(self, inputs, *targets, **kwargs):
         # input should be already scatterd
         # scattering the targets instead
-        if gathered:
+        if kwargs['gathered']:
             if isinstance(inputs, (list, tuple)):
                 inputs, _ = self.scatter(inputs, kwargs, self.device_ids)
             else:

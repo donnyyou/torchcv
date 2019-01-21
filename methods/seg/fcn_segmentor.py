@@ -19,7 +19,7 @@ from methods.tools.trainer import Trainer
 from models.seg_model_manager import SegModelManager
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
-from val.scripts.seg.seg_running_score import SegRunningScore
+from metric.seg.seg_running_score import SegRunningScore
 from vis.visualizer.seg_visualizer import SegVisualizer
 
 

@@ -54,10 +54,10 @@ class FasterRCNNLoader(data.Dataset):
             img = self.img_transform(img)
 
         return dict(
-            img=DataContainer(img, stack=True),
-            bboxes=DataContainer(bboxes, stack=False),
-            labels=DataContainer(labels, stack=False),
-            meta=DataContainer(meta, stack=False, cpu_only=True)
+            img=DataContainer(img, stack=True, return_dc=True, samples_per_gpu=True),
+            bboxes=DataContainer(bboxes, stack=False, return_dc=True, samples_per_gpu=True),
+            labels=DataContainer(labels, stack=False, return_dc=True, samples_per_gpu=True),
+            meta=DataContainer(meta, stack=False, cpu_only=True, return_dc=True, samples_per_gpu=True)
         )
 
     def __len__(self):

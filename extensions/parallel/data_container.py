@@ -31,11 +31,13 @@ class DataContainer(object):
     - leave the objects as is and pass it to the model
     """
 
-    def __init__(self, data, stack=False, padding_value=0, cpu_only=False):
+    def __init__(self, data, stack=False, padding_value=0, cpu_only=False, return_dc=False, samples_per_gpu=False):
         self._data = data
         self._cpu_only = cpu_only
         self._stack = stack
         self._padding_value = padding_value
+        self._return_dc = return_dc
+        self._samples_per_gpu = samples_per_gpu
 
     def __repr__(self):
         return '{}({})'.format(self.__class__.__name__, repr(self.data))
@@ -58,6 +60,14 @@ class DataContainer(object):
     @property
     def stack(self):
         return self._stack
+
+    @property
+    def return_dc(self):
+        return self._return_dc
+
+    @property
+    def samples_per_gpu(self):
+        return self._samples_per_gpu
 
     @property
     def padding_value(self):

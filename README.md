@@ -16,9 +16,6 @@ This repository provides source code for some deep learning based cv problems. W
     - VGG: Very Deep Convolutional Networks for Large-Scale Image Recognition
     - ResNet: Deep Residual Learning for Image Recognition
     - DenseNet: Densely Connected Convolutional Networks
-    - MobileNetV2: Inverted Residuals and Linear Bottlenecks
-    - ResNeXt: Aggregated Residual Transformations for Deep Neural Networks
-    - SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and <0.5MB model size
     - ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices
     - ShuffleNet V2: Practical Guidelines for Ecient CNN Architecture Design
 
@@ -47,22 +44,12 @@ This repository provides source code for some deep learning based cv problems. W
 - ResNet: Deep Residual Learning for Image Recognition
 
 #### Semantic Segmentation
-- CityScapes (Single Scale Whole Image Test): Base LR 0.01, Crop Size 769
+- PSPNet: Pyramid Scene Parsing Network
 
-| Checkpoints | Backbone | Train | Test | mIOU | BS | Iters | Scripts |
-|--------|:---------:|:------:|:------:|:------:|:------:|:------:|:------|
-| [PSPNet](https://drive.google.com/open?id=1bjQ8c-h1IBQPgp7DDwXl-U3tBo1lW6wB) | [3x3-Res101](https://drive.google.com/open?id=1bUzCKazlh8ElGVYWlABBAb0b0uIqFgtR) | train | val | - | 8 | 4W | [PSPNet](https://github.com/donnyyou/PyTorchCV-SemSeg/blob/master/scripts/cityscape/run_fs_pspnet_cityscape_seg.sh) |
-| [DeepLabV3](https://drive.google.com/open?id=15f--MUIMtiPHL8HyH_2A7EofJIPmA-oa) | [3x3-Res101](https://drive.google.com/open?id=1bUzCKazlh8ElGVYWlABBAb0b0uIqFgtR) | train | val | - | 8 | 4W | [DeepLabV3](https://github.com/donnyyou/PyTorchCV-SemSeg/blob/master/scripts/cityscape/run_fs_deeplabv3_cityscape_seg.sh) |
-
-
-- ADE20K (Single Scale Whole Image Test): Base LR 0.02, Crop Size 520
-
-| Checkpoints | Backbone | Train | Test | mIOU | PixelACC | BatchSize | Iters | Scripts |
-|--------|:---------:|:------:|:------:|:------:|:------:|:------:|:------:|:------|
-| [PSPNet]() | [3x3-Res50](https://drive.google.com/open?id=1zPQLFd9c1yHfkQn5CWBCcEKmjEEqxsWx) | train | val | - | - | 16 | 15W | [PSPNet](https://github.com/donnyyou/PyTorchCV-SemSeg/blob/master/scripts/ade20k/run_fs_res50_pspnet_ade20k_seg.sh) |
-| [DeepLabv3]() | [3x3-Res50](https://drive.google.com/open?id=1zPQLFd9c1yHfkQn5CWBCcEKmjEEqxsWx) | train | val | - | - | 16 | 15W | [DeepLabV3](https://github.com/donnyyou/PyTorchCV-SemSeg/blob/master/scripts/ade20k/run_fs_res50_deeplabv3_ade20k_seg.sh) |
-| [PSPNet]() | [3x3-Res101](https://drive.google.com/open?id=1bUzCKazlh8ElGVYWlABBAb0b0uIqFgtR) | train | val | - | - | 16 | 15W | [PSPNet](https://github.com/donnyyou/PyTorchCV-SemSeg/blob/master/scripts/ade20k/run_fs_res101_pspnet_ade20k_seg.sh) |
-| [DeepLabv3]() | [3x3-Res101](https://drive.google.com/open?id=1bUzCKazlh8ElGVYWlABBAb0b0uIqFgtR) | train | val | - | - | 16 | 15W | [DeepLabV3](https://github.com/donnyyou/PyTorchCV-SemSeg/blob/master/scripts/ade20k/run_fs_res101_deeplabv3_ade20k_seg.sh) |
+| Model | Backbone | Training data  | Testing data | mIOU | Pixel Acc | Setting |
+|--------|:---------:|:------:|:------:|:------:|:------:|:------:|
+| [PSPNet Origin](https://github.com/hszhao/PSPNet) | 3x3-ResNet101 | ADE20K train | ADE20K val | 41.96 | 80.64 | - |
+| [PSPNet Ours](https://drive.google.com/open?id=1Q6oYBpq9Y53z_CJz7Km9BaiSVJjcHP4h) | [7x7-ResNet101](https://drive.google.com/open?id=1ROewKyaGPynox_-a50wHkSv1-0jYWyvc) | ADE20K train | ADE20K val | 44.18 | 80.91 | [PSPNet](https://github.com/donnyyou/PyTorchCV/blob/master/hypes/seg/ade20k/fs_pspnet_ade20k_seg.json) |
 
 #### Object Detection
 - SSD: Single Shot MultiBox Detector
@@ -91,51 +78,40 @@ This repository provides source code for some deep learning based cv problems. W
 
 ## Commands with PyTorchCV
 
-Take OpenPose as an example.
-- Train the openpose model
+Take PSPNet as an example. ("tag" could be any string, include an empty one.)
+- Training
 ```bash
-python main.py  --hypes hypes/pose/coco/op_coco_pose.json \
-                --base_lr 0.001 \
-                --phase train \
-                --gpu 0 1
+cd scripts/seg/cityscapes/
+bash run_fs_pspnet_cityscapes_seg.sh train tag
 ```
 
-- Finetune the openpose model
+- Resume Training
 ```bash
-python main.py  --hypes hypes/pose/coco/op_coco_pose.json \
-                --base_lr 0.001 \
-                --phase train \
-                --resume checkpoints/pose/coco/coco_open_pose_65000.pth \
-                --gpu 0 1
+cd scripts/seg/cityscapes/
+bash run_fs_pspnet_cityscapes_seg.sh train tag
 ```
 
-- Test the openpose model(test_img):
+- Validate
 ```bash
-python main.py  --hypes hypes/pose/coco/op_coco_pose.json \
-                --phase test \
-                --resume checkpoints/pose/coco/coco_open_pose_65000.pth \
-                --test_img val/samples/ski.jpg \
-                --gpu 0
+cd scripts/seg/cityscapes/
+bash run_fs_pspnet_cityscapes_seg.sh val tag
 ```
 
-- Test the openpose model(test_dir):
+- Testing:
 ```bash
-python main.py  --hypes hypes/pose/coco/op_coco_pose.json \
-                --phase test \
-                --resume checkpoints/pose/coco/coco_open_pose_65000.pth \
-                --test_dir val/samples \
-                --gpu 0
+cd scripts/seg/cityscapes/
+bash run_fs_pspnet_cityscapes_seg.sh test tag
 ```
 
 ## Examples with PyTorchCV
 
 <div align="center">
 
-<img src="val/examples/pose/coco/000000319721_vis.png" width="500px"/>
+<img src="samples/pose/coco/000000319721_vis.png" width="500px"/>
 
 <p> Example output of <b>VGG19-OpenPose</b></p>
 
-<img src="val/examples/pose/coco/000000475191_vis.png" width="500px"/>
+<img src="samples/pose/coco/000000475191_vis.png" width="500px"/>
 
 <p> Example output of <b>VGG19-OpenPose</b></p>
 

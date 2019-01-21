@@ -15,7 +15,7 @@ CHECKPOINTS_NAME="fc_vgg19_cifar10_cls"
 PRETRAINED_MODEL="./pretrained_model/resnet101-imagenet.pth"
 MAX_EPOCH=400
 
-LOG_FILE="./log/cityscape/${CHECKPOINTS_NAME}.log"
+LOG_FILE="./log/cityscapes/${CHECKPOINTS_NAME}.log"
 
 
 if [ "$1"x == "train"x ]; then

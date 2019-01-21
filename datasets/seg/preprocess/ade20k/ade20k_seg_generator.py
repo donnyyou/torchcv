@@ -77,7 +77,7 @@ if __name__ == "__main__":
     parser.add_argument('--save_dir', default=None, type=str,
                         dest='save_dir', help='The directory to save the data.')
     parser.add_argument('--ori_root_dir', default=None, type=str,
-                        dest='ori_root_dir', help='The directory of the cityscape data.')
+                        dest='ori_root_dir', help='The directory of the cityscapes data.')
 
     args = parser.parse_args()
 

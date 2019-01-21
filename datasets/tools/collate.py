@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 # Author: Donny You (youansheng@gmail.com)
+# Adapted from https://github.com/open-mmlab/mmcv/blob/master/mmcv/parallel/collate.py
 
 
 from __future__ import absolute_import
@@ -15,33 +16,53 @@ from torch.utils.data.dataloader import default_collate
 from torch._six import string_classes, int_classes
 
 from extensions.parallel.data_container import DataContainer
+from utils.helpers.tensor_helper import TensorHelper
 from utils.tools.logger import Logger as Log
 
 
-def stack(batch, data_key=None):
+def stack(batch, data_key=None, trans_dict=None):
     if isinstance(batch[0][data_key], DataContainer):
         if batch[0][data_key].stack:
             assert isinstance(batch[0][data_key].data, torch.Tensor) or \
                    isinstance(batch[0], int_classes) or isinstance(batch[0], float) or \
                    isinstance(batch[0], string_classes) or isinstance(batch[0], collections.Mapping) or\
                    isinstance(batch[0], collections.Sequence)
-            samples = [sample[data_key].data for sample in batch]
-            return default_collate(samples)
+            stacked = []
+            if batch[0][data_key].samples_per_gpu:
+                assert len(batch) % trans_dict['samples_per_gpu'] == 0
+                for i in range(0, len(batch), trans_dict['samples_per_gpu']):
+                    stacked.append(
+                        default_collate([sample[data_key].data for sample in batch[i:i + trans_dict['samples_per_gpu']]])
+                    )
+            else:
+                stacked = default_collate([sample[data_key].data for sample in batch])
 
+            if batch[0][data_key].return_dc:
+                return DataContainer(stacked, batch[0][data_key].stack,
+                                     batch[0][data_key].padding_value, cpu_only=batch[0][data_key].cpu_only)
+            else:
+                return stacked
         else:
-            return [sample[data_key].data for sample in batch]
+            stacked = []
+            if batch[0][data_key].samples_per_gpu:
+                assert len(batch) % trans_dict['samples_per_gpu'] == 0
+                for i in range(0, len(batch), trans_dict['samples_per_gpu']):
+                    stacked.append([sample[data_key].data for sample in batch[i:i + trans_dict['samples_per_gpu']]])
+            else:
+                stacked = [sample[data_key].data for sample in batch]
 
+            if batch[0][data_key].return_dc:
+                return DataContainer(stacked, batch[0][data_key].stack,
+                                     batch[0][data_key].padding_value, cpu_only=batch[0][data_key].cpu_only)
+            else:
+                return stacked
     else:
         return default_collate([sample[data_key] for sample in batch])
 
 
 def collate(batch, trans_dict):
     data_keys = batch[0].keys()
-
-    if trans_dict['size_mode'] == 'random_size':
-        target_width, target_height = batch[0]['img'].size(2), batch[0]['img'].size(1)
-
-    elif trans_dict['size_mode'] == 'fix_size':
+    if trans_dict['size_mode'] == 'fix_size':
         target_width, target_height = trans_dict['input_size']
 
     elif trans_dict['size_mode'] == 'multi_size':
@@ -100,36 +121,33 @@ def collate(batch, trans_dict):
 
             scaled_size_hw = (scaled_size[1], scaled_size[0])
 
-            batch[i]['img'] = DataContainer(F.interpolate(batch[i]['img'].data.unsqueeze(0), scaled_size_hw,
-                                                          mode='bilinear', align_corners=False).squeeze(0), stack=True)
+            batch[i]['img'] = DataContainer(TensorHelper.resize(batch[i]['img'].data,
+                                                                scaled_size_hw, mode='bilinear', align_corners=True),
+                                            stack=batch[i]['img'].stack)
             if 'labelmap' in data_keys:
-                labelmap = batch[i]['labelmap'].data.unsqueeze(0).unsqueeze(0).float()
-                labelmap = F.interpolate(labelmap, scaled_size_hw, mode='nearest').long().squeeze(0).squeeze(0)
-                batch[i]['labelmap'] = DataContainer(labelmap, stack=True)
+                batch[i]['labelmap'] = DataContainer(TensorHelper.resize(batch[i]['labelmap'].data,
+                                                                         scaled_size_hw, mode='nearest'),
+                                                     stack=batch[i]['labelmap'].stack)
 
             if 'maskmap' in data_keys:
-                maskmap = batch[i]['maskmap'].data.unsqueeze(0).unsqueeze(0).float()
-                maskmap = F.interpolate(maskmap, scaled_size_hw, mode='nearest').long().squeeze(0).squeeze(0)
-                batch[i]['maskmap'].data = DataContainer(maskmap, stack=True)
+                batch[i]['maskmap'].data = DataContainer(TensorHelper.resize(batch[i]['maskmap'].data,
+                                                                             scaled_size_hw, mode='nearest'),
+                                                         stack=batch[i]['maskmap'].stack)
 
         pad_width = target_width - scaled_size[0]
         pad_height = target_height - scaled_size[1]
         assert pad_height >= 0 and pad_width >= 0
         if pad_width > 0 or pad_height > 0:
             assert trans_dict['align_method'] in ['only_pad', 'scale_and_pad']
-            left_pad = 0
-            up_pad = 0
+            left_pad, up_pad = None, None
             if 'pad_mode' not in trans_dict or trans_dict['pad_mode'] == 'random':
                 left_pad = random.randint(0, pad_width)  # pad_left
                 up_pad = random.randint(0, pad_height)  # pad_up
 
             elif trans_dict['pad_mode'] == 'pad_border':
-                if random.randint(0, 1) == 0:
-                    left_pad = pad_width
-                    up_pad = pad_height
-                else:
-                    left_pad = 0
-                    up_pad = 0
+                direction = random.randint(0, 1)
+                left_pad = pad_width if direction == 0 else 0
+                up_pad = pad_height if direction == 0  else 0
 
             elif trans_dict['pad_mode'] == 'pad_left_up':
                 left_pad = pad_width
@@ -149,13 +167,19 @@ def collate(batch, trans_dict):
 
             pad = (left_pad, pad_width-left_pad, up_pad, pad_height-up_pad)
 
-            batch[i]['img'] = DataContainer(F.pad(batch[i]['img'].data, pad=pad, value=0), stack=True)
+            batch[i]['img'] = DataContainer(
+                F.pad(batch[i]['img'].data, pad=pad, value=0), stack=batch[i]['img'].stack
+            )
 
             if 'labelmap' in data_keys:
-                batch[i]['labelmap'] = DataContainer(F.pad(batch[i]['labelmap'].data, pad=pad, value=-1), stack=True)
+                batch[i]['labelmap'] = DataContainer(
+                    F.pad(batch[i]['labelmap'].data, pad=pad, value=-1), stack=batch[i]['labelmap'].stack
+                )
 
             if 'maskmap' in data_keys:
-                batch[i]['maskmap'] = DataContainer(F.pad(batch[i]['maskmap'].data, pad=pad, value=1), stack=True)
+                batch[i]['maskmap'] = DataContainer(
+                    F.pad(batch[i]['maskmap'].data, pad=pad, value=1), stack=batch[i]['maskmap'].stack
+                )
 
             if 'polygons' in data_keys:
                 for object_id in range(len(batch[i]['polygons'])):
@@ -171,7 +195,7 @@ def collate(batch, trans_dict):
                 batch[i]['bboxes'].data[:, 0::2] += left_pad
                 batch[i]['bboxes'].data[:, 1::2] += up_pad
 
-    return dict({key: stack(batch, data_key=key) for key in data_keys})
+    return dict({key: stack(batch, data_key=key, trans_dict=trans_dict) for key in data_keys})
 
 
 
