@@ -302,7 +302,7 @@ if __name__ == "__main__":
     #                          --json_dir ../../../results/pose/coco/test_dir/coco/json/
     #                          --gt_dir /home/donny/DataSet/MSCOCO/annotations/person_keypoints_val2017.json
     parser = argparse.ArgumentParser()
-    parser.add_argument('--hypes_file', default='../../../hypes/det/voc/ssd_vgg300_voc_det.json', type=str,
+    parser.add_argument('--hypes_file', default='../../../hypes/det/voc/ssd300_vgg16_voc_det.json', type=str,
                         dest='hypes_file', help='The hypes file of pose.')
     parser.add_argument('--gt_dir', default='/home/donny/DataSet/VOC/VOCdevkit/VOC2007', type=str,
                         dest='gt_dir', help='The groundtruth annotations file of voc dets.')

@@ -1,8 +1,8 @@
-# PyTorchCV: A PyTorch-Based Framework for Deep Learning in Computer Vision
+# TorchCV: A PyTorch-Based Framework for Deep Learning in Computer Vision
 ```
 @misc{CV2018,
   author =       {Donny You (youansheng@gmail.com)},
-  howpublished = {\url{https://github.com/donnyyou/PyTorchCV}},
+  howpublished = {\url{https://github.com/youansheng/torchcv}},
   year =         {2018}
 }
 ```
@@ -12,63 +12,62 @@ This repository provides source code for some deep learning based cv problems. W
 
 ## Implemented Papers
 
-- [Image Classification](https://github.com/donnyyou/PyTorchCV/tree/master/methods/cls)
+- [Image Classification](https://github.com/youansheng/torchcv/tree/master/methods/cls)
     - VGG: Very Deep Convolutional Networks for Large-Scale Image Recognition
     - ResNet: Deep Residual Learning for Image Recognition
     - DenseNet: Densely Connected Convolutional Networks
     - ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices
     - ShuffleNet V2: Practical Guidelines for Ecient CNN Architecture Design
 
-- [Semantic Segmentation](https://github.com/donnyyou/PyTorchCV/tree/master/methods/seg)
+- [Semantic Segmentation](https://github.com/youansheng/torchcv/tree/master/methods/seg)
     - DeepLabV3: Rethinking Atrous Convolution for Semantic Image Segmentation
     - PSPNet: Pyramid Scene Parsing Network
     - DenseASPP: DenseASPP for Semantic Segmentation in Street Scenes
     
-- [Object Detection](https://github.com/donnyyou/PyTorchCV/tree/master/methods/det)
+- [Object Detection](https://github.com/youansheng/torchcv/tree/master/methods/det)
     - SSD: Single Shot MultiBox Detector
     - Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks
     - YOLOv3: An Incremental Improvement
     - FPN: Feature Pyramid Networks for Object Detection
 
-- [Pose Estimation](https://github.com/donnyyou/PyTorchCV/tree/master/methods/pose)
+- [Pose Estimation](https://github.com/youansheng/torchcv/tree/master/methods/pose)
     - CPM: Convolutional Pose Machines
     - OpenPose: Realtime Multi-Person 2D Pose Estimation using Part Affinity Fields
 
-- [Instance Segmentation](https://github.com/donnyyou/PyTorchCV/tree/master/methods/seg)
+- [Instance Segmentation](https://github.com/youansheng/torchcv/tree/master/methods/seg)
     - Mask R-CNN
 
 
-## Performances with PyTorchCV
+## Performances with TorchCV
 
 #### Image Classification
 - ResNet: Deep Residual Learning for Image Recognition
 
 #### Semantic Segmentation
-- PSPNet: Pyramid Scene Parsing Network
+- CityScapes (Single Scale Whole Image Test): Base LR 0.01, Crop Size 769
 
-| Model | Backbone | Training data  | Testing data | mIOU | Pixel Acc | Setting |
-|--------|:---------:|:------:|:------:|:------:|:------:|:------:|
-| [PSPNet Origin](https://github.com/hszhao/PSPNet) | 3x3-ResNet101 | ADE20K train | ADE20K val | 41.96 | 80.64 | - |
-| [PSPNet Ours](https://drive.google.com/open?id=1Q6oYBpq9Y53z_CJz7Km9BaiSVJjcHP4h) | [7x7-ResNet101](https://drive.google.com/open?id=1ROewKyaGPynox_-a50wHkSv1-0jYWyvc) | ADE20K train | ADE20K val | 44.18 | 80.91 | [PSPNet](https://github.com/donnyyou/PyTorchCV/blob/master/hypes/seg/ade20k/fs_pspnet_ade20k_seg.json) |
+| Model | Backbone | Train | Test | mIOU | BS | Iters | Scripts |
+|:--------|:---------|:------|:------|:------|:------|:------|:------|
+| [PSPNet]() | [3x3-Res101](https://drive.google.com/open?id=1bUzCKazlh8ElGVYWlABBAb0b0uIqFgtR) | train | val | 78.20 | 8 | 4W | [PSPNet](https://github.com/youansheng/torchcv/blob/master/scripts/cityscape/run_fs_pspnet_cityscape_seg.sh) |
+| [DeepLabV3]() | [3x3-Res101](https://drive.google.com/open?id=1bUzCKazlh8ElGVYWlABBAb0b0uIqFgtR) | train | val | 79.13 | 8 | 4W | [DeepLabV3](https://github.com/youansheng/torchcv/blob/master/scripts/cityscape/run_fs_deeplabv3_cityscape_seg.sh) |
+
+- ADE20K (Single Scale Whole Image Test): Base LR 0.02, Crop Size 520
+
+| Model | Backbone | Train | Test | mIOU | PixelACC | BS | Iters | Scripts |
+|:--------|:---------|:------|:------|:------|:------|:------|:------|:------|
+| [PSPNet]() | [3x3-Res50](https://drive.google.com/open?id=1zPQLFd9c1yHfkQn5CWBCcEKmjEEqxsWx) | train | val | 41.52 | 80.09 | 16 | 15W | [PSPNet](https://github.com/youansheng/torchcv/blob/master/scripts/seg/ade20k/run_fs_res50_pspnet_ade20k_seg.sh) |
+| [DeepLabv3]() | [3x3-Res50](https://drive.google.com/open?id=1zPQLFd9c1yHfkQn5CWBCcEKmjEEqxsWx) | train | val | 42.16 | 80.36 | 16 | 15W | [DeepLabV3](https://github.com/youansheng/torchcv/blob/master/scripts/seg/ade20k/run_fs_res50_deeplabv3_ade20k_seg.sh) |
+| [PSPNet]() | [3x3-Res101](https://drive.google.com/open?id=1bUzCKazlh8ElGVYWlABBAb0b0uIqFgtR) | train | val | 43.60 | 81.30 | 16 | 15W | [PSPNet](https://github.com/youansheng/torchcv/blob/master/scripts/seg/ade20k/run_fs_res101_pspnet_ade20k_seg.sh) |
+| [DeepLabv3]() | [3x3-Res101](https://drive.google.com/open?id=1bUzCKazlh8ElGVYWlABBAb0b0uIqFgtR) | train | val | 44.13 | 81.42 | 16 | 15W | [DeepLabV3](https://github.com/youansheng/torchcv/blob/master/scripts/seg/ade20k/run_fs_res101_deeplabv3_ade20k_seg.sh) |
 
 #### Object Detection
-- SSD: Single Shot MultiBox Detector
+- Pascal VOC2007/2012: 20 classes
 
-| Model | Backbone | Training data  | Testing data | mAP | FPS  | Setting |
-|--------|:-------:|:---------:|:------:|:------:|:------:|:------:|
-| [SSD-300 Origin](https://github.com/weiliu89/caffe/tree/ssd) | VGG16 | VOC07+12 trainval | VOC07 test | 0.772 | - | - |
-| [SSD-300 Ours](https://drive.google.com/open?id=15J5blVyZq7lqCePh-Q8S2pxim3-f_8LP) | [VGG16](https://drive.google.com/open?id=1nM0UwmqR4lIHzmRWvs71jfP_gAekjuKy) | VOC07+12 trainval | VOC07 test | 0.786 | - | [SSD300](https://github.com/donnyyou/PyTorchCV/blob/master/hypes/det/voc/ssd_vgg300_voc_det.json) |
-| [SSD-512 Origin](https://github.com/weiliu89/caffe/tree/ssd) | VGG16 | VOC07+12 trainval | VOC07 test | 0.798 | - | - |
-| [SSD-512 Ours](https://drive.google.com/open?id=1RF5gnqfiyz-EcSFU1OSK7tNuX_VRObVW) | [VGG16](https://drive.google.com/open?id=1nM0UwmqR4lIHzmRWvs71jfP_gAekjuKy) | VOC07+12 trainval | VOC07 test | 0.808 | - | [SSD512](https://github.com/donnyyou/PyTorchCV/blob/master/hypes/det/voc/ssd_vgg512_voc_det.json) |
-
-- Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks
-
-| Model | Backbone |  Training data  | Testing data | mAP | FPS  | Setting |
-|--------|:--------:|:---------:|:------:|:------:|:------:|:------:|
-| [Faster R-CNN Origin](https://github.com/rbgirshick/py-faster-rcnn) | VGG16 | VOC07 trainval | VOC07 test | 0.699 | - | - |
-| [Faster R-CNN Ours](https://drive.google.com/open?id=15SfklRiI1McVWEq9EAceznK-9sxXSQR4) | [VGG16](https://drive.google.com/open?id=1ZL9SS9KRzsDQhMe8kyPQ1LHA60wx_Vcj) | VOC07 trainval | VOC07 test | 0.706 | - | [Faster R-CNN](https://github.com/donnyyou/PyTorchCV/blob/master/hypes/det/voc/fr_vgg16_voc_det.json) |
-
-- YOLOv3: An Incremental Improvement
+| Model | Backbone | Train | Test | mAP | BS | Epochs | Scripts |
+|:--------|:---------|:------|:------|:------|:------|:------|:------|
+| [SSD300](https://drive.google.com/open?id=15J5blVyZq7lqCePh-Q8S2pxim3-f_8LP) | [VGG16](https://drive.google.com/open?id=1nM0UwmqR4lIHzmRWvs71jfP_gAekjuKy) | 07+12_trainval | 07_test | 0.786 | 32 | 235 | [SSD300](https://github.com/youansheng/torchcv/blob/master/scripts/det/voc/run_ssd300_vgg16_voc_det.sh) |
+| [SSD512](https://drive.google.com/open?id=1RF5gnqfiyz-EcSFU1OSK7tNuX_VRObVW) | [VGG16](https://drive.google.com/open?id=1nM0UwmqR4lIHzmRWvs71jfP_gAekjuKy) | 07+12_trainval | 07_test | 0.808 | 32 | 235 | [SSD512](https://github.com/youansheng/torchcv/blob/master/scripts/det/voc/run_ssd512_vgg16_voc_det.sh) |
+| [Faster R-CNN](https://drive.google.com/open?id=15SfklRiI1McVWEq9EAceznK-9sxXSQR4) | [VGG16](https://drive.google.com/open?id=1ZL9SS9KRzsDQhMe8kyPQ1LHA60wx_Vcj) | 07_trainval | 07_test | 0.706 | 1 | 15 | [Faster R-CNN](https://github.com/youansheng/torchcv/blob/master/scripts/det/voc/run_fr_vgg16_voc_det.sh) |
 
 #### Pose Estimation
 - OpenPose: Realtime Multi-Person 2D Pose Estimation using Part Affinity Fields
@@ -76,7 +75,34 @@ This repository provides source code for some deep learning based cv problems. W
 #### Instance Segmentation
 - Mask R-CNN
 
-## Commands with PyTorchCV
+
+## DataSet with TorchCV
+An example dataset directory tree for training semantic segmentation.
+- You could preprocess the open datasets with the scripts in folder [datasets/seg/preprocess](https://github.com/youansheng/torchcv/tree/master/datasets/seg/preprocess)
+    ```
+    DataSet
+        train
+            image
+                00001.jpg/png
+                00002.jpg/png
+                ...
+            label-
+                00001.png
+                00002.png
+                ...
+        val
+            image
+                00001.jpg/png
+                00002.jpg/png
+                ...
+            label
+                00001.png
+                00002.png
+                ...
+    ```
+
+
+## Commands with TorchCV
 
 Take PSPNet as an example. ("tag" could be any string, include an empty one.)
 - Training
@@ -103,7 +129,7 @@ cd scripts/seg/cityscapes/
 bash run_fs_pspnet_cityscapes_seg.sh test tag
 ```
 
-## Examples with PyTorchCV
+## Examples with TorchCV
 
 <div align="center">
 
