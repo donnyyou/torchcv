@@ -25,7 +25,7 @@ CLS_MODEL_DICT = {
 }
 
 
-class ClsModelManager(object):
+class ModelManager(object):
 
     def __init__(self, configer):
         self.configer = configer

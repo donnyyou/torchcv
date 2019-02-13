@@ -16,7 +16,7 @@ from loss.loss_manager import LossManager
 from methods.det.faster_rcnn_test import FastRCNNTest
 from methods.tools.runner_helper import RunnerHelper
 from methods.tools.trainer import Trainer
-from models.det_model_manager import DetModelManager
+from models.det.model_manager import ModelManager
 from utils.layers.det.fr_priorbox_layer import FRPriorBoxLayer
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
@@ -37,7 +37,7 @@ class FasterRCNN(object):
         self.val_losses = AverageMeter()
         self.det_visualizer = DetVisualizer(configer)
         self.det_loss_manager = LossManager(configer)
-        self.det_model_manager = DetModelManager(configer)
+        self.det_model_manager = ModelManager(configer)
         self.det_data_loader = DataLoader(configer)
         self.fr_priorbox_layer = FRPriorBoxLayer(configer)
         self.det_running_score = DetRunningScore(configer)

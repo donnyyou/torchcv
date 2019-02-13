@@ -130,9 +130,9 @@ def collate(batch, trans_dict):
                                                      stack=batch[i]['labelmap'].stack)
 
             if 'maskmap' in data_keys:
-                batch[i]['maskmap'].data = DataContainer(TensorHelper.resize(batch[i]['maskmap'].data,
-                                                                             scaled_size_hw, mode='nearest'),
-                                                         stack=batch[i]['maskmap'].stack)
+                batch[i]['maskmap'] = DataContainer(TensorHelper.resize(batch[i]['maskmap'].data,
+                                                                        scaled_size_hw, mode='nearest'),
+                                                    stack=batch[i]['maskmap'].stack)
 
         pad_width = target_width - scaled_size[0]
         pad_height = target_height - scaled_size[1]

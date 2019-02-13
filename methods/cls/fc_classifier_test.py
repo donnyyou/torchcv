@@ -18,7 +18,7 @@ from PIL import Image
 from datasets.cls.data_loader import DataLoader
 from methods.tools.blob_helper import BlobHelper
 from methods.tools.runner_helper import RunnerHelper
-from models.cls_model_manager import ClsModelManager
+from models.cls.model_manager import ModelManager
 from utils.helpers.image_helper import ImageHelper
 from utils.helpers.json_helper import JsonHelper
 from utils.tools.logger import Logger as Log
@@ -30,7 +30,7 @@ class FCClassifierTest(object):
     def __init__(self, configer):
         self.configer = configer
         self.blob_helper = BlobHelper(configer)
-        self.cls_model_manager = ClsModelManager(configer)
+        self.cls_model_manager = ModelManager(configer)
         self.cls_data_loader = DataLoader(configer)
         self.cls_parser = ClsParser(configer)
         self.device = torch.device('cpu' if self.configer.get('gpu') is None else 'cuda')

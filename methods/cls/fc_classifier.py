@@ -16,7 +16,7 @@ from datasets.cls.data_loader import DataLoader
 from loss.loss_manager import LossManager
 from methods.tools.runner_helper import RunnerHelper
 from methods.tools.trainer import Trainer
-from models.cls_model_manager import ClsModelManager
+from models.cls.model_manager import ModelManager
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
 from metric.cls.cls_running_score import ClsRunningScore
@@ -36,7 +36,7 @@ class FCClassifier(object):
         self.train_losses = AverageMeter()
         self.val_losses = AverageMeter()
         self.cls_loss_manager = LossManager(configer)
-        self.cls_model_manager = ClsModelManager(configer)
+        self.cls_model_manager = ModelManager(configer)
         self.cls_data_loader = DataLoader(configer)
         self.cls_running_score = ClsRunningScore(configer)
 

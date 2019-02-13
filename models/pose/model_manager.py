@@ -23,7 +23,7 @@ SINGLE_POSE_MODEL_DICT = {
 }
 
 
-class PoseModelManager(object):
+class ModelManager(object):
     def __init__(self, configer):
         self.configer = configer
 

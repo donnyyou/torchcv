@@ -15,7 +15,7 @@ import torch
 from datasets.det.data_loader import DataLoader
 from methods.tools.blob_helper import BlobHelper
 from methods.tools.runner_helper import RunnerHelper
-from models.det_model_manager import DetModelManager
+from models.det.model_manager import ModelManager
 from utils.helpers.det_helper import DetHelper
 from utils.helpers.image_helper import ImageHelper
 from utils.helpers.json_helper import JsonHelper
@@ -32,7 +32,7 @@ class YOLOv3Test(object):
         self.blob_helper = BlobHelper(configer)
         self.det_visualizer = DetVisualizer(configer)
         self.det_parser = DetParser(configer)
-        self.det_model_manager = DetModelManager(configer)
+        self.det_model_manager = ModelManager(configer)
         self.det_data_loader = DataLoader(configer)
         self.yolo_target_generator = YOLOTargetGenerator(configer)
         self.yolo_detection_layer = YOLODetectionLayer(configer)

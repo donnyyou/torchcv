@@ -22,7 +22,7 @@ SEG_MODEL_DICT = {
 }
 
 
-class SegModelManager(object):
+class ModelManager(object):
 
     def __init__(self, configer):
         self.configer = configer

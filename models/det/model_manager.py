@@ -24,7 +24,7 @@ DET_MODEL_DICT = {
 }
 
 
-class DetModelManager(object):
+class ModelManager(object):
 
     def __init__(self, configer):
         self.configer = configer

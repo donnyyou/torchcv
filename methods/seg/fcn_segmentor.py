@@ -16,7 +16,7 @@ from datasets.seg.data_loader import DataLoader
 from loss.loss_manager import LossManager
 from methods.tools.runner_helper import RunnerHelper
 from methods.tools.trainer import Trainer
-from models.seg_model_manager import SegModelManager
+from models.seg.model_manager import ModelManager
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
 from metric.seg.seg_running_score import SegRunningScore
@@ -36,7 +36,7 @@ class FCNSegmentor(object):
         self.seg_running_score = SegRunningScore(configer)
         self.seg_visualizer = SegVisualizer(configer)
         self.seg_loss_manager = LossManager(configer)
-        self.seg_model_manager = SegModelManager(configer)
+        self.seg_model_manager = ModelManager(configer)
         self.seg_data_loader = DataLoader(configer)
 
         self.seg_net = None
