@@ -138,7 +138,7 @@ cd scripts/seg/cityscapes/
 bash run_fs_pspnet_cityscapes_seg.sh test tag
 ```
 
-## Examples with TorchCV
+## Demos with TorchCV
 
 <div align="center">
 

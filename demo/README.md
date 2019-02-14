@@ -1,2 +1,2 @@
-# Demos for PyTorchCV
+# Demos with TorchCV
 
