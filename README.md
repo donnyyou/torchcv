@@ -7,7 +7,7 @@
 }
 ```
 
-This repository provides source code for some deep learning based cv problems. We'll do our best to keep this repository up to date.  If you do find a problem about this repository, please raise it as an issue. We will fix it immediately.
+This repository provides source code for most deep learning based cv problems. We'll do our best to keep this repository up-to-date.  If you do find a problem about this repository, please raise it as an issue or submit a pull request.
 
 
 ## Implemented Papers
