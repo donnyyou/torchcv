@@ -87,29 +87,28 @@ All the performances showed below fully reimplemented the papers' results.
 
 
 ## DataSets with TorchCV
-TorchCV has defined the dataset format of all the tasks which you could check in the subdirs of [datasets](https://github.com/youansheng/torchcv/tree/master/datasets). Following is an example dataset directory trees for training semantic segmentation.
-- You could preprocess the open datasets with the scripts in folder [datasets/seg/preprocess](https://github.com/youansheng/torchcv/tree/master/datasets/seg/preprocess)
-    ```
-    DataSet
-        train
-            image
-                00001.jpg/png
-                00002.jpg/png
-                ...
-            label-
-                00001.png
-                00002.png
-                ...
-        val
-            image
-                00001.jpg/png
-                00002.jpg/png
-                ...
-            label
-                00001.png
-                00002.png
-                ...
-    ```
+TorchCV has defined the dataset format of all the tasks which you could check in the subdirs of [datasets](https://github.com/youansheng/torchcv/tree/master/datasets). Following is an example dataset directory trees for training semantic segmentation. You could preprocess the open datasets with the scripts in folder [datasets/seg/preprocess](https://github.com/youansheng/torchcv/tree/master/datasets/seg/preprocess)
+```
+DataSet
+    train
+        image
+            00001.jpg/png
+            00002.jpg/png
+            ...
+        label
+            00001.png
+            00002.png
+            ...
+    val
+        image
+            00001.jpg/png
+            00002.jpg/png
+            ...
+        label
+            00001.png
+            00002.png
+            ...
+```
 
 
 ## Commands with TorchCV
