@@ -44,7 +44,7 @@ This repository provides source code for some deep learning based cv problems. W
 - ResNet: Deep Residual Learning for Image Recognition
 
 #### Semantic Segmentation
-- CityScapes (Single Scale Whole Image Test): Base LR 0.01, Crop Size 769
+- Cityscapes (Single Scale Whole Image Test): Base LR 0.01, Crop Size 769
 
 | Model | Backbone | Train | Test | mIOU | BS | Iters | Scripts |
 |:--------|:---------|:------|:------|:------|:------|:------|:------|
@@ -61,7 +61,7 @@ This repository provides source code for some deep learning based cv problems. W
 | [DeepLabv3]() | [3x3-Res101](https://drive.google.com/open?id=1bUzCKazlh8ElGVYWlABBAb0b0uIqFgtR) | train | val | 44.13 | 81.42 | 16 | 15W | [DeepLabV3](https://github.com/youansheng/torchcv/blob/master/scripts/seg/ade20k/run_fs_res101_deeplabv3_ade20k_seg.sh) |
 
 #### Object Detection
-- Pascal VOC2007/2012: 20 classes
+- Pascal VOC2007/2012 (Single Scale Test): 20 Classes
 
 | Model | Backbone | Train | Test | mAP | BS | Epochs | Scripts |
 |:--------|:---------|:------|:------|:------|:------|:------|:------|
@@ -76,8 +76,8 @@ This repository provides source code for some deep learning based cv problems. W
 - Mask R-CNN
 
 
-## DataSet with TorchCV
-An example dataset directory tree for training semantic segmentation.
+## DataSets with TorchCV
+TorchCV has defined the dataset format of all the tasks which you could check in the subdirs of [datasets](https://github.com/youansheng/torchcv/tree/master/datasets). Following is an example dataset directory trees for training semantic segmentation.
 - You could preprocess the open datasets with the scripts in folder [datasets/seg/preprocess](https://github.com/youansheng/torchcv/tree/master/datasets/seg/preprocess)
     ```
     DataSet
