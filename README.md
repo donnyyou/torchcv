@@ -49,8 +49,8 @@ All the performances showed below fully reimplemented the papers' results.
 
 | Model | Backbone | Train | Test | mIOU | BS | Iters | Scripts |
 |:--------|:---------|:------|:------|:------|:------|:------|:------|
-| [PSPNet]() | [3x3-Res101](https://drive.google.com/open?id=1bUzCKazlh8ElGVYWlABBAb0b0uIqFgtR) | train | val | 78.20 | 8 | 4W | [PSPNet](https://github.com/youansheng/torchcv/blob/master/scripts/cityscape/run_fs_pspnet_cityscape_seg.sh) |
-| [DeepLabV3]() | [3x3-Res101](https://drive.google.com/open?id=1bUzCKazlh8ElGVYWlABBAb0b0uIqFgtR) | train | val | 79.13 | 8 | 4W | [DeepLabV3](https://github.com/youansheng/torchcv/blob/master/scripts/cityscape/run_fs_deeplabv3_cityscape_seg.sh) |
+| [PSPNet]() | [3x3-Res101](https://drive.google.com/open?id=1bUzCKazlh8ElGVYWlABBAb0b0uIqFgtR) | train | val | 78.20 | 8 | 4W | [PSPNet](https://github.com/youansheng/torchcv/blob/master/scripts/seg/cityscapes/run_fs_pspnet_cityscapes_seg.sh) |
+| [DeepLabV3]() | [3x3-Res101](https://drive.google.com/open?id=1bUzCKazlh8ElGVYWlABBAb0b0uIqFgtR) | train | val | 79.13 | 8 | 4W | [DeepLabV3](https://github.com/youansheng/torchcv/blob/master/scripts/seg/cityscapes/run_fs_deeplabv3_cityscapes_seg.sh) |
 
 - ADE20K (Single Scale Whole Image Test): Base LR 0.02, Crop Size 520
 
