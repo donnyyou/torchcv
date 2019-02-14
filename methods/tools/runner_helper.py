@@ -38,13 +38,16 @@ class RunnerHelper(object):
         return DataParallelModel(net, gather_=runner.configer.get('network', 'gathered'))
 
     @staticmethod
-    def load_net(runner, net):
+    def load_net(runner, net, model_path=None):
         if runner.configer.get('gpu') is not None:
             net = RunnerHelper._make_parallel(runner, net)
 
         net = net.to(torch.device('cpu' if runner.configer.get('gpu') is None else 'cuda'))
-        if runner.configer.get('network', 'resume') is not None:
-            resume_dict = torch.load(runner.configer.get('network', 'resume'))
+        if model_path is not None or runner.configer.get('network', 'resume') is not None:
+            resume_path = runner.configer.get('network', 'resume')
+            resume_path = model_path if model_path is not None else resume_path
+            Log.info('Resuming from {}'.format(resume_path))
+            resume_dict = torch.load(resume_path)
             if 'state_dict' in resume_dict:
                 checkpoint_dict = resume_dict['state_dict']
 
