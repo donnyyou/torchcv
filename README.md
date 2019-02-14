@@ -39,6 +39,7 @@ This repository provides source code for some deep learning based cv problems. W
 
 
 ## Performances with TorchCV
+All the performances showed below fully reimplemented the papers' results.
 
 #### Image Classification
 - ResNet: Deep Residual Learning for Image Recognition
