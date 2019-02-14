@@ -38,6 +38,15 @@ This repository provides source code for most deep learning based cv problems. W
     - Mask R-CNN
 
 
+## QuickStart with TorchCV
+Now only support Python3.x & pytorch 0.4.1, and I will update to pytorch 1.0.
+```bash
+pip3 install -r requirements.txt
+cd extensions
+sh make.sh
+```
+
+
 ## Performances with TorchCV
 All the performances showed below fully reimplemented the papers' results.
 
