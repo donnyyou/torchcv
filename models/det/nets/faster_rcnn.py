@@ -202,10 +202,9 @@ class BBoxHead(nn.Module):
         self.classifier = classifier
         self.cls_loc = nn.Linear(4096, self.configer.get('data', 'num_classes') * 4)
         self.score = nn.Linear(4096, self.configer.get('data', 'num_classes'))
-        from extensions.roipool.module import RoIPool2D
-        self.roi_pool = RoIPool2D(pooled_height=int(self.configer.get('roi', 'pooled_height')),
-                                  pooled_width=int(self.configer.get('roi', 'pooled_width')),
-                                  spatial_scale=1.0 / float(self.configer.get('roi', 'spatial_stride')))
+        from extensions.ops.roi_pool.modules.roi_pool import RoIPool
+        self.roi_pool = RoIPool(out_size=int(self.configer.get('roi', 'pooled_size')),
+                                spatial_scale=1.0 / float(self.configer.get('roi', 'spatial_stride')))
 
         normal_init(self.cls_loc, 0, 0.001)
         normal_init(self.score, 0, 0.01)
@@ -225,8 +224,7 @@ class BBoxHead(nn.Module):
                 which bounding boxes correspond to. Its shape is :math:`(R',)`.
         """
         # in case roi_indices is  ndarray
-        scale = x.size(2) / meta[0]['input_size'][1]
-        pool = self.roi_pool(x, indices_and_rois, scale)
+        pool = self.roi_pool(x, indices_and_rois)
         pool = pool.view(pool.size(0), -1)
         fc7 = self.classifier(pool)
         roi_cls_locs = self.cls_loc(fc7)

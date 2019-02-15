@@ -48,7 +48,7 @@ class LossManager(object):
 
     def _parallel(self, loss):
         if self.configer.get('network', 'loss_balance') and len(range(torch.cuda.device_count())) > 1:
-            from extensions.parallel.data_parallel import DataParallelCriterion
+            from extensions.tools.parallel.data_parallel import DataParallelCriterion
             loss = DataParallelCriterion(loss)
 
         return loss

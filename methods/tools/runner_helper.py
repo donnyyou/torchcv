@@ -15,7 +15,7 @@ import torch
 import torch.nn as nn
 from torch.nn.parallel.scatter_gather import gather as torch_gather
 
-from extensions.parallel.data_parallel import DataParallelModel
+from extensions.tools.parallel.data_parallel import DataParallelModel
 from utils.tools.logger import Logger as Log
 
 

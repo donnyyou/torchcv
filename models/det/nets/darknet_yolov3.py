@@ -13,7 +13,7 @@ import torch.nn.functional as F
 from collections import OrderedDict
 
 from models.backbones.backbone_selector import BackboneSelector
-from utils.layers.det.yolo_detection_layer import YOLODetectionLayer
+from models.det.layers.yolo_detection_layer import YOLODetectionLayer
 
 
 class DarkNetYolov3(nn.Module):
