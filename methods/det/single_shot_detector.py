@@ -17,12 +17,12 @@ from methods.det.single_shot_detector_test import SingleShotDetectorTest
 from methods.tools.runner_helper import RunnerHelper
 from methods.tools.trainer import Trainer
 from models.det.model_manager import ModelManager
-from utils.layers.det.ssd_priorbox_layer import SSDPriorBoxLayer
-from utils.layers.det.ssd_target_generator import SSDTargetGenerator
+from models.det.layers.ssd_priorbox_layer import SSDPriorBoxLayer
+from models.det.layers.ssd_target_generator import SSDTargetGenerator
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
 from metric.det.det_running_score import DetRunningScore
-from vis.visualizer.det_visualizer import DetVisualizer
+from utils.visualizer.det_visualizer import DetVisualizer
 
 
 class SingleShotDetector(object):

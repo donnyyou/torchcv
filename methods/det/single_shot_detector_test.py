@@ -21,11 +21,11 @@ from models.det.model_manager import ModelManager
 from utils.helpers.det_helper import DetHelper
 from utils.helpers.image_helper import ImageHelper
 from utils.helpers.json_helper import JsonHelper
-from utils.layers.det.ssd_priorbox_layer import SSDPriorBoxLayer
-from utils.layers.det.ssd_target_generator import SSDTargetGenerator
+from models.det.layers.ssd_priorbox_layer import SSDPriorBoxLayer
+from models.det.layers.ssd_target_generator import SSDTargetGenerator
 from utils.tools.logger import Logger as Log
-from vis.parser.det_parser import DetParser
-from vis.visualizer.det_visualizer import DetVisualizer
+from utils.parser.det_parser import DetParser
+from utils.visualizer.det_visualizer import DetVisualizer
 
 
 class SingleShotDetectorTest(object):

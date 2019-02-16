@@ -17,11 +17,11 @@ from methods.det.faster_rcnn_test import FastRCNNTest
 from methods.tools.runner_helper import RunnerHelper
 from methods.tools.trainer import Trainer
 from models.det.model_manager import ModelManager
-from utils.layers.det.fr_priorbox_layer import FRPriorBoxLayer
+from models.det.layers.fr_priorbox_layer import FRPriorBoxLayer
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
 from metric.det.det_running_score import DetRunningScore
-from vis.visualizer.det_visualizer import DetVisualizer
+from utils.visualizer.det_visualizer import DetVisualizer
 from utils.helpers.dc_helper import DCHelper
 
 

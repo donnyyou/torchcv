@@ -21,11 +21,9 @@ from methods.tools.runner_helper import RunnerHelper
 from models.pose.model_manager import ModelManager
 from utils.helpers.image_helper import ImageHelper
 from utils.helpers.json_helper import JsonHelper
-from utils.layers.pose.heatmap_generator import HeatmapGenerator
-from utils.layers.pose.paf_generator import PafGenerator
 from utils.tools.logger import Logger as Log
-from vis.parser.pose_parser import PoseParser
-from vis.visualizer.pose_visualizer import PoseVisualizer
+from utils.parser.pose_parser import PoseParser
+from utils.visualizer.pose_visualizer import PoseVisualizer
 
 
 class OpenPoseTest(object):
@@ -36,8 +34,6 @@ class OpenPoseTest(object):
         self.pose_parser = PoseParser(configer)
         self.pose_model_manager = ModelManager(configer)
         self.pose_data_loader = DataLoader(configer)
-        self.heatmap_generator = HeatmapGenerator(configer)
-        self.paf_generator = PafGenerator(configer)
         self.device = torch.device('cpu' if self.configer.get('gpu') is None else 'cuda')
         self.pose_net = None
 

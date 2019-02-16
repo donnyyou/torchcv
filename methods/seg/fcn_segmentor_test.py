@@ -20,8 +20,8 @@ from methods.tools.runner_helper import RunnerHelper
 from models.seg.model_manager import ModelManager
 from utils.helpers.image_helper import ImageHelper
 from utils.tools.logger import Logger as Log
-from vis.parser.seg_parser import SegParser
-from vis.visualizer.seg_visualizer import SegVisualizer
+from utils.parser.seg_parser import SegParser
+from utils.visualizer.seg_visualizer import SegVisualizer
 
 
 class FCNSegmentorTest(object):

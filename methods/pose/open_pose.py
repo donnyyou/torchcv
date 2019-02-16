@@ -16,11 +16,9 @@ from loss.loss_manager import LossManager
 from methods.tools.runner_helper import RunnerHelper
 from methods.tools.trainer import Trainer
 from models.pose.model_manager import ModelManager
-from utils.layers.pose.heatmap_generator import HeatmapGenerator
-from utils.layers.pose.paf_generator import PafGenerator
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
-from vis.visualizer.pose_visualizer import PoseVisualizer
+from utils.visualizer.pose_visualizer import PoseVisualizer
 
 
 class OpenPose(object):
@@ -42,8 +40,6 @@ class OpenPose(object):
         self.pose_loss_manager = LossManager(configer)
         self.pose_model_manager = ModelManager(configer)
         self.pose_data_loader = DataLoader(configer)
-        self.heatmap_generator = HeatmapGenerator(configer)
-        self.paf_generator = PafGenerator(configer)
 
         self.pose_net = None
         self.train_loader = None

@@ -19,11 +19,11 @@ from models.det.model_manager import ModelManager
 from utils.helpers.det_helper import DetHelper
 from utils.helpers.image_helper import ImageHelper
 from utils.helpers.json_helper import JsonHelper
-from utils.layers.det.yolo_detection_layer import YOLODetectionLayer
-from utils.layers.det.yolo_target_generator import YOLOTargetGenerator
+from models.det.layers.yolo_detection_layer import YOLODetectionLayer
+from models.det.layers.yolo_target_generator import YOLOTargetGenerator
 from utils.tools.logger import Logger as Log
-from vis.parser.det_parser import DetParser
-from vis.visualizer.det_visualizer import DetVisualizer
+from utils.parser.det_parser import DetParser
+from utils.visualizer.det_visualizer import DetVisualizer
 
 
 class YOLOv3Test(object):

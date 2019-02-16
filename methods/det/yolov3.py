@@ -17,12 +17,12 @@ from methods.det.yolov3_test import YOLOv3Test
 from methods.tools.runner_helper import RunnerHelper
 from methods.tools.trainer import Trainer
 from models.det.model_manager import ModelManager
-from utils.layers.det.yolo_detection_layer import YOLODetectionLayer
-from utils.layers.det.yolo_target_generator import YOLOTargetGenerator
+from models.det.layers.yolo_detection_layer import YOLODetectionLayer
+from models.det.layers.yolo_target_generator import YOLOTargetGenerator
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
 from metric.det.det_running_score import DetRunningScore
-from vis.visualizer.det_visualizer import DetVisualizer
+from utils.visualizer.det_visualizer import DetVisualizer
 
 
 class YOLOv3(object):

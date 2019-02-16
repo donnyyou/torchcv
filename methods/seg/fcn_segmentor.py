@@ -20,7 +20,7 @@ from models.seg.model_manager import ModelManager
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
 from metric.seg.seg_running_score import SegRunningScore
-from vis.visualizer.seg_visualizer import SegVisualizer
+from utils.visualizer.seg_visualizer import SegVisualizer
 
 
 class FCNSegmentor(object):
