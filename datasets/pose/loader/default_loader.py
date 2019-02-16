@@ -12,7 +12,7 @@ import numpy as np
 import torch
 import torch.utils.data as data
 
-from extensions.tools.parallel.data_container import DataContainer
+from extensions.tools.parallel import DataContainer
 from datasets.pose.utils.heatmap_generator import HeatmapGenerator
 from utils.helpers.json_helper import JsonHelper
 from utils.helpers.image_helper import ImageHelper

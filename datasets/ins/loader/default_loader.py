@@ -11,7 +11,7 @@ import os
 import numpy as np
 from torch.utils import data
 
-from extensions.tools.parallel.data_container import DataContainer
+from extensions.tools.parallel import DataContainer
 from utils.helpers.image_helper import ImageHelper
 from utils.helpers.json_helper import JsonHelper
 from utils.tools.logger import Logger as Log

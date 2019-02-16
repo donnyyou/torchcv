@@ -15,7 +15,7 @@ import torch.nn.functional as F
 from torch.utils.data.dataloader import default_collate
 from torch._six import string_classes, int_classes
 
-from extensions.parallel.data_container import DataContainer
+from extensions.tools.parallel import DataContainer
 from utils.helpers.tensor_helper import TensorHelper
 from utils.tools.logger import Logger as Log
 

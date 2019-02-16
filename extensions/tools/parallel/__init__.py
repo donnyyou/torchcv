@@ -1,8 +1,10 @@
 from .data_container import DataContainer
+from .data_parallel import DataParallelModel, DataParallelCriterion
 from .distributed import MMDistributedDataParallel
 from .scatter_gather import scatter, scatter_kwargs
 
 __all__ = [
-    'collate', 'DataContainer', 'MMDataParallel', 'MMDistributedDataParallel',
+    'DataContainer', 'MMDistributedDataParallel',
+    'DataParallelModel', 'DataParallelCriterion',
     'scatter', 'scatter_kwargs'
 ]
