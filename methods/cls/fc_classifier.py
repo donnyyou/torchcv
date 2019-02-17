@@ -13,13 +13,12 @@ import torch
 import torch.backends.cudnn as cudnn
 
 from datasets.cls.data_loader import DataLoader
-from loss.loss_manager import LossManager
 from methods.tools.runner_helper import RunnerHelper
 from methods.tools.trainer import Trainer
 from models.cls.model_manager import ModelManager
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
-from metric.cls.cls_running_score import ClsRunningScore
+from metrics.cls.cls_running_score import ClsRunningScore
 
 
 cudnn.benchmark = True
@@ -35,7 +34,6 @@ class FCClassifier(object):
         self.data_time = AverageMeter()
         self.train_losses = AverageMeter()
         self.val_losses = AverageMeter()
-        self.cls_loss_manager = LossManager(configer)
         self.cls_model_manager = ModelManager(configer)
         self.cls_data_loader = DataLoader(configer)
         self.cls_running_score = ClsRunningScore(configer)
@@ -52,12 +50,12 @@ class FCClassifier(object):
     def _init_model(self):
         self.cls_net = self.cls_model_manager.image_classifier()
         self.cls_net = RunnerHelper.load_net(self, self.cls_net)
-        self.optimizer, self.scheduler = Trainer.init(self, self._get_parameters())
+        self.optimizer, self.scheduler = Trainer.init(self, self._get_parameters(), self.configer.get('solver'))
 
         self.train_loader = self.cls_data_loader.get_trainloader()
         self.val_loader = self.cls_data_loader.get_valloader()
 
-        self.ce_loss = self.cls_loss_manager.get_cls_loss()
+        self.ce_loss = self.cls_model_manager.get_cls_loss()
 
     def _get_parameters(self):
 

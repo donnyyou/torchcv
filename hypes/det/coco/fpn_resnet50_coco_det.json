@@ -8,10 +8,29 @@
       "image_tool": "pil",
       "input_mode": "RGB",
       "keep_difficult": false,
-      "workers": 8
+      "workers": 8,
+      "normalize": {
+        "div_value": 255,
+        "mean_value": [124, 116, 104],
+        "mean": [0.485, 0.456, 0.406],
+        "std": [0.229, 0.224, 0.225]
+      }
     },
     "train": {
       "batch_size": 16,
+      "aug_trans": {
+        "trans_seq": ["random_hflip", "random_resize"],
+        "random_hflip": {
+          "ratio": 0.5,
+          "swap_pair": []
+        },
+        "random_resize": {
+          "ratio": 1.0,
+          "method": "bound",
+          "resize_bound": [800, 1333],
+          "aspect_range": [0.9, 1.1]
+        }
+      },
       "data_transformer": {
         "size_mode": "max_size",
         "align_method": "only_pad"
@@ -20,6 +39,15 @@
     "val": {
       "batch_size": 16,
       "use_07_metric": false,
+      "aug_trans": {
+        "trans_seq": ["random_resize"],
+        "random_resize": {
+          "ratio": 1.0,
+          "method": "bound",
+          "resize_bound": [800, 1333],
+          "aspect_range": [0.9, 1.1]
+        }
+      },
       "data_transformer": {
         "size_mode": "max_size",
         "align_method": "only_pad"
@@ -28,34 +56,6 @@
     "test": {
       "resize_bound": [800, 1333],
       "scale_search": [1.0]
-    },
-    "train_trans": {
-      "trans_seq": ["random_hflip", "random_resize"],
-      "random_hflip": {
-        "ratio": 0.5,
-        "swap_pair": []
-      },
-      "random_resize": {
-        "ratio": 1.0,
-        "method": "bound",
-        "resize_bound": [800, 1333],
-        "aspect_range": [0.9, 1.1]
-      }
-    },
-    "val_trans": {
-      "trans_seq": ["random_resize"],
-      "random_resize": {
-        "ratio": 1.0,
-        "method": "bound",
-        "resize_bound": [800, 1333],
-        "aspect_range": [0.9, 1.1]
-      }
-    },
-    "normalize": {
-      "div_value": 255,
-      "mean_value": [124, 116, 104],
-      "mean": [0.485, 0.456, 0.406],
-      "std": [0.229, 0.224, 0.225]
     },
     "rpn": {
       "head_index_list": [0, 0, 0, 0, 0],
@@ -68,7 +68,7 @@
       "num_feature_list": [512, 512, 512, 512, 512],
       "nms_threshold": 0.7,
       "min_size": 16,
-      "loss": {
+      "sampler": {
         "n_sample": 256,
         "pos_ratio": 0.5,
         "pos_iou_thresh": 0.7,
@@ -78,7 +78,6 @@
       "n_train_post_nms": 2000,
       "n_test_pre_nms": 6000,
       "n_test_post_nms": 300
-
     },
     "roi": {
       "method": "roialign",
@@ -88,7 +87,7 @@
       "spatial_stride": 16,
       "loc_normalize_mean": [0.0, 0.0, 0.0, 0.0],
       "loc_normalize_std": [0.1, 0.1, 0.2, 0.2],
-      "loss": {
+      "sampler": {
         "n_sample": 128,
         "pos_ratio": 0.25,
         "pos_iou_thresh": 0.5,
@@ -130,18 +129,11 @@
                    "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator",
                    "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush"]
     },
-    "checkpoints": {
-      "checkpoints_name": "fpn_resnet101_coco_det",
-      "checkpoints_dir": "checkpoints/det/coco",
-      "save_iters": 5000
-    },
     "network":{
       "backbone": "resnet101",
       "model_name": "fpn_rcnn",
-      "loss_weights": {
-        "rpn_loss": 1.0,
-        "roi_loss": 1.0
-      }
+      "checkpoints_name": "fpn_resnet101_coco_det",
+      "checkpoints_dir": "checkpoints/det/coco"
     },
     "logging": {
       "logfile_level": "info",
@@ -150,51 +142,56 @@
       "log_format": "%(asctime)s %(levelname)-7s %(message)s",
       "rewrite": true
     },
-    "lr": {
-      "metric": "epoch",
-      "is_warm": true,
-      "warm": {
-        "warm_epoch": 0.1
-      },
-      "base_lr": 0.02,
-      "lr_policy": "multistep",
-      "step": {
-        "gamma": 0.1,
-        "step_size": 9
-      },
-      "multistep": {
-        "gamma": 0.1,
-        "stepvalue": [9, 12]
-      }
-    },
     "solver": {
+      "lr": {
+        "metric": "epoch",
+        "is_warm": true,
+        "warm": {
+          "warm_epoch": 0.1
+        },
+        "base_lr": 0.02,
+        "lr_policy": "multistep",
+        "step": {
+          "gamma": 0.1,
+          "step_size": 9
+        },
+        "multistep": {
+          "gamma": 0.1,
+          "stepvalue": [9, 12]
+        }
+      },
+      "optim": {
+        "optim_method": "sgd",
+        "adam": {
+          "betas": [0.9, 0.999],
+          "eps": 1e-08,
+          "weight_decay": 0.0001
+        },
+        "sgd":{
+          "weight_decay": 0.0001,
+          "momentum": 0.9,
+          "nesterov": false
+        }
+      },
       "display_iter": 100,
+      "save_iters": 5000,
       "test_interval": 5000,
       "max_epoch": 13
     },
-    "optim": {
-      "optim_method": "sgd",
-      "adam": {
-        "betas": [0.9, 0.999],
-        "eps": 1e-08,
-        "weight_decay": 0.0001
-      },
-      "sgd":{
-        "weight_decay": 0.0001,
-        "momentum": 0.9,
-        "nesterov": false
-      }
-    },
-    "nms": {
-      "mode": "union",
-      "overlap_threshold": 0.3
-    },
     "res": {
+      "nms": {
+        "mode": "union",
+        "overlap_threshold": 0.3
+      },
       "val_conf_thre": 0.05,
       "vis_conf_thre": 0.5
     },
     "loss": {
       "loss_type": "fr_loss",
+      "loss_weights": {
+        "rpn_loss": 1.0,
+        "roi_loss": 1.0
+      },
       "params": {
         "rpn_sigma": 3.0,
         "roi_sigma": 1.0

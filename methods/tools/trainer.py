@@ -16,16 +16,17 @@ from utils.tools.logger import Logger as Log
 class Trainer(object):
 
     @staticmethod
-    def init(runner, net_params):
+    def init(runner, net_params, solver_dict=None):
         optimizer = None
-        if runner.configer.get('optim', 'optim_method') == 'sgd':
+        optim_params = solver_dict['optim']
+        if optim_params['optim_method'] == 'sgd':
             optimizer = SGD(net_params,
                             lr=runner.configer.get('lr', 'base_lr'),
                             momentum=runner.configer.get('optim', 'sgd')['momentum'],
                             weight_decay=runner.configer.get('optim', 'sgd')['weight_decay'],
                             nesterov=runner.configer.get('optim', 'sgd')['nesterov'])
 
-        elif runner.configer.get('optim', 'optim_method') == 'adam':
+        elif optim_params['optim_method'] == 'adam':
             optimizer = Adam(net_params,
                              lr=runner.configer.get('lr', 'base_lr'),
                              betas=runner.configer.get('optim', 'adam')['betas'],
@@ -33,88 +34,88 @@ class Trainer(object):
                              weight_decay=runner.configer.get('optim', 'adam')['weight_decay'])
 
         else:
-            Log.error('Optimizer {} is not valid.'.format(runner.configer.get('optim', 'optim_method')))
+            Log.error('Optimizer {} is not valid.'.format(optim_params['optim_method']))
             exit(1)
 
-        policy = runner.configer.get('lr', 'lr_policy')
-
+        lr_params = solver_dict['lr']
         scheduler = None
-        if policy == 'step':
+        if lr_params['policy'] == 'step':
             scheduler = lr_scheduler.StepLR(optimizer,
-                                            runner.configer.get('lr', 'step')['step_size'],
-                                            gamma=runner.configer.get('lr', 'step')['gamma'])
+                                            lr_params['step']['step_size'],
+                                            gamma=lr_params['step']['gamma'])
 
-        elif policy == 'multistep':
+        elif lr_params['policy'] == 'multistep':
             scheduler = lr_scheduler.MultiStepLR(optimizer,
-                                                 runner.configer.get('lr', 'multistep')['stepvalue'],
-                                                 gamma=runner.configer.get('lr', 'multistep')['gamma'])
+                                                 lr_params['multistep']['stepvalue'],
+                                                 gamma=lr_params['multistep']['gamma'])
 
-        elif policy == 'lambda_poly':
-            if runner.configer.get('lr', 'metric') == 'epoch':
-                lambda_poly = lambda epoch: pow((1.0 - epoch / runner.configer.get('solver', 'max_epoch')), 0.9)
+        elif lr_params['policy'] == 'lambda_poly':
+            if lr_params['metric'] == 'epoch':
+                lambda_poly = lambda epoch: pow((1.0 - epoch / solver_dict['max_epoch']), 0.9)
             else:
                 assert runner.configer.get('lr', 'metric') == 'iters'
-                lambda_poly = lambda epoch: pow((1.0 - epoch / runner.configer.get('solver', 'max_iters')), 0.9)
+                lambda_poly = lambda epoch: pow((1.0 - epoch / solver_dict['max_iters']), 0.9)
 
             scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_poly)
 
-        elif policy == 'lambda_linear':
-            if runner.configer.get('lr', 'metric') == 'epoch':
-                lambda_linear = lambda epoch: 1.0 - (epoch / runner.configer.get('solver', 'max_epoch'))
+        elif lr_params['policy'] == 'lambda_linear':
+            if lr_params['metric'] == 'epoch':
+                lambda_linear = lambda epoch: 1.0 - (epoch / solver_dict['max_epoch'])
             else:
-                assert runner.configer.get('lr', 'metric') == 'iters'
-                lambda_linear = lambda epoch: 1.0 - (epoch / runner.configer.get('solver', 'max_iters'))
+                assert lr_params['metric'] == 'iters'
+                lambda_linear = lambda epoch: 1.0 - (epoch / solver_dict['max_iters'])
 
             scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_linear)
 
-        elif policy == 'plateau':
+        elif lr_params['policy'] == 'plateau':
             scheduler = lr_scheduler.ReduceLROnPlateau(optimizer,
-                                                       mode=runner.configer.get('lr', 'plateau')['mode'],
-                                                       factor=runner.configer.get('lr', 'plateau')['factor'],
-                                                       patience=runner.configer.get('lr', 'plateau')['patience'],
-                                                       threshold=runner.configer.get('lr', 'plateau')['threshold'],
-                                                       threshold_mode=runner.configer.get('lr', 'plateau')['thre_mode'],
-                                                       cooldown=runner.configer.get('lr', 'plateau')['cooldown'],
-                                                       min_lr=runner.configer.get('lr', 'plateau')['min_lr'],
-                                                       eps=runner.configer.get('lr', 'plateau')['eps'])
+                                                       mode=lr_params['plateau']['mode'],
+                                                       factor=lr_params['plateau']['factor'],
+                                                       patience=lr_params['plateau']['patience'],
+                                                       threshold=lr_params['plateau']['threshold'],
+                                                       threshold_mode=lr_params['plateau']['thre_mode'],
+                                                       cooldown=lr_params['plateau']['cooldown'],
+                                                       min_lr=lr_params['plateau']['min_lr'],
+                                                       eps=lr_params['plateau']['eps'])
 
         else:
-            Log.error('Policy:{} is not valid.'.format(policy))
+            Log.error('Policy:{} is not valid.'.format(lr_params['policy']))
             exit(1)
 
         return optimizer, scheduler
 
     @staticmethod
-    def update(runner, backbone_list=()):
-        if not runner.configer.exists('lr', 'is_warm') or not runner.configer.get('lr', 'is_warm'):
-            if runner.configer.get('lr', 'metric') == 'epoch':
+    def update(runner, backbone_list=(), solver_dict=None):
+        if 'is_warm' not in solver_dict['lr'] or not solver_dict['lr']['is_warm']:
+            if solver_dict['lr']['metric'] == 'epoch':
                 runner.scheduler.step(runner.runner_state['epoch'])
             else:
-                assert runner.configer.get('lr', 'metric') == 'iters'
+                assert solver_dict['lr']['metric'] == 'iters'
                 runner.scheduler.step(runner.runner_state['iters'])
 
             return
 
-        if runner.runner_state['iters'] < runner.configer.get('lr', 'warm')['warm_iters']:
-            if runner.configer.get('lr', 'warm')['freeze_backbone']:
+        warm_params = solver_dict['lr']['warm']
+        if runner.runner_state['iters'] < warm_params['warm_iters']:
+            if warm_params['freeze_backbone']:
                 for backbone_index in backbone_list:
                     runner.optimizer.param_groups[backbone_index]['lr'] = 0.0
 
             else:
-                lr_ratio = (runner.runner_state['iters'] + 1) / runner.configer.get('lr', 'warm')['warm_iters']
+                lr_ratio = (runner.runner_state['iters'] + 1) / warm_params['warm_iters']
 
                 base_lr_list = runner.scheduler.get_lr()
                 for param_group, base_lr in zip(runner.optimizer.param_groups, base_lr_list):
                     param_group['lr'] = base_lr * (lr_ratio ** 4)
 
-        elif runner.runner_state['iters'] == runner.configer.get('lr', 'warm')['warm_iters']:
+        elif runner.runner_state['iters'] == warm_params['warm_iters']:
             try:
                 base_lr_list = runner.scheduler.get_lr()
                 for param_group, base_lr in zip(runner.optimizer.param_groups, base_lr_list):
                     param_group['lr'] = base_lr
 
             except AttributeError:
-                nbb_lr = runner.configer.get('lr', 'base_lr') * runner.configer.get('lr', 'nbb_mult')
+                nbb_lr = solver_dict['lr']['base_lr'] * solver_dict['lr']['nbb_mult']
                 for i, param_group in enumerate(runner.optimizer.param_groups):
                     if i in backbone_list:
                         continue
@@ -122,10 +123,10 @@ class Trainer(object):
                     param_group[i]['lr'] = nbb_lr
 
         else:
-            if runner.configer.get('lr', 'metric') == 'epoch':
+            if solver_dict['lr']['metric'] == 'epoch':
                 runner.scheduler.step(runner.runner_state['epoch'])
             else:
-                assert runner.configer.get('lr', 'metric') == 'iters'
+                assert solver_dict['lr']['metric'] == 'iters'
                 runner.scheduler.step(runner.runner_state['iters'])
 
 

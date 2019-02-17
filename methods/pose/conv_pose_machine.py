@@ -12,7 +12,6 @@ import time
 import torch
 
 from datasets.pose.data_loader import DataLoader
-from loss.loss_manager import LossManager
 from methods.tools.runner_helper import RunnerHelper
 from methods.tools.trainer import Trainer
 from models.pose.model_manager import ModelManager
@@ -32,7 +31,6 @@ class ConvPoseMachine(object):
         self.train_losses = AverageMeter()
         self.val_losses = AverageMeter()
         self.pose_visualizer = PoseVisualizer(configer)
-        self.pose_loss_manager = LossManager(configer)
         self.pose_model_manager = ModelManager(configer)
         self.pose_data_loader = DataLoader(configer)
 
@@ -49,12 +47,12 @@ class ConvPoseMachine(object):
         self.pose_net = self.pose_model_manager.single_pose_detector()
         self.pose_net = RunnerHelper.load_net(self, self.pose_net)
 
-        self.optimizer, self.scheduler = Trainer.init(self, self._get_parameters())
+        self.optimizer, self.scheduler = Trainer.init(self, self._get_parameters(), self.configer.get('solver'))
 
         self.train_loader = self.pose_data_loader.get_trainloader()
         self.val_loader = self.pose_data_loader.get_valloader()
 
-        self.mse_loss = self.pose_loss_manager.get_pose_loss()
+        self.mse_loss = self.pose_model_manager.get_pose_loss()
 
     def _get_parameters(self):
 

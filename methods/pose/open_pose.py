@@ -12,7 +12,6 @@ import time
 import torch
 
 from datasets.pose.data_loader import DataLoader
-from loss.loss_manager import LossManager
 from methods.tools.runner_helper import RunnerHelper
 from methods.tools.trainer import Trainer
 from models.pose.model_manager import ModelManager
@@ -37,7 +36,6 @@ class OpenPose(object):
         self.val_loss_heatmap = AverageMeter()
         self.val_loss_associate = AverageMeter()
         self.pose_visualizer = PoseVisualizer(configer)
-        self.pose_loss_manager = LossManager(configer)
         self.pose_model_manager = ModelManager(configer)
         self.pose_data_loader = DataLoader(configer)
 
@@ -54,13 +52,13 @@ class OpenPose(object):
         self.pose_net = self.pose_model_manager.multi_pose_detector()
         self.pose_net = RunnerHelper.load_net(self, self.pose_net)
 
-        self.optimizer, self.scheduler = Trainer.init(self, self._get_parameters())
+        self.optimizer, self.scheduler = Trainer.init(self, self._get_parameters(), self.configer.get('solver'))
 
         self.train_loader = self.pose_data_loader.get_trainloader()
         self.val_loader = self.pose_data_loader.get_valloader()
 
         self.weights = self.configer.get('network', 'loss_weights')
-        self.mse_loss = self.pose_loss_manager.get_pose_loss()
+        self.mse_loss = self.pose_model_manager.get_pose_loss()
 
     def _get_parameters(self):
         lr_1 = []
