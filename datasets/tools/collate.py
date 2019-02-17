@@ -196,8 +196,3 @@ def collate(batch, trans_dict):
                 batch[i]['bboxes'].data[:, 1::2] += up_pad
 
     return dict({key: stack(batch, data_key=key, trans_dict=trans_dict) for key in data_keys})
-
-
-
-
-

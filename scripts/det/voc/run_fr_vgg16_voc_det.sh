@@ -14,8 +14,14 @@ LOSS_TYPE="fr_loss"
 CHECKPOINTS_NAME="fr_vgg16_voc_det"$2
 PRETRAINED_MODEL="./pretrained_model/faster_rcnn_vgg16_caffe_pretrained.pth"
 HYPES_FILE='hypes/det/voc/fr_vgg16_voc_det.json'
-LOG_FILE="./log/det/voc/${CHECKPOINTS_NAME}.log"
 
+LOG_DIR="./log/det/voc/"
+LOG_FILE="${LOG_DIR}${CHECKPOINTS_NAME}.log"
+
+if [ ! -d ${LOG_DIR} ]; then
+    echo ${LOG_DIR}" not exists!!!"
+    make -p ${LOG_DIR}
+fi
 
 if [ "$1"x == "train"x ]; then
   ${PYTHON} -u main.py --hypes ${HYPES_FILE} --phase train --log_to_file n --gpu 0 --cudnn n \
