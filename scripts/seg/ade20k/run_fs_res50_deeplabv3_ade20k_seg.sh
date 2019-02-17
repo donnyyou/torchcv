@@ -24,7 +24,7 @@ LOG_FILE="${LOG_DIR}${CHECKPOINTS_NAME}.log"
 
 if [ ! -d ${LOG_DIR} ]; then
     echo ${LOG_DIR}" not exists!!!"
-    make -p ${LOG_DIR}
+    mkdir -p ${LOG_DIR}
 fi
 
 
