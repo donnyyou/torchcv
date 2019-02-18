@@ -3,6 +3,8 @@
 # Author: Donny You(youansheng@gmail.com)
 
 
+export PATH=/opt/rh/devtoolset-3/root/usr/bin:$PATH
+
 PYTHON=${PYTHON:-"python"}
 
 echo "Building cocoapi..."

@@ -111,7 +111,7 @@ class SingleShotDetectorTest(object):
 
             valid_preds = image_pred[ids]
             _, order = valid_preds[:, 4].sort(0, descending=True)
-            order = order[:configer.get('nms', 'pre_nms')]
+            order = order[:configer.get('res', 'nms')['pre_nms']]
             valid_preds = valid_preds[order]
             valid_preds = valid_preds[valid_preds[:, 4] > configer.get('res', 'val_conf_thre')]
             if valid_preds.numel() == 0:
@@ -119,7 +119,7 @@ class SingleShotDetectorTest(object):
 
             valid_preds = DetHelper.cls_nms(valid_preds[:, :6],
                                             labels=valid_preds[:, 5],
-                                            max_threshold=configer.get('nms', 'max_threshold'),
+                                            max_threshold=configer.get('res', 'nms')['max_threshold'],
                                             cls_keep_num=configer.get('res', 'cls_keep_num'))
 
             _, order = valid_preds[:, 4].sort(0, descending=True)

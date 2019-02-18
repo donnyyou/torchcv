@@ -164,7 +164,7 @@ class FastRCNNTest(object):
 
             output[i] = DetHelper.cls_nms(valid_preds,
                                           labels=valid_preds[:, 5],
-                                          max_threshold=configer.get('nms', 'max_threshold'))
+                                          max_threshold=configer.get('res', 'nms')['max_threshold'])
 
         return output
 

@@ -104,7 +104,7 @@ class YOLOv3Test(object):
             detections = torch.cat((image_pred[:, :5], class_conf.float(), class_pred.float()), 1)
             output[image_i] = DetHelper.cls_nms(detections,
                                                 labels=class_pred.squeeze(1),
-                                                max_threshold=configer.get('nms', 'max_threshold'))
+                                                max_threshold=configer.get('res', 'nms')['max_threshold'])
 
         return output
 
