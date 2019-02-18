@@ -137,7 +137,7 @@ class OpenPose(object):
                 self.train_loss_heatmap.reset()
                 self.train_loss_associate.reset()
 
-            if self.configer.get('lr', 'metric') == 'iters' \
+            if self.configer.get('solver', 'lr')['metric'] == 'iters' \
                     and self.runner_state['iters'] == self.configer.get('solver', 'max_iters'):
                 break
 

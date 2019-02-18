@@ -243,9 +243,9 @@ class YOLOv3Loss(nn.Module):
         loss_cls = loss_cls / obj_cnt
 
         #  total loss = losses * weight
-        loss = loss_coord * self.configer.get('network', 'loss_weights')['coord_loss'] + \
-               loss_obj * self.configer.get('network', 'loss_weights')['obj_loss'] + \
-               loss_cls * self.configer.get('network', 'loss_weights')['cls_loss']
+        loss = loss_coord * self.configer.get('loss', 'loss_weights')['coord_loss'] + \
+               loss_obj * self.configer.get('loss', 'loss_weights')['obj_loss'] + \
+               loss_cls * self.configer.get('loss', 'loss_weights')['cls_loss']
 
         return loss
 
@@ -304,7 +304,7 @@ class FRLoss(nn.Module):
         # Log.info('rpn cls {}'.format(rpn_cls_loss))
         # Log.info('roi loc {}'.format(roi_loc_loss))
         # Log.info('roi cls {}'.format(roi_cls_loss))
-        rpn_loss = (rpn_loc_loss + rpn_cls_loss) * self.configer.get('network', 'loss_weights')['rpn_loss']
-        roi_loss = (roi_loc_loss + roi_cls_loss) * self.configer.get('network', 'loss_weights')['roi_loss']
+        rpn_loss = (rpn_loc_loss + rpn_cls_loss) * self.configer.get('loss', 'loss_weights')['rpn_loss']
+        roi_loss = (roi_loc_loss + roi_cls_loss) * self.configer.get('loss', 'loss_weights')['roi_loss']
         return rpn_loss + roi_loss
 

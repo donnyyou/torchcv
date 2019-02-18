@@ -120,8 +120,8 @@ class FSAuxOhemCELoss(nn.Module):
         seg_loss = self.ohem_ce_loss(seg_out, targets)
         aux_targets = self._scale_target(targets, (aux_out.size(2), aux_out.size(3)))
         aux_loss = self.ce_loss(aux_out, aux_targets)
-        loss = self.configer.get('network', 'loss_weights')['seg_loss'] * seg_loss
-        loss = loss + self.configer.get('network', 'loss_weights')['aux_loss'] * aux_loss
+        loss = self.configer.get('loss', 'loss_weights')['seg_loss'] * seg_loss
+        loss = loss + self.configer.get('loss', 'loss_weights')['aux_loss'] * aux_loss
         return loss
 
     @staticmethod
@@ -142,8 +142,8 @@ class FSAuxCELoss(nn.Module):
         seg_loss = self.ce_loss(seg_out, targets)
         aux_targets = self._scale_target(targets, (aux_out.size(2), aux_out.size(3)))
         aux_loss = self.ce_loss(aux_out, aux_targets)
-        loss = self.configer.get('network', 'loss_weights')['seg_loss'] * seg_loss
-        loss = loss + self.configer.get('network', 'loss_weights')['aux_loss'] * aux_loss
+        loss = self.configer.get('loss', 'loss_weights')['seg_loss'] * seg_loss
+        loss = loss + self.configer.get('loss', 'loss_weights')['aux_loss'] * aux_loss
         return loss
 
     @staticmethod
@@ -165,10 +165,10 @@ class FSAuxEncCELoss(nn.Module):
         seg_loss = self.ce_loss(seg_out, targets)
         aux_targets = self._scale_target(targets, (aux_out.size(2), aux_out.size(3)))
         aux_loss = self.ce_loss(aux_out, aux_targets)
-        loss = self.configer.get('network', 'loss_weights')['seg_loss'] * seg_loss
-        loss = loss + self.configer.get('network', 'loss_weights')['aux_loss'] * aux_loss
-        enc_loss = self.enc_loss(enc_out, aux_targets, self.configer.get('network', 'enc_size'))
-        loss = loss + self.configer.get('network', 'loss_weights')['enc_loss'] * enc_loss
+        loss = self.configer.get('loss', 'loss_weights')['seg_loss'] * seg_loss
+        loss = loss + self.configer.get('loss', 'loss_weights')['aux_loss'] * aux_loss
+        enc_loss = self.enc_loss(enc_out, aux_targets, self.configer.get('loss', 'enc_size'))
+        loss = loss + self.configer.get('loss', 'loss_weights')['enc_loss'] * enc_loss
         return loss
 
     @staticmethod

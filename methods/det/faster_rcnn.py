@@ -53,7 +53,7 @@ class FasterRCNN(object):
         self.det_net = self.det_model_manager.object_detector()
         self.det_net = RunnerHelper.load_net(self, self.det_net)
 
-        self.optimizer, self.scheduler = Trainer.init(self._get_parameters(), self.configer.get('solver'))
+        self.optimizer, self.scheduler = Trainer.init( self._get_parameters(), self.configer.get('solver'))
 
         self.train_loader = self.det_data_loader.get_trainloader()
         self.val_loader = self.det_data_loader.get_valloader()
@@ -114,7 +114,7 @@ class FasterRCNN(object):
                 self.data_time.reset()
                 self.train_losses.reset()
 
-            if self.configer.get('lr', 'metric') == 'iters' \
+            if self.configer.get('solver', 'lr')['metric'] == 'iters' \
                     and self.runner_state['iters'] == self.configer.get('solver', 'max_iters'):
                 break
 

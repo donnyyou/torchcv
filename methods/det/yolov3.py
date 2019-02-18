@@ -131,7 +131,7 @@ class YOLOv3(object):
                 self.data_time.reset()
                 self.train_losses.reset()
 
-            if self.configer.get('lr', 'metric') == 'iters' \
+            if self.configer.get('solver', 'lr')['metric'] == 'iters' \
                     and self.runner_state['iters'] == self.configer.get('solver', 'max_iters'):
                 break
 
