@@ -31,13 +31,13 @@ class ModuleHelper(object):
                 nn.ReLU()
             )
         elif bn_type == 'syncbn':
-            from extensions.syncbn.module import BatchNorm2d
+            from extensions.ops.syncbn.module import BatchNorm2d
             return nn.Sequential(
                 BatchNorm2d(num_features, **kwargs),
                 nn.ReLU()
             )
         elif bn_type == 'inplace_abn':
-            from extensions.inplace_abn.bn import InPlaceABNSync
+            from extensions.ops.inplace_abn.bn import InPlaceABNSync
             return InPlaceABNSync(num_features, **kwargs)
         else:
             Log.error('Not support BN type: {}.'.format(bn_type))
@@ -49,13 +49,13 @@ class ModuleHelper(object):
             return nn.BatchNorm2d
 
         elif bn_type == 'syncbn':
-            from extensions.syncbn.module import BatchNorm2d
+            from extensions.ops.syncbn.module import BatchNorm2d
             return BatchNorm2d
 
         elif bn_type == 'inplace_abn':
             torch_ver = torch.__version__[:3]
             if torch_ver == '0.4':
-                from extensions.inplace_abn.bn import InPlaceABNSync
+                from extensions.ops.inplace_abn.bn import InPlaceABNSync
                 if ret_cls:
                     return InPlaceABNSync
 
