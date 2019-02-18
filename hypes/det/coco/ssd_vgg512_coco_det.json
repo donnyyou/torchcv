@@ -8,10 +8,55 @@
       "image_tool": "cv2",
       "input_mode": "BGR",
       "keep_difficult": false,
-      "workers": 8
+      "workers": 8,
+      "mean_value": [104, 117, 123],
+      "normalize": {
+        "div_value": 1,
+        "mean": [104.0, 117.0, 123.0],
+        "std": [1.0, 1.0, 1.0]
+      }
     },
     "train": {
       "batch_size": 32,
+      "aug_trans": {
+        "shuffle_trans_seq": ["random_contrast", "random_hue", "random_saturation", "random_brightness", "random_perm"],
+        "trans_seq": ["random_hflip", "random_pad", "random_crop"],
+        "random_saturation": {
+          "ratio": 0.5,
+          "lower": 0.5,
+          "upper": 1.5
+        },
+        "random_hue": {
+          "ratio": 0.5,
+          "delta": 18
+        },
+        "random_contrast": {
+          "ratio": 0.5,
+          "lower": 0.5,
+          "upper": 1.5
+        },
+        "random_pad": {
+          "ratio": 0.6,
+          "up_scale_range": [1.0, 4.0]
+        },
+        "random_brightness": {
+          "ratio": 0.5,
+          "shift_value": 32
+        },
+        "random_perm": {
+          "ratio": 0.5
+        },
+        "random_hflip": {
+          "ratio": 0.5,
+          "swap_pair": []
+        },
+        "random_crop":{
+          "ratio": 1.0,
+          "method": "det",
+          "grid":[3, 2],
+          "center_jitter": 20
+        }
+      },
       "data_transformer": {
         "size_mode": "fix_size",
         "input_size": [512, 512],
@@ -22,6 +67,9 @@
       "batch_size": 32,
       "use_07_metric": false,
       "start_val": 20,
+      "aug_trans": {
+        "trans_seq": []
+      },
       "data_transformer": {
         "size_mode": "fix_size",
         "input_size": [512, 512],
@@ -32,55 +80,7 @@
       "input_size": [512, 512],
       "scale_search": [1.0]
     },
-    "train_trans": {
-      "shuffle_trans_seq": ["random_contrast", "random_hue", "random_saturation", "random_brightness", "random_perm"],
-      "trans_seq": ["random_hflip", "random_pad", "random_crop"],
-      "random_saturation": {
-        "ratio": 0.5,
-        "lower": 0.5,
-        "upper": 1.5
-      },
-      "random_hue": {
-        "ratio": 0.5,
-        "delta": 18
-      },
-      "random_contrast": {
-        "ratio": 0.5,
-        "lower": 0.5,
-        "upper": 1.5
-      },
-      "random_pad": {
-        "ratio": 0.6,
-        "up_scale_range": [1.0, 4.0]
-      },
-      "random_brightness": {
-        "ratio": 0.5,
-        "shift_value": 32
-      },
-      "random_perm": {
-        "ratio": 0.5
-      },
-      "random_hflip": {
-        "ratio": 0.5,
-        "swap_pair": []
-      },
-      "random_crop":{
-        "ratio": 1.0,
-        "method": "det",
-        "grid":[3, 2],
-        "center_jitter": 20
-      }
-    },
-    "val_trans": {
-      "trans_seq": []
-    },
-    "normalize": {
-      "div_value": 1,
-      "mean_value": [104, 117, 123],
-      "mean": [104.0, 117.0, 123.0],
-      "std": [1.0, 1.0, 1.0]
-    },
-    "gt": {
+    "anchor": {
       "anchor_method": "ssd",
       "iou_threshold": 0.5,
       "num_anchor_list": [4, 6, 6, 6, 6, 4, 4],
@@ -122,17 +122,14 @@
                    "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator",
                    "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush"]
     },
-    "checkpoints": {
-      "checkpoints_name": "ssd_vgg512_coco_det",
-      "checkpoints_dir": "checkpoints/det/coco",
-      "save_iters": 5000
-    },
     "network":{
       "backbone": "vgg16",
       "model_name": "vgg300_ssd",
       "num_feature_list": [512, 1024, 512, 256, 256, 256, 256],
       "stride_list": [8, 16, 32, 64, 128, 256, 512],
-      "head_index_list": [0, 1, 2, 3, 4, 5, 6]
+      "head_index_list": [0, 1, 2, 3, 4, 5, 6],
+      "checkpoints_name": "ssd_vgg512_coco_det",
+      "checkpoints_dir": "checkpoints/det/coco"
     },
     "logging": {
       "logfile_level": "info",
@@ -141,48 +138,44 @@
       "log_format": "%(asctime)s %(levelname)-7s %(message)s",
       "rewrite": true
     },
-    "lr": {
-      "metric": "epoch",
-      "is_warm": true,
-      "warm": {
-        "warm_epoch": 1,
-        "freeze_backbone": false
-      },
-      "base_lr": 0.001,
-      "lr_policy": "multistep",
-      "step": {
-        "gamma": 0.1,
-        "step_size": 500
-      },
-      "multistep": {
-        "gamma": 0.1,
-        "stepvalue": [90, 120, 140]
-      }
-    },
     "solver": {
+      "lr": {
+        "metric": "epoch",
+        "is_warm": true,
+        "warm": {
+          "warm_epoch": 1,
+          "freeze_backbone": false
+        },
+        "base_lr": 0.001,
+        "lr_policy": "multistep",
+        "step": {
+          "gamma": 0.1,
+          "step_size": 500
+        },
+        "multistep": {
+          "gamma": 0.1,
+          "stepvalue": [90, 120, 140]
+        }
+      },
+      "optim": {
+        "optim_method": "sgd",
+        "sgd":{
+          "weight_decay": 0.0005,
+          "momentum": 0.9,
+          "nesterov": false
+        }
+      },
       "display_iter": 100,
+      "save_iters": 5000,
       "test_interval": 5000,
       "max_epoch": 142
     },
-    "optim": {
-      "optim_method": "sgd",
-      "adam": {
-        "betas": [0.9, 0.999],
-        "eps": 1e-08,
-        "weight_decay": 0.0001
-      },
-      "sgd":{
-        "weight_decay": 0.0005,
-        "momentum": 0.9,
-        "nesterov": false
-      }
-    },
-    "nms": {
-      "mode": "union",
-      "max_threshold": 0.45,
-      "pre_nms": 3000
-    },
     "res": {
+      "nms": {
+        "mode": "union",
+        "max_threshold": 0.45,
+        "pre_nms": 3000
+      },
       "val_conf_thre": 0.01,
       "vis_conf_thre": 0.5,
       "max_per_image": 200,

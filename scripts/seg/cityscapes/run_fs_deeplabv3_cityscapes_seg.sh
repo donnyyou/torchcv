@@ -13,7 +13,7 @@ DATA_DIR="/home/donny/DataSet/CityScape"
 BACKBONE="deepbase_resnet101_dilated8"
 MODEL_NAME="deeplabv3"
 CHECKPOINTS_NAME="fs_deeplabv3_cityscapes_seg"$2
-PRETRAINED_MODEL="./pretrained_model/resnet101-imagenet.pth"
+PRETRAINED_MODEL="./pretrained_models/resnet101-imagenet.pth"
 
 HYPES_FILE='hypes/seg/cityscapes/fs_deeplabv3_cityscapes_seg.json'
 MAX_ITERS=40000
@@ -24,7 +24,7 @@ LOG_FILE="${LOG_DIR}${CHECKPOINTS_NAME}.log"
 
 if [ ! -d ${LOG_DIR} ]; then
     echo ${LOG_DIR}" not exists!!!"
-    make -p ${LOG_DIR}
+    mkdir -p ${LOG_DIR}
 fi
 
 

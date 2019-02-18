@@ -8,10 +8,13 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import torch
+
 from models.seg.nets.denseassp import DenseASPP
 from models.seg.nets.deeplabv3 import DeepLabV3
 from models.seg.nets.embednet import EmbedNet
 from models.seg.nets.pspnet import PSPNet
+from models.seg.loss.seg_modules import FSCELoss, FSOhemCELoss, FSAuxCELoss, FSAuxEncCELoss, FSAuxOhemCELoss
 from utils.tools.logger import Logger as Log
 
 SEG_MODEL_DICT = {
@@ -21,6 +24,13 @@ SEG_MODEL_DICT = {
     'denseaspp': DenseASPP
 }
 
+SEG_LOSS_DICT = {
+    'fs_ce_loss': FSCELoss,
+    'fs_ohemce_loss': FSOhemCELoss,
+    'fs_auxce_loss':FSAuxCELoss,
+    'fs_auxencce_loss': FSAuxEncCELoss,
+    'fs_auxohemce_loss': FSAuxOhemCELoss
+}
 
 class ModelManager(object):
 
@@ -37,3 +47,16 @@ class ModelManager(object):
         model = SEG_MODEL_DICT[model_name](self.configer)
 
         return model
+
+    def get_seg_loss(self, loss_type=None):
+        key = self.configer.get('loss', 'loss_type') if loss_type is None else loss_type
+        if key not in SEG_LOSS_DICT:
+            Log.error('Loss: {} not valid!'.format(key))
+            exit(1)
+
+        loss = SEG_LOSS_DICT[key](self.configer)
+        if self.configer.get('network', 'loss_balance') and len(range(torch.cuda.device_count())) > 1:
+            from extensions.tools.parallel.data_parallel import DataParallelCriterion
+            loss = DataParallelCriterion(loss)
+
+        return loss

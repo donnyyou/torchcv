@@ -12,16 +12,15 @@ import time
 import torch
 
 from datasets.det.data_loader import DataLoader
-from loss.loss_manager import LossManager
 from methods.det.faster_rcnn_test import FastRCNNTest
 from methods.tools.runner_helper import RunnerHelper
 from methods.tools.trainer import Trainer
 from models.det.model_manager import ModelManager
-from utils.layers.det.fr_priorbox_layer import FRPriorBoxLayer
+from models.det.layers.fr_priorbox_layer import FRPriorBoxLayer
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
-from metric.det.det_running_score import DetRunningScore
-from vis.visualizer.det_visualizer import DetVisualizer
+from metrics.det.det_running_score import DetRunningScore
+from utils.visualizer.det_visualizer import DetVisualizer
 from utils.helpers.dc_helper import DCHelper
 
 
@@ -36,7 +35,6 @@ class FasterRCNN(object):
         self.train_losses = AverageMeter()
         self.val_losses = AverageMeter()
         self.det_visualizer = DetVisualizer(configer)
-        self.det_loss_manager = LossManager(configer)
         self.det_model_manager = ModelManager(configer)
         self.det_data_loader = DataLoader(configer)
         self.fr_priorbox_layer = FRPriorBoxLayer(configer)
@@ -55,7 +53,7 @@ class FasterRCNN(object):
         self.det_net = self.det_model_manager.object_detector()
         self.det_net = RunnerHelper.load_net(self, self.det_net)
 
-        self.optimizer, self.scheduler = Trainer.init(self, self._get_parameters())
+        self.optimizer, self.scheduler = Trainer.init( self._get_parameters(), self.configer.get('solver'))
 
         self.train_loader = self.det_data_loader.get_trainloader()
         self.val_loader = self.det_data_loader.get_valloader()
@@ -71,8 +69,8 @@ class FasterRCNN(object):
                 else:
                     lr_1.append(value)
 
-        params = [{'params': lr_1, 'lr': self.configer.get('lr', 'base_lr')},
-                  {'params': lr_2, 'lr': self.configer.get('lr', 'base_lr') * 2., 'weight_decay': 0}]
+        params = [{'params': lr_1, 'lr': self.configer.get('solver', 'lr')['base_lr']},
+                  {'params': lr_2, 'lr': self.configer.get('solver', 'lr')['base_lr'] * 2., 'weight_decay': 0}]
         return params
 
     def train(self):
@@ -85,7 +83,7 @@ class FasterRCNN(object):
         self.runner_state['epoch'] += 1
 
         for i, data_dict in enumerate(self.train_loader):
-            Trainer.update(self)
+            Trainer.update(self, solver_dict=self.configer.get('solver'))
             self.data_time.update(time.time() - start_time)
             # Forward pass.
             loss = self.det_net(data_dict)
@@ -116,7 +114,7 @@ class FasterRCNN(object):
                 self.data_time.reset()
                 self.train_losses.reset()
 
-            if self.configer.get('lr', 'metric') == 'iters' \
+            if self.configer.get('solver', 'lr')['metric'] == 'iters' \
                     and self.runner_state['iters'] == self.configer.get('solver', 'max_iters'):
                 break
 

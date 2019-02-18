@@ -8,7 +8,7 @@ import torch
 from torch import nn
 import torch.nn.init as init
 
-from utils.layers.det.ssd_detection_layer import SSDDetectionLayer
+from models.det.layers.ssd_detection_layer import SSDDetectionLayer
 from utils.tools.logger import Logger as Log
 
 

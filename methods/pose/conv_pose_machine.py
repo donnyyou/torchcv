@@ -12,14 +12,12 @@ import time
 import torch
 
 from datasets.pose.data_loader import DataLoader
-from loss.loss_manager import LossManager
 from methods.tools.runner_helper import RunnerHelper
 from methods.tools.trainer import Trainer
 from models.pose.model_manager import ModelManager
-from utils.layers.pose.heatmap_generator import HeatmapGenerator
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
-from vis.visualizer.pose_visualizer import PoseVisualizer
+from utils.visualizer.pose_visualizer import PoseVisualizer
 
 
 class ConvPoseMachine(object):
@@ -33,10 +31,8 @@ class ConvPoseMachine(object):
         self.train_losses = AverageMeter()
         self.val_losses = AverageMeter()
         self.pose_visualizer = PoseVisualizer(configer)
-        self.pose_loss_manager = LossManager(configer)
         self.pose_model_manager = ModelManager(configer)
         self.pose_data_loader = DataLoader(configer)
-        self.heatmap_generator = HeatmapGenerator(configer)
 
         self.pose_net = None
         self.train_loader = None
@@ -51,12 +47,12 @@ class ConvPoseMachine(object):
         self.pose_net = self.pose_model_manager.single_pose_detector()
         self.pose_net = RunnerHelper.load_net(self, self.pose_net)
 
-        self.optimizer, self.scheduler = Trainer.init(self, self._get_parameters())
+        self.optimizer, self.scheduler = Trainer.init(self._get_parameters(), self.configer.get('solver'))
 
         self.train_loader = self.pose_data_loader.get_trainloader()
         self.val_loader = self.pose_data_loader.get_valloader()
 
-        self.mse_loss = self.pose_loss_manager.get_pose_loss()
+        self.mse_loss = self.pose_model_manager.get_pose_loss()
 
     def _get_parameters(self):
 
@@ -73,7 +69,7 @@ class ConvPoseMachine(object):
 
         # data_tuple: (inputs, heatmap, maskmap, tagmap, num_objects)
         for i, data_dict in enumerate(self.train_loader):
-            Trainer.update(self)
+            Trainer.update(self, solver_dict=self.configer.get('solver'))
             inputs = data_dict['img']
             heatmap = data_dict['heatmap']
 
@@ -112,7 +108,7 @@ class ConvPoseMachine(object):
                 self.data_time.reset()
                 self.train_losses.reset()
 
-            if self.configer.get('lr', 'metric') == 'iters' \
+            if self.configer.get('solver', 'lr')['metric'] == 'iters' \
                     and self.runner_state['iters'] == self.configer.get('solver', 'max_iters'):
                 break
 

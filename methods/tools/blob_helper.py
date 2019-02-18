@@ -75,9 +75,9 @@ class BlobHelper(object):
 
         image = ImageHelper.resize(image, (int(in_width * scale), int(in_height * scale)), interpolation='cubic')
         img_tensor = ToTensor()(image)
-        img_tensor = Normalize(div_value=self.configer.get('normalize', 'div_value'),
-                               mean=self.configer.get('normalize', 'mean'),
-                               std=self.configer.get('normalize', 'std'))(img_tensor)
+        img_tensor = Normalize(div_value=self.configer.get('data', 'normalize')['div_value'],
+                               mean=self.configer.get('data', 'normalize')['mean'],
+                               std=self.configer.get('data', 'normalize')['std'])(img_tensor)
         img_tensor = img_tensor.unsqueeze(0).to(torch.device('cpu' if self.configer.get('gpu') is None else 'cuda'))
 
         return img_tensor
@@ -85,9 +85,9 @@ class BlobHelper(object):
     def tensor2bgr(self, tensor):
         assert len(tensor.size()) == 3
 
-        ori_img = DeNormalize(div_value=self.configer.get('normalize', 'div_value'),
-                              mean=self.configer.get('normalize', 'mean'),
-                              std=self.configer.get('normalize', 'std'))(tensor.cpu())
+        ori_img = DeNormalize(div_value=self.configer.get('data', 'normalize')['div_value'],
+                              mean=self.configer.get('data', 'normalize')['mean'],
+                              std=self.configer.get('data', 'normalize')['std'])(tensor.cpu())
         ori_img = ori_img.numpy().transpose(1, 2, 0).astype(np.uint8)
 
         if self.configer.get('data', 'input_mode') == 'BGR':

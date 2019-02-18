@@ -12,15 +12,12 @@ import time
 import torch
 
 from datasets.pose.data_loader import DataLoader
-from loss.loss_manager import LossManager
 from methods.tools.runner_helper import RunnerHelper
 from methods.tools.trainer import Trainer
 from models.pose.model_manager import ModelManager
-from utils.layers.pose.heatmap_generator import HeatmapGenerator
-from utils.layers.pose.paf_generator import PafGenerator
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
-from vis.visualizer.pose_visualizer import PoseVisualizer
+from utils.visualizer.pose_visualizer import PoseVisualizer
 
 
 class OpenPose(object):
@@ -39,11 +36,8 @@ class OpenPose(object):
         self.val_loss_heatmap = AverageMeter()
         self.val_loss_associate = AverageMeter()
         self.pose_visualizer = PoseVisualizer(configer)
-        self.pose_loss_manager = LossManager(configer)
         self.pose_model_manager = ModelManager(configer)
         self.pose_data_loader = DataLoader(configer)
-        self.heatmap_generator = HeatmapGenerator(configer)
-        self.paf_generator = PafGenerator(configer)
 
         self.pose_net = None
         self.train_loader = None
@@ -58,13 +52,13 @@ class OpenPose(object):
         self.pose_net = self.pose_model_manager.multi_pose_detector()
         self.pose_net = RunnerHelper.load_net(self, self.pose_net)
 
-        self.optimizer, self.scheduler = Trainer.init(self, self._get_parameters())
+        self.optimizer, self.scheduler = Trainer.init(self._get_parameters(), self.configer.get('solver'))
 
         self.train_loader = self.pose_data_loader.get_trainloader()
         self.val_loader = self.pose_data_loader.get_valloader()
 
         self.weights = self.configer.get('network', 'loss_weights')
-        self.mse_loss = self.pose_loss_manager.get_pose_loss()
+        self.mse_loss = self.pose_model_manager.get_pose_loss()
 
     def _get_parameters(self):
         lr_1 = []
@@ -76,8 +70,8 @@ class OpenPose(object):
             else:
                 lr_1.append(value)
 
-        params = [{'params': lr_1, 'lr': self.configer.get('lr', 'base_lr'), 'weight_decay': 0.0},
-                  {'params': lr_2, 'lr': self.configer.get('lr', 'base_lr'), 'weight_decay': 0.0},]
+        params = [{'params': lr_1, 'lr': self.configer.get('solver', 'lr')['base_lr'], 'weight_decay': 0.0},
+                  {'params': lr_2, 'lr': self.configer.get('solver', 'lr')['base_lr'], 'weight_decay': 0.0},]
 
         return params
 
@@ -143,7 +137,7 @@ class OpenPose(object):
                 self.train_loss_heatmap.reset()
                 self.train_loss_associate.reset()
 
-            if self.configer.get('lr', 'metric') == 'iters' \
+            if self.configer.get('solver', 'lr')['metric'] == 'iters' \
                     and self.runner_state['iters'] == self.configer.get('solver', 'max_iters'):
                 break
 

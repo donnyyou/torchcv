@@ -10,8 +10,8 @@ from __future__ import print_function
 import numpy as np
 import torch
 
-from extensions.nms.nms_wrapper import nms
-from extensions.nms.nms_wrapper import soft_nms
+from extensions.ops.nms.nms_wrapper import nms
+from extensions.ops.nms.nms_wrapper import soft_nms
 
 
 class DetHelper(object):
@@ -28,12 +28,12 @@ class DetHelper(object):
         cls_keep_list = list()
         for c in unique_labels:
             cls_index = np.where(labels == c)[0]
-            cls_keep = nms(dets[cls_index], thresh=max_threshold, device_id=device_id)
+            _, cls_keep = nms(dets[cls_index], iou_thr=max_threshold, device_id=device_id)
 
             if cls_keep_num is not None:
                 cls_keep = cls_keep[:cls_keep_num]
 
-            cls_keep_list.append(cls_index[cls_keep])
+            cls_keep_list.append(cls_index[cls_keep.cpu().numpy()])
 
         keep_index = np.concatenate(cls_keep_list, 0)
         return dets[keep_index]
@@ -50,7 +50,7 @@ class DetHelper(object):
         cls_dets_list = list()
         for c in unique_labels:
             cls_index = np.where(labels == c)[0]
-            _, cls_dets = soft_nms(dets[cls_index], max_threshold=max_threshold,
+            cls_dets, _ = soft_nms(dets[cls_index], max_threshold=max_threshold,
                                 method=method, sigma=sigma, min_score=min_score)
 
             if cls_keep_num is not None:

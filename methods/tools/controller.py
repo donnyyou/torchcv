@@ -41,7 +41,7 @@ class Controller(object):
         if runner.configer.get('network', 'resume') is not None and runner.configer.get('network', 'resume_val'):
             runner.val()
 
-        if runner.configer.get('lr', 'metric') == 'epoch':
+        if runner.configer.get('solver', 'lr')['metric'] == 'epoch':
             while runner.runner_state['epoch'] < runner.configer.get('solver', 'max_epoch'):
                 runner.train()
                 if runner.runner_state['epoch'] == runner.configer.get('solver', 'max_epoch'):

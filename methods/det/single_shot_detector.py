@@ -12,17 +12,16 @@ import time
 import torch
 
 from datasets.det.data_loader import DataLoader
-from loss.loss_manager import LossManager
 from methods.det.single_shot_detector_test import SingleShotDetectorTest
 from methods.tools.runner_helper import RunnerHelper
 from methods.tools.trainer import Trainer
 from models.det.model_manager import ModelManager
-from utils.layers.det.ssd_priorbox_layer import SSDPriorBoxLayer
-from utils.layers.det.ssd_target_generator import SSDTargetGenerator
+from models.det.layers.ssd_priorbox_layer import SSDPriorBoxLayer
+from models.det.layers.ssd_target_generator import SSDTargetGenerator
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
-from metric.det.det_running_score import DetRunningScore
-from vis.visualizer.det_visualizer import DetVisualizer
+from metrics.det.det_running_score import DetRunningScore
+from utils.visualizer.det_visualizer import DetVisualizer
 
 
 class SingleShotDetector(object):
@@ -36,7 +35,6 @@ class SingleShotDetector(object):
         self.train_losses = AverageMeter()
         self.val_losses = AverageMeter()
         self.det_visualizer = DetVisualizer(configer)
-        self.det_loss_manager = LossManager(configer)
         self.det_model_manager = ModelManager(configer)
         self.det_data_loader = DataLoader(configer)
         self.ssd_target_generator = SSDTargetGenerator(configer)
@@ -55,10 +53,10 @@ class SingleShotDetector(object):
     def _init_model(self):
         self.det_net = self.det_model_manager.object_detector()
         self.det_net = RunnerHelper.load_net(self, self.det_net)
-        self.optimizer, self.scheduler = Trainer.init(self, self._get_parameters())
+        self.optimizer, self.scheduler = Trainer.init(self._get_parameters(), self.configer.get('solver'))
         self.train_loader = self.det_data_loader.get_trainloader()
         self.val_loader = self.det_data_loader.get_valloader()
-        self.det_loss = self.det_loss_manager.get_det_loss()
+        self.det_loss = self.det_model_manager.get_det_loss()
 
     def _get_parameters(self):
         lr_1 = []
@@ -70,8 +68,8 @@ class SingleShotDetector(object):
             else:
                 lr_1.append(value)
 
-        params = [{'params': lr_1, 'lr': self.configer.get('lr', 'base_lr')},
-                  {'params': lr_10, 'lr': self.configer.get('lr', 'base_lr')}]
+        params = [{'params': lr_1, 'lr': self.configer.get('solver', 'lr')['base_lr']},
+                  {'params': lr_10, 'lr': self.configer.get('solver', 'lr')['base_lr']}]
 
         return params
 
@@ -86,7 +84,7 @@ class SingleShotDetector(object):
 
         # data_tuple: (inputs, heatmap, maskmap, vecmap)
         for i, data_dict in enumerate(self.train_loader):
-            Trainer.update(self, backbone_list=(0,))
+            Trainer.update(self, backbone_list=(0,), solver_dict=self.configer.get('solver'))
             inputs = data_dict['img']
             batch_gt_bboxes = data_dict['bboxes']
             batch_gt_labels = data_dict['labels']
@@ -133,7 +131,7 @@ class SingleShotDetector(object):
                 self.data_time.reset()
                 self.train_losses.reset()
 
-            if self.configer.get('lr', 'metric') == 'iters' \
+            if self.configer.get('solver', 'lr')['metric'] == 'iters' \
                     and self.runner_state['iters'] == self.configer.get('solver', 'max_iters'):
                 break
 

@@ -22,7 +22,7 @@ from models.cls.model_manager import ModelManager
 from utils.helpers.image_helper import ImageHelper
 from utils.helpers.json_helper import JsonHelper
 from utils.tools.logger import Logger as Log
-from vis.parser.cls_parser import ClsParser
+from utils.parser.cls_parser import ClsParser
 
 
 class FCClassifierTest(object):

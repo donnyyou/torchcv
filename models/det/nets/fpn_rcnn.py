@@ -13,9 +13,9 @@ from torch import nn
 from torch.nn import functional as F
 
 from models.backbones.backbone_selector import BackboneSelector
-from utils.layers.det.fr_roi_generator import FRROIGenerator
-from utils.layers.det.fr_roi_sampler import FRROISampler
-from utils.layers.det.rpn_detection_layer import RPNDetectionLayer
+from models.det.layers.fr_roi_generator import FRROIGenerator
+from models.det.layers.fr_roi_sampler import FRROISampler
+from models.det.layers.rpn_detection_layer import RPNDetectionLayer
 from utils.tools.logger import Logger as Log
 
 

@@ -8,10 +8,55 @@
       "image_tool": "pil",
       "input_mode": "RGB",
       "keep_difficult": false,
-      "workers": 8
+      "workers": 8,
+      "mean_value": [128, 128, 128],
+      "normalize": {
+        "div_value": 255,
+        "mean": [0.0, 0.0, 0.0],
+        "std": [1.0, 1.0, 1.0]
+      }
     },
     "train": {
       "batch_size": 64,
+      "aug_trans": {
+        "shuffle_trans_seq": ["random_contrast", "random_hue", "random_saturation", "random_brightness", "random_perm"],
+        "trans_seq": ["random_hflip", "random_pad", "random_crop"],
+        "random_saturation": {
+          "ratio": 0.5,
+          "lower": 0.5,
+          "upper": 1.5
+        },
+        "random_hue": {
+          "ratio": 0.5,
+          "delta": 18
+        },
+        "random_contrast": {
+          "ratio": 0.5,
+          "lower": 0.5,
+          "upper": 1.5
+        },
+        "random_pad": {
+          "ratio": 0.6,
+          "up_scale_range": [1.0, 3.0]
+        },
+        "random_brightness": {
+          "ratio": 0.5,
+          "shift_value": 32
+        },
+        "random_perm": {
+          "ratio": 0.5
+        },
+        "random_hflip": {
+          "ratio": 0.5,
+          "swap_pair": []
+        },
+        "random_crop":{
+          "ratio": 1.0,
+          "method": "det",
+          "grid":[3, 2],
+          "center_jitter": 20
+        }
+      },
       "data_transformer": {
         "size_mode": "multi_size",
         "ms_input_size": [[416, 416]],
@@ -21,6 +66,9 @@
     "val": {
       "batch_size": 64,
       "use_07_metric": false,
+      "aug_trans": {
+        "trans_seq": []
+      },
       "data_transformer": {
         "size_mode": "fix_size",
         "input_size": [416, 416],
@@ -31,55 +79,7 @@
       "input_size": [416, 416],
       "scale_search": [1.0]
     },
-    "train_trans": {
-      "shuffle_trans_seq": ["random_contrast", "random_hue", "random_saturation", "random_brightness", "random_perm"],
-      "trans_seq": ["random_hflip", "random_pad", "random_crop"],
-      "random_saturation": {
-        "ratio": 0.5,
-        "lower": 0.5,
-        "upper": 1.5
-      },
-      "random_hue": {
-        "ratio": 0.5,
-        "delta": 18
-      },
-      "random_contrast": {
-        "ratio": 0.5,
-        "lower": 0.5,
-        "upper": 1.5
-      },
-      "random_pad": {
-        "ratio": 0.6,
-        "up_scale_range": [1.0, 3.0]
-      },
-      "random_brightness": {
-        "ratio": 0.5,
-        "shift_value": 32
-      },
-      "random_perm": {
-        "ratio": 0.5
-      },
-      "random_hflip": {
-        "ratio": 0.5,
-        "swap_pair": []
-      },
-      "random_crop":{
-        "ratio": 1.0,
-        "method": "det",
-        "grid":[3, 2],
-        "center_jitter": 20
-      }
-    },
-    "val_trans": {
-      "trans_seq": []
-    },
-    "normalize": {
-      "div_value": 255,
-      "mean_value": [128, 128, 128],
-      "mean": [0.0, 0.0, 0.0],
-      "std": [1.0, 1.0, 1.0]
-    },
-    "gt": {
+    "anchor": {
       "anchors_list": [
         [[116, 90], [156, 198], [373, 326]],
         [[30, 61], [62, 45], [59, 119]],
@@ -121,20 +121,12 @@
                    "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator",
                    "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush"]
     },
-    "checkpoints": {
-      "checkpoints_name": "yolov3_darknet_coco_det",
-      "checkpoints_dir": "checkpoints/det/coco",
-      "save_iters": 5000
-    },
     "network":{
       "backbone": "darknet53",
       "model_name": "darknet_yolov3",
       "stride_list": [32, 16, 8],
-      "loss_weights": {
-        "coord_loss": 1.0,
-        "obj_loss": 5.0,
-        "cls_loss": 1.0
-      }
+      "checkpoints_name": "yolov3_darknet_coco_det",
+      "checkpoints_dir": "checkpoints/det/coco"
     },
     "logging": {
       "logfile_level": "info",
@@ -143,50 +135,48 @@
       "log_format": "%(asctime)s %(levelname)-7s %(message)s",
       "rewrite": true
     },
-    "lr": {
-      "metric": "epoch",
-      "is_warm": true,
-      "warm": {
-        "warm_epoch": 0.2
-      },
-      "base_lr": 0.0004,
-      "lr_policy": "multistep",
-      "step": {
-        "gamma": 0.1,
-        "step_size": 30
-      },
-      "multistep": {
-        "gamma": 0.1,
-        "stepvalue": [50, 60, 70]
-      }
-    },
+
     "solver": {
+      "lr": {
+        "metric": "epoch",
+        "is_warm": true,
+        "warm": {
+          "warm_epoch": 0.2
+        },
+        "base_lr": 0.0004,
+        "lr_policy": "multistep",
+        "multistep": {
+          "gamma": 0.1,
+          "stepvalue": [50, 60, 70]
+        }
+      },
+      "optim": {
+        "optim_method": "sgd",
+        "sgd":{
+          "weight_decay": 0.0005,
+          "momentum": 0.9,
+          "nesterov": true
+        }
+      },
       "display_iter": 100,
+      "save_iters": 5000,
       "test_interval": 5000,
       "max_epoch": 72
     },
-    "optim": {
-      "optim_method": "sgd",
-      "adam": {
-        "betas": [0.9, 0.999],
-        "eps": 1e-08,
-        "weight_decay": 0.0001
-      },
-      "sgd":{
-        "weight_decay": 0.0005,
-        "momentum": 0.9,
-        "nesterov": true
-      }
-    },
-    "nms": {
-      "mode": "union",
-      "max_threshold": 0.45
-    },
     "res": {
+      "nms": {
+        "mode": "union",
+        "max_threshold": 0.45
+      },
       "val_conf_thre": 0.5,
       "vis_conf_thre": 0.5
     },
     "loss": {
+      "loss_weights": {
+        "coord_loss": 1.0,
+        "obj_loss": 5.0,
+        "cls_loss": 1.0
+      },
       "loss_type": "yolov3_loss"
     }
 }

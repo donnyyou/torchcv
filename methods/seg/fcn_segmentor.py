@@ -13,14 +13,13 @@ import time
 import torch
 
 from datasets.seg.data_loader import DataLoader
-from loss.loss_manager import LossManager
 from methods.tools.runner_helper import RunnerHelper
 from methods.tools.trainer import Trainer
 from models.seg.model_manager import ModelManager
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
-from metric.seg.seg_running_score import SegRunningScore
-from vis.visualizer.seg_visualizer import SegVisualizer
+from metrics.seg.seg_running_score import SegRunningScore
+from utils.visualizer.seg_visualizer import SegVisualizer
 
 
 class FCNSegmentor(object):
@@ -35,7 +34,6 @@ class FCNSegmentor(object):
         self.val_losses = AverageMeter()
         self.seg_running_score = SegRunningScore(configer)
         self.seg_visualizer = SegVisualizer(configer)
-        self.seg_loss_manager = LossManager(configer)
         self.seg_model_manager = ModelManager(configer)
         self.seg_data_loader = DataLoader(configer)
 
@@ -52,12 +50,12 @@ class FCNSegmentor(object):
         self.seg_net = self.seg_model_manager.semantic_segmentor()
         self.seg_net = RunnerHelper.load_net(self, self.seg_net)
 
-        self.optimizer, self.scheduler = Trainer.init(self, self._get_parameters())
+        self.optimizer, self.scheduler = Trainer.init(self._get_parameters(), self.configer.get('solver'))
 
         self.train_loader = self.seg_data_loader.get_trainloader()
         self.val_loader = self.seg_data_loader.get_valloader()
 
-        self.pixel_loss = self.seg_loss_manager.get_seg_loss()
+        self.pixel_loss = self.seg_model_manager.get_seg_loss()
 
     def _get_parameters(self):
         lr_1 = []
@@ -69,8 +67,8 @@ class FCNSegmentor(object):
             else:
                 lr_1.append(value)
 
-        params = [{'params': lr_1, 'lr': self.configer.get('lr', 'base_lr')},
-                  {'params': lr_10, 'lr': self.configer.get('lr', 'base_lr') * 1.0}]
+        params = [{'params': lr_1, 'lr': self.configer.get('solver', 'lr')['base_lr']},
+                  {'params': lr_10, 'lr': self.configer.get('solver', 'lr')['base_lr'] * 1.0}]
         return params
 
     def train(self):
@@ -82,7 +80,7 @@ class FCNSegmentor(object):
         # Adjust the learning rate after every epoch.
 
         for i, data_dict in enumerate(self.train_loader):
-            Trainer.update(self, backbone_list=(0, ))
+            Trainer.update(self, backbone_list=(0, ), solver_dict=self.configer.get('solver'))
             inputs = data_dict['img']
             targets = data_dict['labelmap']
             self.data_time.update(time.time() - start_time)
@@ -119,7 +117,7 @@ class FCNSegmentor(object):
                 self.data_time.reset()
                 self.train_losses.reset()
 
-            if self.configer.get('lr', 'metric') == 'iters' \
+            if self.configer.get('solver', 'lr')['metric'] == 'iters' \
                     and self.runner_state['iters'] == self.configer.get('solver', 'max_iters'):
                 break
 

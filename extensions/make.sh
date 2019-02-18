@@ -3,6 +3,8 @@
 # Author: Donny You(youansheng@gmail.com)
 
 
+export PATH=/opt/rh/devtoolset-3/root/usr/bin:$PATH
+
 PYTHON=${PYTHON:-"python"}
 
 echo "Building cocoapi..."
@@ -11,23 +13,27 @@ ${PYTHON} setup.py install
 
 cd -
 echo "Building roi align op..."
-cd ./roi_align
+cd ops/roi_align
 if [ -d "build" ]; then
     rm -r build
 fi
-${PYTHON} setup.py build_ext --inplace
-rm -r build
+$PYTHON setup.py build_ext --inplace
 
 echo "Building roi pool op..."
 cd ../roi_pool
 if [ -d "build" ]; then
     rm -r build
 fi
-${PYTHON} setup.py build_ext --inplace
-rm -r build
+$PYTHON setup.py build_ext --inplace
 
 echo "Building nms op..."
-cd ../nms/src
+cd ../nms
 make clean
 make PYTHON=${PYTHON}
-rm -r build
+
+echo "Building dcn..."
+cd ../dcn
+if [ -d "build" ]; then
+    rm -r build
+fi
+$PYTHON setup.py build_ext --inplace

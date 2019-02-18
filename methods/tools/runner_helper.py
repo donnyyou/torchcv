@@ -15,7 +15,7 @@ import torch
 import torch.nn as nn
 from torch.nn.parallel.scatter_gather import gather as torch_gather
 
-from extensions.parallel.data_parallel import DataParallelModel
+from extensions.tools.parallel.data_parallel import DataParallelModel
 from utils.tools.logger import Logger as Log
 
 
@@ -128,39 +128,39 @@ class RunnerHelper(object):
             'state_dict': net.state_dict(),
             'runner_state': runner.runner_state
         }
-        if runner.configer.get('checkpoints', 'checkpoints_root') is None:
+        if runner.configer.get('network', 'checkpoints_root') is None:
             checkpoints_dir = os.path.join(runner.configer.get('project_dir'),
-                                           runner.configer.get('checkpoints', 'checkpoints_dir'))
+                                           runner.configer.get('network', 'checkpoints_dir'))
         else:
-            checkpoints_dir = os.path.join(runner.configer.get('checkpoints', 'checkpoints_root'),
-                                           runner.configer.get('checkpoints', 'checkpoints_dir'))
+            checkpoints_dir = os.path.join(runner.configer.get('network', 'checkpoints_root'),
+                                           runner.configer.get('network', 'checkpoints_dir'))
 
         if not os.path.exists(checkpoints_dir):
             os.makedirs(checkpoints_dir)
 
-        latest_name = '{}_latest.pth'.format(runner.configer.get('checkpoints', 'checkpoints_name'))
+        latest_name = '{}_latest.pth'.format(runner.configer.get('network', 'checkpoints_name'))
         torch.save(state, os.path.join(checkpoints_dir, latest_name))
         if performance is not None:
             if performance > runner.runner_state['max_performance']:
-                latest_name = '{}_max_performance.pth'.format(runner.configer.get('checkpoints', 'checkpoints_name'))
+                latest_name = '{}_max_performance.pth'.format(runner.configer.get('network', 'checkpoints_name'))
                 torch.save(state, os.path.join(checkpoints_dir, latest_name))
                 runner.runner_state['max_performance'] = performance
 
         if val_loss is not None:
             if val_loss < runner.runner_state['min_val_loss']:
-                latest_name = '{}_min_loss.pth'.format(runner.configer.get('checkpoints', 'checkpoints_name'))
+                latest_name = '{}_min_loss.pth'.format(runner.configer.get('network', 'checkpoints_name'))
                 torch.save(state, os.path.join(checkpoints_dir, latest_name))
                 runner.runner_state['min_val_loss'] = val_loss
 
         if iters is not None:
-            if iters - runner.runner_state['last_iters'] >= runner.configer.get('checkpoints', 'save_iters'):
-                latest_name = '{}_iters{}.pth'.format(runner.configer.get('checkpoints', 'checkpoints_name'), iters)
+            if iters - runner.runner_state['last_iters'] >= runner.configer.get('solver', 'save_iters'):
+                latest_name = '{}_iters{}.pth'.format(runner.configer.get('network', 'checkpoints_name'), iters)
                 torch.save(state, os.path.join(checkpoints_dir, latest_name))
                 runner.runner_state['last_iters'] = iters
 
         if epoch is not None:
-            if epoch - runner.runner_state['last_epoch'] >= runner.configer.get('checkpoints', 'save_epoch'):
-                latest_name = '{}_epoch{}.pth'.format(runner.configer.get('checkpoints', 'checkpoints_name'), epoch)
+            if epoch - runner.runner_state['last_epoch'] >= runner.configer.get('solver', 'save_epoch'):
+                latest_name = '{}_epoch{}.pth'.format(runner.configer.get('network', 'checkpoints_name'), epoch)
                 torch.save(state, os.path.join(checkpoints_dir, latest_name))
                 runner.runner_state['last_epoch'] = epoch
 
@@ -171,7 +171,7 @@ class RunnerHelper(object):
                 m.eval()
 
             if syncbn:
-                from extensions.syncbn.module import BatchNorm2d, BatchNorm1d
+                from extensions.ops.syncbn.module import BatchNorm2d, BatchNorm1d
                 if isinstance(m, BatchNorm2d) or isinstance(m, BatchNorm1d):
                     m.eval()
 

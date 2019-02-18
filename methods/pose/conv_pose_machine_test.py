@@ -19,9 +19,8 @@ from methods.tools.blob_helper import BlobHelper
 from methods.tools.runner_helper import RunnerHelper
 from models.pose.model_manager import ModelManager
 from utils.helpers.image_helper import ImageHelper
-from utils.layers.pose.heatmap_generator import HeatmapGenerator
 from utils.tools.logger import Logger as Log
-from vis.visualizer.pose_visualizer import PoseVisualizer
+from utils.visualizer.pose_visualizer import PoseVisualizer
 
 
 class ConvPoseMachineTest(object):
@@ -31,7 +30,6 @@ class ConvPoseMachineTest(object):
         self.pose_vis = PoseVisualizer(configer)
         self.pose_model_manager = ModelManager(configer)
         self.pose_data_loader = DataLoader(configer)
-        self.heatmap_generator = HeatmapGenerator(configer)
         self.device = torch.device('cpu' if self.configer.get('gpu') is None else 'cuda')
         self.pose_net = None
 

@@ -84,6 +84,10 @@ class Configer(object):
         if len(key) == 2 and (key[0] in self.params_root and key[1] in self.params_root[key[0]]):
             return True
 
+        if len(key) == 3 and (key[0] in self.params_root and key[1] in self.params_root[key[0]])\
+                and key[2] in self.params_root[key[0]][key[1]]:
+            return True
+
         return False
 
     def add(self, key_tuple, value):
@@ -100,6 +104,15 @@ class Configer(object):
 
             self.params_root[key_tuple[0]][key_tuple[1]] = value
 
+        elif len(key_tuple) == 3:
+            if key_tuple[0] not in self.params_root:
+                self.params_root[key_tuple[0]] = dict()
+
+            if key_tuple[1] not in self.params_root[key_tuple[0]]:
+                self.params_root[key_tuple[0]][key_tuple[1]] = dict()
+
+            self.params_root[key_tuple[0]][key_tuple[1]][key_tuple[2]] = value
+
         else:
             Log.error('{} KeyError: {}.'.format(self._get_caller(), key_tuple))
             exit(1)
@@ -109,11 +122,15 @@ class Configer(object):
             Log.error('{} Key: {} not existed!!!'.format(self._get_caller(), key_tuple))
             exit(1)
 
-        if len(key_tuple) == 1 and not isinstance(self.params_root[key_tuple[0]], dict):
+        if len(key_tuple) == 1:
+            assert not isinstance(self.params_root[key_tuple[0]], dict)
             self.params_root[key_tuple[0]] = value
 
         elif len(key_tuple) == 2:
             self.params_root[key_tuple[0]][key_tuple[1]] = value
+
+        elif len(key_tuple) == 3:
+            self.params_root[key_tuple[0]][key_tuple[1]][key_tuple[2]] = value
 
         else:
             Log.error('{} Key: {} not existed!!!'.format(self._get_caller(), key_tuple))

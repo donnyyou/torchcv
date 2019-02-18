@@ -58,19 +58,13 @@ if __name__ == "__main__":
     parser.add_argument('--val_batch_size', default=None, type=int,
                         dest='val:batch_size', help='The batch size of validation.')
 
-    # ***********  Params for checkpoint.  **********
-    parser.add_argument('--checkpoints_root', default=None, type=str,
-                        dest='checkpoints:checkpoints_root', help='The root dir of model save path.')
-    parser.add_argument('--checkpoints_name', default=None, type=str,
-                        dest='checkpoints:checkpoints_name', help='The name of checkpoint model.')
-    parser.add_argument('--save_iters', default=None, type=int,
-                        dest='checkpoints:save_iters', help='The saving iters of checkpoint model.')
-    parser.add_argument('--save_epoch', default=None, type=int,
-                        dest='checkpoints:save_epoch', help='The saving epoch of checkpoint model.')
-
     # ***********  Params for model.  **********
     parser.add_argument('--model_name', default=None, type=str,
                         dest='network:model_name', help='The name of model.')
+    parser.add_argument('--checkpoints_root', default=None, type=str,
+                        dest='network:checkpoints_root', help='The root dir of model save path.')
+    parser.add_argument('--checkpoints_name', default=None, type=str,
+                        dest='network:checkpoints_name', help='The name of checkpoint model.')
     parser.add_argument('--backbone', default=None, type=str,
                         dest='network:backbone', help='The base network of model.')
     parser.add_argument('--bn_type', default=None, type=str,
@@ -94,17 +88,13 @@ if __name__ == "__main__":
 
     # ***********  Params for solver.  **********
     parser.add_argument('--optim_method', default=None, type=str,
-                        dest='optim:optim_method', help='The optim method that used.')
+                        dest='solver:optim:optim_method', help='The optim method that used.')
     parser.add_argument('--base_lr', default=None, type=float,
-                        dest='lr:base_lr', help='The learning rate.')
+                        dest='solver:lr:base_lr', help='The learning rate.')
     parser.add_argument('--nbb_mult', default=1.0, type=float,
-                        dest='lr:nbb_mult', help='The not backbone mult ratio of learning rate.')
+                        dest='solver:lr:nbb_mult', help='The not backbone mult ratio of learning rate.')
     parser.add_argument('--lr_policy', default=None, type=str,
-                        dest='lr:lr_policy', help='The policy of lr during training.')
-    parser.add_argument('--loss_type', default=None, type=str,
-                        dest='loss:loss_type', help='The loss type of the network.')
-
-    # ***********  Params for display.  **********
+                        dest='solver:lr:lr_policy', help='The policy of lr during training.')
     parser.add_argument('--max_epoch', default=None, type=int,
                         dest='solver:max_epoch', help='The max epoch of training.')
     parser.add_argument('--max_iters', default=None, type=int,
@@ -113,6 +103,14 @@ if __name__ == "__main__":
                         dest='solver:display_iter', help='The display iteration of train logs.')
     parser.add_argument('--test_interval', default=None, type=int,
                         dest='solver:test_interval', help='The test interval of validation.')
+    parser.add_argument('--save_iters', default=None, type=int,
+                        dest='solver:save_iters', help='The saving iters of checkpoint model.')
+    parser.add_argument('--save_epoch', default=None, type=int,
+                        dest='solver:save_epoch', help='The saving epoch of checkpoint model.')
+
+    # ***********  Params for loss.  **********
+    parser.add_argument('--loss_type', default=None, type=str,
+                        dest='loss:loss_type', help='The loss type of the network.')
 
     # ***********  Params for logging.  **********
     parser.add_argument('--logfile_level', default=None, type=str,

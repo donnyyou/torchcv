@@ -20,14 +20,14 @@ from models.det.model_manager import ModelManager
 from utils.helpers.det_helper import DetHelper
 from utils.helpers.image_helper import ImageHelper
 from utils.helpers.json_helper import JsonHelper
-from utils.layers.det.fr_priorbox_layer import FRPriorBoxLayer
-from utils.layers.det.fr_roi_generator import FRROIGenerator
-from utils.layers.det.fr_roi_sampler import FRROISampler
-from utils.layers.det.rpn_target_assigner import RPNTargetAssigner
+from models.det.layers.fr_priorbox_layer import FRPriorBoxLayer
+from models.det.layers.fr_roi_generator import FRROIGenerator
+from models.det.layers.fr_roi_sampler import FRROISampler
+from models.det.layers.rpn_target_assigner import RPNTargetAssigner
 from utils.tools.logger import Logger as Log
-from vis.parser.det_parser import DetParser
-from vis.visualizer.det_visualizer import DetVisualizer
-from extensions.parallel.data_container import DataContainer
+from utils.parser.det_parser import DetParser
+from utils.visualizer.det_visualizer import DetVisualizer
+from extensions.tools.parallel import DataContainer
 from utils.helpers.dc_helper import DCHelper
 
 
@@ -164,7 +164,7 @@ class FastRCNNTest(object):
 
             output[i] = DetHelper.cls_nms(valid_preds,
                                           labels=valid_preds[:, 5],
-                                          max_threshold=configer.get('nms', 'max_threshold'))
+                                          max_threshold=configer.get('res', 'nms')['max_threshold'])
 
         return output
 

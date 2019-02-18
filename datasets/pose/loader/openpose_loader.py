@@ -13,9 +13,9 @@ import torch
 import numpy as np
 import torch.utils.data as data
 
-from extensions.parallel.data_container import DataContainer
-from utils.layers.pose.heatmap_generator import HeatmapGenerator
-from utils.layers.pose.paf_generator import PafGenerator
+from extensions.tools.parallel import DataContainer
+from datasets.pose.utils.heatmap_generator import HeatmapGenerator
+from datasets.pose.utils.paf_generator import PafGenerator
 from utils.helpers.json_helper import JsonHelper
 from utils.helpers.image_helper import ImageHelper
 from utils.tools.logger import Logger as Log

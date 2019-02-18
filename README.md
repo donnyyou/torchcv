@@ -142,11 +142,11 @@ bash run_fs_pspnet_cityscapes_seg.sh test tag
 
 <div align="center">
 
-<img src="samples/pose/coco/000000319721_vis.png" width="500px"/>
+<img src="demos/openpose/samples/000000319721_vis.png" width="500px"/>
 
 <p> Example output of <b>VGG19-OpenPose</b></p>
 
-<img src="samples/pose/coco/000000475191_vis.png" width="500px"/>
+<img src="demos/openpose/samples/000000475191_vis.png" width="500px"/>
 
 <p> Example output of <b>VGG19-OpenPose</b></p>
 

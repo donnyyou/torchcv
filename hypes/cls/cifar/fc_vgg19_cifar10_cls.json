@@ -8,9 +8,9 @@
       "image_tool": "pil",
       "input_mode": "RGB",
       "workers": 8,
+      "mean_value": [124, 116, 104],
       "normalize": {
         "div_value": 255,
-        "mean_value": [124, 116, 104],
         "mean": [0.485, 0.456, 0.406],
         "std": [0.229, 0.224, 0.225]
       }

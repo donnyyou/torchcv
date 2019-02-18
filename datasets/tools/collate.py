@@ -15,7 +15,7 @@ import torch.nn.functional as F
 from torch.utils.data.dataloader import default_collate
 from torch._six import string_classes, int_classes
 
-from extensions.parallel.data_container import DataContainer
+from extensions.tools.parallel import DataContainer
 from utils.helpers.tensor_helper import TensorHelper
 from utils.tools.logger import Logger as Log
 
@@ -196,8 +196,3 @@ def collate(batch, trans_dict):
                 batch[i]['bboxes'].data[:, 1::2] += up_pad
 
     return dict({key: stack(batch, data_key=key, trans_dict=trans_dict) for key in data_keys})
-
-
-
-
-
