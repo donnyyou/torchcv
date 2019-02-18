@@ -39,7 +39,7 @@ This repository provides source code for most deep learning based cv problems. W
 
 
 ## QuickStart with TorchCV
-Now only support Python3.x & pytorch 0.4.1, and I will update to pytorch 1.0.
+Now only support Python3.x, pytorch 1.0.
 ```bash
 pip3 install -r requirements.txt
 cd extensions
