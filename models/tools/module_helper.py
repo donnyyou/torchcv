@@ -53,13 +53,11 @@ class ModuleHelper(object):
             return BatchNorm2d
 
         elif bn_type == 'inplace_abn':
-            torch_ver = torch.__version__[:3]
-            if torch_ver == '0.4':
-                from extensions.ops.inplace_abn.bn import InPlaceABNSync
-                if ret_cls:
-                    return InPlaceABNSync
+            from extensions.ops.inplace_abn.bn import InPlaceABNSync
+            if ret_cls:
+                return InPlaceABNSync
 
-                return functools.partial(InPlaceABNSync, activation='none')
+            return functools.partial(InPlaceABNSync, activation='none')
 
         else:
             Log.error('Not support BN type: {}.'.format(bn_type))
