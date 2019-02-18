@@ -33,7 +33,7 @@ class DetHelper(object):
             if cls_keep_num is not None:
                 cls_keep = cls_keep[:cls_keep_num]
 
-            cls_keep_list.append(cls_index[cls_keep])
+            cls_keep_list.append(cls_index[cls_keep.cpu().numpy()])
 
         keep_index = np.concatenate(cls_keep_list, 0)
         return dets[keep_index]
