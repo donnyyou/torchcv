@@ -9,9 +9,9 @@
       "input_mode": "BGR",
       "keep_difficult": false,
       "workers": 8,
+      "mean_value": [123, 116, 103],
       "normalize": {
         "div_value": 1.0,
-        "mean_value": [123, 116, 103],
         "mean": [122.7717, 115.9465, 102.9801],
         "std": [1.0, 1.0, 1.0]
       }
@@ -33,7 +33,7 @@
         }
       },
       "data_transformer": {
-        "size_mode": "random_size"
+        "size_mode": "max_size"
       }
     },
     "val": {
@@ -50,7 +50,7 @@
         }
       },
       "data_transformer": {
-        "size_mode": "random_size"
+        "size_mode": "max_size"
       }
     },
     "test": {
@@ -80,8 +80,7 @@
     },
     "roi": {
       "method": "roipool",
-      "pooled_width": 7,
-      "pooled_height": 7,
+      "pooled_hw": [7, 7],
       "spatial_stride": 16,
       "loc_normalize_mean": [0.0, 0.0, 0.0, 0.0],
       "loc_normalize_std": [0.1, 0.1, 0.2, 0.2],

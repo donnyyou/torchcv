@@ -9,6 +9,7 @@ echo "Building cocoapi..."
 cd apis/cocoapi/PythonAPI
 ${PYTHON} setup.py install
 
+cd -
 echo "Building roi align op..."
 cd ops/roi_align
 if [ -d "build" ]; then

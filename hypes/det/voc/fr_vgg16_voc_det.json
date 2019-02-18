@@ -9,9 +9,9 @@
       "input_mode": "BGR",
       "keep_difficult": false,
       "workers": 8,
+      "mean_value": [123, 116, 103],
       "normalize": {
         "div_value": 1.0,
-        "mean_value": [123, 116, 103],
         "mean": [122.7717, 115.9465, 102.9801],
         "std": [1.0, 1.0, 1.0]
       }
@@ -86,12 +86,10 @@
       "n_train_post_nms": 2000,
       "n_test_pre_nms": 6000,
       "n_test_post_nms": 300
-
     },
     "roi": {
       "method": "roipool",
-      "pooled_width": 7,
-      "pooled_height": 7,
+      "pooled_hw": [7, 7],
       "spatial_stride": 16,
       "loc_normalize_mean": [0.0, 0.0, 0.0, 0.0],
       "loc_normalize_std": [0.1, 0.1, 0.2, 0.2],
@@ -128,7 +126,6 @@
       "log_format": "%(asctime)s %(levelname)-7s %(message)s",
       "rewrite": true
     },
-
     "solver": {
       "lr": {
         "metric": "epoch",
@@ -152,7 +149,6 @@
       "test_interval": 5000,
       "max_epoch": 15
     },
-
     "res": {
       "nms": {
         "mode": "union",

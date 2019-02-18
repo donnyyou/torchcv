@@ -16,22 +16,22 @@ from utils.tools.logger import Logger as Log
 class Trainer(object):
 
     @staticmethod
-    def init(runner, net_params, solver_dict=None):
+    def init(net_params, solver_dict=None):
         optimizer = None
         optim_params = solver_dict['optim']
         if optim_params['optim_method'] == 'sgd':
             optimizer = SGD(net_params,
-                            lr=runner.configer.get('lr', 'base_lr'),
-                            momentum=runner.configer.get('optim', 'sgd')['momentum'],
-                            weight_decay=runner.configer.get('optim', 'sgd')['weight_decay'],
-                            nesterov=runner.configer.get('optim', 'sgd')['nesterov'])
+                            lr=solver_dict['lr']['base_lr'],
+                            momentum=optim_params['sgd']['momentum'],
+                            weight_decay=optim_params['sgd']['weight_decay'],
+                            nesterov=optim_params['sgd']['nesterov'])
 
         elif optim_params['optim_method'] == 'adam':
             optimizer = Adam(net_params,
-                             lr=runner.configer.get('lr', 'base_lr'),
-                             betas=runner.configer.get('optim', 'adam')['betas'],
-                             eps=runner.configer.get('optim', 'adam')['eps'],
-                             weight_decay=runner.configer.get('optim', 'adam')['weight_decay'])
+                             lr=solver_dict['lr']['base_lr'],
+                             betas=optim_params['adam']['betas'],
+                             eps=optim_params['adam']['eps'],
+                             weight_decay=optim_params['adam']['weight_decay'])
 
         else:
             Log.error('Optimizer {} is not valid.'.format(optim_params['optim_method']))
@@ -39,26 +39,26 @@ class Trainer(object):
 
         lr_params = solver_dict['lr']
         scheduler = None
-        if lr_params['policy'] == 'step':
+        if lr_params['lr_policy'] == 'step':
             scheduler = lr_scheduler.StepLR(optimizer,
                                             lr_params['step']['step_size'],
                                             gamma=lr_params['step']['gamma'])
 
-        elif lr_params['policy'] == 'multistep':
+        elif lr_params['lr_policy'] == 'multistep':
             scheduler = lr_scheduler.MultiStepLR(optimizer,
                                                  lr_params['multistep']['stepvalue'],
                                                  gamma=lr_params['multistep']['gamma'])
 
-        elif lr_params['policy'] == 'lambda_poly':
+        elif lr_params['lr_policy'] == 'lambda_poly':
             if lr_params['metric'] == 'epoch':
                 lambda_poly = lambda epoch: pow((1.0 - epoch / solver_dict['max_epoch']), 0.9)
             else:
-                assert runner.configer.get('lr', 'metric') == 'iters'
+                assert lr_params['metric'] == 'iters'
                 lambda_poly = lambda epoch: pow((1.0 - epoch / solver_dict['max_iters']), 0.9)
 
             scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_poly)
 
-        elif lr_params['policy'] == 'lambda_linear':
+        elif lr_params['lr_policy'] == 'lambda_linear':
             if lr_params['metric'] == 'epoch':
                 lambda_linear = lambda epoch: 1.0 - (epoch / solver_dict['max_epoch'])
             else:
@@ -67,7 +67,7 @@ class Trainer(object):
 
             scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_linear)
 
-        elif lr_params['policy'] == 'plateau':
+        elif lr_params['lr_policy'] == 'plateau':
             scheduler = lr_scheduler.ReduceLROnPlateau(optimizer,
                                                        mode=lr_params['plateau']['mode'],
                                                        factor=lr_params['plateau']['factor'],
@@ -79,7 +79,7 @@ class Trainer(object):
                                                        eps=lr_params['plateau']['eps'])
 
         else:
-            Log.error('Policy:{} is not valid.'.format(lr_params['policy']))
+            Log.error('Policy:{} is not valid.'.format(lr_params['lr_policy']))
             exit(1)
 
         return optimizer, scheduler

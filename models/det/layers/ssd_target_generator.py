@@ -13,7 +13,7 @@ import numpy as np
 import torch
 
 from utils.helpers.det_helper import DetHelper
-from utils.layers.det.ssd_priorbox_layer import SSDPriorBoxLayer
+from models.det.layers.ssd_priorbox_layer import SSDPriorBoxLayer
 from utils.tools.logger import Logger as Log
 
 

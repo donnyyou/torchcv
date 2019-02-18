@@ -52,7 +52,7 @@ class OpenPose(object):
         self.pose_net = self.pose_model_manager.multi_pose_detector()
         self.pose_net = RunnerHelper.load_net(self, self.pose_net)
 
-        self.optimizer, self.scheduler = Trainer.init(self, self._get_parameters(), self.configer.get('solver'))
+        self.optimizer, self.scheduler = Trainer.init(self._get_parameters(), self.configer.get('solver'))
 
         self.train_loader = self.pose_data_loader.get_trainloader()
         self.val_loader = self.pose_data_loader.get_valloader()
@@ -70,8 +70,8 @@ class OpenPose(object):
             else:
                 lr_1.append(value)
 
-        params = [{'params': lr_1, 'lr': self.configer.get('lr', 'base_lr'), 'weight_decay': 0.0},
-                  {'params': lr_2, 'lr': self.configer.get('lr', 'base_lr'), 'weight_decay': 0.0},]
+        params = [{'params': lr_1, 'lr': self.configer.get('solver', 'lr')['base_lr'], 'weight_decay': 0.0},
+                  {'params': lr_2, 'lr': self.configer.get('solver', 'lr')['base_lr'], 'weight_decay': 0.0},]
 
         return params
 

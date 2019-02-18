@@ -53,7 +53,7 @@ class FasterRCNN(object):
         self.det_net = self.det_model_manager.object_detector()
         self.det_net = RunnerHelper.load_net(self, self.det_net)
 
-        self.optimizer, self.scheduler = Trainer.init(self, self._get_parameters(), self.configer.get('solver'))
+        self.optimizer, self.scheduler = Trainer.init(self._get_parameters(), self.configer.get('solver'))
 
         self.train_loader = self.det_data_loader.get_trainloader()
         self.val_loader = self.det_data_loader.get_valloader()
@@ -69,8 +69,8 @@ class FasterRCNN(object):
                 else:
                     lr_1.append(value)
 
-        params = [{'params': lr_1, 'lr': self.configer.get('lr', 'base_lr')},
-                  {'params': lr_2, 'lr': self.configer.get('lr', 'base_lr') * 2., 'weight_decay': 0}]
+        params = [{'params': lr_1, 'lr': self.configer.get('solver', 'lr')['base_lr']},
+                  {'params': lr_2, 'lr': self.configer.get('solver', 'lr')['base_lr'] * 2., 'weight_decay': 0}]
         return params
 
     def train(self):
@@ -83,7 +83,7 @@ class FasterRCNN(object):
         self.runner_state['epoch'] += 1
 
         for i, data_dict in enumerate(self.train_loader):
-            Trainer.update(self)
+            Trainer.update(self, solver_dict=self.configer.get('solver'))
             self.data_time.update(time.time() - start_time)
             # Forward pass.
             loss = self.det_net(data_dict)

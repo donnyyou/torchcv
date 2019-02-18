@@ -13,7 +13,7 @@ import numpy as np
 import torch
 
 from utils.helpers.det_helper import DetHelper
-from utils.layers.det.fr_priorbox_layer import FRPriorBoxLayer
+from models.det.layers.fr_priorbox_layer import FRPriorBoxLayer
 from utils.tools.logger import Logger as Log
 
 
@@ -26,10 +26,10 @@ class RPNTargetAssigner(object):
 
     def __call__(self, feat_list, gt_bboxes, meta):
         anchor_boxes = self.fr_proirbox_layer(feat_list, meta[0]['input_size'])
-        n_sample = self.configer.get('rpn', 'loss')['n_sample']
-        pos_iou_thresh = self.configer.get('rpn', 'loss')['pos_iou_thresh']
-        neg_iou_thresh = self.configer.get('rpn', 'loss')['neg_iou_thresh']
-        pos_ratio = self.configer.get('rpn', 'loss')['pos_ratio']
+        n_sample = self.configer.get('rpn', 'sampler')['n_sample']
+        pos_iou_thresh = self.configer.get('rpn', 'sampler')['pos_iou_thresh']
+        neg_iou_thresh = self.configer.get('rpn', 'sampler')['neg_iou_thresh']
+        pos_ratio = self.configer.get('rpn', 'sampler')['pos_ratio']
         # Calc indicies of anchors which are located completely inside of the image
         # whose size is speficied.
         target_bboxes = list()

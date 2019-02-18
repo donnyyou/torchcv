@@ -43,9 +43,7 @@ class DataLoader(object):
 
         self.img_transform = trans.Compose([
             trans.ToTensor(),
-            trans.Normalize(div_value=self.configer.get('normalize', 'div_value'),
-                            mean=self.configer.get('normalize', 'mean'),
-                            std=self.configer.get('normalize', 'std')), ])
+            trans.Normalize(**self.configer.get('data', 'normalize')), ])
 
     def get_trainloader(self):
         if not self.configer.exists('train', 'loader') or self.configer.get('train', 'loader') == 'default':

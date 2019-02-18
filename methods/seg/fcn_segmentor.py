@@ -50,7 +50,7 @@ class FCNSegmentor(object):
         self.seg_net = self.seg_model_manager.semantic_segmentor()
         self.seg_net = RunnerHelper.load_net(self, self.seg_net)
 
-        self.optimizer, self.scheduler = Trainer.init(self, self._get_parameters(), self.configer.get('solver'))
+        self.optimizer, self.scheduler = Trainer.init(self._get_parameters(), self.configer.get('solver'))
 
         self.train_loader = self.seg_data_loader.get_trainloader()
         self.val_loader = self.seg_data_loader.get_valloader()
@@ -67,8 +67,8 @@ class FCNSegmentor(object):
             else:
                 lr_1.append(value)
 
-        params = [{'params': lr_1, 'lr': self.configer.get('lr', 'base_lr')},
-                  {'params': lr_10, 'lr': self.configer.get('lr', 'base_lr') * 1.0}]
+        params = [{'params': lr_1, 'lr': self.configer.get('solver', 'lr')['base_lr']},
+                  {'params': lr_10, 'lr': self.configer.get('solver', 'lr')['base_lr'] * 1.0}]
         return params
 
     def train(self):
@@ -80,7 +80,7 @@ class FCNSegmentor(object):
         # Adjust the learning rate after every epoch.
 
         for i, data_dict in enumerate(self.train_loader):
-            Trainer.update(self, backbone_list=(0, ))
+            Trainer.update(self, backbone_list=(0, ), solver_dict=self.configer.get('solver'))
             inputs = data_dict['img']
             targets = data_dict['labelmap']
             self.data_time.update(time.time() - start_time)

@@ -13,11 +13,11 @@ from torch import nn
 from torch.nn import functional as F
 from torchvision.models import vgg16
 
-from loss.modules.det_modules import FRLoss
-from utils.layers.det.fr_roi_generator import FRROIGenerator
-from utils.layers.det.fr_roi_sampler import FRROISampler
-from utils.layers.det.rpn_detection_layer import RPNDetectionLayer
-from utils.layers.det.rpn_target_assigner import RPNTargetAssigner
+from models.det.loss.det_modules import FRLoss
+from models.det.layers.fr_roi_generator import FRROIGenerator
+from models.det.layers.fr_roi_sampler import FRROISampler
+from models.det.layers.rpn_detection_layer import RPNDetectionLayer
+from models.det.layers.rpn_target_assigner import RPNTargetAssigner
 from utils.tools.logger import Logger as Log
 
 
@@ -203,7 +203,7 @@ class BBoxHead(nn.Module):
         self.cls_loc = nn.Linear(4096, self.configer.get('data', 'num_classes') * 4)
         self.score = nn.Linear(4096, self.configer.get('data', 'num_classes'))
         from extensions.ops.roi_pool.modules.roi_pool import RoIPool
-        self.roi_pool = RoIPool(out_size=int(self.configer.get('roi', 'pooled_size')),
+        self.roi_pool = RoIPool(out_size=tuple(self.configer.get('roi', 'pooled_hw')),
                                 spatial_scale=1.0 / float(self.configer.get('roi', 'spatial_stride')))
 
         normal_init(self.cls_loc, 0, 0.001)

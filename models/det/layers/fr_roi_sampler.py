@@ -22,11 +22,11 @@ class FRROISampler(object):
         self.configer = configer
 
     def __call__(self, indices_and_rois, gt_bboxes, gt_labels, meta, gt_polygons=None):
-        n_sample = self.configer.get('roi', 'loss')['n_sample']
-        pos_iou_thresh = self.configer.get('roi', 'loss')['pos_iou_thresh']
-        neg_iou_thresh_hi = self.configer.get('roi', 'loss')['neg_iou_thresh_hi']
-        neg_iou_thresh_lo = self.configer.get('roi', 'loss')['neg_iou_thresh_lo']
-        pos_ratio = self.configer.get('roi', 'loss')['pos_ratio']
+        n_sample = self.configer.get('roi', 'sampler')['n_sample']
+        pos_iou_thresh = self.configer.get('roi', 'sampler')['pos_iou_thresh']
+        neg_iou_thresh_hi = self.configer.get('roi', 'sampler')['neg_iou_thresh_hi']
+        neg_iou_thresh_lo = self.configer.get('roi', 'sampler')['neg_iou_thresh_lo']
+        pos_ratio = self.configer.get('roi', 'sampler')['pos_ratio']
         loc_normalize_mean = self.configer.get('roi', 'loc_normalize_mean')
         loc_normalize_std = self.configer.get('roi', 'loc_normalize_std')
 

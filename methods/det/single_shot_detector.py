@@ -53,7 +53,7 @@ class SingleShotDetector(object):
     def _init_model(self):
         self.det_net = self.det_model_manager.object_detector()
         self.det_net = RunnerHelper.load_net(self, self.det_net)
-        self.optimizer, self.scheduler = Trainer.init(self, self._get_parameters(), self.configer.get('solver'))
+        self.optimizer, self.scheduler = Trainer.init(self._get_parameters(), self.configer.get('solver'))
         self.train_loader = self.det_data_loader.get_trainloader()
         self.val_loader = self.det_data_loader.get_valloader()
         self.det_loss = self.det_model_manager.get_det_loss()
@@ -68,8 +68,8 @@ class SingleShotDetector(object):
             else:
                 lr_1.append(value)
 
-        params = [{'params': lr_1, 'lr': self.configer.get('lr', 'base_lr')},
-                  {'params': lr_10, 'lr': self.configer.get('lr', 'base_lr')}]
+        params = [{'params': lr_1, 'lr': self.configer.get('solver', 'lr')['base_lr']},
+                  {'params': lr_10, 'lr': self.configer.get('solver', 'lr')['base_lr']}]
 
         return params
 
@@ -84,7 +84,7 @@ class SingleShotDetector(object):
 
         # data_tuple: (inputs, heatmap, maskmap, vecmap)
         for i, data_dict in enumerate(self.train_loader):
-            Trainer.update(self, backbone_list=(0,))
+            Trainer.update(self, backbone_list=(0,), solver_dict=self.configer.get('solver'))
             inputs = data_dict['img']
             batch_gt_bboxes = data_dict['bboxes']
             batch_gt_labels = data_dict['labels']

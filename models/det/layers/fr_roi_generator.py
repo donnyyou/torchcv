@@ -10,8 +10,8 @@ from __future__ import print_function
 
 import torch
 
-from extensions.nms.nms_wrapper import nms
-from utils.layers.det.fr_priorbox_layer import FRPriorBoxLayer
+from extensions.ops.nms.nms_wrapper import nms
+from models.det.layers.fr_priorbox_layer import FRPriorBoxLayer
 
 
 class FRROIGenerator(object):
@@ -135,8 +135,8 @@ class FRROIGenerator(object):
 
             # unNOTE: somthing is wrong here!
             # TODO: remove cuda.to_gpu
-            keep = nms(torch.cat((rois, tmp_scores.unsqueeze(1)), 1),
-                       thresh=self.configer.get('rpn', 'nms_threshold'))
+            _, keep = nms(torch.cat((rois, tmp_scores.unsqueeze(1)), 1),
+                          iou_thr=self.configer.get('rpn', 'nms_threshold'))
             # keep = DetHelper.nms(rois,
             #                      scores=tmp_scores,
             #                      nms_threshold=self.configer.get('rpn', 'nms_threshold'))

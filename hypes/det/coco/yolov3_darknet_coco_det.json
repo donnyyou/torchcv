@@ -9,9 +9,9 @@
       "input_mode": "RGB",
       "keep_difficult": false,
       "workers": 8,
+      "mean_value": [128, 128, 128],
       "normalize": {
         "div_value": 255,
-        "mean_value": [128, 128, 128],
         "mean": [0.0, 0.0, 0.0],
         "std": [1.0, 1.0, 1.0]
       }

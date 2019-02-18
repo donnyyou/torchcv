@@ -20,7 +20,7 @@ from torch.nn.parallel.data_parallel import DataParallel
 from torch.nn.parallel.parallel_apply import get_a_var
 from torch.nn.parallel.scatter_gather import gather
 
-from extensions.parallel.scatter_gather import scatter_kwargs
+from .scatter_gather import scatter_kwargs
 
 
 torch_ver = torch.__version__[:3]

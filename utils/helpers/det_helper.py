@@ -28,7 +28,7 @@ class DetHelper(object):
         cls_keep_list = list()
         for c in unique_labels:
             cls_index = np.where(labels == c)[0]
-            cls_keep = nms(dets[cls_index], thresh=max_threshold, device_id=device_id)
+            _, cls_keep = nms(dets[cls_index], iou_thr=max_threshold, device_id=device_id)
 
             if cls_keep_num is not None:
                 cls_keep = cls_keep[:cls_keep_num]
@@ -50,7 +50,7 @@ class DetHelper(object):
         cls_dets_list = list()
         for c in unique_labels:
             cls_index = np.where(labels == c)[0]
-            _, cls_dets = soft_nms(dets[cls_index], max_threshold=max_threshold,
+            cls_dets, _ = soft_nms(dets[cls_index], max_threshold=max_threshold,
                                 method=method, sigma=sigma, min_score=min_score)
 
             if cls_keep_num is not None:

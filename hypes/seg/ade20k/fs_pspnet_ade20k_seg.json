@@ -9,9 +9,9 @@
       "reduce_zero_label": true,
       "data_dir": "~/DataSet/ADE20K",
       "workers": 8,
+      "mean_value": [103, 116, 123],
       "normalize": {
         "div_value": 1.0,
-        "mean_value": [103, 116, 123],
         "mean": [102.9801, 115.9465, 122.7717],
         "std": [1.0, 1.0, 1.0]
       }

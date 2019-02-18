@@ -50,7 +50,7 @@ class FCClassifier(object):
     def _init_model(self):
         self.cls_net = self.cls_model_manager.image_classifier()
         self.cls_net = RunnerHelper.load_net(self, self.cls_net)
-        self.optimizer, self.scheduler = Trainer.init(self, self._get_parameters(), self.configer.get('solver'))
+        self.optimizer, self.scheduler = Trainer.init(self._get_parameters(), self.configer.get('solver'))
 
         self.train_loader = self.cls_data_loader.get_trainloader()
         self.val_loader = self.cls_data_loader.get_valloader()
@@ -71,7 +71,7 @@ class FCClassifier(object):
         self.runner_state['epoch'] += 1
 
         for i, data_dict in enumerate(self.train_loader):
-            Trainer.update(self)
+            Trainer.update(self, solver_dict=self.configer.get('solver'))
             inputs = data_dict['img']
             labels = data_dict['label']
             self.data_time.update(time.time() - start_time)

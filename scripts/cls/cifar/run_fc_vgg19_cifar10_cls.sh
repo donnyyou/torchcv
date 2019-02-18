@@ -12,7 +12,7 @@ DATA_DIR="/home/donny/DataSet/Cifar10"
 MODEL_NAME="vgg19"
 LOSS_TYPE="fc_ce_loss"
 CHECKPOINTS_NAME="fc_vgg19_cifar10_cls"
-PRETRAINED_MODEL="./pretrained_model/resnet101-imagenet.pth"
+PRETRAINED_MODEL="./pretrained_models/resnet101-imagenet.pth"
 MAX_EPOCH=400
 
 LOG_FILE="./log/cityscapes/${CHECKPOINTS_NAME}.log"

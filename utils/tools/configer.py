@@ -84,6 +84,10 @@ class Configer(object):
         if len(key) == 2 and (key[0] in self.params_root and key[1] in self.params_root[key[0]]):
             return True
 
+        if len(key) == 3 and (key[0] in self.params_root and key[1] in self.params_root[key[0]])\
+                and key[2] in self.params_root[key[0]][key[1]]:
+            return True
+
         return False
 
     def add(self, key_tuple, value):

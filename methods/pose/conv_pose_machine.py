@@ -47,7 +47,7 @@ class ConvPoseMachine(object):
         self.pose_net = self.pose_model_manager.single_pose_detector()
         self.pose_net = RunnerHelper.load_net(self, self.pose_net)
 
-        self.optimizer, self.scheduler = Trainer.init(self, self._get_parameters(), self.configer.get('solver'))
+        self.optimizer, self.scheduler = Trainer.init(self._get_parameters(), self.configer.get('solver'))
 
         self.train_loader = self.pose_data_loader.get_trainloader()
         self.val_loader = self.pose_data_loader.get_valloader()
@@ -69,7 +69,7 @@ class ConvPoseMachine(object):
 
         # data_tuple: (inputs, heatmap, maskmap, tagmap, num_objects)
         for i, data_dict in enumerate(self.train_loader):
-            Trainer.update(self)
+            Trainer.update(self, solver_dict=self.configer.get('solver'))
             inputs = data_dict['img']
             heatmap = data_dict['heatmap']
 
