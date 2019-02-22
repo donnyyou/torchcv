@@ -26,10 +26,6 @@ class Controller(object):
         runner.runner_state['val_loss'] = 0
         runner.runner_state['max_performance'] = 0
         runner.runner_state['min_val_loss'] = 0
-
-        if runner.configer.get('network', 'bn_type') is None:
-            runner.configer.update(['network', 'bn_type'], 'torchbn')
-
         if runner.configer.get('phase') == 'train':
             assert len(runner.configer.get('gpu')) > 1 or runner.configer.get('network', 'bn_type') == 'torchbn'
 

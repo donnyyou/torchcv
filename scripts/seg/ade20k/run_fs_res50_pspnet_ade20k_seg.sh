@@ -11,11 +11,11 @@ cd ../../../
 DATA_DIR="/home/donny/DataSet/ADE20K"
 
 BACKBONE="deepbase_resnet50_dilated8"
-MODEL_NAME="deeplabv3"
-CHECKPOINTS_NAME="fs_res50_deeplabv3_ade20k_seg"$2
+MODEL_NAME="pspnet"
+CHECKPOINTS_NAME="fs_res50_pspnet_ade20k_seg"$2
 PRETRAINED_MODEL="./pretrained_models/resnet50-imagenet.pth"
 
-HYPES_FILE='hypes/seg/ade20k/fs_deeplabv3_ade20k_seg.json'
+HYPES_FILE='hypes/seg/ade20k/fs_pspnet_ade20k_seg.json'
 MAX_ITERS=40000
 LOSS_TYPE="fs_auxce_loss"
 

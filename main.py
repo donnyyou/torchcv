@@ -152,6 +152,9 @@ if __name__ == "__main__":
     if configer.get('gpu') is not None:
         os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(str(gpu_id) for gpu_id in configer.get('gpu'))
 
+    if configer.get('network', 'bn_type') is None:
+        configer.update(['network', 'bn_type'], 'torchbn')
+
     project_dir = os.path.dirname(os.path.realpath(__file__))
     configer.add(['project_dir'], project_dir)
 

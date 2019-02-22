@@ -166,7 +166,7 @@ class DenseNet(nn.Module):
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(m.weight)
-            elif isinstance(m, ModuleHelper.BatchNorm2d(bn_type=bn_type)):
+            elif isinstance(m, ModuleHelper.BatchNorm2d(bn_type=bn_type, ret_cls=True)):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
             elif isinstance(m, nn.Linear):

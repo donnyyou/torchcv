@@ -118,7 +118,7 @@ class YOLOv3(object):
             self.runner_state['iters'] += 1
 
             # Print the log info & reset the states.
-            if self.configer.get('iters') % self.configer.get('solver', 'display_iter') == 0:
+            if self.runner_state['iters'] % self.configer.get('solver', 'display_iter') == 0:
                 Log.info('Train Epoch: {0}\tTrain Iteration: {1}\t'
                          'Time {batch_time.sum:.3f}s / {2}iters, ({batch_time.avg:.3f})\t'
                          'Data load {data_time.sum:.3f}s / {2}iters, ({data_time.avg:3f})\n'
