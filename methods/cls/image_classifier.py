@@ -21,10 +21,7 @@ from utils.tools.logger import Logger as Log
 from metrics.cls.cls_running_score import ClsRunningScore
 
 
-cudnn.benchmark = True
-
-
-class FCClassifier(object):
+class ImageClassifier(object):
     """
       The class for the training phase of Image classification.
     """

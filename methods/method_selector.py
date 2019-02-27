@@ -7,8 +7,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from methods.cls.fc_classifier import FCClassifier
-from methods.cls.fc_classifier_test import FCClassifierTest
+from methods.cls.image_classifier import ImageClassifier
+from methods.cls.image_classifier_test import ImageClassifierTest
 from methods.det.faster_rcnn import FasterRCNN
 from methods.det.faster_rcnn_test import FastRCNNTest
 from methods.det.single_shot_detector import SingleShotDetector
@@ -52,10 +52,10 @@ DET_TEST_DICT = {
 }
 
 CLS_METHOD_DICT = {
-    'fc_classifier': FCClassifier,
+    'image_classifier': ImageClassifier,
 }
 CLS_TEST_DICT = {
-    'fc_classifier': FCClassifierTest,
+    'image_classifier': ImageClassifierTest,
 }
 
 

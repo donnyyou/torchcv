@@ -10,8 +10,13 @@ from __future__ import print_function
 
 import torch
 
-from extensions.ops.nms.nms_wrapper import nms
 from models.det.layers.fr_priorbox_layer import FRPriorBoxLayer
+from utils.tools.logger import Logger as Log
+
+try:
+    from extensions.ops.nms.nms_wrapper import nms
+except ImportError:
+    Log.error('NMS ImportError.')
 
 
 class FRROIGenerator(object):

@@ -25,7 +25,7 @@ from utils.tools.logger import Logger as Log
 from utils.parser.cls_parser import ClsParser
 
 
-class FCClassifierTest(object):
+class ImageClassifierTest(object):
 
     def __init__(self, configer):
         self.configer = configer

@@ -20,6 +20,11 @@ from models.det.layers.rpn_detection_layer import RPNDetectionLayer
 from models.det.layers.rpn_target_assigner import RPNTargetAssigner
 from utils.tools.logger import Logger as Log
 
+try:
+    from extensions.ops.roi_pool.modules.roi_pool import RoIPool
+except ImportError:
+    Log.error('RoIPool ImportError.')
+
 
 DETECTOR_CONFIG = {
     'vgg_cfg': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512]
@@ -202,7 +207,6 @@ class BBoxHead(nn.Module):
         self.classifier = classifier
         self.cls_loc = nn.Linear(4096, self.configer.get('data', 'num_classes') * 4)
         self.score = nn.Linear(4096, self.configer.get('data', 'num_classes'))
-        from extensions.ops.roi_pool.modules.roi_pool import RoIPool
         self.roi_pool = RoIPool(out_size=tuple(self.configer.get('roi', 'pooled_hw')),
                                 spatial_scale=1.0 / float(self.configer.get('roi', 'spatial_stride')))
 

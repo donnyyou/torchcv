@@ -1,7 +1,7 @@
 {
     "dataset": "imagenet",
     "task": "cls",
-    "method": "fc_classifier",
+    "method": "image_classifier",
     "data": {
       "num_classes": 1000,
       "data_dir": "~/DataSet/ImageNet",

@@ -10,8 +10,16 @@ from __future__ import print_function
 import numpy as np
 import torch
 
-from extensions.ops.nms.nms_wrapper import nms
-from extensions.ops.nms.nms_wrapper import soft_nms
+from utils.tools.logger import Logger as Log
+try:
+    from extensions.ops.nms.nms_wrapper import nms
+except ImportError:
+    Log.error('NMS ImportError.')
+
+try:
+    from extensions.ops.nms.nms_wrapper import soft_nms
+except ImportError:
+    Log.error('Soft-NMS ImportError.')
 
 
 class DetHelper(object):
@@ -50,7 +58,7 @@ class DetHelper(object):
         cls_dets_list = list()
         for c in unique_labels:
             cls_index = np.where(labels == c)[0]
-            cls_dets, _ = soft_nms(dets[cls_index], max_threshold=max_threshold,
+            cls_dets, _ = soft_nms(dets[cls_index], iou_thr=max_threshold,
                                 method=method, sigma=sigma, min_score=min_score)
 
             if cls_keep_num is not None:

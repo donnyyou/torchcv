@@ -9,7 +9,12 @@ from __future__ import division
 from __future__ import print_function
 
 import numpy as np
-import pycocotools.mask as mask_util
+
+from utils.tools.logger import Logger as Log
+try:
+    import pycocotools.mask as mask_util
+except ImportError:
+    Log.error('pycocotools ImportError.')
 
 
 class MaskHelper(object):
