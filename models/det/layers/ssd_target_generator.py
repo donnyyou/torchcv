@@ -1,20 +1,12 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 # Author: Donny You(youansheng@gmail.com)
-# Priorbox layer for Detection.
 
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
-import math
-import numpy as np
 import torch
 
 from utils.helpers.det_helper import DetHelper
 from models.det.layers.ssd_priorbox_layer import SSDPriorBoxLayer
-from utils.tools.logger import Logger as Log
 
 
 class SSDTargetGenerator(object):

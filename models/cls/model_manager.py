@@ -4,10 +4,6 @@
 # Select Cls Model for pose detection.
 
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import torch
 
 from models.cls.nets.mobilenet import MobileNet

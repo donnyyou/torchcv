@@ -4,17 +4,12 @@
 # ROI sample layer for Detection training.
 
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import numpy as np
 import torch
 import random
 
 from utils.helpers.mask_helper import MaskHelper
 from utils.helpers.det_helper import DetHelper
-from utils.tools.logger import Logger as Log
 
 
 class FRROISampler(object):

@@ -4,14 +4,9 @@
 # Evaluation of cityscapes.
 
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import fnmatch
 import argparse
 import platform
-import sys
 
 try:
     from itertools import izip
@@ -19,7 +14,7 @@ except ImportError:
     izip = zip
 
 # Cityscapes imports
-from metric.seg.cityscapes.evaluation.csHelpers import *
+from metrics.seg.cityscapes.evaluation.csHelpers import *
 
 # C Support
 # Enable the cython support for faster evaluation, this is necessary for speeding up your model results

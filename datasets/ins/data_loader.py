@@ -1,12 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 # Author: Donny You(youansheng@gmail.com)
-# Class for the Semantic Segmentation Data Loader.
 
-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 from torch.utils import data
 

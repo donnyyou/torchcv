@@ -1,19 +1,13 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 # Author: Donny You(youansheng@gmail.com)
-# Mobilenet models.
 
-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import torch
 import torch.nn as nn
 import torch.nn.init as init
 
 from models.tools.module_helper import ModuleHelper
-from utils.tools.logger import Logger as Log
 
 
 model_urls = {

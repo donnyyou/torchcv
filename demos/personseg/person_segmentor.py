@@ -1,5 +1,4 @@
 import torch
-import torch.nn.functional as F
 import numpy as np
 from model.dmnetU import l_Net
 import model.ICNet_model as ICNet_model

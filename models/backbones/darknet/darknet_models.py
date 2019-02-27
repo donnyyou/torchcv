@@ -3,14 +3,11 @@
 # Author: Donny You(youansheng@gmail.com)
 
 
-import os
-import torch
 import torch.nn as nn
 import math
 from collections import OrderedDict
 
 from models.tools.module_helper import ModuleHelper
-from utils.tools.logger import Logger as Log
 
 
 model_urls = {

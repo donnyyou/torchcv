@@ -3,10 +3,6 @@
 # Author: Donny You(youansheng@gmail.com)
 
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import torch.nn as nn
 
 from models.backbones.densenet.densenet_models import DenseNetModels

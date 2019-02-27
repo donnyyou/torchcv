@@ -4,10 +4,6 @@
 # Select Pose Model for pose detection.
 
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import torch
 
 from models.pose.nets.open_pose_org import get_open_pose_org

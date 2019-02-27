@@ -3,10 +3,6 @@
 # Author: Donny You(youansheng@gmail.com)
 
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import itertools
 
 from extensions.tools.parallel import DataContainer

@@ -4,15 +4,9 @@
 # Priorbox layer for Detection.
 
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import math
 import numpy as np
 import torch
-
-from utils.tools.logger import Logger as Log
 
 
 class FRPriorBoxLayer(object):

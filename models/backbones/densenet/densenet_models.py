@@ -8,15 +8,12 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import os
-import re
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from collections import OrderedDict
 
 from models.tools.module_helper import ModuleHelper
-from utils.tools.logger import Logger as Log
 
 
 model_urls = {

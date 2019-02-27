@@ -1,12 +1,10 @@
 #!/usr/bin/env python
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 # Author: Donny You(youansheng@gmail.com)
 # Visualizer for pose estimator.
 
 
-import math
 import os
-import time
 
 import cv2
 import matplotlib

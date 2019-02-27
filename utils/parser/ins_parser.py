@@ -4,15 +4,10 @@
 # Parse json file of bounding boxes.
 
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import json
 import cv2
 import os
 import argparse
-import random
 import numpy as np
 
 from utils.helpers.mask_helper import MaskHelper

@@ -4,10 +4,6 @@
 # Some methods used by main methods.
 
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import math
 import os
 from collections import OrderedDict

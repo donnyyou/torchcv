@@ -4,10 +4,6 @@
 # Select Det Model for object detection.
 
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import torch
 
 from models.det.nets.darknet_yolov2 import DarkNetYolov2

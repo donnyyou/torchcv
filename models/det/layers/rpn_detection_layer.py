@@ -1,12 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 # Author: Donny You(youansheng@gmail.com)
-# Priorbox layer for Detection.
 
-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import torch
 import torch.nn as nn

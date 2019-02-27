@@ -3,7 +3,6 @@
 # Author: Donny You(youansheng@gmail.com)
 
 
-from __future__ import print_function
 from PIL import Image
 import os
 import json

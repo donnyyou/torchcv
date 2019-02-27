@@ -3,11 +3,6 @@
 # Author: Donny You(youansheng@gmail.com)
 
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
-import os
 from torch.utils import data
 
 import datasets.tools.pil_aug_transforms as pil_aug_trans

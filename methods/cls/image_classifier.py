@@ -4,13 +4,8 @@
 # Class Definition for Image Classifier.
 
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import time
 import torch
-import torch.backends.cudnn as cudnn
 
 from datasets.cls.data_loader import DataLoader
 from methods.tools.runner_helper import RunnerHelper

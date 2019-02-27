@@ -4,10 +4,6 @@
 # CityScape Seg data generator.
 
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import os
 import argparse
 import shutil
@@ -29,7 +25,7 @@ def str2bool(v):
         raise argparse.ArgumentTypeError('Unsupported value encountered.')
 
 
-class CityscapeSegGenerator(object):
+class CityscapesSegGenerator(object):
 
     def __init__(self, args, image_dir=IMAGE_DIR, label_dir=LABEL_DIR):
         self.args = args
@@ -135,5 +131,5 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    cityscape_seg_generator = CityscapeSegGenerator(args)
-    cityscape_seg_generator.generate_label()
+    cityscapes_seg_generator = CityscapesSegGenerator(args)
+    cityscapes_seg_generator.generate_label()

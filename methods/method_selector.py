@@ -3,10 +3,6 @@
 # Author: Donny You(youansheng@gmail.com)
 
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from methods.cls.image_classifier import ImageClassifier
 from methods.cls.image_classifier_test import ImageClassifierTest
 from methods.det.faster_rcnn import FasterRCNN

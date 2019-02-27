@@ -3,10 +3,6 @@
 # Author: Donny You(youansheng@gmail.com)
 
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from models.backbones.vgg.vgg_backbone import VGGBackbone
 from models.backbones.darknet.darknet_backbone import DarkNetBackbone
 from models.backbones.resnet.resnet_backbone import ResNetBackbone

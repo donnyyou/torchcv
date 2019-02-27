@@ -4,10 +4,6 @@
 # Repackage some mask operations.
 
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import numpy as np
 
 from utils.tools.logger import Logger as Log

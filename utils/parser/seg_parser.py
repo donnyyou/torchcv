@@ -4,18 +4,14 @@
 # Parse label file of segmentation.
 
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import cv2
 import os
 import numpy as np
 import argparse
+from PIL import Image
 
 from utils.tools.configer import Configer
 from utils.tools.logger import Logger as Log
-from PIL import Image
 
 
 class SegParser(object):
