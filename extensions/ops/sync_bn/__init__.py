@@ -6,4 +6,3 @@
 # @File    : __init__.py
 
 from .syncbn import *
-from .parallel import *
