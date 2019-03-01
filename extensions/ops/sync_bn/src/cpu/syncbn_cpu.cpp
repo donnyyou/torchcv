@@ -1,3 +1,4 @@
+#include <torch/serialize/tensor.h>
 #include <ATen/ATen.h>
 #include <vector>
 
@@ -8,11 +9,13 @@ at::Tensor broadcast_to(at::Tensor v, at::Tensor x) {
     std::vector<int64_t> broadcast_size = {1, -1};
     for (int64_t i = 2; i < x.ndimension(); ++i)
       broadcast_size.push_back(1);
-     return v.view(broadcast_size);
+
+    return v.view(broadcast_size);
   }
 }
+
 at::Tensor BatchNorm_Forward_CPU(
-    const at::Tensor input,
+    const at::Tensor input, 
     const at::Tensor mean,
     const at::Tensor std,
     const at::Tensor gamma,
@@ -26,10 +29,10 @@ at::Tensor BatchNorm_Forward_CPU(
 std::vector<at::Tensor> BatchNorm_Backward_CPU(
     const at::Tensor gradoutput,
     const at::Tensor input,
-    const at::Tensor mean,
+    const at::Tensor mean, 
     const at::Tensor std,
     const at::Tensor gamma,
-    const at::Tensor beta,
+    const at::Tensor beta, 
     bool train) {
   /* outputs*/
   at::Tensor gradinput = at::zeros_like(input);
@@ -43,8 +46,8 @@ std::vector<at::Tensor> BatchNorm_Backward_CPU(
 std::vector<at::Tensor> Sum_Square_Forward_CPU(
     const at::Tensor input) {
   /* outputs */
-  at::Tensor sum = input.type().tensor({input.size(1)}).zero_();
-  at::Tensor square = input.type().tensor({input.size(1)}).zero_();
+  at::Tensor sum = torch::zeros({input.size(1)}, input.options());
+  at::Tensor square = torch::zeros({input.size(1)}, input.options());
   return {sum, square};
 }
 

@@ -6,6 +6,7 @@
 
 import cv2
 import time
+import numpy as np
 import torch
 
 from datasets.seg.data_loader import DataLoader

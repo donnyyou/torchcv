@@ -37,3 +37,17 @@ if [ -d "build" ]; then
     rm -r build
 fi
 $PYTHON setup.py build_ext --inplace
+
+echo "Building GPU SyncBN..."
+cd ../sync_bn/src/gpu
+if [ -d "build" ]; then
+    rm -r build
+fi
+$PYTHON setup.py build_ext --inplace
+
+echo "Building CPU SyncBN..."
+cd ../../../sync_bn/src/cpu
+if [ -d "build" ]; then
+    rm -r build
+fi
+$PYTHON setup.py build_ext --inplace

@@ -109,7 +109,7 @@
     "loss": {
       "loss_type": "fc_ce_loss",
       "params": {
-        "ce_reduction": "elementwise_mean"
+        "ce_reduction": "mean"
       }
     }
 }

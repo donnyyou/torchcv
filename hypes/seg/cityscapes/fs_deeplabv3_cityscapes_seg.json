@@ -74,7 +74,7 @@
       "backbone": "deepbase_resnet101_dilated8",
       "multi_grid": [1, 1, 1],
       "model_name": "deeplabv3",
-      "bn_type": "inplace_abn",
+      "bn_type": "syncbn",
       "stride": 8,
       "checkpoints_name": "fs_deeplabv3_cityscapes_seg",
       "checkpoints_dir": "./checkpoints/seg/cityscapes"
@@ -124,7 +124,7 @@
         "ce_weight": [0.8373, 0.9180, 0.8660, 1.0345, 1.0166, 0.9969, 0.9754,
                       1.0489, 0.8786, 1.0023, 0.9539, 0.9843, 1.1116, 0.9037,
                       1.0865, 1.0955, 1.0865, 1.1529, 1.0507],
-        "ce_reduction": "elementwise_mean",
+        "ce_reduction": "mean",
         "ce_ignore_index": -1
       }
     }

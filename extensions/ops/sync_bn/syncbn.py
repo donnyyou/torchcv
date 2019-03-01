@@ -1,105 +1,25 @@
-##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-## Created by: Hang Zhang
-## ECE Department, Rutgers University
-## Email: zhang.hang@rutgers.edu
-## Copyright (c) 2017
-##
-## This source code is licensed under the MIT-style license found in the
-## LICENSE file in the root directory of this source tree
-##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#!/usr/bin/env python3
+# encoding: utf-8
+# @Time    : 2018/10/3 下午1:45
+# @Author  : yuchangqian
+# @Contact : changqian_yu@163.com
+# @File    : syncbn.py.py
 
 """Synchronized Cross-GPU Batch Normalization Module"""
 import collections
-import os
 import threading
 
 import torch
-from torch.autograd import Function
-from torch.nn.functional import batch_norm
 from torch.nn.modules.batchnorm import _BatchNorm
+from torch.nn.functional import batch_norm
 from torch.nn.parallel._functions import ReduceAddCoalesced, Broadcast
-from torch.utils.cpp_extension import load
 
-from extensions.syncbn.allreduce import allreduce
-from extensions.syncbn.comm import SyncMaster
-
-
-torch_ver = torch.__version__[:3]
-
-print('compiling/loading syncbn')
-build_path = '/tmp/bulid/syncbn'
-if not os.path.exists(build_path):
-    os.makedirs(build_path)
-
-syncbn = load(name='syncbn', sources=['extensions/syncbn/src/operator.cpp',
-                                      'extensions/syncbn/src/syncbn_kernel.cu'],
-              build_directory=build_path, verbose=True)
+from .functions import *
+from .comm import SyncMaster
+from .parallel import allreduce
 
 
-def sum_square(input):
-    r"""Calculate sum of elements and sum of squares for Batch Normalization"""
-    return _sum_square.apply(input)
-
-
-class _sum_square(Function):
-    @staticmethod
-    def forward(ctx, input):
-        ctx.save_for_backward(input)
-        if input.is_cuda:
-            xsum, xsqusum = syncbn.sumsquare_forward(input)
-        else:
-            raise NotImplemented
-        return xsum, xsqusum
-
-    @staticmethod
-    def backward(ctx, gradSum, gradSquare):
-        input, = ctx.saved_variables
-        if input.is_cuda:
-            gradInput = syncbn.sumsquare_backward(input, gradSum, gradSquare)
-        else:
-            raise NotImplemented
-        return gradInput
-
-
-class _batchnormtrain(Function):
-    @staticmethod
-    def forward(ctx, input, mean, std, gamma, beta):
-        ctx.save_for_backward(input, mean, std, gamma, beta)
-        if input.is_cuda:
-            output = syncbn.batchnorm_forward(input, mean, std, gamma, beta)
-        else:
-            raise NotImplemented
-        return output
-
-    @staticmethod
-    def backward(ctx, gradOutput):
-        input, mean, std, gamma, beta = ctx.saved_variables
-        if gradOutput.is_cuda:
-            gradInput, gradMean, gradStd, gradGamma, gradBeta = \
-                syncbn.batchnorm_backward(gradOutput, input, mean,
-                                           std, gamma, beta, True)
-        else:
-            raise NotImplemented
-        return gradInput, gradMean, gradStd, gradGamma, gradBeta
-
-
-def batchnormtrain(input, mean, std, gamma, beta):
-    r"""Applies Batch Normalization over a 3d input that is seen as a
-    mini-batch.
-
-    .. _encoding.batchnormtrain:
-
-    .. math::
-
-        y = \frac{x - \mu[x]}{ \sqrt{var[x] + \epsilon}} * \gamma + \beta
-
-    Shape:
-        - Input: :math:`(N, C)` or :math:`(N, C, L)`
-        - Output: :math:`(N, C)` or :math:`(N, C, L)` (same shape as input)
-
-    """
-    return _batchnormtrain.apply(input, mean, std, gamma, beta)
-
+__all__ = ['BatchNorm1d', 'BatchNorm2d', 'BatchNorm3d']
 
 class _SyncBatchNorm(_BatchNorm):
     def __init__(self, num_features, eps=1e-5, momentum=0.1, affine=True):
@@ -189,7 +109,7 @@ class BatchNorm1d(_SyncBatchNorm):
         if input.dim() != 2 and input.dim() != 3:
             raise ValueError('expected 2D or 3D input (got {}D input)'
                              .format(input.dim()))
-        super(BatchNorm1d, self)._check_input_dim(input)
+        super(BatchNorm2d, self)._check_input_dim(input)
 
 
 class BatchNorm2d(_SyncBatchNorm):
@@ -242,7 +162,7 @@ class BatchNorm2d(_SyncBatchNorm):
     Examples:
         >>> m = BatchNorm2d(100)
         >>> net = torch.nn.DataParallel(m)
-        >>> syncbn.parallel.patch_replication_callback(net)
+        >>> encoding.parallel.patch_replication_callback(net)
         >>> output = net(input)
     """
     def _check_input_dim(self, input):
@@ -315,4 +235,3 @@ class SharedTensor(object):
 
     def __repr__(self):
         return ('SharedTensor')
-

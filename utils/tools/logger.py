@@ -46,6 +46,7 @@ class Logger(object):
              log_format=DEFAULT_LOG_FORMAT,
              rewrite=False,
              stdout_level=None):
+        assert Logger.logger is None
         Logger.logfile_level = logfile_level
         Logger.log_file = log_file
         Logger.log_format = log_format
@@ -90,35 +91,9 @@ class Logger(object):
             Logger.logger.addHandler(console)
 
     @staticmethod
-    def set_log_file(file_path):
-        Logger.log_file = file_path
-        Logger.init(log_file=file_path)
-
-    @staticmethod
-    def set_logfile_level(log_level):
-        if log_level not in LOG_LEVEL_DICT:
-            print('Invalid logging level: {}'.format(log_level))
-            return
-
-        Logger.init(logfile_level=log_level)
-
-    @staticmethod
-    def clear_log_file():
-        Logger.rewrite = True
-        Logger.init(rewrite=True)
-
-    @staticmethod
     def check_logger():
         if Logger.logger is None:
             Logger.init(logfile_level=None, stdout_level=DEFAULT_STDOUT_LEVEL)
-
-    @staticmethod
-    def set_stdout_level(log_level):
-        if log_level not in LOG_LEVEL_DICT:
-            print('Invalid logging level: {}'.format(log_level))
-            return
-
-        Logger.init(stdout_level=log_level)
 
     @staticmethod
     def debug(message):
