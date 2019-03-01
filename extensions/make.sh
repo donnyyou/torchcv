@@ -46,7 +46,7 @@ fi
 $PYTHON setup.py build_ext --inplace
 
 echo "Building CPU SyncBN..."
-cd ../../../sync_bn/src/gpu
+cd ../../../sync_bn/src/cpu
 if [ -d "build" ]; then
     rm -r build
 fi
