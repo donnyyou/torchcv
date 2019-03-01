@@ -90,7 +90,7 @@
     "network":{
       "backbone": "deepbase_resnet101_dilated8",
       "model_name": "pspnet",
-      "bn_type": "inplace_abn",
+      "bn_type": "syncbn",
       "stride": 8,
       "checkpoints_name": "fs_pspnet_ade20k_seg",
       "checkpoints_dir": "./checkpoints/seg/ade20k"
