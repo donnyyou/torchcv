@@ -13,7 +13,7 @@ DATA_DIR="/home/donny/DataSet/ADE20K"
 BACKBONE="deepbase_resnet101_dilated8"
 MODEL_NAME="deeplabv3"
 CHECKPOINTS_NAME="fs_res101_deeplabv3_ade20k_seg"$2
-PRETRAINED_MODEL="./pretrained_models/resnet101-imagenet.pth"
+PRETRAINED_MODEL="./pretrained_models/3x3resnet101-imagenet.pth"
 
 HYPES_FILE='hypes/seg/ade20k/fs_deeplabv3_ade20k_seg.json'
 MAX_ITERS=40000

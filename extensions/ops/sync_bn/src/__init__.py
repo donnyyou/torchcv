@@ -6,6 +6,8 @@ cwd = os.path.dirname(os.path.realpath(__file__))
 cpu_path = os.path.join(cwd, 'cpu')
 gpu_path = os.path.join(cwd, 'gpu')
 
+from .cpu import syncbn_cpu as cpu
+from .gpu import syncbn_gpu as gpu
 # cpu = load('syncbn_cpu', [
 #         os.path.join(cpu_path, 'operator.cpp'),
 #         os.path.join(cpu_path, 'syncbn_cpu.cpp'),

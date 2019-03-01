@@ -141,7 +141,7 @@
         "seg_loss": 1.0
       },
       "params": {
-        "ce_reduction": "elementwise_mean",
+        "ce_reduction": "mean",
         "ce_ignore_index": -1
       }
     }

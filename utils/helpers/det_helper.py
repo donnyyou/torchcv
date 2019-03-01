@@ -10,12 +10,12 @@ from utils.tools.logger import Logger as Log
 try:
     from extensions.ops.nms.nms_wrapper import nms
 except ImportError:
-    Log.error('NMS ImportError.')
+    print('DetHelper NMS ImportError.')
 
 try:
     from extensions.ops.nms.nms_wrapper import soft_nms
 except ImportError:
-    Log.error('Soft-NMS ImportError.')
+    print('DetHelper Soft-NMS ImportError.')
 
 
 class DetHelper(object):

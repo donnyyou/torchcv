@@ -12,7 +12,7 @@ from utils.tools.logger import Logger as Log
 try:
     from extensions.ops.nms.nms_wrapper import nms
 except ImportError:
-    Log.error('NMS ImportError.')
+    print('FRROIiGenerator NMS ImportError.')
 
 
 class FRROIGenerator(object):
