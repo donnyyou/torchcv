@@ -58,7 +58,10 @@ def stack(batch, data_key=None, trans_dict=None):
 
 def collate(batch, trans_dict):
     data_keys = batch[0].keys()
-    if trans_dict['size_mode'] == 'fix_size':
+    if trans_dict['size_mode'] == 'none':
+        return dict({key: stack(batch, data_key=key, trans_dict=trans_dict) for key in data_keys})
+
+    elif trans_dict['size_mode'] == 'fix_size':
         target_width, target_height = trans_dict['input_size']
 
     elif trans_dict['size_mode'] == 'multi_size':
@@ -161,7 +164,7 @@ def collate(batch, trans_dict):
                 Log.error('Invalid pad mode: {}'.format(trans_dict['pad_mode']))
                 exit(1)
 
-            pad = (left_pad, pad_width-left_pad, up_pad, pad_height-up_pad)
+            pad = [left_pad, pad_width-left_pad, up_pad, pad_height-up_pad]
 
             batch[i]['img'] = DataContainer(
                 F.pad(batch[i]['img'].data, pad=pad, value=0), stack=batch[i]['img'].stack

@@ -100,14 +100,12 @@ class OpenPoseLoader(data.Dataset):
         json_dir = os.path.join(root_dir, dataset, 'json')
         mask_dir = os.path.join(root_dir, dataset, 'mask')
 
-        img_extension = os.listdir(image_dir)[0].split('.')[-1]
-
         for file_name in os.listdir(json_dir):
             image_name = '.'.join(file_name.split('.')[:-1])
-            img_path = os.path.join(image_dir, '{}.{}'.format(image_name, img_extension))
             mask_path = os.path.join(mask_dir, '{}.png'.format(image_name))
+            img_path = ImageHelper.imgpath(image_dir, image_name)
             json_path = os.path.join(json_dir, file_name)
-            if not os.path.exists(json_path) or not os.path.exists(img_path):
+            if not os.path.exists(json_path) or img_path is None:
                 Log.warn('Json Path: {} not exists.'.format(json_path))
                 continue
 
@@ -121,10 +119,10 @@ class OpenPoseLoader(data.Dataset):
             mask_dir = os.path.join(root_dir, 'val/mask')
             for file_name in os.listdir(json_dir):
                 image_name = '.'.join(file_name.split('.')[:-1])
-                img_path = os.path.join(image_dir, '{}.{}'.format(image_name, img_extension))
                 mask_path = os.path.join(mask_dir, '{}.png'.format(image_name))
+                img_path = ImageHelper.imgpath(image_dir, image_name)
                 json_path = os.path.join(json_dir, file_name)
-                if not os.path.exists(json_path) or not os.path.exists(img_path):
+                if not os.path.exists(json_path) or img_path is None:
                     Log.warn('Json Path: {} not exists.'.format(json_path))
                     continue
 
