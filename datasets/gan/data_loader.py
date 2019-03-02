@@ -7,6 +7,7 @@ from torch.utils import data
 
 from datasets.gan.loader.default_loader import DefaultLoader
 from datasets.gan.loader.cyclegan_loader import CycleGANLoader
+from datasets.gan.loader.facegan_loader import FaceGANLoader
 import datasets.tools.pil_aug_transforms as pil_aug_trans
 import datasets.tools.cv2_aug_transforms as cv2_aug_trans
 import datasets.tools.transforms as trans
@@ -76,6 +77,22 @@ class DataLoader(object):
 
             return trainloader
 
+        elif self.configer.get('train', 'loader') == 'facegan':
+            trainloader = data.DataLoader(
+                FaceGANLoader(root_dir=self.configer.get('data', 'data_dir'), dataset='train',
+                              aug_transform=self.aug_train_transform,
+                              img_transform=self.img_transform,
+                              configer=self.configer),
+                batch_size=self.configer.get('train', 'batch_size'), shuffle=True,
+                num_workers=self.configer.get('data', 'workers'), pin_memory=True,
+                drop_last=self.configer.get('data', 'drop_last'),
+                collate_fn=lambda *args: collate(
+                    *args, trans_dict=self.configer.get('train', 'data_transformer')
+                )
+            )
+
+            return trainloader
+
         else:
             Log.error('{} train loader is invalid.'.format(self.configer.get('train', 'loader')))
             exit(1)
@@ -97,7 +114,7 @@ class DataLoader(object):
 
             return valloader
 
-        if self.configer.get('val', 'loader') == 'cyclegan':
+        elif self.configer.get('val', 'loader') == 'cyclegan':
             valloader = data.DataLoader(
                 CycleGANLoader(root_dir=self.configer.get('data', 'data_dir'), dataset=dataset,
                                aug_transform=self.aug_val_transform,
@@ -112,6 +129,20 @@ class DataLoader(object):
 
             return valloader
 
+        elif self.configer.get('val', 'loader') == 'facegan':
+            valloader = data.DataLoader(
+                FaceGANLoader(root_dir=self.configer.get('data', 'data_dir'), dataset=dataset,
+                              aug_transform=self.aug_val_transform,
+                              img_transform=self.img_transform,
+                              configer=self.configer),
+                batch_size=self.configer.get('val', 'batch_size'), shuffle=False,
+                num_workers=self.configer.get('data', 'workers'), pin_memory=True,
+                collate_fn=lambda *args: collate(
+                    *args, trans_dict=self.configer.get('val', 'data_transformer')
+                )
+            )
+
+            return valloader
         else:
             Log.error('{} val loader is invalid.'.format(self.configer.get('val', 'loader')))
             exit(1)

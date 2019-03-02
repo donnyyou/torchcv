@@ -27,7 +27,7 @@ class DefaultLoader(data.Dataset):
                                       tool=self.configer.get('data', 'image_tool'),
                                       mode=self.configer.get('data', 'input_mode'))
 
-        imgB = ImageHelper.read_image(self.imgA_list[index],
+        imgB = ImageHelper.read_image(self.imgB_list[index],
                                       tool=self.configer.get('data', 'image_tool'),
                                       mode=self.configer.get('data', 'input_mode'))
 

@@ -5,6 +5,7 @@
 
 
 import os
+import random
 import torch.utils.data as data
 
 from extensions.tools.parallel import DataContainer
@@ -26,7 +27,8 @@ class CycleGANLoader(data.Dataset):
                                       tool=self.configer.get('data', 'image_tool'),
                                       mode=self.configer.get('data', 'input_mode'))
 
-        imgB = ImageHelper.read_image(self.imgA_list[index],
+        indexB = random.randint(0, len(self.imgB_list) - 1) % len(self.imgB_list)
+        imgB = ImageHelper.read_image(self.imgB_list[indexB],
                                       tool=self.configer.get('data', 'image_tool'),
                                       mode=self.configer.get('data', 'input_mode'))
 
