@@ -40,4 +40,7 @@ class Pix2Pix(nn.Module):
         # Combined loss
         loss_D = (loss_D_fake + loss_D_real) * 0.5
 
-        return loss_G + loss_D
+        return dict(loss=loss_G + loss_D)
+
+    def forward_test(self, data_dict):
+        return dict(fakeB=self.netG.forward(data_dict['imgA']))

@@ -26,27 +26,6 @@ class CycleGAN(nn.Module):
         self.criterionCycle = nn.L1Loss()
         self.criterionIdt = nn.L1Loss()
 
-    def backward_D_basic(self, netD, real, fake):
-        # Real
-        pred_real = netD.forward(real)
-        loss_D_real = self.criterionGAN(pred_real, True)
-        # Fake
-        pred_fake = netD.forward(fake.detach())
-        loss_D_fake = self.criterionGAN(pred_fake, False)
-        # Combined loss
-        loss_D = (loss_D_real + loss_D_fake) * 0.5
-        # backward
-        loss_D.backward()
-        return loss_D
-
-    def backward_D_A(self):
-        fake_B = self.fake_B_pool.query(self.fake_B)
-        self.loss_D_A = self.backward_D_basic(self.netD_A, self.real_B, fake_B)
-
-    def backward_D_B(self):
-        fake_A = self.fake_A_pool.query(self.fake_A)
-        self.loss_D_B = self.backward_D_basic(self.netD_B, self.real_A, fake_A)
-
     def forward(self, data_dict):
         lambda_idt = self.opt.identity
         lambda_A = self.opt.lambda_A
@@ -99,4 +78,20 @@ class CycleGAN(nn.Module):
         # Combined loss
         loss_D_B = (loss_D_real_B + loss_D_fake_B) * 0.5
 
-        return loss_G + loss_D_A + loss_D_B
+        return dict(loss=loss_G + loss_D_A + loss_D_B)
+
+    def forward_test(self, data_dict):
+        out_dict = dict()
+        if 'imgA' in data_dict:
+            fake_B = self.netG_A.forward(data_dict['imgA'])
+            rec_A = self.netG_B.forward(fake_B)
+            out_dict['fakeB'] = fake_B
+            out_dict['recA'] = rec_A
+
+        if 'imgB' in data_dict:
+            fake_A = self.netG_B.forward(data_dict['imgB'])
+            rec_B = self.netG_A.forward(fake_A)
+            out_dict['fakeA'] = fake_A
+            out_dict['recB'] = rec_B
+
+        return out_dict
