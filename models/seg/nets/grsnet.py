@@ -53,7 +53,7 @@ class _ConvBatchNormReluBlock(nn.Module):
         self.conv = nn.Conv2d(in_channels=inplanes,out_channels=outplanes,
                               kernel_size=kernel_size, stride=stride, padding=padding,
                               dilation = dilation, bias=False)
-        self.bn = ModuleHelper.BatchNorm2d(bn_type=bn_type)(num_features=outplanes)
+        self.bn = ModuleHelper.BatchNorm2d(norm_type=bn_type)(num_features=outplanes)
         self.relu_f = nn.ReLU()
 
     def forward(self, x):
@@ -77,7 +77,7 @@ class PPMBilinearDeepsup(nn.Module):
             self.ppm.append(nn.Sequential(
                 nn.AdaptiveAvgPool2d(scale),
                 nn.Conv2d(fc_dim, 512, kernel_size=1, bias=False),
-                ModuleHelper.BatchNorm2d(bn_type=bn_type)(512),
+                ModuleHelper.BatchNorm2d(norm_type=bn_type)(512),
                 nn.ReLU(inplace=True)
             ))
 
@@ -86,7 +86,7 @@ class PPMBilinearDeepsup(nn.Module):
         self.conv_last = nn.Sequential(
             nn.Conv2d(fc_dim+len(pool_scales)*512, 512,
                       kernel_size=3, padding=1, bias=False),
-            ModuleHelper.BatchNorm2d(bn_type=bn_type)(512),
+            ModuleHelper.BatchNorm2d(norm_type=bn_type)(512),
             nn.ReLU(inplace=True),
             nn.Dropout2d(0.1),
             nn.Conv2d(512, num_class, kernel_size=1)

@@ -18,29 +18,29 @@ class ASPPModule(nn.Module):
         Chen, Liang-Chieh, et al. *"Rethinking Atrous Convolution for Semantic Image Segmentation."*
     """
 
-    def __init__(self, features, inner_features=512, out_features=512, dilations=(12, 24, 36), bn_type=None):
+    def __init__(self, features, inner_features=512, out_features=512, dilations=(12, 24, 36), norm_type=None):
         super(ASPPModule, self).__init__()
 
         self.conv1 = nn.Sequential(nn.AdaptiveAvgPool2d((1, 1)),
                                    nn.Conv2d(features, inner_features, kernel_size=1, padding=0, dilation=1,
                                              bias=False),
-                                   ModuleHelper.BNReLU(inner_features, bn_type=bn_type))
+                                   ModuleHelper.BNReLU(inner_features, norm_type=norm_type))
         self.conv2 = nn.Sequential(
             nn.Conv2d(features, inner_features, kernel_size=1, padding=0, dilation=1, bias=False),
-            ModuleHelper.BNReLU(inner_features, bn_type=bn_type))
+            ModuleHelper.BNReLU(inner_features, norm_type=norm_type))
         self.conv3 = nn.Sequential(
             nn.Conv2d(features, inner_features, kernel_size=3, padding=dilations[0], dilation=dilations[0], bias=False),
-            ModuleHelper.BNReLU(inner_features, bn_type=bn_type))
+            ModuleHelper.BNReLU(inner_features, norm_type=norm_type))
         self.conv4 = nn.Sequential(
             nn.Conv2d(features, inner_features, kernel_size=3, padding=dilations[1], dilation=dilations[1], bias=False),
-            ModuleHelper.BNReLU(inner_features, bn_type=bn_type))
+            ModuleHelper.BNReLU(inner_features, norm_type=norm_type))
         self.conv5 = nn.Sequential(
             nn.Conv2d(features, inner_features, kernel_size=3, padding=dilations[2], dilation=dilations[2], bias=False),
-            ModuleHelper.BNReLU(inner_features, bn_type=bn_type))
+            ModuleHelper.BNReLU(inner_features, norm_type=norm_type))
 
         self.bottleneck = nn.Sequential(
             nn.Conv2d(inner_features * 5, out_features, kernel_size=1, padding=0, dilation=1, bias=False),
-            ModuleHelper.BNReLU(out_features, bn_type=bn_type),
+            ModuleHelper.BNReLU(out_features, norm_type=norm_type),
             nn.Dropout2d(0.1)
         )
 
@@ -67,11 +67,11 @@ class DeepLabV3(nn.Module):
         self.num_classes = self.configer.get('data', 'num_classes')
         self.backbone = BackboneSelector(configer).get_backbone()
 
-        self.head = nn.Sequential(ASPPModule(2048, bn_type=self.configer.get('network', 'bn_type')),
+        self.head = nn.Sequential(ASPPModule(2048, norm_type=self.configer.get('network', 'norm_type')),
                                   nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True))
         self.dsn = nn.Sequential(
             nn.Conv2d(1024, 512, kernel_size=3, stride=1, padding=1),
-            ModuleHelper.BNReLU(512, bn_type=self.configer.get('network', 'bn_type')),
+            ModuleHelper.BNReLU(512, norm_type=self.configer.get('network', 'norm_type')),
             nn.Dropout2d(0.1),
             nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True)
         )

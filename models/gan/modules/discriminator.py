@@ -6,9 +6,8 @@ import torch.nn.functional as F
 
 # Defines the PatchGAN discriminator with the specified arguments.
 class NLayerDiscriminator(nn.Module):
-    def __init__(self, input_nc, ndf=64, n_layers=3, norm_layer=nn.BatchNorm2d, use_sigmoid=False, gpu_ids=[]):
+    def __init__(self, input_nc, ndf=64, n_layers=3, norm_layer=nn.BatchNorm2d, use_sigmoid=False):
         super(NLayerDiscriminator, self).__init__()
-        self.gpu_ids = gpu_ids
 
         kw = 4
         padw = int(np.ceil((kw-1)/2))
@@ -46,28 +45,18 @@ class NLayerDiscriminator(nn.Module):
         self.model = nn.Sequential(*sequence)
 
     def forward(self, input):
-        if len(self.gpu_ids) and isinstance(input.data, torch.cuda.FloatTensor):
-            return nn.parallel.data_parallel(self.model, input, self.gpu_ids)
-        else:
-            return self.model(input)
+        return self.model(input)
 
 
-class FC_Discriminator(nn.Module):
-    def __init__(self, input_size,output_size, num_hidden=128, gpu_ids=[]):
-        super(FC_Discriminator,self).__init__()
+class FCDiscriminator(nn.Module):
+    def __init__(self, input_size,output_size, num_hidden=128):
+        super(FCDiscriminator, self).__init__()
         self.fc = nn.Sequential(nn.Linear(input_size, num_hidden),
             nn.Linear(num_hidden, output_size))
-        self.gpu_ids = gpu_ids
 
     def forward(self, x):
-        if len(self.gpu_ids) and isinstance(x.data, torch.cuda.FloatTensor):
-            x = F.dropout(x, training=self.training)
-            x = x.view(x.size(0), -1)
-            x = nn.parallel.data_parallel(self.fc, x, self.gpu_ids)
-            x = nn.parallel.data_parallel(torch.nn.functional.sigmoid, x, self.gpu_ids)
-        else:
-            x = F.dropout(x, training=self.training)
-            x = x.view(x.size(0), -1)
-            x = self.fc(x)
-            x = torch.nn.functional.sigmoid(x)
+        x = F.dropout(x, training=self.training)
+        x = x.view(x.size(0), -1)
+        x = self.fc(x)
+        x = torch.nn.functional.sigmoid(x)
         return x

@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 # Defines the LightCNN generator.
@@ -28,10 +29,10 @@ class group(nn.Module):
         x = self.conv(x)
         return x
 
+
 class LightCnnGenerator(nn.Module):
-    def __init__(self, num_classes=99891, gpu_ids=[]):
+    def __init__(self, num_classes=99891):
         super(LightCnnGenerator, self).__init__()
-        self.gpu_ids = gpu_ids
 
         self.features = nn.Sequential(
             mfm(1, 48, 5, 1, 2),
@@ -49,25 +50,17 @@ class LightCnnGenerator(nn.Module):
 
 
     def forward(self, input):
-        if len(self.gpu_ids) and isinstance(input.data, torch.cuda.FloatTensor):
-            x = nn.parallel.data_parallel(self.features, input, self.gpu_ids)
-            x = x.view(x.size(0), -1)
-            feature = nn.parallel.data_parallel(self.fc1, x, self.gpu_ids)
-            x = F.dropout(feature, training=self.training)
-            out = nn.parallel.data_parallel(self.fc2, x, self.gpu_ids)
-        else:
-            x = self.features(input)
-            x = x.view(x.size(0), -1)
-            feature = self.fc1(x)
-            x = F.dropout(feature, training=self.training)
-            out = self.fc2(x)
+        x = self.features(input)
+        x = x.view(x.size(0), -1)
+        feature = self.fc1(x)
+        x = F.dropout(feature, training=self.training)
+        out = self.fc2(x)
         return out, feature
 
 
 class LightCnnFeatureGenerator(nn.Module):
-    def __init__(self, gpu_ids=[]):
+    def __init__(self):
         super(LightCnnFeatureGenerator, self).__init__()
-        self.gpu_ids = gpu_ids
 
         self.features = nn.Sequential(
             mfm(1, 48, 5, 1, 2),
@@ -84,23 +77,17 @@ class LightCnnFeatureGenerator(nn.Module):
 
 
     def forward(self, input):
-        if len(self.gpu_ids) and isinstance(input.data, torch.cuda.FloatTensor):
-            x = nn.parallel.data_parallel(self.features, input, self.gpu_ids)
-            x = x.view(x.size(0), -1)
-            feature = nn.parallel.data_parallel(self.fc1, x, self.gpu_ids)
-            # feature = F.dropout(feature, training=self.training)
-        else:
-            x = self.features(input)
-            x = x.view(x.size(0), -1)
-            feature = self.fc1(x)
-            # feature = F.dropout(feature, training=self.training)
+        x = self.features(input)
+        x = x.view(x.size(0), -1)
+        feature = self.fc1(x)
+        # feature = F.dropout(feature, training=self.training)
         return feature
+
 
 class LightCnnNoFCFeatureGenerator(nn.Module):
     # output conv features(feature map of the last conv layer) of the light cnn model
-    def __init__(self, gpu_ids=[]):
+    def __init__(self):
         super(LightCnnNoFCFeatureGenerator, self).__init__()
-        self.gpu_ids = gpu_ids
 
         self.features = nn.Sequential(
             mfm(1, 48, 5, 1, 2),
@@ -116,24 +103,17 @@ class LightCnnNoFCFeatureGenerator(nn.Module):
         # self.fc1 = mfm(8*8*128, 256, type=0)
 
     def forward(self, input):
-        if len(self.gpu_ids) and isinstance(input.data, torch.cuda.FloatTensor):
-            feature = nn.parallel.data_parallel(self.features, input, self.gpu_ids)
-        else:
-            feature = self.features(input)
+        feature = self.features(input)
         return feature
+
 
 class LightCnnFC1Generator(nn.Module):
     # input is the feature map of conv layers
-    def __init__(self, gpu_ids=[]):
+    def __init__(self):
         super(LightCnnFC1Generator, self).__init__()
-        self.gpu_ids = gpu_ids
         self.fc1 = mfm(8*8*128, 256, type=0)
 
     def forward(self, x):
-        if len(self.gpu_ids) and isinstance(x.data, torch.cuda.FloatTensor):
-            x = x.view(x.size(0), -1)
-            feature = nn.parallel.data_parallel(self.fc1, x, self.gpu_ids)
-        else:
-            x = x.view(x.size(0), -1)
-            feature = self.fc1(x)
+        x = x.view(x.size(0), -1)
+        feature = self.fc1(x)
         return feature

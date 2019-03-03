@@ -80,7 +80,7 @@
       "pooled_size": [7, 7],
       "use_se_block": false,
       "se_reduction": 16,
-      "bn_type": "syncbn",
+      "norm_type": "sync_batchnorm",
       "checkpoints_name": "fc_shufflenetv2-50_imagenet_cls",
       "checkpoints_dir": "checkpoints/cls/imagenet",
     },
