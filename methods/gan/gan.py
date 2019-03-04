@@ -47,18 +47,8 @@ class GAN(object):
         self.val_loader = self.seg_data_loader.get_valloader()
 
     def _get_parameters(self):
-        lr_1 = []
-        lr_10 = []
-        params_dict = dict(self.gan_net.named_parameters())
-        for key, value in params_dict.items():
-            if 'backbone' not in key:
-                lr_10.append(value)
-            else:
-                lr_1.append(value)
 
-        params = [{'params': lr_1, 'lr': self.configer.get('solver', 'lr')['base_lr']},
-                  {'params': lr_10, 'lr': self.configer.get('solver', 'lr')['base_lr'] * 1.0}]
-        return params
+        return self.gan_net.parameters()
 
     def train(self):
         """
@@ -67,9 +57,8 @@ class GAN(object):
         self.gan_net.train()
         start_time = time.time()
         # Adjust the learning rate after every epoch.
-
         for i, data_dict in enumerate(self.train_loader):
-            Trainer.update(self, backbone_list=(0, ), solver_dict=self.configer.get('solver'))
+            Trainer.update(self, solver_dict=self.configer.get('solver'))
             inputs = data_dict['img']
             self.data_time.update(time.time() - start_time)
 
