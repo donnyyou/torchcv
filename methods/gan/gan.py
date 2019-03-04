@@ -15,7 +15,7 @@ from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
 
 
-class CycleGAN(object):
+class GAN(object):
     """
       The class for Pose Estimation. Include train, val, val & predict.
     """
