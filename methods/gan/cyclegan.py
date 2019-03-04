@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 # Author: Donny You (youansheng@gmail.com)
-# Class Definition for Semantic Segmentation.
+# Class Definition for GAN.
 
 
-import cv2
 import time
-import numpy as np
 import torch
 
 from datasets.gan.data_loader import DataLoader
@@ -17,7 +15,7 @@ from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
 
 
-class GAN(object):
+class CycleGAN(object):
     """
       The class for Pose Estimation. Include train, val, val & predict.
     """
