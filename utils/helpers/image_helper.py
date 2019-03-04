@@ -9,6 +9,7 @@ import cv2
 import numpy as np
 from PIL import Image
 
+from utils.helpers.file_helper import FileHelper
 from utils.tools.logger import Logger as Log
 
 
@@ -232,6 +233,7 @@ class ImageHelper(object):
 
     @staticmethod
     def save(img, save_path):
+        FileHelper.make_dirs(save_path, is_file=True)
         if isinstance(img, Image.Image):
             img.save(save_path)
 

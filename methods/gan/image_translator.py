@@ -15,7 +15,7 @@ from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
 
 
-class GAN(object):
+class ImageTranslator(object):
     """
       The class for Pose Estimation. Include train, val, val & predict.
     """

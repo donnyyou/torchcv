@@ -16,7 +16,7 @@ from utils.helpers.image_helper import ImageHelper
 from utils.tools.logger import Logger as Log
 
 
-class GANTest(object):
+class ImageTranslatorTest(object):
     def __init__(self, configer):
         self.configer = configer
         self.blob_helper = BlobHelper(configer)
@@ -32,13 +32,11 @@ class GANTest(object):
         self.gan_net = RunnerHelper.load_net(self, self.gan_net)
         self.gan_net.eval()
 
-    def test(self, imgA_dir=None, imgB_dir=None):
-        base_dir = os.path.join(self.configer.get('project_dir'),
-                                'results', self.configer.get('task'),
-                                self.configer.get('checkpoints', 'checkpoints_name'),
-                                self.configer.get('test', 'out_dir'))
+    def test(self, test_dir, out_dir):
+        imgA_dir = os.path.join(test_dir, 'imgA')
+        imgB_dir = os.path.join(test_dir, 'imgB')
 
-        if imgA_dir is not None:
+        if os.path.exists(imgA_dir):
             Log.info('ImageA Dir: {}'.format(imgA_dir))
             for data_dict in self.test_loader.get_testloader(imgA_dir):
                 new_data_dict = dict(imgA=data_dict['img'])
@@ -50,9 +48,9 @@ class GANTest(object):
                         img_path = meta_list['img_path']
                         Log.info('Image Path: {}'.format(img_path))
                         filename = img_path.rstrip().split('/')[-1]
-                        ImageHelper.save(img_bgr, os.path.join(base_dir, key, filename))
+                        ImageHelper.save(img_bgr, os.path.join(out_dir, key, filename))
 
-        if imgB_dir is not None:
+        if os.path.exists(imgB_dir):
             Log.info('ImageB Dir: {}'.format(imgB_dir))
             for data_dict in self.test_loader.get_testloader(imgB_dir):
                 new_data_dict = dict(imgB=data_dict['img'])
@@ -64,7 +62,4 @@ class GANTest(object):
                         img_path = meta_list['img_path']
                         Log.info('Image Path: {}'.format(img_path))
                         filename = img_path.rstrip().split('/')[-1]
-                        ImageHelper.save(img_bgr, os.path.join(base_dir, key, filename))
-
-
-
+                        ImageHelper.save(img_bgr, os.path.join(out_dir, key, filename))
