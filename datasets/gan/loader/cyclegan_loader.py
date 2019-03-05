@@ -27,7 +27,7 @@ class CycleGANLoader(data.Dataset):
                                       tool=self.configer.get('data', 'image_tool'),
                                       mode=self.configer.get('data', 'input_mode'))
 
-        indexB = random.randint(0, len(self.imgB_list) - 1) % len(self.imgB_list)
+        indexB = random.randint(0, len(self.imgB_list) - 1)
         imgB = ImageHelper.read_image(self.imgB_list[indexB],
                                       tool=self.configer.get('data', 'image_tool'),
                                       mode=self.configer.get('data', 'input_mode'))
