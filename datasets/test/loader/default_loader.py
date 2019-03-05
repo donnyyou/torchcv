@@ -10,15 +10,19 @@ import torch.utils.data as data
 from extensions.tools.parallel import DataContainer
 from utils.helpers.file_helper import FileHelper
 from utils.helpers.image_helper import ImageHelper
+from utils.tools.logger import Logger as Log
 
 
 class DefaultLoader(data.Dataset):
 
-    def __init__(self, test_dir=None, img_transform=None, configer=None):
+    def __init__(self, test_dir=None, list_path=None, img_transform=None, configer=None):
         super(DefaultLoader, self).__init__()
         self.configer = configer
         self.img_transform = img_transform
-        self.img_list = [os.path.join(test_dir, filename) for filename in FileHelper.list_dir(test_dir)]
+        if test_dir is not None:
+            self.img_list = [os.path.join(test_dir, filename) for filename in FileHelper.list_dir(test_dir)]
+        else:
+            self.img_list = self.__read_list(list_path)
 
     def __getitem__(self, index):
         image = ImageHelper.read_image(self.img_list[index],
@@ -87,3 +91,17 @@ class DefaultLoader(data.Dataset):
     def __len__(self):
 
         return len(self.img_list)
+
+    def __read_list(self, list_path):
+        img_list = []
+        with open(list_path, 'r') as f:
+            for line in f.readlines()[0:]:
+                img_path = line.strip().split()[0]
+                if not os.path.exists(img_path):
+                    Log.error('Image Path: {} is Invalid.'.format(img_path))
+                    exit(1)
+
+                img_list.append(img_path)
+
+        Log.info('There are {} images..'.format(len(img_list)))
+        return img_list

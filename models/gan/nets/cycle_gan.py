@@ -22,7 +22,7 @@ class CycleGAN(nn.Module):
         self.fake_A_pool = ImagePool(self.configer.get('network', 'discriminatorA')['pool_size'])
         self.fake_B_pool = ImagePool(self.configer.get('network', 'discriminatorB')['pool_size'])
         # define loss functions
-        self.criterionGAN = GANLoss(use_lsgan=not opt.no_lsgan, tensor=self.Tensor)
+        self.criterionGAN = GANLoss(use_lsgan=self.configer.get('loss', 'use_lsgan'))
         self.criterionCycle = nn.L1Loss()
         self.criterionIdt = nn.L1Loss()
 

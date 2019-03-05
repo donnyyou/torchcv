@@ -15,7 +15,7 @@ class Pix2Pix(nn.Module):
 
         self.fake_AB_pool = ImagePool(opt.pool_size)
         # define loss functions
-        self.criterionGAN = GANLoss(use_lsgan=not opt.no_lsgan, tensor=self.Tensor)
+        self.criterionGAN = GANLoss(use_lsgan=self.configer.get('loss', 'use_lsgan'))
         self.criterionL1 = nn.L1Loss()
 
     def forward(self, data_dict):

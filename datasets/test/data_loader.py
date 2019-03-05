@@ -20,11 +20,12 @@ class DataLoader(object):
             ToTensor(),
             Normalize(**self.configer.get('data', 'normalize')), ])
 
-    def get_testloader(self, test_dir=None):
+    def get_testloader(self, test_dir=None, list_path=None):
         test_dir = test_dir if test_dir is not None else self.configer.get('test', 'data_dir')
         if not self.configer.exists('test', 'loader') or self.configer.get('test', 'loader') == 'default':
             trainloader = data.DataLoader(
-                DefaultLoader(test_dir=self.configer.get('test', 'data_dir'),
+                DefaultLoader(test_dir=test_dir,
+                              list_path=list_path,
                               img_transform=self.img_transform,
                               configer=self.configer),
                 batch_size=self.configer.get('train', 'batch_size'), shuffle=False,
