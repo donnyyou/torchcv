@@ -31,7 +31,7 @@ class RandomPad(object):
         self.mean = mean
 
     def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
-        assert isinstance(img, np.ndarray)
+        assert isinstance(img, (np.ndarray, list))
         assert labelmap is None or isinstance(labelmap, np.ndarray)
         assert maskmap is None or isinstance(maskmap, np.ndarray)
 
@@ -60,8 +60,13 @@ class RandomPad(object):
         left_pad = random.randint(0, pad_width)  # pad_left
         up_pad = random.randint(0, pad_height)  # pad_up
 
-        img = cv2.copyMakeBorder(img, up_pad, pad_height-up_pad, left_pad, pad_width-left_pad,
-                                 cv2.BORDER_CONSTANT, value=self.mean)
+        if not isinstance(img, list):
+            img = cv2.copyMakeBorder(img, up_pad, pad_height-up_pad, left_pad, pad_width-left_pad,
+                                     cv2.BORDER_CONSTANT, value=self.mean)
+        else:
+            img = [cv2.copyMakeBorder(item, up_pad, pad_height-up_pad, left_pad, pad_width-left_pad,
+                                      cv2.BORDER_CONSTANT, value=self.mean) for item in img]
+
         if labelmap is not None:
             labelmap = cv2.copyMakeBorder(labelmap, up_pad, pad_height - up_pad, left_pad, pad_width - left_pad,
                                           cv2.BORDER_CONSTANT, value=255)
@@ -104,7 +109,7 @@ class Padding(object):
         self.allow_outside_center = allow_outside_center
 
     def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
-        assert isinstance(img, np.ndarray)
+        assert isinstance(img, (np.ndarray, list))
         assert labelmap is None or isinstance(labelmap, np.ndarray)
         assert maskmap is None or isinstance(maskmap, np.ndarray)
 
@@ -159,13 +164,23 @@ class Padding(object):
 
                 polygons = new_polygons
 
-        expand_image = np.zeros((max(height, target_size[1]) + abs(offset_up),
-                                 max(width, target_size[0]) + abs(offset_left), channels), dtype=img.dtype)
-        expand_image[:, :, :] = self.mean
-        expand_image[abs(min(offset_up, 0)):abs(min(offset_up, 0)) + height,
-        abs(min(offset_left, 0)):abs(min(offset_left, 0)) + width] = img
-        img = expand_image[max(offset_up, 0):max(offset_up, 0) + target_size[1],
-              max(offset_left, 0):max(offset_left, 0) + target_size[0]]
+        if not isinstance(img, list):
+            expand_image = np.zeros((max(height, target_size[1]) + abs(offset_up),
+                                     max(width, target_size[0]) + abs(offset_left), channels), dtype=img.dtype)
+            expand_image[:, :, :] = self.mean
+            expand_image[abs(min(offset_up, 0)):abs(min(offset_up, 0)) + height,
+                         abs(min(offset_left, 0)):abs(min(offset_left, 0)) + width] = img
+            img = expand_image[max(offset_up, 0):max(offset_up, 0) + target_size[1],
+                               max(offset_left, 0):max(offset_left, 0) + target_size[0]]
+        else:
+            for i in range(len(img)):
+                expand_image = np.zeros((max(height, target_size[1]) + abs(offset_up),
+                                         max(width, target_size[0]) + abs(offset_left), channels), dtype=img[i].dtype)
+                expand_image[:, :, :] = self.mean
+                expand_image[abs(min(offset_up, 0)):abs(min(offset_up, 0)) + height,
+                             abs(min(offset_left, 0)):abs(min(offset_left, 0)) + width] = img[i]
+                img[i] = expand_image[max(offset_up, 0):max(offset_up, 0) + target_size[1],
+                                      max(offset_left, 0):max(offset_left, 0) + target_size[0]]
 
         if maskmap is not None:
             expand_maskmap = np.zeros((max(height, target_size[1]) + abs(offset_up),
@@ -194,7 +209,7 @@ class RandomHFlip(object):
         self.ratio = ratio
 
     def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
-        assert isinstance(img, np.ndarray)
+        assert isinstance(img, (np.ndarray, list))
         assert labelmap is None or isinstance(labelmap, np.ndarray)
         assert maskmap is None or isinstance(maskmap, np.ndarray)
 
@@ -202,7 +217,11 @@ class RandomHFlip(object):
             return img, labelmap, maskmap, kpts, bboxes, labels, polygons
 
         height, width, _ = img.shape
-        img = cv2.flip(img, 1)
+        if not isinstance(img, list):
+            img = cv2.flip(img, 1)
+        else:
+            img = [cv2.flip(item, 1) for item in img]
+
         if labelmap is not None:
             labelmap = cv2.flip(labelmap, 1)
 
@@ -359,9 +378,8 @@ class RandomResizedCrop(object):
         interpolation: Default: PIL.Image.BILINEAR
     """
 
-    def __init__(self, size, scale_range=(0.08, 1.0), aspect_range=(3. / 4., 4. / 3.), interpolation=cv2.INTER_CUBIC):
+    def __init__(self, size, scale_range=(0.08, 1.0), aspect_range=(3. / 4., 4. / 3.)):
         self.size = tuple(size)
-        self.interpolation = interpolation
         self.scale = scale_range
         self.ratio = aspect_range
 
@@ -412,7 +430,7 @@ class RandomResizedCrop(object):
         assert labelmap is None and maskmap is None and kpts is None and bboxes is None and labels is None
         i, j, h, w = self.get_params(img, self.scale, self.ratio)
         img = img[i:i+h, j:j+w]
-        img = cv2.resize(img, self.size, interpolation=self.interpolation)
+        img = cv2.resize(img, self.size, interpolation=cv2.INTER_LINEAR)
         return img, labelmap, maskmap, kpts, bboxes, labels, polygons
 
 
@@ -483,7 +501,7 @@ class RandomResize(object):
             list:   Randomly resize keypoints.
             list:   Randomly resize center points.
         """
-        assert isinstance(img, np.ndarray)
+        assert isinstance(img, (np.ndarray, list))
         assert labelmap is None or isinstance(labelmap, np.ndarray)
         assert maskmap is None or isinstance(maskmap, np.ndarray)
 
@@ -511,8 +529,11 @@ class RandomResize(object):
                     polygons[object_id][polygon_id][1::2] *= h_scale_ratio
 
         converted_size = (int(width * w_scale_ratio), int(height * h_scale_ratio))
+        if not isinstance(img, list):
+            img = cv2.resize(img, converted_size, interpolation=cv2.INTER_LINEAR).astype(np.uint8)
+        else:
+            img = [cv2.resize(item, converted_size, interpolation=cv2.INTER_LINEAR).astype(np.uint8) for item in img]
 
-        img = cv2.resize(img, converted_size, interpolation=cv2.INTER_CUBIC).astype(np.uint8)
         if labelmap is not None:
             labelmap = cv2.resize(labelmap, converted_size, interpolation=cv2.INTER_NEAREST)
 
@@ -547,7 +568,7 @@ class RandomRotate(object):
             Image:     Rotated image.
             list:      Rotated key points.
         """
-        assert isinstance(img, np.ndarray)
+        assert isinstance(img, (np.ndarray, list))
         assert labelmap is None or isinstance(labelmap, np.ndarray)
         assert maskmap is None or isinstance(maskmap, np.ndarray)
 
@@ -567,7 +588,11 @@ class RandomRotate(object):
         new_height = int(height * cos_val + width * sin_val)
         rotate_mat[0, 2] += (new_width / 2.) - img_center[0]
         rotate_mat[1, 2] += (new_height / 2.) - img_center[1]
-        img = cv2.warpAffine(img, rotate_mat, (new_width, new_height), borderValue=self.mean).astype(np.uint8)
+        if not isinstance(img, list):
+            img = cv2.warpAffine(img, rotate_mat, (new_width, new_height), borderValue=self.mean).astype(np.uint8)
+        else:
+            img = [cv2.warpAffine(item, rotate_mat, (new_width, new_height),
+                                  borderValue=self.mean).astype(np.uint8) for item in img]
         if labelmap is not None:
             labelmap = cv2.warpAffine(labelmap, rotate_mat, (new_width, new_height),
                                       borderValue=(255, 255, 255), flags=cv2.INTER_NEAREST)
@@ -675,7 +700,7 @@ class RandomCrop(object):
             list:   Cropped keypoints.
             list:   Cropped center points.
         """
-        assert isinstance(img, np.ndarray)
+        assert isinstance(img, (np.ndarray, list))
         assert labelmap is None or isinstance(labelmap, np.ndarray)
         assert maskmap is None or isinstance(maskmap, np.ndarray)
 
@@ -727,7 +752,11 @@ class RandomCrop(object):
 
                 polygons = new_polygons
 
-        img = img[offset_up:offset_up + target_size[1], offset_left:offset_left + target_size[0]]
+        if not isinstance(img, list):
+            img = img[offset_up:offset_up + target_size[1], offset_left:offset_left + target_size[0]]
+        else:
+            img = [item[offset_up:offset_up + target_size[1], offset_left:offset_left + target_size[0]] for item in img]
+
         if maskmap is not None:
             maskmap = maskmap[offset_up:offset_up + target_size[1], offset_left:offset_left + target_size[0]]
 
@@ -1018,7 +1047,7 @@ class Resize(object):
         self.max_side_length = max_side_length
 
     def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
-        assert isinstance(img, np.ndarray)
+        assert isinstance(img, (np.ndarray, list))
         assert labelmap is None or isinstance(labelmap, np.ndarray)
         assert maskmap is None or isinstance(maskmap, np.ndarray)
 
@@ -1053,7 +1082,10 @@ class Resize(object):
                     polygons[object_id][polygon_id][1::2] *= h_scale_ratio
 
         target_size = tuple(target_size)
-        img = cv2.resize(img, target_size, interpolation=cv2.INTER_CUBIC)
+        if not isinstance(img, list):
+            img = cv2.resize(img, target_size, interpolation=cv2.INTER_LINEAR)
+        else:
+            img = [cv2.resize(item, target_size, interpolation=cv2.INTER_LINEAR) for item in img]
         if labelmap is not None:
             labelmap = cv2.resize(labelmap, target_size, interpolation=cv2.INTER_NEAREST)
 
