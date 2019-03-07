@@ -3,7 +3,6 @@
     "task": "gan",
     "method": "face_gan",
     "data": {
-      "num_classes": 21,
       "data_dir": "~/DataSet/CASIA_NIR-VIS2.0",
       "image_tool": "cv2",
       "input_mode": "BGR",
@@ -33,7 +32,7 @@
       },
       "data_transformer": {
         "size_mode": "none",
-        "input_size": [32, 32],
+        "input_size": [128, 128],
         "align_method": "only_pad"
       }
     },
@@ -45,27 +44,27 @@
       },
       "data_transformer": {
         "size_mode": "fix_size",
-        "input_size": [300, 300],
+        "input_size": [128, 128],
         "align_method": "only_scale"
       }
     },
     "test": {
-      "input_size": [300, 300],
-      "scale_search": [1.0]
+      "batch_size": 32,
+      "data_transformer": {
+        "size_mode": "fix_size",
+        "input_size": [128, 128],
+        "align_method": "only_scale"
+      }
     },
-    "network":{
-      "backbone": "vgg16",
-      "model_name": "vgg300_ssd",
-      "num_feature_list": [512, 1024, 512, 256, 256, 256],
-      "stride_list": [8, 16, 30, 60, 100, 300],
-      "head_index_list": [0, 1, 2, 3, 4, 5],
-      "checkpoints_name": "ssd_vgg300_voc_det",
-      "checkpoints_dir": "checkpoints/det/voc"
+    "network": {
+      "model_name": "face_gan",
+      "checkpoints_name": "fg_lightcnn_face_gan",
+      "checkpoints_dir": "checkpoints/gan/face"
     },
     "logging": {
       "logfile_level": "info",
       "stdout_level": "info",
-      "log_file": "./log/det/ssd_vgg300_voc_det.log",
+      "log_file": "./log/gan/fg_lightcnn_face_gan.log",
       "log_format": "%(asctime)s %(levelname)-7s %(message)s",
       "rewrite": true
     },
@@ -96,17 +95,6 @@
       "save_iters": 5000,
       "test_interval": 5000,
       "max_epoch": 235
-    },
-    "res": {
-      "nms": {
-        "mode": "union",
-        "max_threshold": 0.45,
-        "pre_nms": 1000
-      },
-      "val_conf_thre": 0.01,
-      "vis_conf_thre": 0.5,
-      "max_per_image": 200,
-      "cls_keep_num": 50
     },
     "loss": {
       "use_lsgan": true
