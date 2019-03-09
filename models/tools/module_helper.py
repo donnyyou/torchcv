@@ -45,6 +45,28 @@ class ModuleHelper(object):
             exit(1)
 
     @staticmethod
+    def BatchNorm3d(norm_type=None, ret_cls=False):
+        if norm_type == 'batchnorm':
+            return nn.BatchNorm3d
+
+        elif norm_type == 'sync_batchnorm':
+            from extensions.ops.sync_bn.syncbn import BatchNorm3d
+            return BatchNorm3d
+
+        elif norm_type == 'instancenorm':
+            return nn.InstanceNorm3d
+        # elif bn_type == 'inplace_abn':
+        #    from extensions.ops.inplace_abn.bn import InPlaceABNSync
+        #    if ret_cls:
+        #        return InPlaceABNSync
+
+        #    return functools.partial(InPlaceABNSync, activation='none')
+
+        else:
+            Log.error('Not support BN type: {}.'.format(norm_type))
+            exit(1)
+
+    @staticmethod
     def BatchNorm2d(norm_type=None, ret_cls=False):
         if norm_type == 'batchnorm':
             return nn.BatchNorm2d
@@ -55,6 +77,28 @@ class ModuleHelper(object):
 
         elif norm_type == 'instancenorm':
             return nn.InstanceNorm2d
+        # elif bn_type == 'inplace_abn':
+        #    from extensions.ops.inplace_abn.bn import InPlaceABNSync
+        #    if ret_cls:
+        #        return InPlaceABNSync
+
+        #    return functools.partial(InPlaceABNSync, activation='none')
+
+        else:
+            Log.error('Not support BN type: {}.'.format(norm_type))
+            exit(1)
+
+    @staticmethod
+    def BatchNorm1d(norm_type=None, ret_cls=False):
+        if norm_type == 'batchnorm':
+            return nn.BatchNorm1d
+
+        elif norm_type == 'sync_batchnorm':
+            from extensions.ops.sync_bn.syncbn import BatchNorm1d
+            return BatchNorm1d
+
+        elif norm_type == 'instancenorm':
+            return nn.InstanceNorm1d
         # elif bn_type == 'inplace_abn':
         #    from extensions.ops.inplace_abn.bn import InPlaceABNSync
         #    if ret_cls:
