@@ -63,8 +63,8 @@ if __name__ == "__main__":
                         dest='network:checkpoints_name', help='The name of checkpoint model.')
     parser.add_argument('--backbone', default=None, type=str,
                         dest='network:backbone', help='The base network of model.')
-    parser.add_argument('--bn_type', default=None, type=str,
-                        dest='network:bn_type', help='The BN type of the network.')
+    parser.add_argument('--norm_type', default=None, type=str,
+                        dest='network:norm_type', help='The BN type of the network.')
     parser.add_argument('--multi_grid', default=None, nargs='+', type=int,
                         dest='network:multi_grid', help='The multi_grid for resnet backbone.')
     parser.add_argument('--pretrained', type=str, default=None,
@@ -148,8 +148,8 @@ if __name__ == "__main__":
     if configer.get('gpu') is not None:
         os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(str(gpu_id) for gpu_id in configer.get('gpu'))
 
-    if configer.get('network', 'bn_type') is None:
-        configer.update(['network', 'bn_type'], 'torchbn')
+    if configer.get('network', 'norm_type') is None:
+        configer.update(['network', 'norm_type'], 'batchnorm')
 
     project_dir = os.path.dirname(os.path.realpath(__file__))
     configer.add(['project_dir'], project_dir)
