@@ -66,7 +66,7 @@ class FSOhemCELoss(nn.Module):
             weight = self.configer.get('loss', 'params')['ce_weight']
             weight = torch.FloatTensor(weight).cuda()
 
-        self.reduction = 'elementwise_mean'
+        self.reduction = 'mean'
         if self.configer.exists('loss', 'params') and 'ce_reduction' in self.configer.get('loss', 'params'):
             self.reduction = self.configer.get('loss', 'params')['ce_reduction']
 
@@ -86,7 +86,7 @@ class FSOhemCELoss(nn.Module):
                                            If given, has to be a Tensor of size "nclasses"
         """
         prob_out = F.softmax(predict, dim=1)
-        tmp_target = target.copy_()
+        tmp_target = target.clone()
         tmp_target[tmp_target == self.ignore_label] = 0
         prob = prob_out.gather(1, tmp_target.unsqueeze(1))
         mask = target.contiguous().view(-1, ) != self.ignore_label
@@ -98,7 +98,7 @@ class FSOhemCELoss(nn.Module):
         select_loss_matrix = sort_loss_matirx[sort_prob < threshold]
         if self.reduction == 'sum':
             return select_loss_matrix.sum()
-        elif self.reduction == 'elementwise_mean':
+        elif self.reduction == 'mean':
             return select_loss_matrix.mean()
         else:
             raise NotImplementedError('Reduction Error!')
