@@ -59,7 +59,8 @@
       "aug_trans": {
         "trans_seq": ["resize"],
         "resize": {
-          "min_side_length": 520
+          "min_side_length": 520,
+          "max_side_length": 1040
         },
         "random_crop": {
           "ratio": 1.0,

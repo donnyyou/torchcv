@@ -18,6 +18,7 @@ from utils.helpers.image_helper import ImageHelper
 from utils.tools.logger import Logger as Log
 from utils.parser.seg_parser import SegParser
 from utils.visualizer.seg_visualizer import SegVisualizer
+from utils.helpers.file_helper import FileHelper
 
 
 class FCNSegmentorTest(object):
@@ -80,7 +81,11 @@ class FCNSegmentorTest(object):
 
         return image, border_hw
 
-    def test_img(self, image_path, label_path, vis_path, raw_path):
+    def test(self, test_dir, out_dir):
+        for filename in FileHelper.list_dir(test_dir):
+            self.test_img(image_path=os.path.join(test_dir, filename), out_dir=out_dir)
+
+    def test_img(self, image_path, out_dir):
         Log.info('Image Path: {}'.format(image_path))
         ori_image = ImageHelper.read_image(image_path,
                                            tool=self.configer.get('data', 'image_tool'),
@@ -102,12 +107,12 @@ class FCNSegmentorTest(object):
             Log.error('Invalid test mode:{}'.format(self.configer.get('test', 'mode')))
             exit(1)
 
+        filename = image_path.split('/')[-1].split('.')[0]
         label_map = np.argmax(total_logits, axis=-1)
         label_img = np.array(label_map, dtype=np.uint8)
         ori_img_bgr = ImageHelper.get_cv2_bgr(ori_image, mode=self.configer.get('data', 'input_mode'))
         image_canvas = self.seg_parser.colorize(label_img, image_canvas=ori_img_bgr)
-        ImageHelper.save(image_canvas, save_path=vis_path)
-        ImageHelper.save(ori_image, save_path=raw_path)
+        ImageHelper.save(image_canvas, save_path=os.path.join(out_dir, 'vis/{}.png', filename))
 
         if self.configer.exists('data', 'label_list'):
             label_img = self.__relabel(label_img)
@@ -117,6 +122,7 @@ class FCNSegmentorTest(object):
             label_img = label_img.astype(np.uint8)
 
         label_img = Image.fromarray(label_img, 'P')
+        label_path = os.path.join(out_dir, 'label/{}.png', filename)
         Log.info('Label Path: {}'.format(label_path))
         ImageHelper.save(label_img, label_path)
 
