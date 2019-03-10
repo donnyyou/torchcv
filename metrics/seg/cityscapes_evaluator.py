@@ -23,7 +23,7 @@ CSUPPORT = True
 # Check if C-Support is available for better performance
 if CSUPPORT:
     try:
-        import metric.seg.cityscapes.evaluation.addToConfusionMatrix as addToConfusionMatrix
+        import metrics.seg.cityscapes.evaluation.addToConfusionMatrix as addToConfusionMatrix
     except:
         CSUPPORT = False
 

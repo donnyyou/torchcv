@@ -35,8 +35,8 @@ except:
 
 # Cityscapes modules
 try:
-    from metric.seg.cityscapes.helpers.annotation   import Annotation
-    from metric.seg.cityscapes.helpers.labels       import labels, name2label, id2label, trainId2label, category2labels
+    from metrics.seg.cityscapes.helpers.annotation   import Annotation
+    from metrics.seg.cityscapes.helpers.labels       import labels, name2label, id2label, trainId2label, category2labels
 except:
     print("Failed to find all Cityscapes modules")
     sys.exit(-1)
