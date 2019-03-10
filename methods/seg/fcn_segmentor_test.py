@@ -33,6 +33,7 @@ class FCNSegmentorTest(object):
         self.seg_net = None
 
         self._init_model()
+        self.runner_state = dict()
 
     def _init_model(self):
         self.seg_net = self.seg_model_manager.semantic_segmentor()
@@ -112,7 +113,7 @@ class FCNSegmentorTest(object):
         label_img = np.array(label_map, dtype=np.uint8)
         ori_img_bgr = ImageHelper.get_cv2_bgr(ori_image, mode=self.configer.get('data', 'input_mode'))
         image_canvas = self.seg_parser.colorize(label_img, image_canvas=ori_img_bgr)
-        ImageHelper.save(image_canvas, save_path=os.path.join(out_dir, 'vis/{}.png', filename))
+        ImageHelper.save(image_canvas, save_path=os.path.join(out_dir, 'vis/{}.png'.format(filename)))
 
         if self.configer.exists('data', 'label_list'):
             label_img = self.__relabel(label_img)
@@ -122,7 +123,7 @@ class FCNSegmentorTest(object):
             label_img = label_img.astype(np.uint8)
 
         label_img = Image.fromarray(label_img, 'P')
-        label_path = os.path.join(out_dir, 'label/{}.png', filename)
+        label_path = os.path.join(out_dir, 'label/{}.png'.format(filename))
         Log.info('Label Path: {}'.format(label_path))
         ImageHelper.save(label_img, label_path)
 

@@ -63,10 +63,11 @@ class Controller(object):
     @staticmethod
     def test(runner):
         Log.info('Testing start...')
-        base_dir = os.path.join(runner.configer.get('project_dir'),
-                                'results', runner.configer.get('task'),
-                                runner.configer.get('checkpoints', 'checkpoints_name'),
-                                runner.configer.get('test', 'out_dir'))
+        out_dir = os.path.join(runner.configer.get('project_dir'),
+                               'results', runner.configer.get('task'),
+                               runner.configer.get('dataset'),
+                               runner.configer.get('network', 'checkpoints_name'),
+                               runner.configer.get('test', 'out_dir'))
 
         test_img = runner.configer.get('test', 'img_path')
         test_dir = runner.configer.get('test', 'data_dir')
@@ -75,11 +76,9 @@ class Controller(object):
             exit(1)
 
         if test_img is not None:
-            out_dir = os.path.join(base_dir, 'test_img')
             runner.test_img(test_img, out_dir)
 
         if test_dir is not None:
-            out_dir = os.path.join(base_dir, 'test_dir', test_dir.rstrip('/').split('/')[-1])
             runner.test(test_dir, out_dir)
 
         Log.info('Testing end...')
