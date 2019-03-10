@@ -91,7 +91,7 @@ class FSOhemCELoss(nn.Module):
         prob = prob_out.gather(1, tmp_target.unsqueeze(1))
         mask = target.contiguous().view(-1, ) != self.ignore_label
         sort_prob, sort_indices = prob.contiguous().view(-1, )[mask].contiguous().sort()
-        min_threshold = sort_prob[self.min_kept]
+        min_threshold = sort_prob[min(self.min_kept, sort_prob.numel() - 1)] if sort_prob.numel() > 0 else 0.0
         threshold = max(min_threshold, self.thresh)
         loss_matirx = self.ce_loss(predict, target).contiguous().view(-1, )
         sort_loss_matirx = loss_matirx[mask][sort_indices]
