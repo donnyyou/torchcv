@@ -68,7 +68,7 @@ class RunnerHelper(object):
                 RunnerHelper.load_state_dict(net, checkpoint_dict, runner.configer.get('network', 'resume_strict'))
 
             if runner.configer.get('network', 'resume_continue'):
-                runner.configer.resume(resume_dict['config_dict'])
+                # runner.configer.resume(resume_dict['config_dict'])
                 runner.runner_state = resume_dict['runner_state']
 
         return net

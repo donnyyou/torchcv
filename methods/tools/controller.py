@@ -22,10 +22,6 @@ class Controller(object):
         runner.runner_state['val_loss'] = 0
         runner.runner_state['max_performance'] = 0
         runner.runner_state['min_val_loss'] = 0
-        if runner.configer.get('phase') == 'train':
-            assert len(runner.configer.get('gpu')) > 1 or runner.configer.get('network', 'norm_type') == 'batchnorm'
-
-        Log.info('BN Type is {}.'.format(runner.configer.get('network', 'norm_type')))
 
     @staticmethod
     def train(runner):

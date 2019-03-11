@@ -151,6 +151,9 @@ if __name__ == "__main__":
     if configer.get('network', 'norm_type') is None:
         configer.update(['network', 'norm_type'], 'batchnorm')
 
+    if configer.get('phase') == 'train':
+        assert len(configer.get('gpu')) > 1 or configer.get('network', 'norm_type') == 'batchnorm'
+
     project_dir = os.path.dirname(os.path.realpath(__file__))
     configer.add(['project_dir'], project_dir)
 
@@ -168,6 +171,7 @@ if __name__ == "__main__":
              rewrite=configer.get('logging', 'rewrite'))
 
     Log.info('Config Dict: {}'.format(json.dumps(configer.to_dict(), indent=2)))
+    Log.info('BN Type is {}.'.format(configer.get('network', 'norm_type')))
     method_selector = MethodSelector(configer)
     runner = None
     if configer.get('task') == 'pose':
@@ -182,8 +186,9 @@ if __name__ == "__main__":
         Log.error('Task: {} is not valid.'.format(configer.get('task')))
         exit(1)
 
-    Controller.init(runner)
     if configer.get('phase') == 'train':
+        if configer.get('network', 'resume') is None:
+            Controller.init(runner)
         Controller.train(runner)
     elif configer.get('phase') == 'debug':
         Controller.debug(runner)
