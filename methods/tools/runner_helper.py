@@ -69,6 +69,7 @@ class RunnerHelper(object):
 
             if runner.configer.get('network', 'resume_continue'):
                 runner.configer.resume(resume_dict['config_dict'])
+                runner.runner_state = resume_dict['runner_state']
 
         return net
 
