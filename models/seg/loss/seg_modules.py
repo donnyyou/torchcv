@@ -96,7 +96,7 @@ class FSOhemCELoss(nn.Module):
         loss_matirx = self.ce_loss(predict, target).contiguous().view(-1, )
         sort_loss_matirx = loss_matirx[mask][sort_indices]
         select_loss_matrix = sort_loss_matirx[sort_prob < threshold]
-        if self.reduction == 'sum':
+        if self.reduction == 'sum' or select_loss_matrix.numel() == 0:
             return select_loss_matrix.sum()
         elif self.reduction == 'mean':
             return select_loss_matrix.mean()
