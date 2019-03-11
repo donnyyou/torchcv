@@ -10,7 +10,7 @@ import torch
 from methods.tools.blob_helper import BlobHelper
 from methods.tools.runner_helper import RunnerHelper
 from models.gan.model_manager import ModelManager
-from datasets.test.data_loader import DataLoader
+from datasets.test.test_data_loader import TestDataLoader
 from utils.helpers.dc_helper import DCHelper
 from utils.helpers.image_helper import ImageHelper
 from utils.tools.logger import Logger as Log
@@ -21,7 +21,7 @@ class ImageTranslatorTest(object):
         self.configer = configer
         self.blob_helper = BlobHelper(configer)
         self.model_manager = ModelManager(configer)
-        self.test_loader = DataLoader(configer)
+        self.test_loader = TestDataLoader(configer)
         self.device = torch.device('cpu' if self.configer.get('gpu') is None else 'cuda')
         self.gan_net = None
 

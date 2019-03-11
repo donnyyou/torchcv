@@ -11,7 +11,7 @@ from datasets.tools.transforms import ToTensor, Normalize, Compose
 from utils.tools.logger import Logger as Log
 
 
-class DataLoader(object):
+class TestDataLoader(object):
 
     def __init__(self, configer):
         self.configer = configer

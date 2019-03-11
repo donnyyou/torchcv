@@ -50,7 +50,7 @@ elif [ "$1"x == "val"x ]; then
                        --resume ./checkpoints/seg/cityscapes/${CHECKPOINTS_NAME}_latest.pth \
                        --test_dir ${DATA_DIR}/val/image --out_dir val >> ${LOG_FILE} 2>&1
   cd metrics/seg/
-  ${PYTHON} -u cityscapes_evaluator.py --pred_dir ../../results/cityscapes/test_dir/${CHECKPOINTS_NAME}/val/label \
+  ${PYTHON} -u cityscapes_evaluator.py --pred_dir ../../results/seg/cityscapes/${CHECKPOINTS_NAME}/val/label \
                                        --gt_dir ${DATA_DIR}/val/label  >> "../../"${LOG_FILE} 2>&1
 
 elif [ "$1"x == "test"x ]; then

@@ -74,7 +74,7 @@ class DefaultLoader(data.Dataset):
         else:
             in_width, in_height = ImageHelper.get_size(image)
 
-        img = ImageHelper.resize(image, (int(in_width), int(in_height)), interpolation='cubic')
+        img = ImageHelper.resize(image, (int(in_width), int(in_height)), interpolation='bilinear')
         if self.img_transform is not None:
             img = self.img_transform(img)
 

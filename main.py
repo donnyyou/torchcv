@@ -170,8 +170,8 @@ if __name__ == "__main__":
              log_format=configer.get('logging', 'log_format'),
              rewrite=configer.get('logging', 'rewrite'))
 
-    Log.info('Config Dict: {}'.format(json.dumps(configer.to_dict(), indent=2)))
     Log.info('BN Type is {}.'.format(configer.get('network', 'norm_type')))
+    Log.info('Config Dict: {}'.format(json.dumps(configer.to_dict(), indent=2)))
     method_selector = MethodSelector(configer)
     runner = None
     if configer.get('task') == 'pose':
@@ -189,6 +189,7 @@ if __name__ == "__main__":
     if configer.get('phase') == 'train':
         if configer.get('network', 'resume') is None:
             Controller.init(runner)
+
         Controller.train(runner)
     elif configer.get('phase') == 'debug':
         Controller.debug(runner)

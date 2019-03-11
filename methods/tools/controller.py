@@ -62,7 +62,7 @@ class Controller(object):
         out_dir = os.path.join(runner.configer.get('project_dir'),
                                'results', runner.configer.get('task'),
                                runner.configer.get('dataset'),
-                               runner.configer.get('network', 'checkpoints_name'),
+                               runner.configer.get('checkpoints', 'checkpoints_name'),
                                runner.configer.get('test', 'out_dir'))
 
         test_img = runner.configer.get('test', 'img_path')
