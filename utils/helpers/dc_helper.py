@@ -27,4 +27,4 @@ class DCHelper(object):
             else:
                 stacked.append(torch.cat(data_list[i:i + samples_per_gpu], 0))
 
-        return DataContainer(stacked, stack=stack, cpu_only=cpu_only)
+        return DataContainer(stacked, stack=stack, samples_per_gpu=True, cpu_only=cpu_only)

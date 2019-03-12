@@ -28,7 +28,7 @@ class TestDataLoader(object):
                               list_path=list_path,
                               img_transform=self.img_transform,
                               configer=self.configer),
-                batch_size=self.configer.get('train', 'batch_size'), shuffle=False,
+                batch_size=self.configer.get('test', 'batch_size'), shuffle=False,
                 num_workers=self.configer.get('data', 'workers'), pin_memory=True,
                 collate_fn=lambda *args: collate(
                     *args, trans_dict=self.configer.get('test', 'data_transformer')

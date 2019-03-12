@@ -25,6 +25,7 @@ class BlobHelper(object):
         for image, meta in zip(DCHelper.tolist(data_dict['img']), DCHelper.tolist(data_dict['meta'])):
             b, c, h, w = image.size()
             border_hw = [int(h*scale), int(w*scale)]
+            meta['border_hw'] = border_hw
             image = TensorHelper.resize(image, border_hw, mode='bilinear', align_corners=True)
             if flip:
                 image = image.flip([3])
@@ -38,12 +39,12 @@ class BlobHelper(object):
                 expand_image = torch.zeros((b, c, border_hw[0] + pad_h, border_hw[1] + pad_w)).to(image.device)
                 expand_image[:, :, 0:border_hw[0], 0:border_hw[1]] = image
                 image = expand_image
-                meta['border_hw'] = border_hw
-                img_list.append(image)
-                meta_list.append(meta)
+
+            img_list.append(image)
+            meta_list.append(meta)
 
         new_data_dict = dict(
-            img=DCHelper.todc(img_list, samples_per_gpu=1),
+            img=DCHelper.todc(img_list, stack=True, samples_per_gpu=1),
             meta=DCHelper.todc(meta_list, samples_per_gpu=1, cpu_only=True)
         )
         return new_data_dict

@@ -74,13 +74,13 @@ class DefaultLoader(data.Dataset):
         else:
             in_width, in_height = ImageHelper.get_size(image)
 
-        img = ImageHelper.resize(image, (int(in_width), int(in_height)), interpolation='bilinear')
+        img = ImageHelper.resize(image, (int(in_width), int(in_height)), interpolation='linear')
         if self.img_transform is not None:
             img = self.img_transform(img)
 
         meta = dict(
             ori_img_size=img_size,
-            border_size=[in_width, in_height],
+            border_hw=[in_height, in_width],
             img_path=self.img_list[index]
         )
         return dict(

@@ -65,11 +65,11 @@ class FCNSegmentorTest(object):
             meta_list = DCHelper.tolist(data_dict['meta'])
             img_list = DCHelper.tolist(data_dict['img'])
             for i in range(len(meta_list)):
-                filename = meta_list[i]['image_path'].split('/')[-1].split('.')[0]
+                filename = meta_list[i]['img_path'].split('/')[-1].split('.')[0]
                 label_map = np.argmax(total_logits[i], axis=-1)
                 label_img = np.array(label_map, dtype=np.uint8)
-                ori_img_bgr = ImageHelper.get_cv2_bgr(img_list[i][0], mode=self.configer.get('data', 'input_mode'))
-                ori_img_bgr = ImageHelper.resize(ori_img_bgr, target_size=meta_list[i]['ori_img_size'])
+                ori_img_bgr = self.blob_helper.tensor2bgr(img_list[i][0])
+                ori_img_bgr = ImageHelper.resize(ori_img_bgr, target_size=meta_list[i]['ori_img_size'], interpolation='linear')
                 image_canvas = self.seg_parser.colorize(label_img, image_canvas=ori_img_bgr)
                 ImageHelper.save(image_canvas, save_path=os.path.join(out_dir, 'vis/{}.png'.format(filename)))
 
@@ -173,7 +173,7 @@ class FCNSegmentorTest(object):
 
         out_list = list()
         with torch.no_grad():
-            results = self.seg_net.forward(DCHelper.todc(split_batch, samples_per_gpu=1))
+            results = self.seg_net.forward(DCHelper.todc(split_batch, stack=True, samples_per_gpu=1))
             for res in results:
                 out_list.append(res[-1].permute(0, 2, 3, 1).cpu().numpy())
 
