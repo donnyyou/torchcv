@@ -34,8 +34,9 @@ def stack(batch, data_key=None, trans_dict=None):
                 stacked = default_collate([sample[data_key].data for sample in batch])
 
             if batch[0][data_key].return_dc:
-                return DataContainer(stacked, batch[0][data_key].stack,
-                                     batch[0][data_key].padding_value, cpu_only=batch[0][data_key].cpu_only)
+                return DataContainer(stacked, stack=batch[0][data_key].stack,
+                                     samples_per_gpu=batch[0][data_key].samples_per_gpu,
+                                     cpu_only=batch[0][data_key].cpu_only)
             else:
                 return stacked
         else:
@@ -48,8 +49,9 @@ def stack(batch, data_key=None, trans_dict=None):
                 stacked = [sample[data_key].data for sample in batch]
 
             if batch[0][data_key].return_dc:
-                return DataContainer(stacked, batch[0][data_key].stack,
-                                     batch[0][data_key].padding_value, cpu_only=batch[0][data_key].cpu_only)
+                return DataContainer(stacked, stack=batch[0][data_key].stack,
+                                     samples_per_gpu=batch[0][data_key].samples_per_gpu,
+                                     cpu_only=batch[0][data_key].cpu_only)
             else:
                 return stacked
     else:
