@@ -45,7 +45,7 @@ elif [ "$1"x == "debug"x ]; then
   ${PYTHON} -u main.py --hypes ${HYPES_FILE}--phase debug --gpu 0 --log_to_file n  > ${LOG_FILE} 2>&1
 
 elif [ "$1"x == "val"x ]; then
-  ${PYTHON} -u main.py --hypes ${HYPES_FILE} --phase test --gpu 0  --log_to_file n \
+  ${PYTHON} -u main.py --hypes ${HYPES_FILE} --phase test --gpu 0 1 2 3 --log_to_file n --gathered n \
                        --backbone ${BACKBONE} --model_name ${MODEL_NAME} --checkpoints_name ${CHECKPOINTS_NAME} \
                        --resume ./checkpoints/seg/ade20k/${CHECKPOINTS_NAME}_latest.pth \
                        --test_dir ${DATA_DIR}/val/image --out_dir val >> ${LOG_FILE} 2>&1
@@ -55,7 +55,7 @@ elif [ "$1"x == "val"x ]; then
                                    --gt_dir ${DATA_DIR}/val/label  >> "../../"${LOG_FILE} 2>&1
 
 elif [ "$1"x == "test"x ]; then
-  ${PYTHON} -u main.py --hypes ${HYPES_FILE} --phase test --gpu 0  --log_to_file n \
+  ${PYTHON} -u main.py --hypes ${HYPES_FILE} --phase test --gpu 0 1 2 3 --log_to_file n --gathered n \
                        --backbone ${BACKBONE} --model_name ${MODEL_NAME} --checkpoints_name ${CHECKPOINTS_NAME} \
                        --resume ./checkpoints/seg/ade20k/${CHECKPOINTS_NAME}_latest.pth \
                        --test_dir ${DATA_DIR}/test --out_dir test >> ${LOG_FILE} 2>&1
