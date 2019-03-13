@@ -98,11 +98,11 @@ class FCNSegmentorTest(object):
     def sscrop_test(self, in_data_dict):
         data_dict = self.blob_helper.get_blob(in_data_dict, scale=1.0)
         crop_size = self.configer.get('test', 'crop_size')
-        if any(image.size()[3] > crop_size[0] and image.size()[2] > crop_size[1]
-               for image in DCHelper.tolist(data_dict['img'])):
-            results = self._crop_predict(data_dict, crop_size)
-        else:
+        if any(image.size()[3] < crop_size[0] or image.size()[2] < crop_size[1]
+                   for image in DCHelper.tolist(data_dict['img'])):
             results = self._predict(data_dict)
+        else:
+            results = self._crop_predict(data_dict, crop_size)
 
         for i, meta in enumerate(DCHelper.tolist(data_dict['meta'])):
             results[i] = cv2.resize(results[i][:meta['border_hw'][0], :meta['border_hw'][1]],
@@ -116,14 +116,29 @@ class FCNSegmentorTest(object):
         for scale in self.configer.get('test', 'scale_search'):
             data_dict = self.blob_helper.get_blob(in_data_dict, scale=scale)
             crop_size = self.configer.get('test', 'crop_size')
-            if any(image.size()[3] > crop_size[0] and image.size()[2] > crop_size[1]
+            if any(image.size()[3] < crop_size[0] or image.size()[2] < crop_size[1]
                    for image in DCHelper.tolist(data_dict['img'])):
-                results = self._crop_predict(data_dict, crop_size)
-            else:
                 results = self._predict(data_dict)
+            else:
+                results = self._crop_predict(data_dict, crop_size)
 
             for i, meta in enumerate(DCHelper.tolist(data_dict['meta'])):
                 total_logits[i] += cv2.resize(results[i][:meta['border_hw'][0], :meta['border_hw'][1]],
+                                              (meta['ori_img_size'][0], meta['ori_img_size'][1]),
+                                              interpolation=cv2.INTER_CUBIC)
+
+        for scale in self.configer.get('test', 'scale_search'):
+            data_dict = self.blob_helper.get_blob(in_data_dict, scale=scale, flip=True)
+            crop_size = self.configer.get('test', 'crop_size')
+            if any(image.size()[3] < crop_size[0] or image.size()[2] < crop_size[1]
+                   for image in DCHelper.tolist(data_dict['img'])):
+                results = self._predict(data_dict)
+            else:
+                results = self._crop_predict(data_dict, crop_size)
+
+            for i, meta in enumerate(DCHelper.tolist(data_dict['meta'])):
+                result = results[i][:meta['border_hw'][0], :meta['border_hw'][1]]
+                total_logits[i] += cv2.resize(result[:, ::-1],
                                               (meta['ori_img_size'][0], meta['ori_img_size'][1]),
                                               interpolation=cv2.INTER_CUBIC)
         return total_logits
