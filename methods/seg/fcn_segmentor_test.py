@@ -196,7 +196,7 @@ class FCNSegmentorTest(object):
             total_logits[i] /= count_predictions[i]
 
         for i, meta in enumerate(DCHelper.tolist(data_dict['meta'])):
-            total_logits[i] += cv2.resize(results[i][:meta['border_hw'][0], :meta['border_hw'][1]],
+            total_logits[i] += cv2.resize(total_logits[i][:meta['border_hw'][0], :meta['border_hw'][1]],
                                           (meta['ori_img_size'][0], meta['ori_img_size'][1]),
                                           interpolation=cv2.INTER_CUBIC)
 
@@ -222,7 +222,7 @@ class FCNSegmentorTest(object):
                 total_logits.append(res[-1].squeeze(0).permute(1, 2, 0).cpu().numpy())
 
             for i, meta in enumerate(DCHelper.tolist(data_dict['meta'])):
-                total_logits[i] += cv2.resize(results[i][:meta['border_hw'][0], :meta['border_hw'][1]],
+                total_logits[i] += cv2.resize(total_logits[i][:meta['border_hw'][0], :meta['border_hw'][1]],
                                               (meta['ori_img_size'][0], meta['ori_img_size'][1]),
                                               interpolation=cv2.INTER_CUBIC)
 
