@@ -114,10 +114,8 @@ class FCNSegmentorTest(object):
             else:
                 results = self._crop_predict(data_dict, crop_size)
 
-            for i, meta in enumerate(DCHelper.tolist(data_dict['meta'])):
-                total_logits[i] += cv2.resize(results[i][:meta['border_hw'][0], :meta['border_hw'][1]],
-                                              (meta['ori_img_size'][0], meta['ori_img_size'][1]),
-                                              interpolation=cv2.INTER_CUBIC)
+            for i in range(len(total_logits)):
+                total_logits[i] += results[i]
 
         for scale in self.configer.get('test', 'scale_search'):
             data_dict = self.blob_helper.get_blob(in_data_dict, scale=scale, flip=True)
@@ -128,7 +126,8 @@ class FCNSegmentorTest(object):
             else:
                 results = self._crop_predict(data_dict, crop_size)
 
-            total_logits[i] += results[i][:, ::-1]
+            for i in range(len(total_logits)):
+                total_logits[i] += results[i][:, ::-1]
 
         return total_logits
 
@@ -139,15 +138,14 @@ class FCNSegmentorTest(object):
         for scale in self.configer.get('test', 'scale_search'):
             data_dict = self.blob_helper.get_blob(in_data_dict, scale=scale)
             results = self._predict(data_dict)
-            for i, meta in enumerate(DCHelper.tolist(data_dict['meta'])):
-                total_logits[i] += cv2.resize(results[i][:meta['border_hw'][0], :meta['border_hw'][1]],
-                                              (meta['ori_img_size'][0], meta['ori_img_size'][1]),
-                                              interpolation=cv2.INTER_CUBIC)
+            for i in range(len(total_logits)):
+                total_logits[i] += results[i]
 
         for scale in self.configer.get('test', 'scale_search'):
             data_dict = self.blob_helper.get_blob(in_data_dict, scale=scale, flip=True)
             results = self._predict(data_dict)
-            total_logits[i] += results[i][:, ::-1]
+            for i in range(len(total_logits)):
+                total_logits[i] += results[i][:, ::-1]
 
         return total_logits
 
