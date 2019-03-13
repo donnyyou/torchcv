@@ -87,6 +87,7 @@ class RunnerHelper(object):
                 :meth:`~torch.nn.Module.state_dict` function. Default: ``False``.
         """
         unexpected_keys = []
+        unmatched_keys = []
         own_state = module.state_dict()
         for name, param in state_dict.items():
             if name not in own_state:
@@ -99,11 +100,15 @@ class RunnerHelper(object):
             try:
                 own_state[name].copy_(param)
             except Exception:
-                raise RuntimeError('While copying the parameter named {}, '
-                                   'whose dimensions in the model are {} and '
-                                   'whose dimensions in the checkpoint are {}.'
-                                   .format(name, own_state[name].size(),
-                                           param.size()))
+                if strict:
+                    raise RuntimeError('While copying the parameter named {}, '
+                                       'whose dimensions in the model are {} and '
+                                       'whose dimensions in the checkpoint are {}.'
+                                       .format(name, own_state[name].size(),
+                                               param.size()))
+                else:
+                    unmatched_keys.append(name)
+
         missing_keys = set(own_state.keys()) - set(state_dict.keys())
 
         err_msg = []
@@ -111,6 +116,8 @@ class RunnerHelper(object):
             err_msg.append('unexpected key in source state_dict: {}\n'.format(', '.join(unexpected_keys)))
         if missing_keys:
             err_msg.append('missing keys in source state_dict: {}\n'.format(', '.join(missing_keys)))
+        if unexpected_keys:
+            err_msg.append('unmatched keys in source state_dict: {}\n'.format(', '.join(unmatched_keys)))
         err_msg = '\n'.join(err_msg)
         if err_msg:
             if strict:
