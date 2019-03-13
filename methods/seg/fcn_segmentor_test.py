@@ -180,12 +180,19 @@ class FCNSegmentorTest(object):
         total_logits = [np.zeros((meta['ori_img_size'][1], meta['ori_img_size'][0],
                                   self.configer.get('data', 'num_classes')), np.float32)
                         for meta in DCHelper.tolist(data_dict['meta'])]
+        count_predictions = [np.zeros((meta['ori_img_size'][1], meta['ori_img_size'][0],
+                                       self.configer.get('data', 'num_classes')), np.float32)
+                             for meta in DCHelper.tolist(data_dict['meta'])]
         for i in range(len(height_starts_list)):
             index = 0
             for height in height_starts_list[i]:
                 for width in width_starts_list[i]:
                     total_logits[i][height:height+crop_size[1], width:width+crop_size[0]] += out_list[i][index]
+                    count_predictions[i][height:height+crop_size[1], width:width+crop_size[0]] += 1
                     index += 1
+
+        for i in range(len(total_logits)):
+            total_logits[i] /= count_predictions[i]
 
         return total_logits
 
