@@ -87,12 +87,7 @@ class FCNSegmentorTest(object):
 
     def ss_test(self, in_data_dict):
         data_dict = self.blob_helper.get_blob(in_data_dict, scale=1.0)
-        meta_list = DCHelper.tolist(data_dict['meta'])
         results = self._predict(data_dict)
-        for i, meta in enumerate(meta_list):
-            results[i] = cv2.resize(results[i][:meta['border_hw'][0], :meta['border_hw'][1]],
-                                    (meta['ori_img_size'][0], meta['ori_img_size'][1]), interpolation=cv2.INTER_CUBIC)
-
         return results
 
     def sscrop_test(self, in_data_dict):
@@ -104,9 +99,6 @@ class FCNSegmentorTest(object):
         else:
             results = self._crop_predict(data_dict, crop_size)
 
-        for i, meta in enumerate(DCHelper.tolist(data_dict['meta'])):
-            results[i] = cv2.resize(results[i][:meta['border_hw'][0], :meta['border_hw'][1]],
-                                    (meta['ori_img_size'][0], meta['ori_img_size'][1]), interpolation=cv2.INTER_CUBIC)
         return results
 
     def mscrop_test(self, in_data_dict):
@@ -136,11 +128,8 @@ class FCNSegmentorTest(object):
             else:
                 results = self._crop_predict(data_dict, crop_size)
 
-            for i, meta in enumerate(DCHelper.tolist(data_dict['meta'])):
-                result = results[i][:meta['border_hw'][0], :meta['border_hw'][1]]
-                total_logits[i] += cv2.resize(result[:, ::-1],
-                                              (meta['ori_img_size'][0], meta['ori_img_size'][1]),
-                                              interpolation=cv2.INTER_CUBIC)
+            total_logits[i] += results[i][:, ::-1]
+
         return total_logits
 
     def ms_test(self, in_data_dict):
@@ -158,19 +147,18 @@ class FCNSegmentorTest(object):
         for scale in self.configer.get('test', 'scale_search'):
             data_dict = self.blob_helper.get_blob(in_data_dict, scale=scale, flip=True)
             results = self._predict(data_dict)
-            for i, meta in enumerate(DCHelper.tolist(data_dict['meta'])):
-                result = results[i][:meta['border_hw'][0], :meta['border_hw'][1]]
-                total_logits[i] += cv2.resize(result[:, ::-1],
-                                              (meta['ori_img_size'][0], meta['ori_img_size'][1]),
-                                              interpolation=cv2.INTER_CUBIC)
+            total_logits[i] += results[i][:, ::-1]
+
         return total_logits
 
     def _crop_predict(self, data_dict, crop_size):
         split_batch = list()
         height_starts_list = list()
         width_starts_list = list()
+        hw_list = list()
         for image in DCHelper.tolist(data_dict['img']):
             height, width = image.size()[2:]
+            hw_list.append([height, width])
             np_image = image.squeeze(0).permute(1, 2, 0).cpu().numpy()
             height_starts = self._decide_intersection(height, crop_size[1])
             width_starts = self._decide_intersection(width, crop_size[0])
@@ -192,12 +180,10 @@ class FCNSegmentorTest(object):
             for res in results:
                 out_list.append(res[-1].permute(0, 2, 3, 1).cpu().numpy())
 
-        total_logits = [np.zeros((meta['ori_img_size'][1], meta['ori_img_size'][0],
-                                  self.configer.get('data', 'num_classes')), np.float32)
-                        for meta in DCHelper.tolist(data_dict['meta'])]
-        count_predictions = [np.zeros((meta['ori_img_size'][1], meta['ori_img_size'][0],
-                                       self.configer.get('data', 'num_classes')), np.float32)
-                             for meta in DCHelper.tolist(data_dict['meta'])]
+        total_logits = [np.zeros((hw[0], hw[1],
+                                  self.configer.get('data', 'num_classes')), np.float32) for hw in hw_list]
+        count_predictions = [np.zeros((hw[0], hw[1],
+                                       self.configer.get('data', 'num_classes')), np.float32) for hw in hw_list]
         for i in range(len(height_starts_list)):
             index = 0
             for height in height_starts_list[i]:
@@ -208,6 +194,11 @@ class FCNSegmentorTest(object):
 
         for i in range(len(total_logits)):
             total_logits[i] /= count_predictions[i]
+
+        for i, meta in enumerate(DCHelper.tolist(data_dict['meta'])):
+            total_logits[i] += cv2.resize(results[i][:meta['border_hw'][0], :meta['border_hw'][1]],
+                                          (meta['ori_img_size'][0], meta['ori_img_size'][1]),
+                                          interpolation=cv2.INTER_CUBIC)
 
         return total_logits
 
@@ -225,12 +216,17 @@ class FCNSegmentorTest(object):
 
     def _predict(self, data_dict):
         with torch.no_grad():
-            out_list = list()
+            total_logits = list()
             results = self.seg_net.forward(data_dict['img'])
             for res in results:
-                out_list.append(res[-1].squeeze(0).permute(1, 2, 0).cpu().numpy())
+                total_logits.append(res[-1].squeeze(0).permute(1, 2, 0).cpu().numpy())
 
-        return out_list
+            for i, meta in enumerate(DCHelper.tolist(data_dict['meta'])):
+                total_logits[i] += cv2.resize(results[i][:meta['border_hw'][0], :meta['border_hw'][1]],
+                                              (meta['ori_img_size'][0], meta['ori_img_size'][1]),
+                                              interpolation=cv2.INTER_CUBIC)
+
+        return total_logits
 
     def __relabel(self, label_map):
         height, width = label_map.shape
