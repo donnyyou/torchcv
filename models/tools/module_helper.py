@@ -32,6 +32,12 @@ class ModuleHelper(object):
                 BatchNorm2d(num_features, **kwargs),
                 nn.ReLU()
             )
+        elif norm_type == 'encsync_batchnorm':
+            from encoding.nn import BatchNorm2d
+            return nn.Sequential(
+                BatchNorm2d(num_features, **kwargs),
+                nn.ReLU()
+            )
         elif norm_type == 'instancenorm':
             return nn.Sequential(
                 nn.InstanceNorm2d(num_features, **kwargs),
@@ -51,6 +57,10 @@ class ModuleHelper(object):
 
         elif norm_type == 'sync_batchnorm':
             from extensions.ops.sync_bn.syncbn import BatchNorm3d
+            return BatchNorm3d
+
+        elif norm_type == 'encsync_batchnorm':
+            from encoding.nn import BatchNorm3d
             return BatchNorm3d
 
         elif norm_type == 'instancenorm':
@@ -75,6 +85,10 @@ class ModuleHelper(object):
             from extensions.ops.sync_bn.syncbn import BatchNorm2d
             return BatchNorm2d
 
+        elif norm_type == 'encsync_batchnorm':
+            from encoding.nn import BatchNorm2d
+            return BatchNorm2d
+
         elif norm_type == 'instancenorm':
             return nn.InstanceNorm2d
         # elif bn_type == 'inplace_abn':
@@ -95,6 +109,10 @@ class ModuleHelper(object):
 
         elif norm_type == 'sync_batchnorm':
             from extensions.ops.sync_bn.syncbn import BatchNorm1d
+            return BatchNorm1d
+
+        elif norm_type == 'encsync_batchnorm':
+            from encoding.nn import BatchNorm1d
             return BatchNorm1d
 
         elif norm_type == 'instancenorm':
