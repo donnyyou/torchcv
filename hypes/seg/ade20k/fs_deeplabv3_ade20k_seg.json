@@ -59,7 +59,8 @@
       "aug_trans": {
         "trans_seq": ["resize"],
         "resize": {
-          "min_side_length": 520
+          "min_side_length": 520,
+          "max_side_length": 1040
         },
         "random_crop": {
           "ratio": 1.0,
@@ -90,7 +91,7 @@
     "network":{
       "backbone": "deepbase_resnet101_dilated8",
       "model_name": "deeplabv3",
-      "bn_type": "syncbn",
+      "norm_type": "sync_batchnorm",
       "stride": 8,
       "checkpoints_name": "fs_deeplabv3_ade20k_seg",
       "checkpoints_dir": "./checkpoints/seg/ade20k"

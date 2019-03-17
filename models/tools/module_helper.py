@@ -20,34 +20,51 @@ from utils.tools.logger import Logger as Log
 class ModuleHelper(object):
 
     @staticmethod
-    def BNReLU(num_features, bn_type=None, **kwargs):
-        if bn_type == 'torchbn':
+    def BNReLU(num_features, norm_type=None, **kwargs):
+        if norm_type == 'batchnorm':
             return nn.Sequential(
                 nn.BatchNorm2d(num_features, **kwargs),
                 nn.ReLU()
             )
-        elif bn_type == 'syncbn':
+        elif norm_type == 'sync_batchnorm':
             from extensions.ops.sync_bn.syncbn import BatchNorm2d
             return nn.Sequential(
                 BatchNorm2d(num_features, **kwargs),
+                nn.ReLU()
+            )
+        elif norm_type == 'encsync_batchnorm':
+            from encoding.nn import BatchNorm2d
+            return nn.Sequential(
+                BatchNorm2d(num_features, **kwargs),
+                nn.ReLU()
+            )
+        elif norm_type == 'instancenorm':
+            return nn.Sequential(
+                nn.InstanceNorm2d(num_features, **kwargs),
                 nn.ReLU()
             )
         # elif bn_type == 'inplace_abn':
         #    from extensions.ops.inplace_abn.bn import InPlaceABNSync
         #    return InPlaceABNSync(num_features, **kwargs)
         else:
-            Log.error('Not support BN type: {}.'.format(bn_type))
+            Log.error('Not support BN type: {}.'.format(norm_type))
             exit(1)
 
     @staticmethod
-    def BatchNorm2d(bn_type='torch', ret_cls=False):
-        if bn_type == 'torchbn':
-            return nn.BatchNorm2d
+    def BatchNorm3d(norm_type=None, ret_cls=False):
+        if norm_type == 'batchnorm':
+            return nn.BatchNorm3d
 
-        elif bn_type == 'syncbn':
-            from extensions.ops.sync_bn.syncbn import BatchNorm2d
-            return BatchNorm2d
+        elif norm_type == 'sync_batchnorm':
+            from extensions.ops.sync_bn.syncbn import BatchNorm3d
+            return BatchNorm3d
 
+        elif norm_type == 'encsync_batchnorm':
+            from encoding.nn import BatchNorm3d
+            return BatchNorm3d
+
+        elif norm_type == 'instancenorm':
+            return nn.InstanceNorm3d
         # elif bn_type == 'inplace_abn':
         #    from extensions.ops.inplace_abn.bn import InPlaceABNSync
         #    if ret_cls:
@@ -56,7 +73,59 @@ class ModuleHelper(object):
         #    return functools.partial(InPlaceABNSync, activation='none')
 
         else:
-            Log.error('Not support BN type: {}.'.format(bn_type))
+            Log.error('Not support BN type: {}.'.format(norm_type))
+            exit(1)
+
+    @staticmethod
+    def BatchNorm2d(norm_type=None, ret_cls=False):
+        if norm_type == 'batchnorm':
+            return nn.BatchNorm2d
+
+        elif norm_type == 'sync_batchnorm':
+            from extensions.ops.sync_bn.syncbn import BatchNorm2d
+            return BatchNorm2d
+
+        elif norm_type == 'encsync_batchnorm':
+            from encoding.nn import BatchNorm2d
+            return BatchNorm2d
+
+        elif norm_type == 'instancenorm':
+            return nn.InstanceNorm2d
+        # elif bn_type == 'inplace_abn':
+        #    from extensions.ops.inplace_abn.bn import InPlaceABNSync
+        #    if ret_cls:
+        #        return InPlaceABNSync
+
+        #    return functools.partial(InPlaceABNSync, activation='none')
+
+        else:
+            Log.error('Not support BN type: {}.'.format(norm_type))
+            exit(1)
+
+    @staticmethod
+    def BatchNorm1d(norm_type=None, ret_cls=False):
+        if norm_type == 'batchnorm':
+            return nn.BatchNorm1d
+
+        elif norm_type == 'sync_batchnorm':
+            from extensions.ops.sync_bn.syncbn import BatchNorm1d
+            return BatchNorm1d
+
+        elif norm_type == 'encsync_batchnorm':
+            from encoding.nn import BatchNorm1d
+            return BatchNorm1d
+
+        elif norm_type == 'instancenorm':
+            return nn.InstanceNorm1d
+        # elif bn_type == 'inplace_abn':
+        #    from extensions.ops.inplace_abn.bn import InPlaceABNSync
+        #    if ret_cls:
+        #        return InPlaceABNSync
+
+        #    return functools.partial(InPlaceABNSync, activation='none')
+
+        else:
+            Log.error('Not support BN type: {}.'.format(norm_type))
             exit(1)
 
     @staticmethod

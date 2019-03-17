@@ -73,7 +73,7 @@ class ImageClassifier(object):
             outputs = self.cls_net(inputs)
             # Compute the loss of the train batch & backward.
 
-            loss = self.ce_loss(outputs, labels)
+            loss = self.ce_loss(outputs, labels, gathered=self.configer.get('network', 'gathered'))
 
             self.train_losses.update(loss.item(), inputs.size(0))
             self.optimizer.zero_grad()
@@ -123,9 +123,9 @@ class ImageClassifier(object):
                 inputs, labels = RunnerHelper.to_device(self, inputs, labels)
                 # Forward pass.
                 outputs = self.cls_net(inputs)
-                outputs = RunnerHelper.gather(self, outputs)
                 # Compute the loss of the val batch.
-                loss = self.ce_loss(outputs, labels)
+                loss = self.ce_loss(outputs, labels, gathered=self.configer.get('network', 'gathered'))
+                outputs = RunnerHelper.gather(self, outputs)
                 self.cls_running_score.update(outputs, labels)
                 self.val_losses.update(loss.item(), inputs.size(0))
 

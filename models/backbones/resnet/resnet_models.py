@@ -28,13 +28,13 @@ def conv3x3(in_planes, out_planes, stride=1):
 class BasicBlock(nn.Module):
     expansion = 1
 
-    def __init__(self, inplanes, planes, stride=1, downsample=None, bn_type=None):
+    def __init__(self, inplanes, planes, stride=1, downsample=None, norm_type=None):
         super(BasicBlock, self).__init__()
         self.conv1 = conv3x3(inplanes, planes, stride)
-        self.bn1 = ModuleHelper.BatchNorm2d(bn_type=bn_type)(planes)
+        self.bn1 = ModuleHelper.BatchNorm2d(norm_type=norm_type)(planes)
         self.relu = nn.ReLU(inplace=True)
         self.conv2 = conv3x3(planes, planes)
-        self.bn2 = ModuleHelper.BatchNorm2d(bn_type=bn_type)(planes)
+        self.bn2 = ModuleHelper.BatchNorm2d(norm_type=norm_type)(planes)
         self.downsample = downsample
         self.stride = stride
 
@@ -60,15 +60,15 @@ class BasicBlock(nn.Module):
 class Bottleneck(nn.Module):
     expansion = 4
 
-    def __init__(self, inplanes, planes, stride=1, downsample=None, bn_type=None):
+    def __init__(self, inplanes, planes, stride=1, downsample=None, norm_type=None):
         super(Bottleneck, self).__init__()
         self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=1, bias=False)
-        self.bn1 = ModuleHelper.BatchNorm2d(bn_type=bn_type)(planes)
+        self.bn1 = ModuleHelper.BatchNorm2d(norm_type=norm_type)(planes)
         self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride,
                                padding=1, bias=False)
-        self.bn2 = ModuleHelper.BatchNorm2d(bn_type=bn_type)(planes)
+        self.bn2 = ModuleHelper.BatchNorm2d(norm_type=norm_type)(planes)
         self.conv3 = nn.Conv2d(planes, planes * 4, kernel_size=1, bias=False)
-        self.bn3 = ModuleHelper.BatchNorm2d(bn_type=bn_type)(planes * 4)
+        self.bn3 = ModuleHelper.BatchNorm2d(norm_type=norm_type)(planes * 4)
         self.relu = nn.ReLU(inplace=True)
         self.downsample = downsample
         self.stride = stride
@@ -98,34 +98,34 @@ class Bottleneck(nn.Module):
 
 class ResNet(nn.Module):
 
-    def __init__(self, block, layers, num_classes=1000, deep_base=False, bn_type=None):
+    def __init__(self, block, layers, num_classes=1000, deep_base=False, norm_type=None):
         super(ResNet, self).__init__()
         self.inplanes = 128 if deep_base else 64
         if deep_base:
             self.prefix = nn.Sequential(OrderedDict([
                 ('conv1', nn.Conv2d(3, 64, kernel_size=3, stride=2, padding=1, bias=False)),
-                ('bn1', ModuleHelper.BatchNorm2d(bn_type=bn_type)(64)),
+                ('bn1', ModuleHelper.BatchNorm2d(norm_type=norm_type)(64)),
                 ('relu1', nn.ReLU(inplace=False)),
                 ('conv2', nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1, bias=False)),
-                ('bn2', ModuleHelper.BatchNorm2d(bn_type=bn_type)(64)),
+                ('bn2', ModuleHelper.BatchNorm2d(norm_type=norm_type)(64)),
                 ('relu2', nn.ReLU(inplace=False)),
                 ('conv3', nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1, bias=False)),
-                ('bn3', ModuleHelper.BatchNorm2d(bn_type=bn_type)(self.inplanes)),
+                ('bn3', ModuleHelper.BatchNorm2d(norm_type=norm_type)(self.inplanes)),
                 ('relu3', nn.ReLU(inplace=False))]
             ))
         else:
             self.prefix = nn.Sequential(OrderedDict([
                 ('conv1', nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False)),
-                ('bn1', ModuleHelper.BatchNorm2d(bn_type=bn_type)(self.inplanes)),
+                ('bn1', ModuleHelper.BatchNorm2d(norm_type=norm_type)(self.inplanes)),
                 ('relu', nn.ReLU(inplace=False))]
             ))
 
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1, ceil_mode=True)  # change.
 
-        self.layer1 = self._make_layer(block, 64, layers[0], bn_type=bn_type)
-        self.layer2 = self._make_layer(block, 128, layers[1], stride=2, bn_type=bn_type)
-        self.layer3 = self._make_layer(block, 256, layers[2], stride=2, bn_type=bn_type)
-        self.layer4 = self._make_layer(block, 512, layers[3], stride=2, bn_type=bn_type)
+        self.layer1 = self._make_layer(block, 64, layers[0], norm_type=norm_type)
+        self.layer2 = self._make_layer(block, 128, layers[1], stride=2, norm_type=norm_type)
+        self.layer3 = self._make_layer(block, 256, layers[2], stride=2, norm_type=norm_type)
+        self.layer4 = self._make_layer(block, 512, layers[3], stride=2, norm_type=norm_type)
         self.avgpool = nn.AvgPool2d(7, stride=1)
         self.fc = nn.Linear(512 * block.expansion, num_classes)
 
@@ -133,24 +133,24 @@ class ResNet(nn.Module):
             if isinstance(m, nn.Conv2d):
                 n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
                 m.weight.data.normal_(0, math.sqrt(2. / n))
-            elif isinstance(m, ModuleHelper.BatchNorm2d(bn_type=bn_type, ret_cls=True)):
+            elif isinstance(m, ModuleHelper.BatchNorm2d(norm_type=norm_type, ret_cls=True)):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
 
-    def _make_layer(self, block, planes, blocks, stride=1, bn_type=None):
+    def _make_layer(self, block, planes, blocks, stride=1, norm_type=None):
         downsample = None
         if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(
                 nn.Conv2d(self.inplanes, planes * block.expansion,
                           kernel_size=1, stride=stride, bias=False),
-                ModuleHelper.BatchNorm2d(bn_type=bn_type)(planes * block.expansion),
+                ModuleHelper.BatchNorm2d(norm_type=norm_type)(planes * block.expansion),
             )
 
         layers = []
-        layers.append(block(self.inplanes, planes, stride, downsample, bn_type=bn_type))
+        layers.append(block(self.inplanes, planes, stride, downsample, norm_type=norm_type))
         self.inplanes = planes * block.expansion
         for i in range(1, blocks):
-            layers.append(block(self.inplanes, planes, bn_type=bn_type))
+            layers.append(block(self.inplanes, planes, norm_type=norm_type))
 
         return nn.Sequential(*layers)
 
@@ -183,7 +183,7 @@ class ResNetModels(object):
             pretrained (bool): If True, returns a model pre-trained on Places
         """
         model = ResNet(BasicBlock, [2, 2, 2, 2], deep_base=False,
-                       bn_type=self.configer.get('network', 'bn_type'), **kwargs)
+                       norm_type=self.configer.get('network', 'norm_type'), **kwargs)
         model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'))
         return model
 
@@ -193,7 +193,7 @@ class ResNetModels(object):
             pretrained (bool): If True, returns a model pre-trained on Places
         """
         model = ResNet(BasicBlock, [2, 2, 2, 2], deep_base=True,
-                       bn_type=self.configer.get('network', 'bn_type'), **kwargs)
+                       norm_type=self.configer.get('network', 'norm_type'), **kwargs)
         model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'))
         return model
 
@@ -203,7 +203,7 @@ class ResNetModels(object):
             pretrained (bool): If True, returns a model pre-trained on Places
         """
         model = ResNet(BasicBlock, [3, 4, 6, 3], deep_base=False,
-                       bn_type=self.configer.get('network', 'bn_type'), **kwargs)
+                       norm_type=self.configer.get('network', 'norm_type'), **kwargs)
         model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'))
         return model
 
@@ -213,7 +213,7 @@ class ResNetModels(object):
             pretrained (bool): If True, returns a model pre-trained on Places
         """
         model = ResNet(BasicBlock, [3, 4, 6, 3], deep_base=True,
-                       bn_type=self.configer.get('network', 'bn_type'), **kwargs)
+                       norm_type=self.configer.get('network', 'norm_type'), **kwargs)
         model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'))
         return model
 
@@ -223,7 +223,7 @@ class ResNetModels(object):
             pretrained (bool): If True, returns a model pre-trained on Places
         """
         model = ResNet(Bottleneck, [3, 4, 6, 3], deep_base=False,
-                       bn_type=self.configer.get('network', 'bn_type'), **kwargs)
+                       norm_type=self.configer.get('network', 'norm_type'), **kwargs)
         model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'))
         return model
 
@@ -233,7 +233,7 @@ class ResNetModels(object):
             pretrained (bool): If True, returns a model pre-trained on Places
         """
         model = ResNet(Bottleneck, [3, 4, 6, 3], deep_base=True,
-                       bn_type=self.configer.get('network', 'bn_type'), **kwargs)
+                       norm_type=self.configer.get('network', 'norm_type'), **kwargs)
         model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'))
         return model
 
@@ -243,7 +243,7 @@ class ResNetModels(object):
             pretrained (bool): If True, returns a model pre-trained on Places
         """
         model = ResNet(Bottleneck, [3, 4, 23, 3], deep_base=False,
-                       bn_type=self.configer.get('network', 'bn_type'), **kwargs)
+                       norm_type=self.configer.get('network', 'norm_type'), **kwargs)
         model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'))
         return model
 
@@ -253,7 +253,7 @@ class ResNetModels(object):
             pretrained (bool): If True, returns a model pre-trained on Places
         """
         model = ResNet(Bottleneck, [3, 4, 23, 3], deep_base=True,
-                       bn_type=self.configer.get('network', 'bn_type'), **kwargs)
+                       norm_type=self.configer.get('network', 'norm_type'), **kwargs)
         model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'))
         return model
 
@@ -264,7 +264,7 @@ class ResNetModels(object):
             pretrained (bool): If True, returns a model pre-trained on Places
         """
         model = ResNet(Bottleneck, [3, 8, 36, 3], deep_base=False,
-                       bn_type=self.configer.get('network', 'bn_type'), **kwargs)
+                       norm_type=self.configer.get('network', 'norm_type'), **kwargs)
         model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'))
         return model
 
@@ -275,6 +275,6 @@ class ResNetModels(object):
             pretrained (bool): If True, returns a model pre-trained on Places
         """
         model = ResNet(Bottleneck, [3, 8, 36, 3], deep_base=True,
-                       bn_type=self.configer.get('network', 'bn_type'), **kwargs)
+                       norm_type=self.configer.get('network', 'norm_type'), **kwargs)
         model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'))
         return model

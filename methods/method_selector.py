@@ -17,6 +17,8 @@ from methods.pose.open_pose import OpenPose
 from methods.pose.open_pose_test import OpenPoseTest
 from methods.seg.fcn_segmentor import FCNSegmentor
 from methods.seg.fcn_segmentor_test import FCNSegmentorTest
+from methods.gan.image_translator import ImageTranslator
+from methods.gan.image_translator_test import ImageTranslatorTest
 from utils.tools.logger import Logger as Log
 
 
@@ -52,6 +54,13 @@ CLS_METHOD_DICT = {
 }
 CLS_TEST_DICT = {
     'image_classifier': ImageClassifierTest,
+}
+
+GAN_METHOD_DICT = {
+    'image_translator': ImageTranslator,
+}
+GAN_TEST_DICT = {
+    'image_translator': ImageTranslatorTest,
 }
 
 
@@ -102,4 +111,15 @@ class MethodSelector(object):
             return CLS_METHOD_DICT[key](self.configer)
         else:
             return CLS_TEST_DICT[key](self.configer)
+
+    def select_gan_method(self):
+        key = self.configer.get('method')
+        if key not in GAN_METHOD_DICT or key not in GAN_TEST_DICT:
+            Log.error('Cls Method: {} is not valid.'.format(key))
+            exit(1)
+
+        if self.configer.get('phase') == 'train':
+            return GAN_METHOD_DICT[key](self.configer)
+        else:
+            return GAN_TEST_DICT[key](self.configer)
 

@@ -10,11 +10,44 @@ import torch
 
 from datasets.tools.transforms import DeNormalize, ToTensor, Normalize
 from utils.helpers.image_helper import ImageHelper
+from utils.helpers.dc_helper import DCHelper
+from utils.helpers.tensor_helper import TensorHelper
 
 
 class BlobHelper(object):
     def __init__(self, configer):
         self.configer = configer
+
+    def get_blob(self, data_dict, scale=None, flip=False):
+        assert scale is not None
+
+        img_list, meta_list = [], []
+        for image, meta in zip(DCHelper.tolist(data_dict['img']), DCHelper.tolist(data_dict['meta'])):
+            b, c, h, w = image.size()
+            border_hw = [int(h*scale), int(w*scale)]
+            meta['border_hw'] = border_hw
+            image = TensorHelper.resize(image, border_hw, mode='bilinear', align_corners=True)
+            if flip:
+                image = image.flip([3])
+
+            if self.configer.exists('test', 'fit_stride'):
+                stride = self.configer.get('test', 'fit_stride')
+
+                pad_w = 0 if (border_hw[1] % stride == 0) else stride - (border_hw[1] % stride)  # right
+                pad_h = 0 if (border_hw[0] % stride == 0) else stride - (border_hw[0] % stride)  # down
+
+                expand_image = torch.zeros((b, c, border_hw[0] + pad_h, border_hw[1] + pad_w)).to(image.device)
+                expand_image[:, :, 0:border_hw[0], 0:border_hw[1]] = image
+                image = expand_image
+
+            img_list.append(image)
+            meta_list.append(meta)
+
+        new_data_dict = dict(
+            img=DCHelper.todc(img_list, stack=True, samples_per_gpu=1),
+            meta=DCHelper.todc(meta_list, samples_per_gpu=1, cpu_only=True)
+        )
+        return new_data_dict
 
     def make_input_batch(self, image_list, input_size=None, scale=1.0):
         input_list = list()

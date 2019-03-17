@@ -28,29 +28,29 @@ class DenseASPP(nn.Module):
 
         self.trans = _Transition(num_input_features=self.num_features,
                                  num_output_features=self.num_features // 2,
-                                 bn_type=self.configer.get('network', 'bn_type'))
+                                 norm_type=self.configer.get('network', 'norm_type'))
 
         self.num_features = self.num_features // 2
 
         self.ASPP_3 = _DenseAsppBlock(input_num=num_features, num1=256, num2=64,
                                       dilation_rate=3, drop_out=dropout0,
-                                      bn_type=self.configer.get('network', 'bn_type'))
+                                      norm_type=self.configer.get('network', 'norm_type'))
 
         self.ASPP_6 = _DenseAsppBlock(input_num=num_features + 64 * 1, num1=256, num2=64,
                                       dilation_rate=6, drop_out=dropout0,
-                                      bn_type=self.configer.get('network', 'bn_type'))
+                                      norm_type=self.configer.get('network', 'norm_type'))
 
         self.ASPP_12 = _DenseAsppBlock(input_num=num_features + 64 * 2, num1=256, num2=64,
                                        dilation_rate=12, drop_out=dropout0,
-                                       bn_type=self.configer.get('network', 'bn_type'))
+                                       norm_type=self.configer.get('network', 'norm_type'))
 
         self.ASPP_18 = _DenseAsppBlock(input_num=num_features + 64 * 3, num1=256, num2=64,
                                        dilation_rate=18, drop_out=dropout0,
-                                       bn_type=self.configer.get('network', 'bn_type'))
+                                       norm_type=self.configer.get('network', 'norm_type'))
 
         self.ASPP_24 = _DenseAsppBlock(input_num=num_features + 64 * 4, num1=256, num2=64,
                                        dilation_rate=24, drop_out=dropout0,
-                                       bn_type=self.configer.get('network', 'bn_type'))
+                                       norm_type=self.configer.get('network', 'norm_type'))
 
         num_features = num_features + 5 * 64
 
@@ -88,16 +88,16 @@ class DenseASPP(nn.Module):
 class _DenseAsppBlock(nn.Sequential):
     """ ConvNet block for building DenseASPP. """
 
-    def __init__(self, input_num, num1, num2, dilation_rate, drop_out, bn_type):
+    def __init__(self, input_num, num1, num2, dilation_rate, drop_out, norm_type):
         super(_DenseAsppBlock, self).__init__()
         self.add_module('relu1', nn.ReLU(inplace=False)),
         self.add_module('conv1', nn.Conv2d(in_channels=input_num, out_channels=num1, kernel_size=1)),
 
-        self.add_module('norm2', ModuleHelper.BatchNorm2d(bn_type=bn_type)(num_features=num1)),
+        self.add_module('norm2', ModuleHelper.BatchNorm2d(norm_type=norm_type)(num_features=num1)),
         self.add_module('relu2', nn.ReLU(inplace=False)),
         self.add_module('conv2', nn.Conv2d(in_channels=num1, out_channels=num2, kernel_size=3,
                                             dilation=dilation_rate, padding=dilation_rate)),
-        self.add_module('norm2', ModuleHelper.BatchNorm2d(bn_type=bn_type)(num_features=input_num)),
+        self.add_module('norm2', ModuleHelper.BatchNorm2d(norm_type=norm_type)(num_features=input_num)),
 
         self.drop_rate = drop_out
 
@@ -107,11 +107,11 @@ class _DenseAsppBlock(nn.Sequential):
 
 
 class _Transition(nn.Sequential):
-    def __init__(self, num_input_features, num_output_features, bn_type):
+    def __init__(self, num_input_features, num_output_features, norm_type):
         super(_Transition, self).__init__()
         self.add_module('relu', nn.ReLU(inplace=False))
         self.add_module('conv', nn.Conv2d(num_input_features, num_output_features, kernel_size=1, stride=1, bias=False))
-        self.add_module('norm', ModuleHelper.BatchNorm2d(bn_type=bn_type)(num_features=num_output_features)),
+        self.add_module('norm', ModuleHelper.BatchNorm2d(norm_type=norm_type)(num_features=num_output_features)),
 
 
 if __name__ == "__main__":

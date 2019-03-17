@@ -63,8 +63,8 @@ if __name__ == "__main__":
                         dest='network:checkpoints_name', help='The name of checkpoint model.')
     parser.add_argument('--backbone', default=None, type=str,
                         dest='network:backbone', help='The base network of model.')
-    parser.add_argument('--bn_type', default=None, type=str,
-                        dest='network:bn_type', help='The BN type of the network.')
+    parser.add_argument('--norm_type', default=None, type=str,
+                        dest='network:norm_type', help='The BN type of the network.')
     parser.add_argument('--multi_grid', default=None, nargs='+', type=int,
                         dest='network:multi_grid', help='The multi_grid for resnet backbone.')
     parser.add_argument('--pretrained', type=str, default=None,
@@ -122,9 +122,9 @@ if __name__ == "__main__":
 
     # ***********  Params for test or submission.  **********
     parser.add_argument('--test_img', default=None, type=str,
-                        dest='test:test_img', help='The test path of image.')
+                        dest='test:img_path', help='The test path of image.')
     parser.add_argument('--test_dir', default=None, type=str,
-                        dest='test:test_dir', help='The test directory of images.')
+                        dest='test:data_dir', help='The test directory of images.')
     parser.add_argument('--out_dir', default='none', type=str,
                         dest='test:out_dir', help='The test out directory of images.')
 
@@ -148,8 +148,11 @@ if __name__ == "__main__":
     if configer.get('gpu') is not None:
         os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(str(gpu_id) for gpu_id in configer.get('gpu'))
 
-    if configer.get('network', 'bn_type') is None:
-        configer.update(['network', 'bn_type'], 'torchbn')
+    if configer.get('network', 'norm_type') is None:
+        configer.update(['network', 'norm_type'], 'batchnorm')
+
+    if configer.get('phase') == 'train':
+        assert len(configer.get('gpu')) > 1 or configer.get('network', 'norm_type') == 'batchnorm'
 
     project_dir = os.path.dirname(os.path.realpath(__file__))
     configer.add(['project_dir'], project_dir)
@@ -167,6 +170,7 @@ if __name__ == "__main__":
              log_format=configer.get('logging', 'log_format'),
              rewrite=configer.get('logging', 'rewrite'))
 
+    Log.info('BN Type is {}.'.format(configer.get('network', 'norm_type')))
     Log.info('Config Dict: {}'.format(json.dumps(configer.to_dict(), indent=2)))
     method_selector = MethodSelector(configer)
     runner = None
@@ -182,8 +186,10 @@ if __name__ == "__main__":
         Log.error('Task: {} is not valid.'.format(configer.get('task')))
         exit(1)
 
-    Controller.init(runner)
     if configer.get('phase') == 'train':
+        if configer.get('network', 'resume') is None:
+            Controller.init(runner)
+
         Controller.train(runner)
     elif configer.get('phase') == 'debug':
         Controller.debug(runner)

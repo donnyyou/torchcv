@@ -6,7 +6,7 @@
 *.o
 /log
 /checkpoints
-/test/results
+/results
 /.idea
 /val/results
 /vis/results

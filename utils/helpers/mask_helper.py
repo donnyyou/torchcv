@@ -10,7 +10,7 @@ from utils.tools.logger import Logger as Log
 try:
     import pycocotools.mask as mask_util
 except ImportError:
-    Log.error('pycocotools ImportError.')
+    print('pycocotools ImportError.')
 
 
 class MaskHelper(object):

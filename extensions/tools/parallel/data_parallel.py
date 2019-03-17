@@ -116,7 +116,7 @@ class DataParallelCriterion(DataParallel):
                 inputs, _ = self.scatter(inputs, kwargs, self.device_ids)
             else:
                 inputs, _ = self.scatter([inputs], kwargs, self.device_ids)
-                # inputs = tuple(inputs_per_gpu[0] for inputs_per_gpu in inputs)
+                inputs = tuple(inputs_per_gpu[0] for inputs_per_gpu in inputs)
 
         if not self.device_ids:
             return self.module(inputs, *targets, **kwargs)

@@ -4,10 +4,12 @@
 # Repackage some image operations.
 
 
+import os
 import cv2
 import numpy as np
 from PIL import Image
 
+from utils.helpers.file_helper import FileHelper
 from utils.tools.logger import Logger as Log
 
 
@@ -22,6 +24,11 @@ CV2_INTER_DICT = {
     'linear': cv2.INTER_LINEAR,
     'cubic': cv2.INTER_CUBIC
 }
+
+IMG_EXTENSIONS = [
+    '.jpg', '.JPG', '.jpeg', '.JPEG',
+    '.png', '.PNG', '.ppm', '.PPM', '.bmp', '.BMP',
+]
 
 
 class ImageHelper(object):
@@ -226,6 +233,7 @@ class ImageHelper(object):
 
     @staticmethod
     def save(img, save_path):
+        FileHelper.make_dirs(save_path, is_file=True)
         if isinstance(img, Image.Image):
             img.save(save_path)
 
@@ -297,11 +305,14 @@ class ImageHelper(object):
 
     @staticmethod
     def is_img(img_name):
-        IMG_EXTENSIONS = [
-            '.jpg', '.JPG', '.jpeg', '.JPEG',
-            '.png', '.PNG', '.ppm', '.PPM', '.bmp', '.BMP',
-        ]
+
         return any(img_name.endswith(extension) for extension in IMG_EXTENSIONS)
+
+    @staticmethod
+    def imgpath(data_dir, image_name):
+        match_list = [os.path.join(data_dir, '{}{}'.format(image_name, ext)) for ext in IMG_EXTENSIONS
+                      if os.path.exists(os.path.join(data_dir, '{}{}'.format(image_name, ext)))]
+        return None if len(match_list) != 1 else match_list[0]
 
 
 if __name__ == "__main__":
