@@ -1,9 +1,10 @@
 # TorchCV: A PyTorch-Based Framework for Deep Learning in Computer Vision
 ```
-@misc{CV2018,
-  author =       {Donny You (youansheng@gmail.com)},
+@misc{you2019torchcv,
+  author = {You, Ansheng and Tong, Yunhai},
+  title = {TorchCV: A PyTorch-Based Framework for Deep Learning in Computer Vision},
   howpublished = {\url{https://github.com/youansheng/torchcv}},
-  year =         {2018}
+  year = {2019}
 }
 ```
 
