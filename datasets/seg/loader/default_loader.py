@@ -67,6 +67,7 @@ class DefaultLoader(data.Dataset):
             return labelmap
 
         labelmap = np.array(labelmap)
+        labelmap[labelmap == 255] = 0
         encoded_labelmap = labelmap - 1
         if self.configer.get('data', 'image_tool') == 'pil':
             encoded_labelmap = ImageHelper.np2img(encoded_labelmap.astype(np.uint8))
@@ -75,7 +76,6 @@ class DefaultLoader(data.Dataset):
 
     def _encode_label(self, labelmap):
         labelmap = np.array(labelmap)
-
         shape = labelmap.shape
         encoded_labelmap = np.ones(shape=(shape[0], shape[1]), dtype=np.float32) * 255
         for i in range(len(self.configer.get('data', 'label_list'))):
