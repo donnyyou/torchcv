@@ -91,18 +91,12 @@
         "base_lr": 0.01,
         "metric": "iters",
         "lr_policy": "lambda_poly",
-        "step": {
-          "gamma": 0.5,
-          "step_size": 100
+        "lambda_poly": {
+          "power": 0.5
         }
       },
       "optim": {
         "optim_method": "sgd",
-        "adam": {
-          "betas": [0.9, 0.999],
-          "eps": 1e-08,
-          "weight_decay": 0.0001
-        },
         "sgd":{
           "weight_decay": 0.0005,
           "momentum": 0.9,

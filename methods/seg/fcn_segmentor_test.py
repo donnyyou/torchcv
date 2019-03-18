@@ -19,9 +19,7 @@ from utils.helpers.image_helper import ImageHelper
 from utils.tools.logger import Logger as Log
 from utils.parser.seg_parser import SegParser
 from utils.visualizer.seg_visualizer import SegVisualizer
-from utils.helpers.file_helper import FileHelper
 from utils.helpers.dc_helper import DCHelper
-from utils.helpers.tensor_helper import TensorHelper
 
 
 class FCNSegmentorTest(object):
@@ -50,13 +48,13 @@ class FCNSegmentorTest(object):
                 total_logits = self.ss_test(data_dict)
 
             elif self.configer.get('test', 'mode') == 'sscrop_test':
-                total_logits = self.sscrop_test(data_dict)
+                total_logits = self.sscrop_test(data_dict, params_dict=self.configer.get('test', 'sscrop_test'))
 
             elif self.configer.get('test', 'mode') == 'ms_test':
-                total_logits = self.ms_test(data_dict)
+                total_logits = self.ms_test(data_dict, params_dict=self.configer.get('test', 'ms_test'))
 
             elif self.configer.get('test', 'mode') == 'mscrop_test':
-                total_logits = self.mscrop_test(data_dict)
+                total_logits = self.mscrop_test(data_dict, params_dict=self.configer.get('test', 'mscrop_test'))
 
             else:
                 Log.error('Invalid test mode:{}'.format(self.configer.get('test', 'mode')))
@@ -90,66 +88,63 @@ class FCNSegmentorTest(object):
         results = self._predict(data_dict)
         return results
 
-    def sscrop_test(self, in_data_dict):
+    def ms_test(self, in_data_dict, params_dict):
+        total_logits = [np.zeros((meta['ori_img_size'][1], meta['ori_img_size'][0],
+                                  self.configer.get('data', 'num_classes')), np.float32)
+                        for meta in DCHelper.tolist(in_data_dict['meta'])]
+        for scale in params_dict['scale_search']:
+            data_dict = self.blob_helper.get_blob(in_data_dict, scale=scale)
+            results = self._predict(data_dict)
+            for i in range(len(total_logits)):
+                total_logits[i] += results[i]
+
+        for scale in params_dict['scale_search']:
+            data_dict = self.blob_helper.get_blob(in_data_dict, scale=scale, flip=True)
+            results = self._predict(data_dict)
+            for i in range(len(total_logits)):
+                total_logits[i] += results[i][:, ::-1]
+
+        return total_logits
+
+    def sscrop_test(self, in_data_dict, params_dict):
         data_dict = self.blob_helper.get_blob(in_data_dict, scale=1.0)
-        crop_size = self.configer.get('test', 'crop_size')
-        if any(image.size()[3] < crop_size[0] or image.size()[2] < crop_size[1]
+        if any(image.size()[3] < params_dict['crop_size'][0] or image.size()[2] < params_dict['crop_size'][1]
                    for image in DCHelper.tolist(data_dict['img'])):
             results = self._predict(data_dict)
         else:
-            results = self._crop_predict(data_dict, crop_size)
+            results = self._crop_predict(data_dict, params_dict['crop_size'], params_dict['crop_stride_ratio'])
 
         return results
 
-    def mscrop_test(self, in_data_dict):
+    def mscrop_test(self, in_data_dict, params_dict):
         total_logits = [np.zeros((meta['ori_img_size'][1], meta['ori_img_size'][0],
                                   self.configer.get('data', 'num_classes')), np.float32)
                         for meta in DCHelper.tolist(in_data_dict['meta'])]
-        for scale in self.configer.get('test', 'scale_search'):
+        for scale in params_dict['scale_search']:
             data_dict = self.blob_helper.get_blob(in_data_dict, scale=scale)
-            crop_size = self.configer.get('test', 'crop_size')
-            if any(image.size()[3] < crop_size[0] or image.size()[2] < crop_size[1]
+            if any(image.size()[3] < params_dict['crop_size'][0] or image.size()[2] < params_dict['crop_size'][1]
                    for image in DCHelper.tolist(data_dict['img'])):
                 results = self._predict(data_dict)
             else:
-                results = self._crop_predict(data_dict, crop_size)
+                results = self._crop_predict(data_dict, params_dict['crop_size'], params_dict['crop_stride_ratio'])
 
             for i in range(len(total_logits)):
                 total_logits[i] += results[i]
 
-        for scale in self.configer.get('test', 'scale_search'):
+        for scale in params_dict['scale_search']:
             data_dict = self.blob_helper.get_blob(in_data_dict, scale=scale, flip=True)
-            crop_size = self.configer.get('test', 'crop_size')
-            if any(image.size()[3] < crop_size[0] or image.size()[2] < crop_size[1]
+            if any(image.size()[3] < params_dict['crop_size'][0] or image.size()[2] < params_dict['crop_size'][1]
                    for image in DCHelper.tolist(data_dict['img'])):
                 results = self._predict(data_dict)
             else:
-                results = self._crop_predict(data_dict, crop_size)
+                results = self._crop_predict(data_dict, params_dict['crop_size'], params_dict['crop_stride_ratio'])
 
             for i in range(len(total_logits)):
                 total_logits[i] += results[i][:, ::-1]
 
         return total_logits
 
-    def ms_test(self, in_data_dict):
-        total_logits = [np.zeros((meta['ori_img_size'][1], meta['ori_img_size'][0],
-                                  self.configer.get('data', 'num_classes')), np.float32)
-                        for meta in DCHelper.tolist(in_data_dict['meta'])]
-        for scale in self.configer.get('test', 'scale_search'):
-            data_dict = self.blob_helper.get_blob(in_data_dict, scale=scale)
-            results = self._predict(data_dict)
-            for i in range(len(total_logits)):
-                total_logits[i] += results[i]
-
-        for scale in self.configer.get('test', 'scale_search'):
-            data_dict = self.blob_helper.get_blob(in_data_dict, scale=scale, flip=True)
-            results = self._predict(data_dict)
-            for i in range(len(total_logits)):
-                total_logits[i] += results[i][:, ::-1]
-
-        return total_logits
-
-    def _crop_predict(self, data_dict, crop_size):
+    def _crop_predict(self, data_dict, crop_size, crop_stride_ratio):
         split_batch = list()
         height_starts_list = list()
         width_starts_list = list()
@@ -158,8 +153,8 @@ class FCNSegmentorTest(object):
             height, width = image.size()[2:]
             hw_list.append([height, width])
             np_image = image.squeeze(0).permute(1, 2, 0).cpu().numpy()
-            height_starts = self._decide_intersection(height, crop_size[1])
-            width_starts = self._decide_intersection(width, crop_size[0])
+            height_starts = self._decide_intersection(height, crop_size[1], crop_stride_ratio)
+            width_starts = self._decide_intersection(width, crop_size[0], crop_stride_ratio)
             split_crops = []
             for height in height_starts:
                 for width in width_starts:
@@ -200,8 +195,8 @@ class FCNSegmentorTest(object):
 
         return total_logits
 
-    def _decide_intersection(self, total_length, crop_length):
-        stride = int(crop_length * self.configer.get('test', 'crop_stride_ratio'))            # set the stride as the paper do
+    def _decide_intersection(self, total_length, crop_length, crop_stride_ratio):
+        stride = int(crop_length * crop_stride_ratio)            # set the stride as the paper do
         times = (total_length - crop_length) // stride + 1
         cropped_starting = []
         for i in range(times):

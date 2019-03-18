@@ -79,8 +79,7 @@
     "test": {
       "mode": "ss_test",
       "min_side_length": 520,
-      "fit_stride": 8,
-      "scale_search": [1.0]
+      "fit_stride": 8
     },
     "details": {
       "color_list": [[128, 64, 128], [244, 35, 232], [70, 70, 70], [102, 102, 156], [190, 153, 153],
@@ -108,22 +107,12 @@
         "base_lr": 0.02,
         "metric": "iters",
         "lr_policy": "lambda_poly",
-        "warm": {
-          "warm_iters": 1000,
-          "freeze_backbone": false
-        },
-        "step": {
-          "gamma": 0.5,
-          "step_size": 100
+        "lambda_poly": {
+          "power": 0.9
         }
       },
       "optim": {
         "optim_method": "sgd",
-        "adam": {
-          "betas": [0.9, 0.999],
-          "eps": 1e-08,
-          "weight_decay": 0.0001
-        },
         "sgd":{
           "weight_decay": 0.0001,
           "momentum": 0.9,
