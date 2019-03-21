@@ -64,13 +64,13 @@
     "network":{
       "model_name": "vgg19",
       "pooled_size": [1, 1],
-      "checkpoints_name": "fc_vgg19_cifar10_cls",
+      "checkpoints_name": "ic_vgg19_cifar10_cls",
       "checkpoints_dir": "checkpoints/cls/cifar10"
     },
     "logging": {
       "logfile_level": "info",
       "stdout_level": "info",
-      "log_file": "./log/cls/fc_vgg19_cifar10_cls.log",
+      "log_file": "./log/cls/ic_vgg19_cifar10_cls.log",
       "log_format": "%(asctime)s %(levelname)-7s %(message)s",
       "rewrite": true
     },

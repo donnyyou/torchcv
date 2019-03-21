@@ -19,8 +19,12 @@ class ADE20KEvaluator(object):
         self.seg_running_score = SegRunningScore(configer)
 
     def relabel(self, labelmap):
+        if self.configer.get('data', 'reduce_zero_label'):
+            labelmap[labelmap == 0] = 255
+            labelmap = (labelmap - 1).astype(np.uint8)
+            labelmap[labelmap == 254] = 255
 
-        return (labelmap - 1).astype(np.uint8)
+        return labelmap
 
     def evaluate(self, pred_dir, gt_dir):
         img_cnt = 0

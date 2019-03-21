@@ -78,13 +78,13 @@
       "model_scale": 0.5,
       "shuffle_group": 2,
       "pooled_size": [7, 7],
-      "checkpoints_name": "fc_shufflenetv2_imagenet_cls",
+      "checkpoints_name": "ic_shufflenetv2_imagenet_cls",
       "checkpoints_dir": "checkpoints/cls/imagenet"
     },
     "logging": {
       "logfile_level": "info",
       "stdout_level": "info",
-      "log_file": "./log/cls/fc_shufflenetv2_imagenet_cls.log",
+      "log_file": "./log/cls/ic_shufflenetv2_imagenet_cls.log",
       "log_format": "%(asctime)s %(levelname)-7s %(message)s",
       "rewrite": true
     },

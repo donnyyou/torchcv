@@ -169,14 +169,16 @@ class RunnerHelper(object):
                 runner.runner_state['last_epoch'] = epoch
 
     @staticmethod
-    def freeze_bn(net, syncbn=False):
+    def freeze_bn(net, norm_type=None):
         for m in net.modules():
-            if isinstance(m, nn.BatchNorm2d) or isinstance(m, nn.BatchNorm1d):
+            if isinstance(m, nn.BatchNorm2d) or isinstance(m, nn.BatchNorm1d) or isinstance(m, nn.BatchNorm3d):
                 m.eval()
 
-            if syncbn:
-                from extensions.ops.syncbn.module import BatchNorm2d, BatchNorm1d
-                if isinstance(m, BatchNorm2d) or isinstance(m, BatchNorm1d):
+            if norm_type is not None:
+                from models.tools.module_helper import ModuleHelper
+                if isinstance(m, ModuleHelper.BatchNorm2d(norm_type=norm_type, ret_cls=True)) \
+                        or isinstance(m, ModuleHelper.BatchNorm1d(norm_type=norm_type, ret_cls=True)) \
+                        or isinstance(m, ModuleHelper.BatchNorm3d(norm_type=norm_type, ret_cls=True)):
                     m.eval()
 
     @staticmethod

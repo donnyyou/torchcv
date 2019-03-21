@@ -20,7 +20,8 @@ class DefaultLoader(data.Dataset):
         self.configer = configer
         self.img_transform = img_transform
         if test_dir is not None:
-            self.img_list = [os.path.join(test_dir, filename) for filename in FileHelper.list_dir(test_dir)]
+            self.img_list = [os.path.join(test_dir, filename)
+                             for filename in FileHelper.list_dir(test_dir) if ImageHelper.is_img(filename)]
         else:
             self.img_list = self.__read_list(list_path)
 
