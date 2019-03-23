@@ -9,7 +9,7 @@ import torch
 from models.cls.nets.mobilenet import MobileNet
 from models.cls.nets.vgg import VGG
 from models.cls.nets.shufflenetv2 import ShuffleNetV2, ShuffleResNetV2
-from models.cls.loss.cls_modules import FCCELoss, FCCenterLoss
+from models.cls.loss.cls_modules import ICCELoss, ICCenterLoss
 from utils.tools.logger import Logger as Log
 
 CLS_MODEL_DICT = {
@@ -24,8 +24,8 @@ CLS_MODEL_DICT = {
 }
 
 CLS_LOSS_DICT = {
-    'fc_ce_loss': FCCELoss,
-    'fc_center_loss': FCCenterLoss
+    'ic_ce_loss': ICCELoss,
+    'ic_center_loss': ICCenterLoss
 }
 
 
