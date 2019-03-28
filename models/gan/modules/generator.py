@@ -3,6 +3,7 @@ import torch.nn as nn
 
 from models.tools.module_helper import ModuleHelper
 
+
 # Defines the generator that consists of Resnet blocks between a few
 # downsampling/upsampling operations.
 # Code and idea originally from Justin Johnson's architecture.

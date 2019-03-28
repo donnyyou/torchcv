@@ -3,7 +3,7 @@
     "task": "gan",
     "method": "face_gan",
     "data": {
-      "data_dir": "~/DataSet/CASIA_NIR-VIS2.0",
+      "data_dir": "~/DataSet/CASIA_NIR2VIS",
       "image_tool": "cv2",
       "input_mode": "BGR",
       "keep_difficult": false,
@@ -57,9 +57,22 @@
       }
     },
     "network": {
+      "generatorA": {
+
+      },
+      "generatorB": {
+
+      },
+      "discriminatorA": {
+
+      },
+      "discriminatorB": {
+
+      },
       "model_name": "face_gan",
       "checkpoints_name": "fg_lightcnn_face_gan",
-      "checkpoints_dir": "checkpoints/gan/face"
+      "checkpoints_dir": "checkpoints/gan/face",
+      "imgpool_size": 50
     },
     "logging": {
       "logfile_level": "info",
