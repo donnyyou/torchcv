@@ -7,15 +7,16 @@ from models.gan.loss.gan_modules import GANLoss
 
 
 class Pix2Pix(nn.Module):
-    def initialize(self, opt):
-
+    def __init__(self, configer):
+        super(Pix2Pix, self).__init__()
+        self.configer = configer
         # load/define networks
-        self.netG = SubnetSelector.generator(self.configer.get('network', 'generator'))
-        self.netD = SubnetSelector.discriminator(self.configer.get('network', 'discriminator'))
+        self.netG = SubnetSelector.generator(net_dict=self.configer.get('network', 'generator'))
+        self.netD = SubnetSelector.discriminator(net_dict=self.configer.get('network', 'discriminator'))
 
-        self.fake_AB_pool = ImagePool(opt.pool_size)
+        self.fake_AB_pool = ImagePool(self.configer.get('network', 'imgpool_size'))
         # define loss functions
-        self.criterionGAN = GANLoss(use_lsgan=self.configer.get('loss', 'use_lsgan'))
+        self.criterionGAN = GANLoss(gan_mode=self.configer.get('loss', 'gan_mode'))
         self.criterionL1 = nn.L1Loss()
 
     def forward(self, data_dict):

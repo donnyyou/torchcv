@@ -8,9 +8,9 @@ import torch
 import torch.nn as nn
 
 
-class FCCELoss(nn.Module):
+class ICCELoss(nn.Module):
     def __init__(self, configer=None):
-        super(FCCELoss, self).__init__()
+        super(ICCELoss, self).__init__()
         self.configer = configer
         weight = None
         if self.configer.exists('loss', 'params') and 'ce_weight' in self.configer.get('loss', 'params'):
@@ -31,9 +31,9 @@ class FCCELoss(nn.Module):
         return self.ce_loss(inputs, targets[0])
 
 
-class FCCenterLoss(nn.Module):
+class ICCenterLoss(nn.Module):
     def __init__(self, dim_hidden, num_classes, lambda_c=1.0, use_cuda=True):
-        super(FCCenterLoss, self).__init__()
+        super(ICCenterLoss, self).__init__()
         self.dim_hidden = dim_hidden
         self.num_classes = num_classes
         self.lambda_c = lambda_c
