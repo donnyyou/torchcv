@@ -85,10 +85,10 @@
       "lr": {
         "metric": "epoch",
         "base_lr": 0.0002,
-        "lr_policy": "multistep",
-        "multistep": {
-          "gamma": 0.1,
-          "stepvalue": [156, 195, 234]
+        "lr_policy": "lambda_fixlinear",
+        "fix_and_linear": {
+          "fix_value": 100,
+          "linear_value": 100
         }
       },
       "optim": {
@@ -102,7 +102,7 @@
       "display_iter": 100,
       "save_iters": 5000,
       "test_interval": 5000,
-      "max_epoch": 235
+      "max_epoch": 200
     },
     "loss": {
       "loss_weights": {
@@ -110,7 +110,7 @@
         "idt_loss": 5
       },
       "params": {
-        "use_lsgan": true
+        "gan_mode": "lsgan"
       }
     }
 }

@@ -107,8 +107,6 @@ if __name__ == "__main__":
     # ***********  Params for loss.  **********
     parser.add_argument('--loss_type', default=None, type=str,
                         dest='loss:loss_type', help='The loss type of the network.')
-    parser.add_argument('--gan_mode', default='lsgan', type=str,
-                        dest='loss:gan_mode', help='the type of GAN objective. [vanilla| lsgan | wgangp].')
 
     # ***********  Params for logging.  **********
     parser.add_argument('--logfile_level', default=None, type=str,

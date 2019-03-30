@@ -65,6 +65,11 @@ class Trainer(object):
 
             scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_linear)
 
+        elif lr_params['lr_policy'] == 'lambda_fixlinear':
+            lambda_fixlinear = lambda epoch: max(0.0, 1.0 - (max(0, epoch - lr_params['lambda_fixlinear']['fix_value'])
+                                                             / lr_params['lambda_fixlinear']['linear_value']))
+            scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_fixlinear)
+
         elif lr_params['lr_policy'] == 'plateau':
             scheduler = lr_scheduler.ReduceLROnPlateau(optimizer,
                                                        mode=lr_params['plateau']['mode'],

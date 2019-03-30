@@ -16,7 +16,7 @@ class Pix2Pix(nn.Module):
 
         self.fake_AB_pool = ImagePool(self.configer.get('network', 'imgpool_size'))
         # define loss functions
-        self.criterionGAN = GANLoss(gan_mode=self.configer.get('loss', 'gan_mode'))
+        self.criterionGAN = GANLoss(gan_mode=self.configer.get('loss', 'params')['gan_mode'])
         self.criterionL1 = nn.L1Loss()
 
     def forward(self, data_dict):
