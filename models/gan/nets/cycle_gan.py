@@ -33,11 +33,10 @@ class CycleGAN(nn.Module):
         self.criterionIdt = nn.L1Loss()
 
     def forward(self, data_dict):
-        lambda_idt = self.opt.identity
         cycle_loss_weight = self.configer.get('loss', 'loss_weights')['cycle_loss']
         idt_loss_weight = self.configer.get('loss', 'loss_weights')['idt_loss']
         # Identity loss
-        if lambda_idt > 0:
+        if idt_loss_weight > 0:
             # G_A should be identity if real_B is fed.
             idt_A = self.netG_A.forward(data_dict['imgB'])
             loss_idt_A = self.criterionIdt(idt_A, data_dict['imgB']) * idt_loss_weight

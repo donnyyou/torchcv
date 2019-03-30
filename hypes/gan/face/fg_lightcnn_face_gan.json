@@ -110,7 +110,7 @@
         "metric": "epoch",
         "base_lr": 0.0002,
         "lr_policy": "lambda_fixlinear",
-        "fix_and_linear": {
+        "lambda_fixlinear": {
           "fix_value": 100,
           "linear_value": 100
         }

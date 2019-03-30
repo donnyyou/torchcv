@@ -59,11 +59,11 @@ class ImageTranslator(object):
         # Adjust the learning rate after every epoch.
         for i, data_dict in enumerate(self.train_loader):
             Trainer.update(self, solver_dict=self.configer.get('solver'))
-            inputs = data_dict['img']
+            inputs = data_dict['imgA']
             self.data_time.update(time.time() - start_time)
 
             # Forward pass.
-            out_dict = self.gan_net(inputs)
+            out_dict = self.gan_net(data_dict)
             # outputs = self.module_utilizer.gather(outputs)
             loss = out_dict['loss'].mean()
             self.train_losses.update(loss.item(), inputs.size(0))
@@ -109,7 +109,7 @@ class ImageTranslator(object):
 
         data_loader = self.val_loader if data_loader is None else data_loader
         for j, data_dict in enumerate(data_loader):
-            inputs = data_dict['img']
+            inputs = data_dict['imgA']
 
             with torch.no_grad():
                 # Forward pass.

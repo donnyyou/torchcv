@@ -152,7 +152,7 @@ if __name__ == "__main__":
         configer.update(['network', 'norm_type'], 'batchnorm')
 
     if configer.get('phase') == 'train':
-        assert len(configer.get('gpu')) > 1 or configer.get('network', 'norm_type') == 'batchnorm'
+        assert len(configer.get('gpu')) > 1 or 'sync' not in configer.get('network', 'norm_type')
 
     project_dir = os.path.dirname(os.path.realpath(__file__))
     configer.add(['project_dir'], project_dir)
