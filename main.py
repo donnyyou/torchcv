@@ -107,8 +107,6 @@ if __name__ == "__main__":
     # ***********  Params for loss.  **********
     parser.add_argument('--loss_type', default=None, type=str,
                         dest='loss:loss_type', help='The loss type of the network.')
-    parser.add_argument('--gan_mode', default='lsgan', type=str,
-                        dest='loss:gan_mode', help='the type of GAN objective. [vanilla| lsgan | wgangp].')
 
     # ***********  Params for logging.  **********
     parser.add_argument('--logfile_level', default=None, type=str,
@@ -154,7 +152,7 @@ if __name__ == "__main__":
         configer.update(['network', 'norm_type'], 'batchnorm')
 
     if configer.get('phase') == 'train':
-        assert len(configer.get('gpu')) > 1 or configer.get('network', 'norm_type') == 'batchnorm'
+        assert len(configer.get('gpu')) > 1 or 'sync' not in configer.get('network', 'norm_type')
 
     project_dir = os.path.dirname(os.path.realpath(__file__))
     configer.add(['project_dir'], project_dir)
@@ -184,6 +182,8 @@ if __name__ == "__main__":
         runner = method_selector.select_det_method()
     elif configer.get('task') == 'cls':
         runner = method_selector.select_cls_method()
+    elif configer.get('task') == 'gan':
+        runner = method_selector.select_gan_method()
     else:
         Log.error('Task: {} is not valid.'.format(configer.get('task')))
         exit(1)

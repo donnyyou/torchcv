@@ -18,7 +18,7 @@ from utils.tools.logger import Logger as Log
 try:
     from extensions.ops.roi_pool.modules.roi_pool import RoIPool
 except ImportError:
-    Log.error('RoIPool ImportError.')
+    print('RoIPool ImportError.')
 
 
 DETECTOR_CONFIG = {

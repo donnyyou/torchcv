@@ -1,7 +1,7 @@
 import torch.nn as nn
 
 from models.gan.tools.image_pool import ImagePool
-from models.gan.modules.subnet_selector import SubnetSelector
+from models.gan.modules.subnet_selector import SubNetSelector
 from models.gan.loss.gan_modules import GANLoss
 
 
@@ -13,25 +13,30 @@ class CycleGAN(nn.Module):
         # The naming conversion is different from those used in the paper
         # Code (paper): G_A (G), G_B (F), D_A (D_Y), D_B (D_X)
         self.configer = configer
-        self.netG_A = SubnetSelector.generator(net_dict=self.configer.get('network', 'generatorA'))
-        self.netG_B = SubnetSelector.generator(net_dict=self.configer.get('network', 'generatorB'))
+        self.netG_A = SubNetSelector.generator(net_dict=self.configer.get('network', 'generatorA'),
+                                               use_dropout=self.configer.get('network', 'use_dropout'),
+                                               norm_type=self.configer.get('network', 'norm_type'))
+        self.netG_B = SubNetSelector.generator(net_dict=self.configer.get('network', 'generatorB'),
+                                               use_dropout=self.configer.get('network', 'use_dropout'),
+                                               norm_type=self.configer.get('network', 'norm_type'))
 
-        self.netD_A = SubnetSelector.discriminator(net_dict=self.configer.get('network', 'discriminatorA'))
-        self.netD_B = SubnetSelector.discriminator(net_dict=self.configer.get('network', 'discriminatorB'))
+        self.netD_A = SubNetSelector.discriminator(net_dict=self.configer.get('network', 'discriminatorA'),
+                                                   norm_type=self.configer.get('network', 'norm_type'))
+        self.netD_B = SubNetSelector.discriminator(net_dict=self.configer.get('network', 'discriminatorB'),
+                                                   norm_type=self.configer.get('network', 'norm_type'))
 
         self.fake_A_pool = ImagePool(self.configer.get('network', 'imgpool_size'))
         self.fake_B_pool = ImagePool(self.configer.get('network', 'imgpool_size'))
         # define loss functions
-        self.criterionGAN = GANLoss(gan_mode=self.configer.get('loss', 'gan_mode'))
+        self.criterionGAN = GANLoss(gan_mode=self.configer.get('loss', 'params')['gan_mode'])
         self.criterionCycle = nn.L1Loss()
         self.criterionIdt = nn.L1Loss()
 
     def forward(self, data_dict):
-        lambda_idt = self.opt.identity
         cycle_loss_weight = self.configer.get('loss', 'loss_weights')['cycle_loss']
         idt_loss_weight = self.configer.get('loss', 'loss_weights')['idt_loss']
         # Identity loss
-        if lambda_idt > 0:
+        if idt_loss_weight > 0:
             # G_A should be identity if real_B is fed.
             idt_A = self.netG_A.forward(data_dict['imgB'])
             loss_idt_A = self.criterionIdt(idt_A, data_dict['imgB']) * idt_loss_weight
