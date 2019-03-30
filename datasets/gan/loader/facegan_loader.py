@@ -53,16 +53,16 @@ class FaceGANLoader(data.Dataset):
 
         return len(self.imgA_list)
 
-    def __read_json_file(self, root_dir, dataset):
+    def __read_json_file(self, root_dir, dataset, tag):
         imgA_list = list()
         imgB_list = list()
         labelA_list = list()
         labelB_list = list()
 
-        with open(os.path.join(root_dir, dataset, 'labelA.json'), 'r') as file_stream:
+        with open(os.path.join(root_dir, 'protocols/{}_label{}A.json'.format(dataset, tag)), 'r') as file_stream:
             items = json.load(file_stream)
             for item in items:
-                img_path = os.path.join(root_dir, dataset, item['image_path'])
+                img_path = os.path.join(root_dir, item['image_path'])
                 if not os.path.exists(img_path):
                     Log.warn('Image Path: {} not exists.'.format(img_path))
                     continue
@@ -70,10 +70,10 @@ class FaceGANLoader(data.Dataset):
                 imgA_list.append(img_path)
                 labelA_list.append(item['label'])
 
-        with open(os.path.join(root_dir, dataset, 'labelB.json'), 'r') as file_stream:
+        with open(os.path.join(root_dir, 'protocols/{}_label{}B.json'.format(dataset, tag)), 'r') as file_stream:
             items = json.load(file_stream)
             for item in items:
-                img_path = os.path.join(root_dir, dataset, item['image_path'])
+                img_path = os.path.join(root_dir, item['image_path'])
                 if not os.path.exists(img_path):
                     Log.warn('Image Path: {} not exists.'.format(img_path))
                     continue
@@ -82,10 +82,10 @@ class FaceGANLoader(data.Dataset):
                 labelB_list.append(item['label'])
 
         if dataset == 'train' and self.configer.get('data', 'include_val'):
-            with open(os.path.join(root_dir, 'val', 'labelA.json'), 'r') as file_stream:
+            with open(os.path.join(root_dir, 'protocols/val_label{}A.json'.format(tag)), 'r') as file_stream:
                 items = json.load(file_stream)
                 for item in items:
-                    img_path = os.path.join(root_dir, 'val', item['image_path'])
+                    img_path = os.path.join(root_dir, item['image_path'])
                     if not os.path.exists(img_path):
                         Log.warn('Image Path: {} not exists.'.format(img_path))
                         continue
@@ -93,10 +93,10 @@ class FaceGANLoader(data.Dataset):
                     imgA_list.append(img_path)
                     labelA_list.append(item['label'])
 
-            with open(os.path.join(root_dir, 'val', 'labelB.json'), 'r') as file_stream:
+            with open(os.path.join(root_dir, 'protocols/val_label{}B.json'.format(tag)), 'r') as file_stream:
                 items = json.load(file_stream)
                 for item in items:
-                    img_path = os.path.join(root_dir, 'val', item['image_path'])
+                    img_path = os.path.join(root_dir, item['image_path'])
                     if not os.path.exists(img_path):
                         Log.warn('Image Path: {} not exists.'.format(img_path))
                         continue

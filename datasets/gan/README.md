@@ -1,4 +1,4 @@
-### Data Format for Instance Segmentation
+### Data Format for GANs
 
 The raw data will be processed by generator shell scripts. There will be two subdirs('train' & 'val')
 
@@ -7,8 +7,8 @@ The raw data will be processed by generator shell scripts. There will be two sub
 train or val dir {
     imageA: contains the A images for train or val.
     imageB: contains the B images for train or val.
-    labelA.json: contains the A json files for train or val.
-    labelB.json: contains the B json files for train or val.
+    labelA.json: contains the A json files for train or val.(optional)
+    labelB.json: contains the B json files for train or val.(optional)
 }
 ```
 
