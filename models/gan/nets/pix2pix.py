@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 from models.gan.tools.image_pool import ImagePool
-from models.gan.modules.subnet_selector import SubnetSelector
+from models.gan.modules.subnet_selector import SubNetSelector
 from models.gan.loss.gan_modules import GANLoss
 
 
@@ -11,8 +11,11 @@ class Pix2Pix(nn.Module):
         super(Pix2Pix, self).__init__()
         self.configer = configer
         # load/define networks
-        self.netG = SubnetSelector.generator(net_dict=self.configer.get('network', 'generator'))
-        self.netD = SubnetSelector.discriminator(net_dict=self.configer.get('network', 'discriminator'))
+        self.netG = SubNetSelector.generator(net_dict=self.configer.get('network', 'generator'),
+                                             use_dropout=self.configer.get('network', 'use_dropout'),
+                                             norm_type=self.configer.get('network', 'norm_type'))
+        self.netD = SubNetSelector.discriminator(net_dict=self.configer.get('network', 'discriminator'),
+                                                 norm_type=self.configer.get('network', 'norm_type'))
 
         self.fake_AB_pool = ImagePool(self.configer.get('network', 'imgpool_size'))
         # define loss functions

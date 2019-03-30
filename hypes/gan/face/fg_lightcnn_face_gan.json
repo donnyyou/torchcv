@@ -58,17 +58,39 @@
     },
     "network": {
       "generatorA": {
-
+        "net_type": "resnet_9blocks",
+        "init_type": "normal",
+        "init_gain": 0.02,
+        "in_c": 3,
+        "out_c": 3,
+        "num_f": 64
       },
       "generatorB": {
-
+        "net_type": "resnet_9blocks",
+        "init_type": "normal",
+        "init_gain": 0.02,
+        "in_c": 3,
+        "out_c": 3,
+        "num_f": 64
       },
       "discriminatorA": {
-
+        "net_type": "n_layers",
+        "init_type": "normal",
+        "init_gain": 0.02,
+        "n_layers": 3,
+        "num_f": 64,
+        "in_c": 3
       },
       "discriminatorB": {
-
+        "net_type": "n_layers",
+        "init_type": "normal",
+        "init_gain": 0.02,
+        "n_layers": 3,
+        "num_f": 64,
+        "in_c": 3
       },
+      "use_dropout": false,
+      "norm_type": "instancenorm",
       "model_name": "face_gan",
       "checkpoints_name": "fg_lightcnn_face_gan",
       "checkpoints_dir": "checkpoints/gan/face",

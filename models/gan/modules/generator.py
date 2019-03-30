@@ -5,7 +5,7 @@ import torch.nn as nn
 from models.tools.module_helper import ModuleHelper
 
 
-class ResnetGenerator(nn.Module):
+class ResNetGenerator(nn.Module):
     """Resnet-based generator that consists of Resnet blocks between a few downsampling/upsampling operations.
     We adapt Torch code and idea from Justin Johnson's neural style transfer project(https://github.com/jcjohnson/fast-neural-style)
     """
@@ -22,7 +22,7 @@ class ResnetGenerator(nn.Module):
             padding_type (str)  -- the name of padding layer in conv layers: reflect | replicate | zero
         """
         assert(n_blocks >= 0)
-        super(ResnetGenerator, self).__init__()
+        super(ResNetGenerator, self).__init__()
         use_bias = (norm_type == 'instancenorm')
 
         model = [nn.ReflectionPad2d(3),
@@ -120,7 +120,7 @@ class ResnetBlock(nn.Module):
         return out
 
 
-class UnetGenerator(nn.Module):
+class UNetGenerator(nn.Module):
     """Create a Unet-based generator"""
 
     def __init__(self, input_nc, output_nc, num_downs, ngf=64, norm_type=None, use_dropout=False):
@@ -135,7 +135,7 @@ class UnetGenerator(nn.Module):
         We construct the U-Net from the innermost layer to the outermost layer.
         It is a recursive process.
         """
-        super(UnetGenerator, self).__init__()
+        super(UNetGenerator, self).__init__()
         # construct unet structure
         unet_block = UnetSkipConnectionBlock(ngf * 8, ngf * 8, input_nc=None, submodule=None, norm_type=norm_type, innermost=True)  # add the innermost layer
         for i in range(num_downs - 5):          # add intermediate layers with ngf * 8 filters

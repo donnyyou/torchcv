@@ -1,7 +1,7 @@
 import torch.nn as nn
 
 from models.gan.tools.image_pool import ImagePool
-from models.gan.modules.subnet_selector import SubnetSelector
+from models.gan.modules.subnet_selector import SubNetSelector
 from models.gan.loss.gan_modules import GANLoss
 
 
@@ -13,11 +13,17 @@ class CycleGAN(nn.Module):
         # The naming conversion is different from those used in the paper
         # Code (paper): G_A (G), G_B (F), D_A (D_Y), D_B (D_X)
         self.configer = configer
-        self.netG_A = SubnetSelector.generator(net_dict=self.configer.get('network', 'generatorA'))
-        self.netG_B = SubnetSelector.generator(net_dict=self.configer.get('network', 'generatorB'))
+        self.netG_A = SubNetSelector.generator(net_dict=self.configer.get('network', 'generatorA'),
+                                               use_dropout=self.configer.get('network', 'use_dropout'),
+                                               norm_type=self.configer.get('network', 'norm_type'))
+        self.netG_B = SubNetSelector.generator(net_dict=self.configer.get('network', 'generatorB'),
+                                               use_dropout=self.configer.get('network', 'use_dropout'),
+                                               norm_type=self.configer.get('network', 'norm_type'))
 
-        self.netD_A = SubnetSelector.discriminator(net_dict=self.configer.get('network', 'discriminatorA'))
-        self.netD_B = SubnetSelector.discriminator(net_dict=self.configer.get('network', 'discriminatorB'))
+        self.netD_A = SubNetSelector.discriminator(net_dict=self.configer.get('network', 'discriminatorA'),
+                                                   norm_type=self.configer.get('network', 'norm_type'))
+        self.netD_B = SubNetSelector.discriminator(net_dict=self.configer.get('network', 'discriminatorB'),
+                                                   norm_type=self.configer.get('network', 'norm_type'))
 
         self.fake_A_pool = ImagePool(self.configer.get('network', 'imgpool_size'))
         self.fake_B_pool = ImagePool(self.configer.get('network', 'imgpool_size'))
