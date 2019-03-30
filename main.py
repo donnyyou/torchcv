@@ -182,6 +182,8 @@ if __name__ == "__main__":
         runner = method_selector.select_det_method()
     elif configer.get('task') == 'cls':
         runner = method_selector.select_cls_method()
+    elif configer.get('task') == 'gan':
+        runner = method_selector.select_gan_method()
     else:
         Log.error('Task: {} is not valid.'.format(configer.get('task')))
         exit(1)
