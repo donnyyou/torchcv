@@ -1,7 +1,7 @@
 {
     "dataset": "face",
     "task": "gan",
-    "method": "face_gan",
+    "method": "image_translator",
     "data": {
       "data_dir": "~/DataSet/CASIA_NIR2VIS",
       "image_tool": "cv2",
