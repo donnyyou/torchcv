@@ -127,6 +127,8 @@ if __name__ == "__main__":
                         dest='test:img_path', help='The test path of image.')
     parser.add_argument('--test_dir', default=None, type=str,
                         dest='test:data_dir', help='The test directory of images.')
+    parser.add_argument('--root_dir', default=None, type=str,
+                        dest='test:root_dir', help='The root directory of images.')
     parser.add_argument('--out_dir', default='none', type=str,
                         dest='test:out_dir', help='The test out directory of images.')
 

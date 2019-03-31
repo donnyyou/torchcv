@@ -33,11 +33,17 @@ class ImageTranslatorTest(object):
         self.gan_net.eval()
 
     def test(self, test_dir, out_dir):
-        imgA_dir = os.path.join(test_dir, 'imageA')
-        imgB_dir = os.path.join(test_dir, 'imageB')
-        if os.path.exists(imgA_dir):
-            Log.info('ImageA Dir: {}'.format(imgA_dir))
-            for data_dict in self.test_loader.get_testloader(test_dir=imgA_dir):
+        if self.configer.get('test', 'mode') == 'nir2vis':
+            test_loader_A = None
+            test_loader_B = None
+        else:
+            imgA_dir = os.path.join(test_dir, 'imageA')
+            test_loader_A = self.test_loader.get_testloader(test_dir=imgA_dir) if os.path.exists(imgA_dir) else None
+            imgB_dir = os.path.join(test_dir, 'imageB')
+            test_loader_B = self.test_loader.get_testloader(test_dir=imgB_dir) if os.path.exists(imgB_dir) else None
+
+        if test_loader_A is not None:
+            for data_dict in test_loader_A:
                 new_data_dict = dict(imgA=data_dict['img'])
                 with torch.no_grad():
                     out_dict = self.gan_net(new_data_dict, testing=True)
@@ -51,9 +57,8 @@ class ImageTranslatorTest(object):
                         filename = img_path.rstrip().split('/')[-1]
                         ImageHelper.save(img_bgr, os.path.join(out_dir, key, filename))
 
-        if os.path.exists(imgB_dir):
-            Log.info('ImageB Dir: {}'.format(imgB_dir))
-            for data_dict in self.test_loader.get_testloader(test_dir=imgB_dir):
+        if test_loader_B is not None:
+            for data_dict in test_loader_B:
                 new_data_dict = dict(imgB=data_dict['img'])
                 with torch.no_grad():
                     out_dict = self.gan_net(new_data_dict, testing=True)

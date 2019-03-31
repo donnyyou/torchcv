@@ -15,7 +15,7 @@
       }
     },
     "train": {
-      "loader": "cyclegan",
+      "loader": "facegan",
       "batch_size": 1,
       "aug_trans": {
         "trans_seq": ["random_hflip", "random_crop"],
@@ -37,7 +37,7 @@
       }
     },
     "val": {
-      "loader": "cyclegan",
+      "loader": "facegan",
       "batch_size": 1,
       "aug_trans": {
         "trans_seq": ["random_crop"],
