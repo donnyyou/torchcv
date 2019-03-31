@@ -19,6 +19,8 @@ from methods.seg.fcn_segmentor import FCNSegmentor
 from methods.seg.fcn_segmentor_test import FCNSegmentorTest
 from methods.gan.image_translator import ImageTranslator
 from methods.gan.image_translator_test import ImageTranslatorTest
+from methods.gan.face_gan import FaceGAN
+from methods.gan.face_gan_test import FaceGANTest
 from utils.tools.logger import Logger as Log
 
 
@@ -58,9 +60,11 @@ CLS_TEST_DICT = {
 
 GAN_METHOD_DICT = {
     'image_translator': ImageTranslator,
+    'face_gan': FaceGAN
 }
 GAN_TEST_DICT = {
     'image_translator': ImageTranslatorTest,
+    'face_gan': FaceGANTest
 }
 
 
