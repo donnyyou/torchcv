@@ -38,6 +38,10 @@ This repository provides source code for most deep learning based cv problems. W
 - [Instance Segmentation](https://github.com/youansheng/torchcv/tree/master/methods/seg)
     - Mask R-CNN
 
+- [Generative Adversarial Networks](https://github.com/youansheng/torchcv/tree/master/methods/gan)
+    - Pix2pix: Image-to-Image Translation with Conditional Adversarial Nets
+    - CycleGAN: Unpaired Image-to-Image Translation using Cycle-Consistent Adversarial Networks.
+
 
 ## QuickStart with TorchCV
 Now only support Python3.x, pytorch 1.0.
@@ -85,6 +89,10 @@ All the performances showed below fully reimplemented the papers' results.
 
 #### Instance Segmentation
 - Mask R-CNN
+
+#### Generative Adversarial Networks
+- Pix2pix
+- CycleGAN
 
 
 ## DataSets with TorchCV
