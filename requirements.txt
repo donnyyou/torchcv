@@ -1,3 +1,4 @@
+sklearn
 cython
 numpy
 cffi
