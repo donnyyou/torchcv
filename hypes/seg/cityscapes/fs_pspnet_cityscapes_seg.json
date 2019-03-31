@@ -60,9 +60,23 @@
       }
     },
     "test": {
-      "input_size": [2048, 1024],
-      "scale_search": [1.0],
-      "mode": "ss_test"
+      "aug_trans": {
+        "trans_seq": []
+      },
+      "batch_size": 8,
+      "data_transformer": {
+        "size_mode": "none",
+        "samples_per_gpu": 1
+      },
+      "mscrop_test":{
+        "scale_search": [0.75, 1.0, 1.25],
+        "crop_stride_ratio": 0.667,
+        "crop_size": [864, 864]
+      },
+      "ms_test":{
+        "scale_search": [0.75, 1.0, 1.25]
+      },
+      "mode": "mscrop_test"
     },
     "details": {
       "color_list": [[128, 64, 128], [244, 35, 232], [70, 70, 70], [102, 102, 156], [190, 153, 153],
