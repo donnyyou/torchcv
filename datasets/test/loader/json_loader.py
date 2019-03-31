@@ -8,20 +8,19 @@ import os
 import torch.utils.data as data
 
 from extensions.tools.parallel import DataContainer
-from utils.helpers.file_helper import FileHelper
+from utils.helpers.json_helper import JsonHelper
 from utils.helpers.image_helper import ImageHelper
 from utils.tools.logger import Logger as Log
 
 
-class DefaultLoader(data.Dataset):
+class JsonLoader(data.Dataset):
 
-    def __init__(self, test_dir=None, aug_transform=None, img_transform=None, configer=None):
-        super(DefaultLoader, self).__init__()
+    def __init__(self, root_dir=None, json_path=None, aug_transform=None, img_transform=None, configer=None):
+        super(JsonLoader, self).__init__()
         self.configer = configer
         self.aug_transform=aug_transform
         self.img_transform = img_transform
-        self.img_list = [os.path.join(test_dir, filename)
-                         for filename in FileHelper.list_dir(test_dir) if ImageHelper.is_img(filename)]
+        self.img_list = self.__read_json(root_dir, json_path)
 
     def __getitem__(self, index):
         img = ImageHelper.read_image(self.img_list[index],
@@ -50,16 +49,15 @@ class DefaultLoader(data.Dataset):
 
         return len(self.img_list)
 
-    def __read_list(self, list_path):
+    def __read_json(self, root_dir, json_path):
         img_list = []
-        with open(list_path, 'r') as f:
-            for line in f.readlines()[0:]:
-                img_path = line.strip().split()[0]
-                if not os.path.exists(img_path):
-                    Log.error('Image Path: {} is Invalid.'.format(img_path))
-                    exit(1)
+        for item in JsonHelper.load_file(json_path):
+            img_path = os.path.join(root_dir, item['image_path'])
+            if not os.path.exists(img_path) or not ImageHelper.is_img(img_path):
+                Log.error('Image Path: {} is Invalid.'.format(img_path))
+                exit(1)
 
-                img_list.append(img_path)
+            img_list.append(img_path)
 
         Log.info('There are {} images..'.format(len(img_list)))
         return img_list
