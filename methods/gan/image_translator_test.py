@@ -33,19 +33,20 @@ class ImageTranslatorTest(object):
         self.gan_net.eval()
 
     def test(self, test_dir, out_dir):
-        imgA_dir = os.path.join(test_dir, 'imgA')
-        imgB_dir = os.path.join(test_dir, 'imgB')
-
+        imgA_dir = os.path.join(test_dir, 'imageA')
+        imgB_dir = os.path.join(test_dir, 'imageB')
         if os.path.exists(imgA_dir):
             Log.info('ImageA Dir: {}'.format(imgA_dir))
             for data_dict in self.test_loader.get_testloader(test_dir=imgA_dir):
                 new_data_dict = dict(imgA=data_dict['img'])
-                out_dict = self.gan_net(new_data_dict)
+                with torch.no_grad():
+                    out_dict = self.gan_net(new_data_dict, testing=True)
+
                 meta_list = DCHelper.tolist(data_dict['meta'])
-                for key, value in out_dict.item():
+                for key, value in out_dict.items():
                     for i in range(len(value)):
                         img_bgr = self.blob_helper.tensor2bgr(value[i])
-                        img_path = meta_list['img_path']
+                        img_path = meta_list[i]['img_path']
                         Log.info('Image Path: {}'.format(img_path))
                         filename = img_path.rstrip().split('/')[-1]
                         ImageHelper.save(img_bgr, os.path.join(out_dir, key, filename))
@@ -54,12 +55,13 @@ class ImageTranslatorTest(object):
             Log.info('ImageB Dir: {}'.format(imgB_dir))
             for data_dict in self.test_loader.get_testloader(test_dir=imgB_dir):
                 new_data_dict = dict(imgB=data_dict['img'])
-                out_dict = self.gan_net(new_data_dict)
+                with torch.no_grad():
+                    out_dict = self.gan_net(new_data_dict, testing=True)
                 meta_list = DCHelper.tolist(data_dict['meta'])
-                for key, value in out_dict.item():
+                for key, value in out_dict.items():
                     for i in range(len(value)):
                         img_bgr = self.blob_helper.tensor2bgr(value[i])
-                        img_path = meta_list['img_path']
+                        img_path = meta_list[i]['img_path']
                         Log.info('Image Path: {}'.format(img_path))
                         filename = img_path.rstrip().split('/')[-1]
                         ImageHelper.save(img_bgr, os.path.join(out_dir, key, filename))

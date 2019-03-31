@@ -16,13 +16,13 @@ from utils.tools.logger import Logger as Log
 
 class FaceGANLoader(data.Dataset):
 
-    def __init__(self, root_dir=None, dataset=None,
+    def __init__(self, root_dir=None, dataset=None, tag=None,
                  aug_transform=None, img_transform=None, configer=None):
         super(FaceGANLoader, self).__init__()
         self.configer = configer
         self.aug_transform = aug_transform
         self.img_transform = img_transform
-        self.imgA_list, self.labelA_list, self.imgB_list, self.labelB_list = self.__read_json_file(root_dir, dataset)
+        self.imgA_list, self.labelA_list, self.imgB_list, self.labelB_list = self.__read_json_file(root_dir, dataset, tag)
 
     def __getitem__(self, index):
         imgA = ImageHelper.read_image(self.imgA_list[index],
@@ -53,16 +53,16 @@ class FaceGANLoader(data.Dataset):
 
         return len(self.imgA_list)
 
-    def __read_json_file(self, root_dir, dataset):
+    def __read_json_file(self, root_dir, dataset, tag):
         imgA_list = list()
         imgB_list = list()
         labelA_list = list()
         labelB_list = list()
 
-        with open(os.path.join(root_dir, dataset, 'labelA.json'), 'r') as file_stream:
+        with open(os.path.join(root_dir, 'protocols/{}_label{}A.json'.format(dataset, tag)), 'r') as file_stream:
             items = json.load(file_stream)
             for item in items:
-                img_path = os.path.join(root_dir, dataset, item['image_path'])
+                img_path = os.path.join(root_dir, item['image_path'])
                 if not os.path.exists(img_path):
                     Log.warn('Image Path: {} not exists.'.format(img_path))
                     continue
@@ -70,10 +70,10 @@ class FaceGANLoader(data.Dataset):
                 imgA_list.append(img_path)
                 labelA_list.append(item['label'])
 
-        with open(os.path.join(root_dir, dataset, 'labelB.json'), 'r') as file_stream:
+        with open(os.path.join(root_dir, 'protocols/{}_label{}B.json'.format(dataset, tag)), 'r') as file_stream:
             items = json.load(file_stream)
             for item in items:
-                img_path = os.path.join(root_dir, dataset, item['image_path'])
+                img_path = os.path.join(root_dir, item['image_path'])
                 if not os.path.exists(img_path):
                     Log.warn('Image Path: {} not exists.'.format(img_path))
                     continue
@@ -82,10 +82,10 @@ class FaceGANLoader(data.Dataset):
                 labelB_list.append(item['label'])
 
         if dataset == 'train' and self.configer.get('data', 'include_val'):
-            with open(os.path.join(root_dir, 'val', 'labelA.json'), 'r') as file_stream:
+            with open(os.path.join(root_dir, 'protocols/val_label{}A.json'.format(tag)), 'r') as file_stream:
                 items = json.load(file_stream)
                 for item in items:
-                    img_path = os.path.join(root_dir, 'val', item['image_path'])
+                    img_path = os.path.join(root_dir, item['image_path'])
                     if not os.path.exists(img_path):
                         Log.warn('Image Path: {} not exists.'.format(img_path))
                         continue
@@ -93,10 +93,10 @@ class FaceGANLoader(data.Dataset):
                     imgA_list.append(img_path)
                     labelA_list.append(item['label'])
 
-            with open(os.path.join(root_dir, 'val', 'labelB.json'), 'r') as file_stream:
+            with open(os.path.join(root_dir, 'protocols/val_label{}B.json'.format(tag)), 'r') as file_stream:
                 items = json.load(file_stream)
                 for item in items:
-                    img_path = os.path.join(root_dir, 'val', item['image_path'])
+                    img_path = os.path.join(root_dir, item['image_path'])
                     if not os.path.exists(img_path):
                         Log.warn('Image Path: {} not exists.'.format(img_path))
                         continue
@@ -105,31 +105,3 @@ class FaceGANLoader(data.Dataset):
                     labelB_list.append(item['label'])
 
         return imgA_list, labelA_list, imgB_list, labelB_list
-
-    def __list_dirs(self, root_dir, dataset):
-        imgA_list = list()
-        imgB_list = list()
-        imageA_dir = os.path.join(root_dir, dataset, 'imageA')
-        imageB_dir = os.path.join(root_dir, dataset, 'imageB')
-
-        for file_name in os.listdir(imageA_dir):
-            imgA_path = os.path.join(imageA_dir, file_name)
-            imgA_list.append(imgA_path)
-
-        for file_name in os.listdir(imageB_dir):
-            imgB_path = os.path.join(imageB_dir, file_name)
-            imgB_list.append(imgB_path)
-
-        if dataset == 'train' and self.configer.get('data', 'include_val'):
-            imageA_dir = os.path.join(root_dir, 'val/imageA')
-            imageB_dir = os.path.join(root_dir, 'val/imageB')
-
-            for file_name in os.listdir(imageA_dir):
-                imgA_path = os.path.join(imageA_dir, file_name)
-                imgA_list.append(imgA_path)
-
-            for file_name in os.listdir(imageB_dir):
-                imgB_path = os.path.join(imageB_dir, file_name)
-                imgB_list.append(imgB_path)
-
-        return imgA_list, imgB_list

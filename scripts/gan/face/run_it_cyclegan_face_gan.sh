@@ -25,14 +25,14 @@ fi
 
 
 if [[ "$1"x == "train"x ]]; then
-  ${PYTHON} -u main.py --hypes ${HYPES_FILE} --drop_last y --phase train \
-                       --model_name ${MODEL_NAME} --gpu 0 1 2 3 --log_to_file n \
+  ${PYTHON} -u main.py --hypes ${HYPES_FILE} --phase train --gpu 0 1 2 3 \
+                       --model_name ${MODEL_NAME} --log_to_file n \
                        --data_dir ${DATA_DIR} --max_epoch ${MAX_EPOCH} \
                        --checkpoints_name ${CHECKPOINTS_NAME}  2>&1 | tee ${LOG_FILE}
 
 elif [[ "$1"x == "resume"x ]]; then
-  ${PYTHON} -u main.py --hypes ${HYPES_FILE} --drop_last y --phase train \
-                       --model_name ${MODEL_NAME} --gpu 0 1 2 3 --log_to_file n\
+  ${PYTHON} -u main.py --hypes ${HYPES_FILE} --phase train --gpu 0 1 2 3 \
+                       --model_name ${MODEL_NAME} --log_to_file n\
                        --data_dir ${DATA_DIR} --max_iters ${MAX_EPOCH} \
                        --resume_continue y --resume ./checkpoints/seg/cityscapes/${CHECKPOINTS_NAME}_latest.pth \
                        --checkpoints_name ${CHECKPOINTS_NAME}  2>&1 | tee -a ${LOG_FILE}
@@ -40,7 +40,7 @@ elif [[ "$1"x == "resume"x ]]; then
 elif [[ "$1"x == "test"x ]]; then
   ${PYTHON} -u main.py --hypes ${HYPES_FILE} --phase test --gpu 0 1 2 3 \
                        --model_name ${MODEL_NAME} --checkpoints_name ${CHECKPOINTS_NAME} \
-                       --resume ./checkpoints/seg/cityscapes/${CHECKPOINTS_NAME}_latest.pth \
+                       --resume ./checkpoints/gan/face/${CHECKPOINTS_NAME}_latest.pth \
                        --test_dir ${DATA_DIR}/test --out_dir test  2>&1 | tee -a ${LOG_FILE}
 
 else

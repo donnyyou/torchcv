@@ -3,7 +3,7 @@
     "task": "gan",
     "method": "image_translator",
     "data": {
-      "data_dir": "~/DataSet/CASIA_NIR2VIS",
+      "data_dir": "~/DataSet/Sketch2VIS",
       "image_tool": "cv2",
       "input_mode": "BGR",
       "workers": 8,
@@ -66,8 +66,7 @@
         }
       },
       "data_transformer": {
-        "size_mode": "none",
-        "samples_per_gpu": 1
+        "size_mode": "none"
       }
     },
     "network": {

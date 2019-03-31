@@ -79,7 +79,8 @@ class DataLoader(object):
 
         elif self.configer.get('train', 'loader') == 'facegan':
             trainloader = data.DataLoader(
-                FaceGANLoader(root_dir=self.configer.get('data', 'data_dir'), dataset='train',
+                FaceGANLoader(root_dir=self.configer.get('data', 'data_dir'),
+                              dataset='train', tag=self.configer.get('data', 'tag'),
                               aug_transform=self.aug_train_transform,
                               img_transform=self.img_transform,
                               configer=self.configer),
@@ -131,7 +132,8 @@ class DataLoader(object):
 
         elif self.configer.get('val', 'loader') == 'facegan':
             valloader = data.DataLoader(
-                FaceGANLoader(root_dir=self.configer.get('data', 'data_dir'), dataset=dataset,
+                FaceGANLoader(root_dir=self.configer.get('data', 'data_dir'),
+                              dataset=dataset, tag=self.configer.get('data', 'tag'),
                               aug_transform=self.aug_val_transform,
                               img_transform=self.img_transform,
                               configer=self.configer),
