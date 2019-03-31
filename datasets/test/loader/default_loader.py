@@ -15,9 +15,10 @@ from utils.tools.logger import Logger as Log
 
 class DefaultLoader(data.Dataset):
 
-    def __init__(self, test_dir=None, list_path=None, img_transform=None, configer=None):
+    def __init__(self, test_dir=None, list_path=None, aug_transform=None, img_transform=None, configer=None):
         super(DefaultLoader, self).__init__()
         self.configer = configer
+        self.aug_transform=aug_transform
         self.img_transform = img_transform
         if test_dir is not None:
             self.img_list = [os.path.join(test_dir, filename)
@@ -26,62 +27,20 @@ class DefaultLoader(data.Dataset):
             self.img_list = self.__read_list(list_path)
 
     def __getitem__(self, index):
-        image = ImageHelper.read_image(self.img_list[index],
-                                       tool=self.configer.get('data', 'image_tool'),
-                                       mode=self.configer.get('data', 'input_mode'))
+        img = ImageHelper.read_image(self.img_list[index],
+                                     tool=self.configer.get('data', 'image_tool'),
+                                     mode=self.configer.get('data', 'input_mode'))
 
-        img_size = ImageHelper.get_size(image)
-        if self.configer.exists('test', 'input_size'):
-            input_size = self.configer.get('test', 'input_size')
-            if input_size[0] == -1 and input_size[1] == -1:
-                in_width, in_height = ImageHelper.get_size(image)
+        ori_img_size = ImageHelper.get_size(img)
+        if self.aug_transform is not None:
+            img = self.aug_transform(img)
 
-            elif input_size[0] != -1 and input_size[1] != -1:
-                in_width, in_height = input_size
-
-            elif input_size[0] == -1 and input_size[1] != -1:
-                width, height = ImageHelper.get_size(image)
-                scale_ratio = input_size[1] / height
-                w_scale_ratio, h_scale_ratio = scale_ratio, scale_ratio
-                in_width, in_height = int(round(width * w_scale_ratio)), int(round(height * h_scale_ratio))
-
-            else:
-                assert input_size[0] != -1 and input_size[1] == -1
-                width, height = ImageHelper.get_size(image)
-                scale_ratio = input_size[0] / width
-                w_scale_ratio, h_scale_ratio = scale_ratio, scale_ratio
-                in_width, in_height = int(round(width * w_scale_ratio)), int(round(height * h_scale_ratio))
-
-        elif self.configer.exists('test', 'min_side_length') and not self.configer.exists('test', 'max_side_length'):
-            width, height = ImageHelper.get_size(image)
-            scale_ratio = self.configer.get('test', 'min_side_length') / min(width, height)
-            w_scale_ratio, h_scale_ratio = scale_ratio, scale_ratio
-            in_width, in_height = int(round(width * w_scale_ratio)), int(round(height * h_scale_ratio))
-
-        elif not self.configer.exists('test', 'min_side_length') and self.configer.exists('test', 'max_side_length'):
-            width, height = ImageHelper.get_size(image)
-            scale_ratio = self.configer.get('test', 'max_side_length') / max(width, height)
-            w_scale_ratio, h_scale_ratio = scale_ratio, scale_ratio
-            in_width, in_height = int(round(width * w_scale_ratio)), int(round(height * h_scale_ratio))
-
-        elif self.configer.exists('test', 'min_side_length') and self.configer.exists('test', 'max_side_length'):
-            width, height = ImageHelper.get_size(image)
-            scale_ratio = self.configer.get('test', 'min_side_length') / min(width, height)
-            bound_scale_ratio = self.configer.get('test', 'max_side_length') / max(width, height)
-            scale_ratio = min(scale_ratio, bound_scale_ratio)
-            w_scale_ratio, h_scale_ratio = scale_ratio, scale_ratio
-            in_width, in_height = int(round(width * w_scale_ratio)), int(round(height * h_scale_ratio))
-
-        else:
-            in_width, in_height = ImageHelper.get_size(image)
-
-        img = ImageHelper.resize(image, (int(in_width), int(in_height)), interpolation='linear')
         if self.img_transform is not None:
             img = self.img_transform(img)
 
         meta = dict(
-            ori_img_size=img_size,
-            border_hw=[in_height, in_width],
+            ori_img_size=ori_img_size,
+            border_hw=ImageHelper.get_size(img)[::-1],
             img_path=self.img_list[index]
         )
         return dict(
