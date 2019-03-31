@@ -55,6 +55,8 @@
       }
     },
     "test": {
+      "test_mode": "nir2vis",
+      "loader": "json",
       "batch_size": 8,
       "aug_trans": {
         "trans_seq": ["random_crop"],

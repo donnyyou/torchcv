@@ -33,9 +33,13 @@ class ImageTranslatorTest(object):
         self.gan_net.eval()
 
     def test(self, test_dir, out_dir):
-        if self.configer.get('test', 'mode') == 'nir2vis':
-            test_loader_A = None
-            test_loader_B = None
+        if self.configer.exists('test', 'mode') and self.configer.get('test', 'mode') == 'nir2vis':
+            jsonA_path = os.path.join(self.configer.get('test', 'test_dir'),
+                                      'protocols/val_label{}A.json'.format(self.configer.get('tag')))
+            test_loader_A = self.test_loader.get_testloader(json_path=jsonA_path) if os.path.exists(jsonA_path) else None
+            jsonB_path = os.path.join(self.configer.get('test', 'test_dir'),
+                                      'protocols/val_label{}B.json'.format(self.configer.get('tag')))
+            test_loader_B = self.test_loader.get_testloader(json_path=jsonB_path) if os.path.exists(jsonB_path) else None
         else:
             imgA_dir = os.path.join(test_dir, 'imageA')
             test_loader_A = self.test_loader.get_testloader(test_dir=imgA_dir) if os.path.exists(imgA_dir) else None
