@@ -20,10 +20,10 @@ class JsonLoader(data.Dataset):
         self.configer = configer
         self.aug_transform=aug_transform
         self.img_transform = img_transform
-        self.img_list = self.__read_json(root_dir, json_path)
+        self.item_list = self.__read_json(root_dir, json_path)
 
     def __getitem__(self, index):
-        img = ImageHelper.read_image(self.img_list[index],
+        img = ImageHelper.read_image(self.item_list[index][0],
                                      tool=self.configer.get('data', 'image_tool'),
                                      mode=self.configer.get('data', 'input_mode'))
 
@@ -38,7 +38,8 @@ class JsonLoader(data.Dataset):
         meta = dict(
             ori_img_size=ori_img_size,
             border_hw=border_hw,
-            img_path=self.img_list[index]
+            img_path=self.item_list[index][0],
+            filename=self.item_list[index][1]
         )
         return dict(
             img=DataContainer(img, stack=True, return_dc=True, samples_per_gpu=True),
@@ -47,17 +48,17 @@ class JsonLoader(data.Dataset):
 
     def __len__(self):
 
-        return len(self.img_list)
+        return len(self.item_list)
 
     def __read_json(self, root_dir, json_path):
-        img_list = []
+        item_list = []
         for item in JsonHelper.load_file(json_path):
             img_path = os.path.join(root_dir, item['image_path'])
             if not os.path.exists(img_path) or not ImageHelper.is_img(img_path):
                 Log.error('Image Path: {} is Invalid.'.format(img_path))
                 exit(1)
 
-            img_list.append(img_path)
+            item_list.append((img_path, item['image_path']))
 
-        Log.info('There are {} images..'.format(len(img_list)))
-        return img_list
+        Log.info('There are {} images..'.format(len(item_list)))
+        return item_list

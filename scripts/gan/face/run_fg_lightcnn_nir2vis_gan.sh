@@ -15,7 +15,7 @@ MODEL_NAME="facegan"
 CHECKPOINTS_NAME="fg_lightcnn_face_gan"$2
 PRETRAINED_MODEL="./pretrained_models/3x3resnet101-imagenet.pth"
 
-HYPES_FILE='hypes/gan/face/fg_lightcnn_face_gan.json'
+HYPES_FILE='hypes/gan/face/fg_lightcnn_nir2vis_gan.json'
 MAX_ITERS=40000
 LOSS_TYPE="fs_auxce_loss"
 
@@ -44,7 +44,7 @@ elif [[ "$1"x == "resume"x ]]; then
 elif [[ "$1"x == "test"x ]]; then
   ${PYTHON} -u main.py --hypes ${HYPES_FILE} --phase test --gpu 0 1 2 3 --log_to_file n --gathered n \
                        --backbone ${BACKBONE} --model_name ${MODEL_NAME} --checkpoints_name ${CHECKPOINTS_NAME} \
-                       --resume ./checkpoints/seg/cityscapes/${CHECKPOINTS_NAME}_latest.pth \
+                       --resume ./checkpoints/gan/face/${CHECKPOINTS_NAME}_latest.pth \
                        --test_dir ${DATA_DIR}/test --out_dir test >> ${LOG_FILE}  2>&1 | tee -a ${LOG_FILE}
 
 else

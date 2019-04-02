@@ -39,7 +39,7 @@ class RandomPad(object):
         if random.random() > self.ratio:
             return img, labelmap, maskmap, kpts, bboxes, labels, polygons
 
-        width, height = img.size
+        width, height = img.size if isinstance(img, Image.Image) else img[0].size
         ws = random.uniform(self.up_scale_range[0], self.up_scale_range[1])
         hs = ws
         for _ in range(50):
@@ -114,7 +114,8 @@ class Padding(object):
         if random.random() > self.ratio:
             return img, labelmap, maskmap, kpts, bboxes, labels, polygons
 
-        width, height = img.size
+        # width, height = img.size
+        width, height = img.size if isinstance(img, Image.Image) else img[0].size
         left_pad, up_pad, right_pad, down_pad = self.pad
         target_size = [width + left_pad + right_pad, height + up_pad + down_pad]
         offset_left = -left_pad
@@ -187,7 +188,8 @@ class RandomHFlip(object):
         if random.random() > self.ratio:
             return img, labelmap, maskmap, kpts, bboxes, labels, polygons
 
-        width, height = img.size
+        # width, height = img.size
+        width, height = img.size if isinstance(img, Image.Image) else img[0].size
         if not isinstance(img, list):
             img = img.transpose(Image.FLIP_LEFT_RIGHT)
         else:
@@ -466,6 +468,7 @@ class RandomResizedCrop(object):
         Returns:
             PIL Image: Randomly cropped and resized image.
         """
+        assert isinstance(img, Image.Image)
         assert labelmap is None and maskmap is None and kpts is None and bboxes is None and labels is None
         i, j, h, w = self.get_params(img, self.scale, self.ratio)
         img = img.crop((j, i, j + w, i + h))
@@ -544,7 +547,8 @@ class RandomResize(object):
         assert labelmap is None or isinstance(labelmap, Image.Image)
         assert maskmap is None or isinstance(maskmap, Image.Image)
 
-        width, height = img.size
+        # width, height = img.size
+        width, height = img.size if isinstance(img, Image.Image) else img[0].size
         if random.random() < self.ratio:
             scale_ratio = self.get_scale([width, height], bboxes)
             aspect_ratio = random.uniform(*self.aspect_range)
@@ -615,8 +619,9 @@ class RandomRotate(object):
         else:
             return img, labelmap, maskmap, kpts, bboxes, labels, polygons
 
-        img = np.array(img)
-        height, width, _ = img.shape
+        # img = np.array(img)
+        # height, width, _ = img.shape
+        width, height = img.size if isinstance(img, Image.Image) else img[0].size
 
         img_center = (width / 2.0, height / 2.0)
 
@@ -628,12 +633,14 @@ class RandomRotate(object):
         rotate_mat[0, 2] += (new_width / 2.) - img_center[0]
         rotate_mat[1, 2] += (new_height / 2.) - img_center[1]
         if not isinstance(img, list):
+            img = np.array(img)
             img = cv2.warpAffine(img, rotate_mat, (new_width, new_height), borderValue=self.mean)
             img = Image.fromarray(img.astype(np.uint8))
         else:
             for i in range(len(img)):
-                item = cv2.warpAffine(img[i], rotate_mat, (new_width, new_height), borderValue=self.mean)
-                img[i] = Image.fromarray(item.astype(np.uint8))
+                img_i = np.array(img[i])
+                img_i = cv2.warpAffine(img_i, rotate_mat, (new_width, new_height), borderValue=self.mean)
+                img[i] = Image.fromarray(img_i.astype(np.uint8))
         if labelmap is not None:
             labelmap = np.array(labelmap)
             labelmap = cv2.warpAffine(labelmap, rotate_mat, (new_width, new_height),
@@ -752,9 +759,9 @@ class RandomCrop(object):
         if random.random() > self.ratio:
             return img, labelmap, maskmap, kpts, bboxes, labels, polygons
 
-        target_size = (min(self.size[0], img.size[0]), min(self.size[1], img.size[1]))
-
-        offset_left, offset_up = self.get_lefttop(target_size, img.size)
+        width, height = img.size if isinstance(img, Image.Image) else img[0].size
+        target_size = [min(self.size[0], width), min(self.size[1], height)]
+        offset_left, offset_up = self.get_lefttop(target_size, [width, height])
 
         # img = ImageHelper.draw_box(img, bboxes[index])
         if kpts is not None and kpts.size > 0:
@@ -1007,6 +1014,7 @@ class RandomDetCrop(object):
         return inter / union  # [A,B]
 
     def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
+        assert isinstance(img, Image.Image)
         assert labelmap is None and maskmap is None and kpts is None and polygons is None
         assert bboxes is not None and labels is not None
 
@@ -1083,7 +1091,8 @@ class Resize(object):
         assert labelmap is None or isinstance(labelmap, Image.Image)
         assert maskmap is None or isinstance(maskmap, Image.Image)
 
-        width, height = img.size
+        # width, height = img.size
+        width, height = img.size if isinstance(img, Image.Image) else img[0].size
         if self.target_size is not None:
             target_size = self.target_size
             w_scale_ratio = self.target_size[0] / width

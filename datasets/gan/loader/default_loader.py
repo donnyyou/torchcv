@@ -32,8 +32,7 @@ class DefaultLoader(data.Dataset):
                                       mode=self.configer.get('data', 'input_mode'))
 
         if self.aug_transform is not None:
-            imgA = self.aug_transform(imgA)
-            imgB = self.aug_transform(imgB)
+            imgA, imgB = self.aug_transform([imgA, imgB])
 
         if self.img_transform is not None:
             imgA = self.img_transform(imgA)

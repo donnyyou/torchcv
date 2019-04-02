@@ -22,14 +22,17 @@ class Pix2Pix(nn.Module):
         self.criterionGAN = GANLoss(gan_mode=self.configer.get('loss', 'params')['gan_mode'])
         self.criterionL1 = nn.L1Loss()
 
-    def forward(self, data_dict):
+    def forward(self, data_dict, testing=False):
+        if testing:
+            return dict(fakeB=self.netG.forward(data_dict['imgA']))
+
         # First, G(A) should fake the discriminator
         fake_B = self.netG.forward(data_dict['imgA'])
         G_fake_AB = torch.cat((data_dict['imgA'], fake_B), 1)
         pred_fake = self.netD.forward(G_fake_AB)
         loss_G_GAN = self.criterionGAN(pred_fake, True)
         # Second, G(A) = B
-        loss_G_L1 = self.criterionL1(fake_B, data_dict['imgB']) * self.opt.lambda_A
+        loss_G_L1 = self.criterionL1(fake_B, data_dict['imgB']) * self.configer.get('loss', 'loss_weights')['l1_loss']
         loss_G = loss_G_GAN + loss_G_L1
 
         D_fake_AB = self.fake_AB_pool.query(torch.cat((data_dict['imgA'], fake_B), 1))
@@ -45,6 +48,3 @@ class Pix2Pix(nn.Module):
         loss_D = (loss_D_fake + loss_D_real) * 0.5
 
         return dict(loss=loss_G + loss_D)
-
-    def forward_test(self, data_dict):
-        return dict(fakeB=self.netG.forward(data_dict['imgA']))
