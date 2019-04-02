@@ -38,7 +38,8 @@ class RandomPad(object):
         if random.random() > self.ratio:
             return img, labelmap, maskmap, kpts, bboxes, labels, polygons
 
-        height, width, channels = img.shape
+        # height, width, channels = img.shape
+        height, width, channels = img.shape if isinstance(img, np.ndarray) else img[0].shape
         ws = random.uniform(self.up_scale_range[0], self.up_scale_range[1])
         hs = ws
         for _ in range(50):
@@ -116,7 +117,8 @@ class Padding(object):
         if random.random() > self.ratio:
             return img, labelmap, maskmap, kpts, bboxes, labels, polygons
 
-        height, width, channels = img.shape
+        # height, width, channels = img.shape
+        height, width, channels = img.shape if isinstance(img, np.ndarray) else img[0].shape
         left_pad, up_pad, right_pad, down_pad = self.pad
 
         target_size = [width + left_pad + right_pad, height + up_pad + down_pad]
@@ -216,7 +218,8 @@ class RandomHFlip(object):
         if random.random() > self.ratio:
             return img, labelmap, maskmap, kpts, bboxes, labels, polygons
 
-        height, width, _ = img.shape
+        # height, width, _ = img.shape
+        height, width, _ = img.shape if isinstance(img, np.ndarray) else img[0].shape
         if not isinstance(img, list):
             img = cv2.flip(img, 1)
         else:
@@ -505,7 +508,8 @@ class RandomResize(object):
         assert labelmap is None or isinstance(labelmap, np.ndarray)
         assert maskmap is None or isinstance(maskmap, np.ndarray)
 
-        height, width, _ = img.shape
+        # height, width, _ = img.shape
+        height, width, _ = img.shape if isinstance(img, np.ndarray) else img[0].shape
         if random.random() < self.ratio:
             scale_ratio = self.get_scale([width, height], bboxes)
             aspect_ratio = random.uniform(*self.aspect_range)
@@ -577,7 +581,8 @@ class RandomRotate(object):
         else:
             return img, labelmap, maskmap, kpts, bboxes, labels, polygons
 
-        height, width, _ = img.shape
+        # height, width, _ = img.shape
+        height, width, _ = img.shape if isinstance(img, np.ndarray) else img[0].shape
 
         img_center = (width / 2.0, height / 2.0)
 
@@ -707,7 +712,7 @@ class RandomCrop(object):
         if random.random() > self.ratio:
             return img, labelmap, maskmap, kpts, bboxes, labels, polygons
 
-        height, width, _ = img.shape
+        height, width, _ = img.shape if isinstance(img, np.ndarray) else img[0].shape
         target_size = [min(self.size[0], width), min(self.size[1], height)]
 
         offset_left, offset_up = self.get_lefttop(target_size, [width, height])
@@ -970,6 +975,7 @@ class RandomDetCrop(object):
         return inter / union  # [A,B]
 
     def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
+        assert isinstance(img, np.ndarray)
         assert labelmap is None and maskmap is None and kpts is None and polygons is None
         assert bboxes is not None and labels is not None
         if random.random() > self.ratio:
@@ -1051,7 +1057,8 @@ class Resize(object):
         assert labelmap is None or isinstance(labelmap, np.ndarray)
         assert maskmap is None or isinstance(maskmap, np.ndarray)
 
-        height, width, _ = img.shape
+        # height, width, _ = img.shape
+        height, width, _ = img.shape if isinstance(img, np.ndarray) else img[0].shape
         if self.target_size is not None:
             target_size = self.target_size
             w_scale_ratio = self.target_size[0] / width

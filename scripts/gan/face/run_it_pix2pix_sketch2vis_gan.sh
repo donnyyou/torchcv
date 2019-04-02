@@ -8,7 +8,7 @@ export PYTHONPATH="/home/donny/Projects/TorchCV":${PYTHONPATH}
 
 cd ../../../
 
-DATA_DIR="/home/donny/DataSet/GAN/Sketch2VIS"
+DATA_DIR="/home/donny/DataSet/GAN/SKETCH2VIS"
 
 MODEL_NAME="pix2pix"
 CHECKPOINTS_NAME="it_pix2pix_sketch2vis_gan"$2
@@ -25,7 +25,7 @@ fi
 
 
 if [[ "$1"x == "train"x ]]; then
-  ${PYTHON} -u main.py --hypes ${HYPES_FILE} --phase train --gpu 0 \
+  ${PYTHON} -u main.py --hypes ${HYPES_FILE} --phase train --gpu 2 \
                        --model_name ${MODEL_NAME} --log_to_file n \
                        --data_dir ${DATA_DIR} --max_epoch ${MAX_EPOCH} \
                        --checkpoints_name ${CHECKPOINTS_NAME}  2>&1 | tee ${LOG_FILE}

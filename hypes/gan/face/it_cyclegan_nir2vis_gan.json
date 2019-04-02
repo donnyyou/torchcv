@@ -31,9 +31,7 @@
         }
       },
       "data_transformer": {
-        "size_mode": "none",
-        "input_size": [128, 128],
-        "align_method": "only_pad"
+        "size_mode": "none"
       }
     },
     "val": {
@@ -49,15 +47,14 @@
         }
       },
       "data_transformer": {
-        "size_mode": "none",
-        "input_size": [128, 128],
-        "align_method": "only_scale"
+        "size_mode": "none"
       }
     },
     "test": {
-      "test_mode": "nir2vis",
+      "mode": "nir2vis",
       "loader": "json",
       "batch_size": 8,
+      "out_size": [128, 128],
       "aug_trans": {
         "trans_seq": ["random_crop"],
         "random_crop": {
