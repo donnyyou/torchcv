@@ -64,7 +64,7 @@ class ImageTranslatorTest(object):
                         img_bgr = ImageHelper.resize(img_bgr,
                                                      target_size=self.configer.get('test', 'out_size'),
                                                      interpolation='linear')
-                        ImageHelper.save(img_bgr, os.path.join(out_dir, key, meta_list[i]['filename']))
+                        ImageHelper.save(img_bgr, os.path.join(out_dir, key, '{}.jpg'.format(meta_list[i]['filename'])))
 
         if test_loader_B is not None:
             for data_dict in test_loader_B:
@@ -82,4 +82,4 @@ class ImageTranslatorTest(object):
                         img_bgr = ImageHelper.resize(img_bgr,
                                                      target_size=self.configer.get('test', 'out_size'),
                                                      interpolation='linear')
-                        ImageHelper.save(img_bgr, os.path.join(out_dir, key, meta_list[i]['filename']))
+                        ImageHelper.save(img_bgr, os.path.join(out_dir, key, '.jpg'.format(meta_list[i]['filename'])))

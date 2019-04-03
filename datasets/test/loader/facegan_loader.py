@@ -59,7 +59,7 @@ class FaceGANLoader(data.Dataset):
                 Log.error('Image Path: {} is Invalid.'.format(img_path))
                 exit(1)
 
-            item_list.append((img_path, item['image_path'], item['label']))
+            item_list.append((img_path, '.'.join(item['image_path'].split('.')[:-1]), item['label']))
 
         Log.info('There are {} images..'.format(len(item_list)))
         return item_list
