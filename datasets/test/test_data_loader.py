@@ -6,6 +6,7 @@
 from torch.utils import data
 
 from datasets.test.loader.default_loader import DefaultLoader
+from datasets.test.loader.facegan_loader import FaceGANLoader
 from datasets.test.loader.list_loader import ListLoader
 from datasets.test.loader.json_loader import JsonLoader
 from datasets.tools.collate import collate
@@ -74,6 +75,23 @@ class TestDataLoader(object):
                            aug_transform=self.aug_test_transform,
                            img_transform=self.img_transform,
                            configer=self.configer),
+                batch_size=self.configer.get('test', 'batch_size'), shuffle=False,
+                num_workers=self.configer.get('data', 'workers'), pin_memory=True,
+                collate_fn=lambda *args: collate(
+                    *args, trans_dict=self.configer.get('test', 'data_transformer')
+                )
+            )
+
+            return testloader
+
+        elif self.configer.get('test', 'loader') == 'facegan':
+            json_path = json_path if json_path is not None else self.configer.get('test', 'json_path')
+            testloader = data.DataLoader(
+                FaceGANLoader(root_dir=self.configer.get('test', 'root_dir'),
+                              json_path=json_path,
+                              aug_transform=self.aug_test_transform,
+                              img_transform=self.img_transform,
+                              configer=self.configer),
                 batch_size=self.configer.get('test', 'batch_size'), shuffle=False,
                 num_workers=self.configer.get('data', 'workers'), pin_memory=True,
                 collate_fn=lambda *args: collate(

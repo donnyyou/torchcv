@@ -16,8 +16,8 @@
       }
     },
     "train": {
-      "loader": "cyclegan",
-      "batch_size": 1,
+      "loader": "facegan",
+      "batch_size": 8,
       "aug_trans": {
         "trans_seq": ["random_hflip", "random_crop"],
         "random_hflip": {
@@ -38,24 +38,37 @@
       }
     },
     "val": {
-      "loader": "cyclegan",
-      "batch_size": 1,
-      "use_07_metric": true,
+      "loader": "facegan",
+      "batch_size": 8,
       "aug_trans": {
-        "trans_seq": []
+        "trans_seq": ["random_crop"],
+        "random_crop": {
+          "ratio": 1.0,
+          "crop_size": [128, 128],
+          "method": "center",
+          "allow_outside_center": false
+        }
       },
       "data_transformer": {
-        "size_mode": "fix_size",
-        "input_size": [128, 128],
-        "align_method": "only_scale"
+        "size_mode": "none"
       }
     },
     "test": {
-      "batch_size": 1,
+      "loader": "facegan",
+      "batch_size": 8,
+      "out_size": [128, 128],
+      "aug_trans": {
+        "trans_seq": ["random_crop"],
+        "random_crop": {
+          "ratio": 1.0,
+          "crop_size": [128, 128],
+          "method": "center",
+          "allow_outside_center": false
+        }
+      },
       "data_transformer": {
-        "size_mode": "fix_size",
-        "input_size": [128, 128],
-        "align_method": "only_scale"
+        "size_mode": "none",
+        "samples_per_gpu": 8
       }
     },
     "network": {
@@ -93,7 +106,7 @@
       },
       "use_dropout": false,
       "norm_type": "instancenorm",
-      "model_name": "face_gan",
+      "model_name": "facegan",
       "checkpoints_name": "fg_lightcnn_face_gan",
       "checkpoints_dir": "checkpoints/gan/face",
       "imgpool_size": 50

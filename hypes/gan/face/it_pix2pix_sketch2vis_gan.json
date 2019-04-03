@@ -57,7 +57,7 @@
       }
     },
     "test": {
-      "batch_size": 1,
+      "batch_size": 8,
       "mode": "pix2pix",
       "out_size": [128, 128],
       "aug_trans": {
@@ -74,7 +74,7 @@
       },
       "data_transformer": {
         "size_mode": "none",
-        "samples_per_gpu": 1
+        "samples_per_gpu": 8
       }
     },
     "network": {

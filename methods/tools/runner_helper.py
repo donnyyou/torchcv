@@ -57,9 +57,6 @@ class RunnerHelper(object):
                 raise RuntimeError(
                     'No state_dict found in checkpoint file {}'.format(runner.configer.get('network', 'resume')))
 
-            if list(checkpoint_dict.keys())[0].startswith('module.'):
-                checkpoint_dict = {k[7:]: v for k, v in checkpoint_dict.items()}
-
             # load state_dict
             if hasattr(net, 'module'):
                 RunnerHelper.load_state_dict(net.module, checkpoint_dict,
@@ -86,6 +83,10 @@ class RunnerHelper(object):
                 in :attr:`state_dict` match the keys returned by this module's
                 :meth:`~torch.nn.Module.state_dict` function. Default: ``False``.
         """
+
+        if list(state_dict.keys())[0].startswith('module.'):
+            state_dict = {k[7:]: v for k, v in state_dict.items()}
+
         unexpected_keys = []
         unmatched_keys = []
         own_state = module.state_dict()
