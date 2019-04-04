@@ -40,12 +40,14 @@ class CycleGAN(nn.Module):
                 rec_A = self.netG_B.forward(fake_B)
                 out_dict['fakeB'] = fake_B
                 out_dict['recA'] = rec_A
+                out_dict['realA'] = data_dict['imgA']
 
             if 'imgB' in data_dict:
                 fake_A = self.netG_B.forward(data_dict['imgB'])
                 rec_B = self.netG_A.forward(fake_A)
                 out_dict['fakeA'] = fake_A
                 out_dict['recB'] = rec_B
+                out_dict['realB'] = data_dict['imgB']
 
             return out_dict
 
