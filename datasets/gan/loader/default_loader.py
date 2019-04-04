@@ -51,13 +51,9 @@ class DefaultLoader(data.Dataset):
     def __list_dirs(self, root_dir, dataset):
         imgA_list = list()
         imgB_list = list()
-        if self.configer.get('data', 'direction') == 'AtoB':
-            dirA, dirB = 'imageA', 'imageB'
-        else:
-            dirB, dirA = 'imageA', 'imageB'
 
-        imageA_dir = os.path.join(root_dir, dataset, dirA)
-        imageB_dir = os.path.join(root_dir, dataset, dirB)
+        imageA_dir = os.path.join(root_dir, dataset, 'imageA')
+        imageB_dir = os.path.join(root_dir, dataset, 'imageB')
 
         for file_name in os.listdir(imageA_dir):
             image_name = '.'.join(file_name.split('.')[:-1])
@@ -71,8 +67,8 @@ class DefaultLoader(data.Dataset):
             imgB_list.append(imgB_path)
 
         if dataset == 'train' and self.configer.get('data', 'include_val'):
-            imageA_dir = os.path.join(root_dir, 'val/{}'.format(dirA))
-            imageB_dir = os.path.join(root_dir, 'val/{}'.format(dirB))
+            imageA_dir = os.path.join(root_dir, 'val/imageA')
+            imageB_dir = os.path.join(root_dir, 'val/imageB')
             for file_name in os.listdir(imageA_dir):
                 image_name = '.'.join(file_name.split('.')[:-1])
                 imgA_path = ImageHelper.imgpath(imageA_dir, image_name)

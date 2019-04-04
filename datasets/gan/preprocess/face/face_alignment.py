@@ -1,19 +1,41 @@
 import os
+import shutil
 import cv2
 
-class FaceAlign(object):
+from utils.helpers.file_helper import FileHelper
+from utils.tools.logger import Logger as Log
 
-    def
+
+class FaceAlignment(object):
+
+    def __init__(self, dist_ec_mc, ec_y):
+        self.dist_ec_mc = dist_ec_mc
+        self.ec_y = ec_y
+
+    def detect_face(self, img):
+        pass
+
+    def align_face(self, img, kpts):
+        pass
+        return None, None
+
+    def process(self, data_dir):
+        new_data_dir = '{}_new'.format(data_dir.rstrip('/'))
+        if os.path.exists(new_data_dir):
+            shutil.rmtree(new_data_dir)
+
+        os.makedirs(new_data_dir)
+
+        for filename in FileHelper.list_dir(FileHelper):
+            file_path = os.path.join(data_dir, filename)
+            img = cv2.imread(file_path)
+            kpts = self.detect_face(img)
+            if kpts is None:
+                Log.info('No face detected in {}'.format(file_path))
+            face, kpts = self.align_face(img, kpts)
 
 function res = face_db_align(face_dir, ffp_dir, ec_mc_y, ec_y, img_size, save_dir)
 
-% center of eyes (ec), center of l&r mouth(mc), rotate and resize
-% ec_mc_y: y_mc-y_ec, diff of height of ec & mc, to scale the image.
-% ec_y: top of ec, to crop the face.
-
-clck = clock();
-log_fn = sprintf('fa2_%4d%02d%02d%02d%02d%02d.log', [clck(1:5) floor(clck(6))]);
-log_fid = fopen(log_fn, 'w');
 
 crop_size = img_size;
 
