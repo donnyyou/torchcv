@@ -32,6 +32,8 @@ class Pix2Pix(nn.Module):
             if 'imgB' in data_dict:
                 out_dict['realB'] = data_dict['imgB']
 
+            return out_dict
+
         # First, G(A) should fake the discriminator
         fake_B = self.netG.forward(data_dict['imgA'])
         G_fake_AB = torch.cat((data_dict['imgA'], fake_B), 1)
