@@ -55,6 +55,8 @@ if __name__ == "__main__":
                         dest='train:batch_size', help='The batch size of training.')
     parser.add_argument('--val_batch_size', default=None, type=int,
                         dest='val:batch_size', help='The batch size of validation.')
+    parser.add_argument('--direction', default='AtoB', type=str,
+                        dest='data:direction', help='The direction for GANs.')
 
     # ***********  Params for model.  **********
     parser.add_argument('--model_name', default=None, type=str,

@@ -12,7 +12,7 @@ DATA_DIR="/home/donny/DataSet/GAN/NIR2VIS"
 TAG="dev"
 
 MODEL_NAME="cyclegan"
-CHECKPOINTS_NAME="it_cyclegan_face_gan"$2
+CHECKPOINTS_NAME="it_cyclegan_nir2vis_gan"$2
 HYPES_FILE='hypes/gan/face/it_cyclegan_nir2vis_gan.json'
 MAX_EPOCH=200
 
