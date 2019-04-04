@@ -51,7 +51,8 @@ class CycleGAN(nn.Module):
 
             return out_dict
 
-        cycle_loss_weight = self.configer.get('loss', 'loss_weights')['cycle_loss']
+        cycleA_loss_weight = self.configer.get('loss', 'loss_weights')['cycleA_loss']
+        cycleB_loss_weight = self.configer.get('loss', 'loss_weights')['cycleB_loss']
         idt_loss_weight = self.configer.get('loss', 'loss_weights')['idt_loss']
         # Identity loss
         if idt_loss_weight > 0:
@@ -76,10 +77,10 @@ class CycleGAN(nn.Module):
         loss_G_B = self.criterionGAN(pred_fake, True)
         # Forward cycle loss
         rec_A = self.netG_B.forward(fake_B)
-        loss_cycle_A = self.criterionCycle(rec_A, data_dict['imgA']) * cycle_loss_weight
+        loss_cycle_A = self.criterionCycle(rec_A, data_dict['imgA']) * cycleA_loss_weight
         # Backward cycle loss
         rec_B = self.netG_A.forward(fake_A)
-        loss_cycle_B = self.criterionCycle(rec_B, data_dict['imgB']) * cycle_loss_weight
+        loss_cycle_B = self.criterionCycle(rec_B, data_dict['imgB']) * cycleB_loss_weight
         # combined loss
         loss_G = loss_G_A + loss_G_B + loss_cycle_A + loss_cycle_B + loss_idt_A + loss_idt_B
 

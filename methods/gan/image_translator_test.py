@@ -61,10 +61,6 @@ class ImageTranslatorTest(object):
                         img_bgr = self.blob_helper.tensor2bgr(value[i])
                         img_path = meta_list[i]['img_path']
                         Log.info('Image Path: {}'.format(img_path))
-                        # filename = '_'.join(img_path.rstrip().split('/')[-2:])
-                        img_bgr = ImageHelper.resize(img_bgr,
-                                                     target_size=self.configer.get('test', 'out_size'),
-                                                     interpolation='linear')
                         ImageHelper.save(img_bgr, os.path.join(out_dir, '{}_{}.jpg'.format(meta_list[i]['filename'], key)))
 
         if test_loader_B is not None:
@@ -78,9 +74,4 @@ class ImageTranslatorTest(object):
                         img_bgr = self.blob_helper.tensor2bgr(value[i])
                         img_path = meta_list[i]['img_path']
                         Log.info('Image Path: {}'.format(img_path))
-                        # filename = img_path.rstrip().split('/')[-1]
-                        # filename = '_'.join(img_path.rstrip().split('/')[-2:])
-                        img_bgr = ImageHelper.resize(img_bgr,
-                                                     target_size=self.configer.get('test', 'out_size'),
-                                                     interpolation='linear')
                         ImageHelper.save(img_bgr, os.path.join(out_dir, '{}_{}.jpg'.format(meta_list[i]['filename'], key)))

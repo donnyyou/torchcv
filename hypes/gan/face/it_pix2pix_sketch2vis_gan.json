@@ -18,7 +18,7 @@
       "loader": "default",
       "batch_size": 1,
       "aug_trans": {
-        "trans_seq": ["random_hflip", "random_crop", "resize"],
+        "trans_seq": ["random_hflip", "random_crop"],
         "random_hflip": {
           "ratio": 0.5,
           "swap_pair": []
@@ -28,9 +28,6 @@
           "crop_size": [128, 128],
           "method": "random",
           "allow_outside_center": false
-        },
-        "resize": {
-          "target_size": [256, 256]
         }
       },
       "data_transformer": {
@@ -41,15 +38,12 @@
       "loader": "default",
       "batch_size": 8,
       "aug_trans": {
-        "trans_seq": ["random_crop", "resize"],
+        "trans_seq": ["random_crop"],
         "random_crop": {
           "ratio": 1.0,
           "crop_size": [128, 128],
           "method": "center",
           "allow_outside_center": false
-        },
-        "resize": {
-          "target_size": [256, 256]
         }
       },
       "data_transformer": {
@@ -59,17 +53,13 @@
     "test": {
       "batch_size": 8,
       "mode": "pix2pix",
-      "out_size": [128, 128],
       "aug_trans": {
-        "trans_seq": ["random_crop", "resize"],
+        "trans_seq": ["random_crop"],
         "random_crop": {
           "ratio": 1.0,
           "crop_size": [128, 128],
           "method": "center",
           "allow_outside_center": false
-        },
-        "resize": {
-          "target_size": [256, 256]
         }
       },
       "data_transformer": {
@@ -111,7 +101,7 @@
     "solver": {
       "lr": {
         "metric": "epoch",
-        "base_lr": 0.0002,
+        "base_lr": 0.00006,
         "lr_policy": "lambda_fixlinear",
         "lambda_fixlinear": {
           "fix_value": 100,

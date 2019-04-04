@@ -54,7 +54,6 @@
       "mode": "nir2vis",
       "loader": "json",
       "batch_size": 8,
-      "out_size": [128, 128],
       "aug_trans": {
         "trans_seq": ["random_crop"],
         "random_crop": {
@@ -119,7 +118,7 @@
     "solver": {
       "lr": {
         "metric": "epoch",
-        "base_lr": 0.0002,
+        "base_lr": 0.00006,
         "lr_policy": "lambda_fixlinear",
         "lambda_fixlinear": {
           "fix_value": 100,
@@ -141,7 +140,8 @@
     },
     "loss": {
       "loss_weights": {
-        "cycle_loss": 10.0,
+        "cycleA_loss": 100.0,
+        "cycleB_loss": 10.0,
         "idt_loss": 5.0,
         "gan_loss": 1.0
       },
