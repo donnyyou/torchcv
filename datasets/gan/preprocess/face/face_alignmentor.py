@@ -25,7 +25,7 @@ class FaceAlignmentor(object):
         return preds
 
     def align_face(self, img, f5pt):
-        ang_tan = (f5pt[0,1] - f5pt[1,1])/ (f5pt[0, 0]-f5pt[1, 0])
+        ang_tan = (f5pt[0,1] - f5pt[1, 1]) / (f5pt[0, 0]-f5pt[1, 0])
         rotate_degree = math.atan(ang_tan) / math.pi * 180
         height, width, _ = img.shape
 
