@@ -15,9 +15,10 @@ from utils.tools.logger import Logger as Log
 
 class FaceAlignmentor(object):
 
-    def __init__(self, dist_ec_mc, ec_y):
+    def __init__(self, dist_ec_mc, ec_y, crop_size=144):
         self.dist_ec_mc = dist_ec_mc
         self.ec_y = ec_y
+        self.crop_size = 144
         self.face_detector = fa.FaceAlignment(fa.LandmarksType._2D, device='cpu', flip_input=False)
 
     def detect_face(self, img):
@@ -32,7 +33,7 @@ class FaceAlignmentor(object):
     def align_face(self, img, f5pt):
         ang_tan = (f5pt[0,1] - f5pt[1, 1]) / (f5pt[0, 0]-f5pt[1, 0])
         rotate_degree = math.atan(ang_tan) / math.pi * 180
-        height, width, _ = img.shape
+        height, width, _ = img[0].shape if isinstance(img, (list, tuple)) else img.shape
 
         img_center = (width / 2.0, height / 2.0)
 
@@ -43,7 +44,11 @@ class FaceAlignmentor(object):
         new_height = int(height * cos_val + width * sin_val)
         rotate_mat[0, 2] += (new_width / 2.) - img_center[0]
         rotate_mat[1, 2] += (new_height / 2.) - img_center[1]
-        img = cv2.warpAffine(img, rotate_mat, (new_width, new_height), borderValue=0).astype(np.uint8)
+        if isinstance(img, (list, tuple)):
+            for i in range(len(img)):
+                img[i] = cv2.warpAffine(img[i], rotate_mat, (new_width, new_height), borderValue=0).astype(np.uint8)
+        else:
+            img = cv2.warpAffine(img, rotate_mat, (new_width, new_height), borderValue=0).astype(np.uint8)
 
         for i in range(len(f5pt)):
             x = f5pt[i][0]
@@ -55,8 +60,22 @@ class FaceAlignmentor(object):
 
         r_scale = self.dist_ec_mc / ((f5pt[3, 1] + f5pt[4, 1]) / 2 - (f5pt[0, 1] - f5pt[1, 1]) / 2)
         target_size = [int(i * r_scale) for i in img.shape[:2]]
-        img = ImageHelper.resize(img, target_size[::-1], interpolation='cubic')
+        if isinstance(img, (list, tuple)):
+            for i in range(len(img)):
+                img[i] = ImageHelper.resize(img[i], target_size[::-1], interpolation='cubic')
+        else:
+            img = ImageHelper.resize(img, target_size[::-1], interpolation='cubic')
         f5pt = f5pt * r_scale
+
+        crop_y = (f5pt[3, 1] + f5pt[4, 1]) / 2 - self.ec_y
+        crop_x = (f5pt[3, 0] + f5pt[4, 0]) / 2 - self.crop_size // 2
+        f5pt[:, 0] -= crop_x
+        f5pt[:, 1] -= crop_y
+        if isinstance(img, (list, tuple)):
+            for i in range(len(img)):
+                img[i] = img[i][crop_y:crop_y+self.crop_size, crop_x:crop_x+self.crop_size]
+        else:
+            img = img[crop_y:crop_y+self.crop_size, crop_x:crop_x+self.crop_size]
         return img, f5pt
 
     def process(self, data_dir):
@@ -80,6 +99,30 @@ class FaceAlignmentor(object):
 
             face, kpts = self.align_face(img, kpts)
             cv2.imwrite(os.path.join(new_data_dir, filename), ImageHelper.rgb2bgr(face))
+
+    def process_3d(self, data_dir):
+        new_data_dir = '{}_new'.format(data_dir.rstrip('/'))
+        if os.path.exists(new_data_dir):
+            shutil.rmtree(new_data_dir)
+
+        os.makedirs(new_data_dir)
+
+        for filename in FileHelper.list_dir(os.path.join(data_dir, 'RGB')):
+            if not ImageHelper.is_img(filename):
+                Log.info('Image Path: {}'.format(os.path.join(data_dir, 'RGB', filename)))
+                continue
+
+            file_path = os.path.join(data_dir, 'RGB', filename)
+            img = io.imread(file_path)
+            kpts = self.detect_face(img)
+            if kpts is None:
+                Log.info('Invliad face detected in {}'.format(file_path))
+                continue
+
+            depth = np.array(io.imread(os.path.join(data_dir, 'Depth', filename)))
+            face_depth, kpts = self.align_face([np.array(img), np.array(depth)], kpts)
+            ImageHelper.save(ImageHelper.rgb2bgr(face_depth[0]), os.path.join(new_data_dir, 'RGB', filename))
+            ImageHelper.save(ImageHelper.rgb2bgr(face_depth[1]), os.path.join(new_data_dir, 'Depth', filename))
 
 
 if __name__ == '__main__':
