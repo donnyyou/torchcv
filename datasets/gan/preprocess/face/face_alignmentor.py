@@ -22,7 +22,12 @@ class FaceAlignmentor(object):
 
     def detect_face(self, img):
         preds = self.face_detector.get_landmarks(img)
-        return preds
+        if len(preds) != 1:
+            return None
+
+        f68pt = preds[0]
+        out = np.array([(f68pt[36] + f68pt[39]) / 2, (f68pt[42] + f68pt[45]) / 2], f68pt[33], f68pt[48], f68pt[54])
+        return out
 
     def align_face(self, img, f5pt):
         ang_tan = (f5pt[0,1] - f5pt[1, 1]) / (f5pt[0, 0]-f5pt[1, 0])
@@ -69,7 +74,9 @@ class FaceAlignmentor(object):
             img = io.imread(file_path)
             kpts = self.detect_face(img)
             if kpts is None:
-                Log.info('No face detected in {}'.format(file_path))
+                Log.info('Invliad face detected in {}'.format(file_path))
+                continue
+
             face, kpts = self.align_face(img, kpts)
             cv2.imshow('main', face)
             cv2.waitKey()
