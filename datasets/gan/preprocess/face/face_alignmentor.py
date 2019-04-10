@@ -19,7 +19,7 @@ class FaceAlignmentor(object):
         self.dist_ec_mc = dist_ec_mc
         self.ec_y = ec_y
         self.crop_size = 144
-        self.face_detector = fa.FaceAlignment(fa.LandmarksType._2D, device='cpu', flip_input=False)
+        self.face_detector = fa.FaceAlignment(fa.LandmarksType._2D, device='cuda', flip_input=False)
 
     def detect_face(self, img):
         preds = self.face_detector.get_landmarks(img)
@@ -58,17 +58,21 @@ class FaceAlignmentor(object):
             f5pt[i][0] = p[0]
             f5pt[i][1] = p[1]
 
-        r_scale = self.dist_ec_mc / ((f5pt[3, 1] + f5pt[4, 1]) / 2 - (f5pt[0, 1] - f5pt[1, 1]) / 2)
-        target_size = [int(i * r_scale) for i in img.shape[:2]]
+        r_scale = self.dist_ec_mc / ((f5pt[3, 1] + f5pt[4, 1]) / 2 - (f5pt[0, 1] + f5pt[1, 1]) / 2)
+        print((f5pt[3, 1] + f5pt[4, 1]) / 2)
+        print((f5pt[0, 1] + f5pt[1, 1]) / 2)
+        height, width, _ = img[0].shape if isinstance(img, (list, tuple)) else img.shape
+        target_size = [int(width * r_scale), int(height * r_scale)]
+        print(target_size)
         if isinstance(img, (list, tuple)):
             for i in range(len(img)):
-                img[i] = ImageHelper.resize(img[i], target_size[::-1], interpolation='cubic')
+                img[i] = ImageHelper.resize(img[i], target_size, interpolation='cubic')
         else:
-            img = ImageHelper.resize(img, target_size[::-1], interpolation='cubic')
+            img = ImageHelper.resize(img, target_size, interpolation='cubic')
         f5pt = f5pt * r_scale
 
-        crop_y = (f5pt[3, 1] + f5pt[4, 1]) / 2 - self.ec_y
-        crop_x = (f5pt[3, 0] + f5pt[4, 0]) / 2 - self.crop_size // 2
+        crop_y = max(int((f5pt[0, 1] + f5pt[1, 1]) / 2 - self.ec_y), 0)
+        crop_x = max(int((f5pt[0, 0] + f5pt[1, 0]) / 2 - self.crop_size // 2), 0)
         f5pt[:, 0] -= crop_x
         f5pt[:, 1] -= crop_y
         if isinstance(img, (list, tuple)):
