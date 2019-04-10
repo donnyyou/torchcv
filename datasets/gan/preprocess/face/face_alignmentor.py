@@ -26,7 +26,7 @@ class FaceAlignmentor(object):
             return None
 
         f68pt = preds[0]
-        out = np.array([(f68pt[36] + f68pt[39]) / 2, (f68pt[42] + f68pt[45]) / 2], f68pt[33], f68pt[48], f68pt[54])
+        out = np.array([(f68pt[36] + f68pt[39]) / 2, (f68pt[42] + f68pt[45]) / 2, f68pt[33], f68pt[48], f68pt[54]])
         return out
 
     def align_face(self, img, f5pt):
@@ -66,8 +66,9 @@ class FaceAlignmentor(object):
 
         os.makedirs(new_data_dir)
 
-        for filename in FileHelper.list_dir(FileHelper):
+        for filename in FileHelper.list_dir(data_dir):
             if not ImageHelper.is_img(filename):
+                Log.info('Image Path: {}'.format(os.path.join(data_dir, filename)))
                 continue
 
             file_path = os.path.join(data_dir, filename)
@@ -78,8 +79,7 @@ class FaceAlignmentor(object):
                 continue
 
             face, kpts = self.align_face(img, kpts)
-            cv2.imshow('main', face)
-            cv2.waitKey()
+            cv2.imwrite(os.path.join(new_data_dir, filename), ImageHelper.rgb2bgr(face))
 
 
 if __name__ == '__main__':
