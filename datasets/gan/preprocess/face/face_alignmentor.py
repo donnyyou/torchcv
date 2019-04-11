@@ -23,7 +23,7 @@ class FaceAlignmentor(object):
 
     def detect_face(self, img):
         preds = self.face_detector.get_landmarks(img)
-        if len(preds) != 1:
+        if preds is None or len(preds) != 1:
             return None
 
         f68pt = preds[0]
@@ -59,11 +59,11 @@ class FaceAlignmentor(object):
             f5pt[i][1] = p[1]
 
         r_scale = self.dist_ec_mc / ((f5pt[3, 1] + f5pt[4, 1]) / 2 - (f5pt[0, 1] + f5pt[1, 1]) / 2)
-        print((f5pt[3, 1] + f5pt[4, 1]) / 2)
-        print((f5pt[0, 1] + f5pt[1, 1]) / 2)
         height, width, _ = img[0].shape if isinstance(img, (list, tuple)) else img.shape
         target_size = [int(width * r_scale), int(height * r_scale)]
-        print(target_size)
+        if r_scale < 0:
+            return None, None
+
         if isinstance(img, (list, tuple)):
             for i in range(len(img)):
                 img[i] = ImageHelper.resize(img[i], target_size, interpolation='cubic')
@@ -111,24 +111,27 @@ class FaceAlignmentor(object):
 
         os.makedirs(new_data_dir)
 
-        for filename in FileHelper.list_dir(os.path.join(data_dir, 'RGB')):
-            if not ImageHelper.is_img(filename):
-                Log.info('Image Path: {}'.format(os.path.join(data_dir, 'RGB', filename)))
+        for filename in FileHelper.list_dir(data_dir):
+            if not ImageHelper.is_img(filename) or 'depth' in filename:
+                Log.info('Image Path: {}'.format(os.path.join(data_dir, filename)))
                 continue
 
-            file_path = os.path.join(data_dir, 'RGB', filename)
+            file_path = os.path.join(data_dir, filename)
             img = io.imread(file_path)
             kpts = self.detect_face(img)
             if kpts is None:
                 Log.info('Invliad face detected in {}'.format(file_path))
                 continue
 
-            depth = np.array(io.imread(os.path.join(data_dir, 'Depth', filename)))
+            depth = np.array(io.imread(os.path.join(data_dir, filename.replace('rgb', 'depth'))))
             face_depth, kpts = self.align_face([np.array(img), np.array(depth)], kpts)
-            ImageHelper.save(ImageHelper.rgb2bgr(face_depth[0]), os.path.join(new_data_dir, 'RGB', filename))
-            ImageHelper.save(ImageHelper.rgb2bgr(face_depth[1]), os.path.join(new_data_dir, 'Depth', filename))
+            if face_depth is None:
+                Log.info('Invliad face detected in {}'.format(file_path))
+                continue
+            ImageHelper.save(ImageHelper.rgb2bgr(face_depth[0]), os.path.join(new_data_dir, filename))
+            ImageHelper.save(ImageHelper.rgb2bgr(face_depth[1]), os.path.join(new_data_dir, filename.replace('rgb', 'depth')))
 
 
 if __name__ == '__main__':
     face_alignmentor = FaceAlignmentor(48, 48)
-    face_alignmentor.process('./test')
+    face_alignmentor.process_3d('/home/donny/DataSet/GAN/3D2VIS')
