@@ -133,8 +133,13 @@ class ModuleHelper(object):
         if pretrained is None:
             return model
 
+        if not os.path.exists(pretrained):
+            Log.warn('{} not exists.'.format(pretrained))
+            return model
+
+        Log.info('Loading pretrained model:{}'.format(pretrained))
         if all_match:
-            Log.info('Loading pretrained model:{}'.format(pretrained))
+
             pretrained_dict = torch.load(pretrained)
             model_dict = model.state_dict()
             load_dict = dict()
@@ -148,7 +153,6 @@ class ModuleHelper(object):
             model.load_state_dict(load_dict)
 
         else:
-            Log.info('Loading pretrained model:{}'.format(pretrained))
             pretrained_dict = torch.load(pretrained)
             model_dict = model.state_dict()
             load_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
