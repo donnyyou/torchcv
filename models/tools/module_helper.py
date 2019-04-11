@@ -139,7 +139,6 @@ class ModuleHelper(object):
 
         Log.info('Loading pretrained model:{}'.format(pretrained))
         if all_match:
-
             pretrained_dict = torch.load(pretrained)
             model_dict = model.state_dict()
             load_dict = dict()
