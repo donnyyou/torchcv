@@ -140,9 +140,10 @@
     },
     "loss": {
       "loss_weights": {
-        "cycleA_loss": 100.0,
+        "cycleA_loss": 10.0,
         "cycleB_loss": 10.0,
-        "idt_loss": 5.0,
+        "idtA_loss": 5.0,
+        "idtB_loss": 5.0,
         "gan_loss": 1.0
       },
       "params": {

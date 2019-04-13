@@ -53,28 +53,25 @@ class CycleGAN(nn.Module):
 
         cycleA_loss_weight = self.configer.get('loss', 'loss_weights')['cycleA_loss']
         cycleB_loss_weight = self.configer.get('loss', 'loss_weights')['cycleB_loss']
-        idt_loss_weight = self.configer.get('loss', 'loss_weights')['idt_loss']
+        idtA_loss_weight = self.configer.get('loss', 'loss_weights')['idtA_loss']
+        idtB_loss_weight = self.configer.get('loss', 'loss_weights')['idtB_loss']
         # Identity loss
-        if idt_loss_weight > 0:
-            # G_A should be identity if real_B is fed.
-            idt_A = self.netG_A.forward(data_dict['imgB'])
-            loss_idt_A = self.criterionIdt(idt_A, data_dict['imgB']) * idt_loss_weight
-            # G_B should be identity if real_A is fed.
-            idt_B = self.netG_B.forward(data_dict['imgA'])
-            loss_idt_B = self.criterionIdt(idt_B, data_dict['imgA']) * idt_loss_weight
-        else:
-            loss_idt_A = 0
-            loss_idt_B = 0
+        # G_A should be identity if real_B is fed.
+        idt_B = self.netG_A.forward(data_dict['imgB'])
+        loss_idt_A = self.criterionIdt(idt_B, data_dict['imgB']) * idtA_loss_weight
+        # G_B should be identity if real_A is fed.
+        idt_A = self.netG_B.forward(data_dict['imgA'])
+        loss_idt_B = self.criterionIdt(idt_A, data_dict['imgA']) * idtB_loss_weight
 
         # GAN loss
         # D_A(G_A(A))
         fake_B = self.netG_A.forward(data_dict['imgA'])
-        pred_fake = self.netD_B.forward(fake_B)
-        loss_G_A = self.criterionGAN(pred_fake, True)
+        pred_fake_B = self.netD_B.forward(fake_B)
+        loss_G_A = self.criterionGAN(pred_fake_B, True)
 
         fake_A = self.netG_B.forward(data_dict['imgB'])
-        pred_fake = self.netD_A.forward(fake_A)
-        loss_G_B = self.criterionGAN(pred_fake, True)
+        pred_fake_A = self.netD_A.forward(fake_A)
+        loss_G_B = self.criterionGAN(pred_fake_A, True)
         # Forward cycle loss
         rec_A = self.netG_B.forward(fake_B)
         loss_cycle_A = self.criterionCycle(rec_A, data_dict['imgA']) * cycleA_loss_weight
