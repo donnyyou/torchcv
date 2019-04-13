@@ -16,7 +16,7 @@
     },
     "train": {
       "loader": "default",
-      "batch_size": 1,
+      "batch_size": 8,
       "aug_trans": {
         "trans_seq": ["random_hflip", "random_crop"],
         "random_hflip": {
@@ -69,7 +69,7 @@
     },
     "network": {
       "generator": {
-        "net_type": "unet_256",
+        "net_type": "unet_128",
         "init_type": "normal",
         "init_gain": 0.02,
         "in_c": 3,
