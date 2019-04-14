@@ -931,9 +931,8 @@ class RandomDetCrop(object):
             labels (Tensor): the class labels for each bbox
     """
 
-    def __init__(self, ratio=0.5, allow_outside_center=True):
+    def __init__(self, ratio=0.5):
         self.ratio = ratio
-        self.allow_outside_center = allow_outside_center
         self.sample_options = (
             # using entire original input image
             None,

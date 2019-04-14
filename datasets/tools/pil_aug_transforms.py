@@ -968,9 +968,8 @@ class RandomDetCrop(object):
             boxes (Tensor): the adjusted bounding boxes in pt form
             labels (Tensor): the class labels for each bbox
     """
-    def __init__(self, ratio=0.5, mean=(104, 117, 123)):
+    def __init__(self, ratio=0.5):
         self.ratio = ratio
-        self.mean = mean
         self.sample_options = (
             # using entire original input image
             None,
