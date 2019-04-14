@@ -837,8 +837,6 @@ class RandomFocusCrop(object):
             raise TypeError('Got inappropriate size arg: {}'.format(crop_size))
 
     def get_center(self, img_size, bboxes):
-        max_center = [img_size[0] // 2, img_size[1] // 2]
-
         if bboxes is None or len(bboxes) == 0:
             if img_size[0] > self.size[0]:
                 x = random.randint(self.size[0] // 2, img_size[0] - self.size[0] // 2)
