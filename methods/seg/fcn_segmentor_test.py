@@ -63,13 +63,13 @@ class FCNSegmentorTest(object):
             meta_list = DCHelper.tolist(data_dict['meta'])
             img_list = DCHelper.tolist(data_dict['img'])
             for i in range(len(meta_list)):
-                filename = meta_list[i]['img_path'].split('/')[-1].split('.')[0]
                 label_map = np.argmax(total_logits[i], axis=-1)
                 label_img = np.array(label_map, dtype=np.uint8)
                 ori_img_bgr = self.blob_helper.tensor2bgr(img_list[i][0])
                 ori_img_bgr = ImageHelper.resize(ori_img_bgr, target_size=meta_list[i]['ori_img_size'], interpolation='linear')
                 image_canvas = self.seg_parser.colorize(label_img, image_canvas=ori_img_bgr)
-                ImageHelper.save(image_canvas, save_path=os.path.join(out_dir, 'vis/{}.png'.format(filename)))
+                ImageHelper.save(image_canvas,
+                                 save_path=os.path.join(out_dir, 'vis/{}.png'.format(meta_list[i]['filename'])))
 
                 if self.configer.exists('data', 'label_list'):
                     label_img = self.__relabel(label_img)
@@ -79,7 +79,7 @@ class FCNSegmentorTest(object):
                     label_img = label_img.astype(np.uint8)
 
                 label_img = Image.fromarray(label_img, 'P')
-                label_path = os.path.join(out_dir, 'label/{}.png'.format(filename))
+                label_path = os.path.join(out_dir, 'label/{}.png'.format(meta_list[i]['filename']))
                 Log.info('Label Path: {}'.format(label_path))
                 ImageHelper.save(label_img, label_path)
 

@@ -8,20 +8,19 @@ import os
 import torch.utils.data as data
 
 from extensions.tools.parallel import DataContainer
-from utils.helpers.file_helper import FileHelper
+from utils.helpers.json_helper import JsonHelper
 from utils.helpers.image_helper import ImageHelper
 from utils.tools.logger import Logger as Log
 
 
-class DefaultLoader(data.Dataset):
+class FaceGANLoader(data.Dataset):
 
-    def __init__(self, test_dir=None, aug_transform=None, img_transform=None, configer=None):
-        super(DefaultLoader, self).__init__()
+    def __init__(self, root_dir=None, json_path=None, aug_transform=None, img_transform=None, configer=None):
+        super(FaceGANLoader, self).__init__()
         self.configer = configer
         self.aug_transform=aug_transform
         self.img_transform = img_transform
-        self.item_list = [(os.path.join(test_dir, filename), '.'.join(filename.split('.')[:-1]))
-                          for filename in FileHelper.list_dir(test_dir) if ImageHelper.is_img(filename)]
+        self.item_list = self.__read_json(root_dir, json_path)
 
     def __getitem__(self, index):
         img = ImageHelper.read_image(self.item_list[index][0],
@@ -40,7 +39,8 @@ class DefaultLoader(data.Dataset):
             ori_img_size=ori_img_size,
             border_hw=border_hw,
             img_path=self.item_list[index][0],
-            filename=self.item_list[index][1]
+            filename=self.item_list[index][1],
+            label=self.item_list[index][2]
         )
         return dict(
             img=DataContainer(img, stack=True, return_dc=True, samples_per_gpu=True),
@@ -50,3 +50,16 @@ class DefaultLoader(data.Dataset):
     def __len__(self):
 
         return len(self.item_list)
+
+    def __read_json(self, root_dir, json_path):
+        item_list = []
+        for item in JsonHelper.load_file(json_path):
+            img_path = os.path.join(root_dir, item['image_path'])
+            if not os.path.exists(img_path) or not ImageHelper.is_img(img_path):
+                Log.error('Image Path: {} is Invalid.'.format(img_path))
+                exit(1)
+
+            item_list.append((img_path, '.'.join(item['image_path'].split('.')[:-1]), item['label']))
+
+        Log.info('There are {} images..'.format(len(item_list)))
+        return item_list

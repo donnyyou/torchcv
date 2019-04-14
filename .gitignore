@@ -3,6 +3,7 @@
 *.pyc
 *.pth
 *.so
+*.bmp
 *.o
 /log
 /checkpoints

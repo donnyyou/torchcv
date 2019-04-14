@@ -37,71 +37,79 @@ class FaceGANTest(object):
         self.gan_net.eval()
 
     def test(self, test_dir, out_dir):
-        gallery_file_list = '*_gallery_*.txt'
-        probe_file_list = '*_probe_*.txt'
-        gallery_file_list = glob.glob(test_dir + '/' + gallery_file_list)
-        probe_file_list = glob.glob(test_dir + '/' + probe_file_list)
-        # remove *_dev.txt file in both list
-        gallery_file_list = sorted(gallery_file_list)
-        probe_file_list = sorted(probe_file_list)
-        rank1_acc = []
-        vr_acc = []
-        for i in range(len(gallery_file_list)):
-            probe_features = []
-            gallery_features = []
-            probe_names = []
-            gallery_names = []
-            Log.info('Gallery File: {}'.format(gallery_file_list[i]))
-            for data_dict in self.test_loader.get_testloader(list_path=gallery_file_list[i]):
-                new_data_dict = dict(gallery=data_dict['img'])
-                out_dict = self.gan_net(new_data_dict)
-                meta_list = DCHelper.tolist(data_dict['meta'])
+        if self.configer.exists('test', 'mode') and self.configer.get('test', 'mode') == 'nir2vis':
+            jsonA_path = os.path.join(test_dir, 'val_label{}A.json'.format(self.configer.get('data', 'tag')))
+            test_loader_A = self.test_loader.get_testloader(json_path=jsonA_path) if os.path.exists(jsonA_path) else None
+            jsonB_path = os.path.join(test_dir, 'val_label{}B.json'.format(self.configer.get('data', 'tag')))
+            test_loader_B = self.test_loader.get_testloader(json_path=jsonB_path) if os.path.exists(jsonB_path) else None
 
-                for idx in range(len(out_dict['feat'])):
-                    gallery_features.append(out_dict['feat'][idx].cpu().numpy())
-                    gallery_names.append(meta_list[idx]['img_path'].split("/")[-2])
+        else:
+            test_loader_A, test_loader_B = None, None
+            Log.error('Test Mode not Exists!')
+            exit(1)
 
-            Log.info('Probe File: {}'.format(probe_file_list[i]))
-            for data_dict in self.test_loader.get_testloader(list_path=probe_file_list[i]):
-                new_data_dict = dict(probe=data_dict['img'])
-                out_dict = self.gan_net(new_data_dict)
-                meta_list = DCHelper.tolist(data_dict['meta'])
+        assert test_loader_A is not None and test_loader_B is not None
+        probe_features = []
+        gallery_features = []
+        probe_labels = []
+        gallery_labels = []
+        for data_dict in test_loader_A:
+            new_data_dict = dict(imgA=data_dict['img'])
+            with torch.no_grad():
+                out_dict = self.gan_net(new_data_dict, testing=True)
 
-                for key, value in out_dict.item():
+            meta_list = DCHelper.tolist(data_dict['meta'])
+
+            for idx in range(len(meta_list)):
+                probe_features.append(out_dict['featA'][idx].cpu().numpy())
+                probe_labels.append(meta_list[idx]['label'])
+
+            for key, value in out_dict.items():
+                for i in range(len(value)):
                     if 'feat' in key:
-                        for idx in range(len(value)):
-                            probe_features.append(value[idx].cpu().numpy())
-                            probe_names.append(meta_list[idx]['img_path'].split("/")[-2])
-
                         continue
-                    else:
-                        for idx in range(len(value)):
-                            img_bgr = self.blob_helper.tensor2bgr(value[idx])
-                            filename = meta_list[idx]['img_path'].rstrip().split('/')[-1]
-                            ImageHelper.save(img_bgr, os.path.join(out_dir, key, filename))
 
-            probe_features = np.array(probe_features)
-            gallery_features = np.array(gallery_features)
-            score = cosine_similarity(gallery_features, probe_features).T
-            r_acc, tpr = self.compute_metric(score, probe_names, gallery_names)
-            # print('score={}, probe_names={}, gallery_names={}'.format(score, probe_names, gallery_names))
-            rank1_acc.append(r_acc)
-            vr_acc.append(tpr)
+                    img_bgr = self.blob_helper.tensor2bgr(value[i])
+                    img_path = meta_list[i]['img_path']
+                    Log.info('Image Path: {}'.format(img_path))
+                    img_bgr = ImageHelper.resize(img_bgr,
+                                                 target_size=self.configer.get('test', 'out_size'),
+                                                 interpolation='linear')
+                    ImageHelper.save(img_bgr, os.path.join(out_dir, key, meta_list[i]['filename']))
 
-        avg_r_a = np.mean(np.array(rank1_acc))
-        std_r_a = np.std(np.array(rank1_acc))
-        avg_v_a = np.mean(np.array(vr_acc))
-        std_v_a = np.std(np.array(vr_acc))
-        # avg_vr_acc = sum(vr_acc)/(len(vr_acc) + 1e-5)
-        print()
-        print('=====================================================')
-        print('Final Rank1 accuracy is', avg_r_a * 100, "% +", std_r_a)
-        print('Final VR@FAR=0.1% accuracy is', avg_v_a * 100, "% +", std_v_a)
-        print('=====================================================')
-        print()
-        return avg_r_a, std_r_a, avg_v_a, std_v_a
+        for data_dict in test_loader_B:
+            new_data_dict = dict(imgB=data_dict['img'])
+            with torch.no_grad():
+                out_dict = self.gan_net(new_data_dict, testing=True)
 
-    def compute_metric(self, score, probe_names, gallery_names):
+            meta_list = DCHelper.tolist(data_dict['meta'])
+
+            for idx in range(len(meta_list)):
+                gallery_features.append(out_dict['feat'][idx].cpu().numpy())
+                gallery_labels.append(meta_list[idx]['label'])
+
+            for key, value in out_dict.items():
+                for i in range(len(value)):
+                    if 'feat' in key:
+                        continue
+
+                    img_bgr = self.blob_helper.tensor2bgr(value[i])
+                    img_path = meta_list[i]['img_path']
+                    Log.info('Image Path: {}'.format(img_path))
+                    img_bgr = ImageHelper.resize(img_bgr,
+                                                 target_size=self.configer.get('test', 'out_size'),
+                                                 interpolation='linear')
+                    ImageHelper.save(img_bgr, os.path.join(out_dir, key, meta_list[i]['filename']))
+
+        r_acc, tpr = self.decode(probe_features, gallery_features, probe_labels, gallery_labels)
+        Log.info('Final Rank1 accuracy is {}'.format(r_acc))
+        Log.info('Final VR@FAR=0.1% accuracy is {}'.format(tpr))
+
+    @staticmethod
+    def decode(probe_features, gallery_features, probe_labels, gallery_labels):
+        probe_features = np.array(probe_features)
+        gallery_features = np.array(gallery_features)
+        score = cosine_similarity(gallery_features, probe_features).T
         # print('score.shape =', score.shape)
         # print('probe_names =', np.array(probe_names).shape)
         # print('gallery_names =', np.array(gallery_names).shape)
@@ -113,9 +121,9 @@ class FaceGANTest(object):
         # print('len = ', len(maxIndex))
         count = 0
         for i in range(len(maxIndex)):
-            probe_names_repeat = np.repeat([probe_names[i]], len(gallery_names), axis=0).T
+            probe_names_repeat = np.repeat([probe_labels[i]], len(gallery_labels), axis=0).T
             # compare two string list
-            result = np.equal(probe_names_repeat, gallery_names) * 1
+            result = np.equal(probe_names_repeat, gallery_labels) * 1
             # result = np.core.defchararray.equal(probe_names_repeat, gallery_names) * 1
             # find the index of image in the gallery that has the same name as probe image
             # print(result)
@@ -128,17 +136,17 @@ class FaceGANTest(object):
             label[i][index[0][0]] = 1
 
             # find the max similarty score in gallery has the same name as probe image
-            if np.equal(int(probe_names[i]), int(gallery_names[maxIndex[i]])):
+            if np.equal(int(probe_labels[i]), int(gallery_labels[maxIndex[i]])):
                 count += 1
             else:
                 pass
                 # print(probe_img_list[i], gallery_img_list[ind])
 
-        r_acc = count/(len(probe_names)+1e-5)
+        r_acc = count/(len(probe_labels)+1e-5)
         fpr, tpr, thresholds = roc_curve(label.flatten(), score.flatten())
-        print("In sub_experiment", label.size(0), 'count of true label :', count)
-        print('rank1 accuracy =', r_acc)
-        print('VR@FAR=0.1% accuracy =', tpr[fpr <= 0.001][-1])
+        # print("In sub_experiment", label.size(0), 'count of true label :', count)
+        # print('rank1 accuracy =', r_acc)
+        # print('VR@FAR=0.1% accuracy =', tpr[fpr <= 0.001][-1])
 
         # plot_roc(fpr, tpr, thresholds, g_count)
         return r_acc, tpr[fpr <= 0.001][-1]

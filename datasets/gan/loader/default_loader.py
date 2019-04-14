@@ -51,6 +51,7 @@ class DefaultLoader(data.Dataset):
     def __list_dirs(self, root_dir, dataset):
         imgA_list = list()
         imgB_list = list()
+
         imageA_dir = os.path.join(root_dir, dataset, 'imageA')
         imageB_dir = os.path.join(root_dir, dataset, 'imageB')
 

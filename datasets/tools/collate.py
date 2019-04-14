@@ -25,7 +25,6 @@ def stack(batch, data_key=None, trans_dict=None):
                    isinstance(batch[0], collections.Sequence)
             stacked = []
             if batch[0][data_key].samples_per_gpu:
-                assert len(batch) % trans_dict['samples_per_gpu'] == 0
                 for i in range(0, len(batch), trans_dict['samples_per_gpu']):
                     stacked.append(
                         default_collate([sample[data_key].data for sample in batch[i:i + trans_dict['samples_per_gpu']]])
@@ -42,7 +41,6 @@ def stack(batch, data_key=None, trans_dict=None):
         else:
             stacked = []
             if batch[0][data_key].samples_per_gpu:
-                assert len(batch) % trans_dict['samples_per_gpu'] == 0
                 for i in range(0, len(batch), trans_dict['samples_per_gpu']):
                     stacked.append([sample[data_key].data for sample in batch[i:i + trans_dict['samples_per_gpu']]])
             else:

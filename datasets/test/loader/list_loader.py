@@ -59,7 +59,7 @@ class ListLoader(data.Dataset):
                     Log.error('Image Path: {} is Invalid.'.format(img_path))
                     exit(1)
 
-                item_list.append((img_path, filename))
+                item_list.append((img_path, '.'.join(filename.split('.')[:-1])))
 
         Log.info('There are {} images..'.format(len(item_list)))
         return item_list

@@ -38,7 +38,7 @@ elif [[ "$1"x == "resume"x ]]; then
                        --checkpoints_name ${CHECKPOINTS_NAME}  2>&1 | tee -a ${LOG_FILE}
 
 elif [[ "$1"x == "test"x ]]; then
-  ${PYTHON} -u main.py --hypes ${HYPES_FILE} --phase test --gpu 0 \
+  ${PYTHON} -u main.py --hypes ${HYPES_FILE} --phase test --gpu 0 --log_to_file n \
                        --model_name ${MODEL_NAME} --checkpoints_name ${CHECKPOINTS_NAME} \
                        --resume ./checkpoints/gan/face/${CHECKPOINTS_NAME}_latest.pth \
                        --test_dir ${DATA_DIR}/val --out_dir test  2>&1 | tee -a ${LOG_FILE}

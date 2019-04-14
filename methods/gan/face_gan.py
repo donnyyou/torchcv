@@ -10,8 +10,10 @@ import torch
 from datasets.gan.data_loader import DataLoader
 from methods.tools.runner_helper import RunnerHelper
 from methods.tools.trainer import Trainer
+from methods.gan.face_gan_test import FaceGANTest
 from models.gan.model_manager import ModelManager
 from utils.tools.average_meter import AverageMeter
+from utils.helpers.dc_helper import DCHelper
 from utils.tools.logger import Logger as Log
 
 
@@ -59,7 +61,7 @@ class FaceGAN(object):
         # Adjust the learning rate after every epoch.
         for i, data_dict in enumerate(self.train_loader):
             Trainer.update(self, solver_dict=self.configer.get('solver'))
-            inputs = data_dict['img']
+            inputs = data_dict['imgA']
             self.data_time.update(time.time() - start_time)
 
             # Forward pass.
@@ -109,7 +111,7 @@ class FaceGAN(object):
 
         data_loader = self.val_loader if data_loader is None else data_loader
         for j, data_dict in enumerate(data_loader):
-            inputs = data_dict['img']
+            inputs = data_dict['imgA']
 
             with torch.no_grad():
                 # Forward pass.
@@ -117,6 +119,20 @@ class FaceGAN(object):
                 # Compute the loss of the val batch.
 
             self.val_losses.update(out_dict['loss'].mean().item(), inputs.size(0))
+            meta_list = DCHelper.tolist(data_dict['meta'])
+            probe_features = []
+            gallery_features = []
+            probe_labels = []
+            gallery_labels = []
+            for idx in range(len(meta_list)):
+                gallery_features.append(out_dict['featB'][idx].cpu().numpy())
+                gallery_labels.append(meta_list[idx]['labelB'])
+                probe_features.append(out_dict['featA'][idx].cpu().numpy())
+                probe_labels.append(meta_list[idx]['labelA'])
+
+            rank_1, vr_far_001 = FaceGANTest.decode(probe_features, gallery_features, probe_labels, gallery_labels)
+            Log.info('Rank1 accuracy is {}'.format(rank_1))
+            Log.info('VR@FAR=0.1% accuracy is {}'.format(vr_far_001))
             # Update the vars of the val phase.
             self.batch_time.update(time.time() - start_time)
             start_time = time.time()

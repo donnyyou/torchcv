@@ -24,7 +24,15 @@ class Pix2Pix(nn.Module):
 
     def forward(self, data_dict, testing=False):
         if testing:
-            return dict(fakeB=self.netG.forward(data_dict['imgA']))
+            out_dict = dict()
+            if 'imgA' in data_dict:
+                out_dict['realA'] = data_dict['imgA']
+                out_dict['fakeB'] = self.netG.forward(data_dict['imgA'])
+
+            if 'imgB' in data_dict:
+                out_dict['realB'] = data_dict['imgB']
+
+            return out_dict
 
         # First, G(A) should fake the discriminator
         fake_B = self.netG.forward(data_dict['imgA'])

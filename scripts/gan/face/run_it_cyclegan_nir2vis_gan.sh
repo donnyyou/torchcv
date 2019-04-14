@@ -12,7 +12,7 @@ DATA_DIR="/home/donny/DataSet/GAN/NIR2VIS"
 TAG="dev"
 
 MODEL_NAME="cyclegan"
-CHECKPOINTS_NAME="it_cyclegan_face_gan"$2
+CHECKPOINTS_NAME="it_cyclegan_nir2vis_gan"$2
 HYPES_FILE='hypes/gan/face/it_cyclegan_nir2vis_gan.json'
 MAX_EPOCH=200
 
@@ -26,7 +26,7 @@ fi
 
 
 if [[ "$1"x == "train"x ]]; then
-  ${PYTHON} -u main.py --hypes ${HYPES_FILE} --phase train --gpu 0 \
+  ${PYTHON} -u main.py --hypes ${HYPES_FILE} --phase train --gpu 1 \
                        --model_name ${MODEL_NAME} --log_to_file n --tag ${TAG} \
                        --data_dir ${DATA_DIR} --max_epoch ${MAX_EPOCH} \
                        --checkpoints_name ${CHECKPOINTS_NAME}  2>&1 | tee ${LOG_FILE}
@@ -39,7 +39,7 @@ elif [[ "$1"x == "resume"x ]]; then
                        --checkpoints_name ${CHECKPOINTS_NAME}  2>&1 | tee -a ${LOG_FILE}
 
 elif [[ "$1"x == "test"x ]]; then
-  ${PYTHON} -u main.py --hypes ${HYPES_FILE} --phase test --gpu 0 --tag ${TAG} \
+  ${PYTHON} -u main.py --hypes ${HYPES_FILE} --phase test --gpu 0 --tag ${TAG} --log_to_file n \
                        --model_name ${MODEL_NAME} --checkpoints_name ${CHECKPOINTS_NAME} \
                        --resume ./checkpoints/gan/face/${CHECKPOINTS_NAME}_latest.pth \
                        --test_dir ${DATA_DIR}/protocols --root_dir ${DATA_DIR} --out_dir test  2>&1 | tee -a ${LOG_FILE}
