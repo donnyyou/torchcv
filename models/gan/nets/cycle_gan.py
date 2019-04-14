@@ -99,4 +99,4 @@ class CycleGAN(nn.Module):
         # Combined loss
         loss_D_B = (loss_D_real_B + loss_D_fake_B) * 0.5
 
-        return dict(loss=loss_G + loss_D_A + loss_D_B)
+        return dict(loss_G=loss_G, loss_D=loss_D_A + loss_D_B)

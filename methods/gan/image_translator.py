@@ -41,14 +41,23 @@ class ImageTranslator(object):
         self.gan_net = self.model_manager.gan_model()
         self.gan_net = RunnerHelper.load_net(self, self.gan_net)
 
-        self.optimizer, self.scheduler = Trainer.init(self._get_parameters(), self.configer.get('solver'))
+        self.optimizer_G, self.scheduler_G = Trainer.init(self._get_parameters()[0], self.configer.get('solver'))
+        self.optimizer_D, self.scheduler_D = Trainer.init(self._get_parameters()[1], self.configer.get('solver'))
 
         self.train_loader = self.seg_data_loader.get_trainloader()
         self.val_loader = self.seg_data_loader.get_valloader()
 
     def _get_parameters(self):
+        params_G = []
+        params_D = []
+        params_dict = dict(self.gan_net.named_parameters())
+        for key, value in params_dict.items():
+            if 'G' not in key:
+                params_D.append(value)
+            else:
+                params_G.append(value)
 
-        return self.gan_net.parameters()
+        return params_G, params_D
 
     def train(self):
         """
@@ -57,19 +66,26 @@ class ImageTranslator(object):
         self.gan_net.train()
         start_time = time.time()
         # Adjust the learning rate after every epoch.
+        self.scheduler_G.step(self.runner_state['epoch'])
+        self.scheduler_D.step(self.runner_state['epoch'])
         for i, data_dict in enumerate(self.train_loader):
-            Trainer.update(self, solver_dict=self.configer.get('solver'))
             inputs = data_dict['imgA']
             self.data_time.update(time.time() - start_time)
 
             # Forward pass.
             out_dict = self.gan_net(data_dict)
             # outputs = self.module_utilizer.gather(outputs)
-            loss = out_dict['loss'].mean()
+            self.optimizer_G.zero_grad()
+            loss_G = out_dict['loss_G'].mean()
+            loss_G.backward()
+            self.optimizer_G.step()
+
+            self.optimizer_D.zero_grad()
+            loss_D = out_dict['loss_D'].mean()
+            loss_D.backward()
+            self.optimizer_D.step()
+            loss = loss_G + loss_D
             self.train_losses.update(loss.item(), inputs.size(0))
-            self.optimizer.zero_grad()
-            loss.backward()
-            self.optimizer.step()
 
             # Update the vars of the train phase.
             self.batch_time.update(time.time() - start_time)
@@ -84,8 +100,8 @@ class ImageTranslator(object):
                          'Learning rate = {3}\tLoss = {loss.val:.8f} (ave = {loss.avg:.8f})\n'.format(
                          self.runner_state['epoch'], self.runner_state['iters'],
                          self.configer.get('solver', 'display_iter'),
-                         RunnerHelper.get_lr(self.optimizer), batch_time=self.batch_time,
-                         data_time=self.data_time, loss=self.train_losses))
+                         [RunnerHelper.get_lr(self.optimizer_G), RunnerHelper.get_lr(self.optimizer_D)],
+                         batch_time=self.batch_time, data_time=self.data_time, loss=self.train_losses))
                 self.batch_time.reset()
                 self.data_time.reset()
                 self.train_losses.reset()
@@ -116,13 +132,12 @@ class ImageTranslator(object):
                 out_dict = self.gan_net(data_dict)
                 # Compute the loss of the val batch.
 
-            self.val_losses.update(out_dict['loss'].mean().item(), inputs.size(0))
+            self.val_losses.update(out_dict['loss_G'].mean().item() + out_dict['loss_D'].mean().item(), inputs.size(0))
             # Update the vars of the val phase.
             self.batch_time.update(time.time() - start_time)
             start_time = time.time()
 
-        RunnerHelper.save_net(self, self.gan_net,
-                              val_loss=self.val_losses.avg)
+        RunnerHelper.save_net(self, self.gan_net, val_loss=self.val_losses.avg)
 
         # Print the log info & reset the states.
         Log.info(
