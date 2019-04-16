@@ -103,15 +103,15 @@
       },
       "use_dropout": false,
       "norm_type": "instancenorm",
-      "model_name": "face_gan",
-      "checkpoints_name": "fg_lightcnn_face_gan",
+      "model_name": "cyclegan",
+      "checkpoints_name": "it_cyclegan_nir2vis_gan",
       "checkpoints_dir": "checkpoints/gan/face",
       "imgpool_size": 50
     },
     "logging": {
       "logfile_level": "info",
       "stdout_level": "info",
-      "log_file": "./log/gan/fg_lightcnn_face_gan.log",
+      "log_file": "./log/gan/it_cyclegan_nir2vis_gan.log",
       "log_format": "%(asctime)s %(levelname)-7s %(message)s",
       "rewrite": true
     },
