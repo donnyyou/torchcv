@@ -58,10 +58,10 @@ class CycleGAN(nn.Module):
         # Identity loss
         # G_A should be identity if real_B is fed.
         idt_B = self.netG_A.forward(data_dict['imgB'])
-        loss_idt_A = self.criterionIdt(idt_B, data_dict['imgB']) * idtA_loss_weight
+        loss_idt_A = self.criterionIdt(idt_B, data_dict['imgB']) * idtB_loss_weight
         # G_B should be identity if real_A is fed.
         idt_A = self.netG_B.forward(data_dict['imgA'])
-        loss_idt_B = self.criterionIdt(idt_A, data_dict['imgA']) * idtB_loss_weight
+        loss_idt_B = self.criterionIdt(idt_A, data_dict['imgA']) * idtA_loss_weight
 
         # GAN loss
         # D_A(G_A(A))
@@ -94,7 +94,7 @@ class CycleGAN(nn.Module):
         D_real_B = self.netD_B.forward(data_dict['imgB'])
         loss_D_real_B = self.criterionGAN(D_real_B, True)
         # Fake
-        D_fake_B = self.netD_A.forward(D_fake_B.detach())
+        D_fake_B = self.netD_B.forward(D_fake_B.detach())
         loss_D_fake_B = self.criterionGAN(D_fake_B, False)
         # Combined loss
         loss_D_B = (loss_D_real_B + loss_D_fake_B) * 0.5
