@@ -1,12 +1,7 @@
-##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-## Created by: Hang Zhang
-## ECE Department, Rutgers University
-## Email: zhang.hang@rutgers.edu
-## Copyright (c) 2017
-##
-## This source code is licensed under the MIT-style license found in the
-## LICENSE file in the root directory of this source tree
-##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Created by: Hang Zhang (https://github.com/zhanghang1989/PyTorch-Encoding)
+# Updated by: Donny You
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 """Encoding Data Parallel"""
 import functools
@@ -19,6 +14,7 @@ from torch.nn.parallel._functions import Broadcast
 from torch.nn.parallel.data_parallel import DataParallel
 from torch.nn.parallel.parallel_apply import get_a_var
 from torch.nn.parallel.scatter_gather import gather
+from torch._six import container_abcs
 
 from .scatter_gather import scatter_kwargs
 
@@ -108,9 +104,10 @@ class DataParallelCriterion(DataParallel):
     def scatter(self, inputs, kwargs, device_ids):
         return scatter_kwargs(inputs, kwargs, device_ids, dim=self.dim)
 
-    def forward(self, inputs, *targets, gathered=True, **kwargs):
+    def forward(self, inputs, targets, gathered=True, **kwargs):
         # input should be already scatterd
         # scattering the targets instead
+        targets = targets if isinstance(targets, (list, tuple)) else [targets]
         if gathered:
             if isinstance(inputs, (list, tuple)):
                 inputs, _ = self.scatter(inputs, kwargs, self.device_ids)
@@ -128,7 +125,15 @@ class DataParallelCriterion(DataParallel):
         replicas = self.replicate(self.module, self.device_ids[:len(inputs)])
         # targets = tuple(targets_per_gpu[0] for targets_per_gpu in targets)
         outputs = _criterion_parallel_apply(replicas, inputs, targets, kwargs)
-        return Reduce.apply(*outputs) / len(outputs)
+        if isinstance(outputs[0], container_abcs.Mapping):
+            return {key: (Reduce.apply(*[d[key] for d in outputs]) / len(outputs)) for key in outputs[0]}
+
+        elif isinstance(outputs[0], container_abcs.Sequence):
+            transposed = zip(*outputs)
+            return [Reduce.apply(*samples) / len(outputs) for samples in transposed]
+
+        else:
+            return Reduce.apply(*outputs) / len(outputs)
 
 
 def _criterion_parallel_apply(modules, inputs, targets, kwargs_tup=None, devices=None):
