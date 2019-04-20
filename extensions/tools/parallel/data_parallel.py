@@ -1,5 +1,5 @@
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Created by: Hang Zhang (https://github.com/donnyyou/PyTorch-Encoding)
+# Created by: Hang Zhang (https://github.com/zhanghang1989/PyTorch-Encoding)
 # Updated by: Donny You
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
