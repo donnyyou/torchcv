@@ -20,9 +20,11 @@ def stack(batch, data_key=None, trans_dict=None):
     if isinstance(batch[0][data_key], DataContainer):
         if batch[0][data_key].stack:
             assert isinstance(batch[0][data_key].data, torch.Tensor) or \
-                   isinstance(batch[0], int_classes) or isinstance(batch[0], float) or \
-                   isinstance(batch[0], string_classes) or isinstance(batch[0], collections.Mapping) or\
-                   isinstance(batch[0], collections.Sequence)
+                   isinstance(batch[0][data_key].data, int_classes) or \
+                   isinstance(batch[0][data_key].data, float) or \
+                   isinstance(batch[0][data_key].data, string_classes) or \
+                   isinstance(batch[0][data_key].data, collections.Mapping) or \
+                   isinstance(batch[0][data_key].data, collections.Sequence)
             stacked = []
             if batch[0][data_key].samples_per_gpu:
                 for i in range(0, len(batch), trans_dict['samples_per_gpu']):
