@@ -91,7 +91,7 @@ class RandomPad(object):
         return img, labelmap, maskmap, kpts, bboxes, labels, polygons
 
 
-class Padding(object):
+class RandomBorder(object):
     """ Padding the Image to proper size.
             Args:
                 stride: the stride of the network.
@@ -1141,7 +1141,7 @@ PIL_AUGMENTATIONS_DICT = {
     'random_gauss_blur': RandomGaussBlur,
     'random_hsv': RandomHSV,
     'random_pad': RandomPad,
-    'padding': Padding,
+    'random_border': RandomBorder,
     'random_hflip': RandomHFlip,
     'random_resize': RandomResize,
     'random_crop': RandomCrop,

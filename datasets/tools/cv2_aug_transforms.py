@@ -93,7 +93,7 @@ class RandomPad(object):
         return img, labelmap, maskmap, kpts, bboxes, labels, polygons
 
 
-class Padding(object):
+class RandomBorder(object):
     """ Padding the Image to proper size.
             Args:
                 stride: the stride of the network.
@@ -1108,7 +1108,7 @@ CV2_AUGMENTATIONS_DICT = {
     'random_contrast': RandomContrast,
     'random_brightness': RandomBrightness,
     'random_pad': RandomPad,
-    'padding': Padding,
+    'random_border': RandomBorder,
     'random_hflip': RandomHFlip,
     'random_resize': RandomResize,
     'random_crop': RandomCrop,
