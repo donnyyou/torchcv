@@ -32,7 +32,7 @@ class DetVisualizer(object):
         base_dir = os.path.join(self.configer.get('project_dir'), DET_DIR, sub_dir)
 
         if isinstance(image_in, Image.Image):
-            image = ImageHelper.rgb2bgr(ImageHelper.img2np(image_in))
+            image = ImageHelper.rgb2bgr(ImageHelper.to_np(image_in))
 
         else:
             image = image_in.copy()

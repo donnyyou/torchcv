@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 # Author: Donny You (youansheng@gmail.com)
+# Image Augmentations implemented by OpenCV. Including RandomPad, RandomRotate, RandomResize etc.
 
 
 import collections
@@ -9,36 +10,32 @@ import math
 import cv2
 import numpy as np
 
-from utils.tools.logger import Logger as Log
-
 
 class RandomPad(object):
-    """ Padding the Image to proper size.
-            Args:
-                stride: the stride of the network.
-                pad_value: the value that pad to the image border.
-                img: Image object as input.
+    """Random Pad a ``np.ndarray``
 
-            Returns::
-                img: Image object.
+    Args:
+        inputs: All elements that need to be processed.
+        up_scale_range: (list): the padding scale range of the image.
+        mean: (list): the mean pixel value.
+        ratio: the ratio of random pad.
+
+    Returns:
+        Outputs: All elements that have been processed.
     """
-
     def __init__(self, up_scale_range=None, ratio=0.5, mean=(104, 117, 123)):
-        # do something
         assert isinstance(up_scale_range, (list, tuple))
         self.up_scale_range = up_scale_range
         self.ratio = ratio
-        self.mean = mean
+        self.mean = tuple(mean)
 
     def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
         assert isinstance(img, (np.ndarray, list))
         assert labelmap is None or isinstance(labelmap, np.ndarray)
         assert maskmap is None or isinstance(maskmap, np.ndarray)
-
         if random.random() > self.ratio:
             return img, labelmap, maskmap, kpts, bboxes, labels, polygons
 
-        # height, width, channels = img.shape
         height, width, channels = img.shape if isinstance(img, np.ndarray) else img[0].shape
         ws = random.uniform(self.up_scale_range[0], self.up_scale_range[1])
         hs = ws
@@ -52,15 +49,10 @@ class RandomPad(object):
             if ws >= 1 and hs >= 1:
                 break
 
-        w = int(ws * width)
-        h = int(hs * height)
-
-        pad_width = random.randint(0, w - width)
-        pad_height = random.randint(0, h - height)
-
+        pad_width = random.randint(0, int(ws * width) - width)
+        pad_height = random.randint(0, int(hs * height) - height)
         left_pad = random.randint(0, pad_width)  # pad_left
         up_pad = random.randint(0, pad_height)  # pad_up
-
         if not isinstance(img, list):
             img = cv2.copyMakeBorder(img, up_pad, pad_height-up_pad, left_pad, pad_width-left_pad,
                                      cv2.BORDER_CONSTANT, value=self.mean)
@@ -102,7 +94,6 @@ class RandomBorder(object):
             Returns::
                 img: Image object.
     """
-
     def __init__(self, pad=None, ratio=0.5, mean=(104, 117, 123), allow_outside_center=True):
         self.pad = pad
         self.ratio = ratio
@@ -117,10 +108,8 @@ class RandomBorder(object):
         if random.random() > self.ratio:
             return img, labelmap, maskmap, kpts, bboxes, labels, polygons
 
-        # height, width, channels = img.shape
         height, width, channels = img.shape if isinstance(img, np.ndarray) else img[0].shape
         left_pad, up_pad, right_pad, down_pad = self.pad
-
         target_size = [width + left_pad + right_pad, height + up_pad + down_pad]
         offset_left = -left_pad
         offset_up = -up_pad
@@ -227,6 +216,10 @@ class RandomHFlip(object):
 
         if labelmap is not None:
             labelmap = cv2.flip(labelmap, 1)
+            for pair in self.swap_pair:
+                a_mask = (labelmap == pair[0])
+                labelmap[labelmap == pair[1]] = pair[0]
+                labelmap[a_mask] = pair[1]
 
         if maskmap is not None:
             maskmap = cv2.flip(maskmap, 1)
@@ -333,14 +326,12 @@ class RandomContrast(object):
         assert isinstance(img, np.ndarray)
         assert labelmap is None or isinstance(labelmap, np.ndarray)
         assert maskmap is None or isinstance(maskmap, np.ndarray)
-
         if random.random() > self.ratio:
             return img, labelmap, maskmap, kpts, bboxes, labels, polygons
 
         img = img.astype(np.float32)
         img *= random.uniform(self.lower, self.upper)
         img = np.clip(img, 0, 255).astype(np.uint8)
-
         return img, labelmap, maskmap, kpts, bboxes, labels, polygons
 
 
@@ -353,7 +344,6 @@ class RandomBrightness(object):
         assert isinstance(img, np.ndarray)
         assert labelmap is None or isinstance(labelmap, np.ndarray)
         assert maskmap is None or isinstance(maskmap, np.ndarray)
-
         if random.random() > self.ratio:
             return img, labelmap, maskmap, kpts, bboxes, labels, polygons
 
@@ -362,7 +352,6 @@ class RandomBrightness(object):
         img[:, :, :] += shift
         img = np.around(img)
         img = np.clip(img, 0, 255).astype(np.uint8)
-
         return img, labelmap, maskmap, kpts, bboxes, labels, polygons
 
 
@@ -380,7 +369,6 @@ class RandomResizedCrop(object):
         ratio: range of aspect ratio of the origin aspect ratio cropped
         interpolation: Default: PIL.Image.BILINEAR
     """
-
     def __init__(self, size, scale_range=(0.08, 1.0), aspect_range=(3. / 4., 4. / 3.)):
         self.size = tuple(size)
         self.scale = scale_range
@@ -444,7 +432,6 @@ class RandomResize(object):
         scale_min: the min scale to resize.
         scale_max: the max scale to resize.
     """
-
     def __init__(self, scale_range=(0.75, 1.25), aspect_range=(0.9, 1.1), target_size=None,
                  resize_bound=None, method='random', ratio=0.5):
         self.scale_range = scale_range
@@ -487,8 +474,7 @@ class RandomResize(object):
             return scale
 
         else:
-            Log.error('Resize method {} is invalid.'.format(self.method))
-            exit(1)
+            raise NotImplementedError('Resize method {} undefined!'.format(self.method))
 
     def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
         """
@@ -507,8 +493,6 @@ class RandomResize(object):
         assert isinstance(img, (np.ndarray, list))
         assert labelmap is None or isinstance(labelmap, np.ndarray)
         assert maskmap is None or isinstance(maskmap, np.ndarray)
-
-        # height, width, _ = img.shape
         height, width, _ = img.shape if isinstance(img, np.ndarray) else img[0].shape
         if random.random() < self.ratio:
             scale_ratio = self.get_scale([width, height], bboxes)
@@ -553,7 +537,6 @@ class RandomRotate(object):
     Args:
         degree (number): Desired rotate degree.
     """
-
     def __init__(self, max_degree, ratio=0.5, mean=(104, 117, 123)):
         assert isinstance(max_degree, int)
         self.max_degree = max_degree
@@ -575,17 +558,13 @@ class RandomRotate(object):
         assert isinstance(img, (np.ndarray, list))
         assert labelmap is None or isinstance(labelmap, np.ndarray)
         assert maskmap is None or isinstance(maskmap, np.ndarray)
-
         if random.random() < self.ratio:
             rotate_degree = random.uniform(-self.max_degree, self.max_degree)
         else:
             return img, labelmap, maskmap, kpts, bboxes, labels, polygons
 
-        # height, width, _ = img.shape
         height, width, _ = img.shape if isinstance(img, np.ndarray) else img[0].shape
-
         img_center = (width / 2.0, height / 2.0)
-
         rotate_mat = cv2.getRotationMatrix2D(img_center, rotate_degree, 1.0)
         cos_val = np.abs(rotate_mat[0, 0])
         sin_val = np.abs(rotate_mat[0, 1])
@@ -665,7 +644,6 @@ class RandomCrop(object):
         self.method = method
         self.grid = grid
         self.allow_outside_center = allow_outside_center
-
         if isinstance(crop_size, float):
             self.size = (crop_size, crop_size)
         elif isinstance(crop_size, collections.Iterable) and len(crop_size) == 2:
@@ -690,8 +668,7 @@ class RandomCrop(object):
             return [x, y]
 
         else:
-            Log.error('Crop method {} is invalid.'.format(self.method))
-            exit(1)
+            raise NotImplementedError('Random Crop Method {} Undefined!'.format(self.method))
 
     def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
         """
@@ -708,16 +685,12 @@ class RandomCrop(object):
         assert isinstance(img, (np.ndarray, list))
         assert labelmap is None or isinstance(labelmap, np.ndarray)
         assert maskmap is None or isinstance(maskmap, np.ndarray)
-
         if random.random() > self.ratio:
             return img, labelmap, maskmap, kpts, bboxes, labels, polygons
 
         height, width, _ = img.shape if isinstance(img, np.ndarray) else img[0].shape
         target_size = [min(self.size[0], width), min(self.size[1], height)]
-
         offset_left, offset_up = self.get_lefttop(target_size, [width, height])
-
-        # img = ImageHelper.draw_box(img, bboxes[index])
         if kpts is not None and kpts.size > 0:
             kpts[:, :, 0] -= offset_left
             kpts[:, :, 1] -= offset_up
@@ -734,7 +707,6 @@ class RandomCrop(object):
             bboxes[:, 1::2] -= offset_up
             bboxes[:, 0::2] = np.clip(bboxes[:, 0::2], 0, target_size[0] - 1)
             bboxes[:, 1::2] = np.clip(bboxes[:, 1::2], 0, target_size[1] - 1)
-
             mask = np.logical_and(mask, (bboxes[:, :2] < bboxes[:, 2:]).all(axis=1))
             bboxes = bboxes[mask]
             if labels is not None:
@@ -777,13 +749,11 @@ class RandomFocusCrop(object):
     Args:
         size (int or tuple): Desired output size of the crop.(w, h)
     """
-
     def __init__(self, crop_size, ratio=0.5, center_jitter=None, mean=(104, 117, 123), allow_outside_center=True):
         self.ratio = ratio
         self.center_jitter = center_jitter
         self.mean = mean
         self.allow_outside_center = allow_outside_center
-
         if isinstance(crop_size, float):
             self.size = (crop_size, crop_size)
         elif isinstance(crop_size, collections.Iterable) and len(crop_size) == 2:
@@ -895,7 +865,6 @@ class RandomFocusCrop(object):
                      abs(min(offset_left, 0)):abs(min(offset_left, 0)) + width] = img
         img = expand_image[max(offset_up, 0):max(offset_up, 0) + self.size[1],
                            max(offset_left, 0):max(offset_left, 0) + self.size[0]]
-
         if maskmap is not None:
             expand_maskmap = np.zeros((max(height, self.size[1]) + abs(offset_up),
                                        max(width, self.size[0]) + abs(offset_left)), dtype=maskmap.dtype)
@@ -930,7 +899,6 @@ class RandomDetCrop(object):
             boxes (Tensor): the adjusted bounding boxes in pt form
             labels (Tensor): the class labels for each bbox
     """
-
     def __init__(self, ratio=0.5):
         self.ratio = ratio
         self.sample_options = (
@@ -1045,7 +1013,6 @@ class Resize(object):
         scale_min: the min scale to resize.
         scale_max: the max scale to resize.
     """
-
     def __init__(self, target_size=None, min_side_length=None, max_side_length=None):
         self.target_size = target_size
         self.min_side_length = min_side_length
@@ -1055,8 +1022,6 @@ class Resize(object):
         assert isinstance(img, (np.ndarray, list))
         assert labelmap is None or isinstance(labelmap, np.ndarray)
         assert maskmap is None or isinstance(maskmap, np.ndarray)
-
-        # height, width, _ = img.shape
         height, width, _ = img.shape if isinstance(img, np.ndarray) else img[0].shape
         if self.target_size is not None:
             target_size = self.target_size
@@ -1131,7 +1096,6 @@ class CV2AugCompose(object):
         >>>     RandomCrop(),
         >>> ])
     """
-
     def __init__(self, configer, split='train'):
         self.configer = configer
         self.transforms = dict()

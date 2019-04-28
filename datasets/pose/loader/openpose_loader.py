@@ -38,7 +38,7 @@ class OpenPoseLoader(data.Dataset):
         else:
             maskmap = np.ones((img.size[1], img.size[0]), dtype=np.uint8)
             if self.configer.get('data', 'image_tool') == 'pil':
-                maskmap = ImageHelper.np2img(maskmap)
+                maskmap = ImageHelper.to_img(maskmap)
 
         kpts, bboxes = self.__read_json_file(self.json_list[index])
 

@@ -37,7 +37,7 @@ class DefaultLoader(data.Dataset):
         if self.configer.exists('data', 'reduce_zero_label'):
             labelmap = self._reduce_zero_label(labelmap)
 
-        ori_target = ImageHelper.tonp(labelmap)
+        ori_target = ImageHelper.to_np(labelmap)
 
         if self.aug_transform is not None:
             img, labelmap = self.aug_transform(img, labelmap=labelmap)
@@ -70,7 +70,7 @@ class DefaultLoader(data.Dataset):
         labelmap = labelmap - 1
         labelmap[labelmap == 254] = 255
         if self.configer.get('data', 'image_tool') == 'pil':
-            labelmap = ImageHelper.np2img(labelmap.astype(np.uint8))
+            labelmap = ImageHelper.to_img(labelmap.astype(np.uint8))
 
         return labelmap
 
@@ -83,7 +83,7 @@ class DefaultLoader(data.Dataset):
             encoded_labelmap[labelmap == class_id] = i
 
         if self.configer.get('data', 'image_tool') == 'pil':
-            encoded_labelmap = ImageHelper.np2img(encoded_labelmap.astype(np.uint8))
+            encoded_labelmap = ImageHelper.to_img(encoded_labelmap.astype(np.uint8))
 
         return encoded_labelmap
 

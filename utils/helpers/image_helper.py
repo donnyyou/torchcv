@@ -53,7 +53,7 @@ class ImageHelper(object):
             return img_bgr
 
         elif mode == 'P':
-            return ImageHelper.img2np(Image.open(image_path).convert('P'))
+            return ImageHelper.to_np(Image.open(image_path).convert('P'))
 
         else:
             Log.error('Not support mode {}'.format(mode))
@@ -67,11 +67,6 @@ class ImageHelper(object):
             if mode == 'RGB':
                 return img.convert('RGB')
 
-            elif mode == 'BGR':
-                img = img.convert('RGB')
-                cv_img = ImageHelper.rgb2bgr(np.array(img))
-                return Image.fromarray(cv_img)
-
             elif mode == 'P':
                 return img.convert('P')
 
@@ -81,19 +76,13 @@ class ImageHelper(object):
 
     @staticmethod
     def rgb2bgr(img_rgb):
-        if isinstance(img_rgb, Image.Image):
-            img_bgr = ImageHelper.rgb2bgr(ImageHelper.img2np(img_rgb))
-            return ImageHelper.np2img(img_bgr)
-
+        assert isinstance(img_rgb, np.ndarray)
         img_bgr = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2BGR)
         return img_bgr
 
     @staticmethod
     def bgr2rgb(img_bgr):
-        if isinstance(img_bgr, Image.Image):
-            img_rgb = ImageHelper.bgr2rgb(ImageHelper.img2np(img_bgr))
-            return ImageHelper.np2img(img_rgb)
-
+        assert isinstance(img_bgr, np.ndarray)
         img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
         return img_rgb
 
@@ -131,7 +120,7 @@ class ImageHelper(object):
     @staticmethod
     def get_cv2_bgr(img, mode='RGB'):
         if isinstance(img, Image.Image):
-            img = ImageHelper.img2np(img)
+            img = ImageHelper.to_np(img)
 
         if mode == 'RGB':
             img_bgr = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
@@ -142,13 +131,16 @@ class ImageHelper(object):
     @staticmethod
     def imshow(win_name, img, time=0):
         if isinstance(img, Image.Image):
-            img = ImageHelper.rgb2bgr(ImageHelper.img2np(img))
+            img = ImageHelper.rgb2bgr(ImageHelper.to_np(img))
 
         cv2.imshow(win_name, img)
         cv2.waitKey(time)
 
     @staticmethod
-    def np2img(arr):
+    def to_img(arr):
+        if isinstance(arr, Image.Image):
+            return arr
+
         if len(arr.shape) == 2:
             mode = 'P'
         else:
@@ -157,15 +149,8 @@ class ImageHelper(object):
         return Image.fromarray(arr, mode=mode)
 
     @staticmethod
-    def img2np(img):
-        return np.array(img)
-
-    @staticmethod
-    def tonp(img):
-        if isinstance(img, Image.Image):
-            img = ImageHelper.img2np(img)
-
-        return img.astype(np.uint8)
+    def to_np(img):
+        return np.asarray(img)
 
     @staticmethod
     def get_size(img):
@@ -184,48 +169,11 @@ class ImageHelper(object):
     def resize(img, target_size, interpolation=None):
         assert isinstance(target_size, (list, tuple))
         assert isinstance(interpolation, str)
-
-        target_size = tuple(target_size)
         if isinstance(img, Image.Image):
-            return ImageHelper.pil_resize(img, target_size, interpolation=PIL_INTER_DICT[interpolation])
+            return img.resize(tuple(target_size), PIL_INTER_DICT[interpolation])
 
         elif isinstance(img, np.ndarray):
-            return ImageHelper.cv2_resize(img, target_size, interpolation=CV2_INTER_DICT[interpolation])
-
-        else:
-            Log.error('Image type is invalid.')
-            exit(1)
-
-    @staticmethod
-    def pil_resize(img, target_size, interpolation):
-        assert isinstance(target_size, (list, tuple))
-
-        target_size = tuple(target_size)
-
-        if isinstance(img, Image.Image):
-            return img.resize(target_size, interpolation)
-
-        elif isinstance(img, np.ndarray):
-            pil_img = ImageHelper.np2img(img)
-            return ImageHelper.img2np(pil_img.resize(target_size, interpolation))
-
-        else:
-            Log.error('Image type is invalid.')
-            exit(1)
-
-    @staticmethod
-    def cv2_resize(img, target_size, interpolation):
-        assert isinstance(target_size, (list, tuple))
-
-        target_size = tuple(target_size)
-
-        if isinstance(img, Image.Image):
-            img = ImageHelper.img2np(img)
-            target_img = cv2.resize(img, target_size, interpolation=interpolation)
-            return ImageHelper.np2img(target_img)
-
-        elif isinstance(img, np.ndarray):
-            return cv2.resize(img, target_size, interpolation=interpolation)
+            return cv2.resize(img, tuple(target_size), interpolation=CV2_INTER_DICT[interpolation])
 
         else:
             Log.error('Image type is invalid.')
@@ -319,7 +267,7 @@ if __name__ == "__main__":
     target_size = (368, 368)
     image_path = '/home/donny/Projects/PyTorchCV/val/samples/pose/coco/ski.jpg'
     pil_img = ImageHelper.cv2_read_image(image_path)
-    pil_img = ImageHelper.np2img(pil_img)
+    pil_img = ImageHelper.to_img(pil_img)
     cv2_img = ImageHelper.cv2_read_image(image_path)
     ImageHelper.imshow('main', np.array(pil_img) - cv2_img)
 
