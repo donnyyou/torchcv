@@ -8,7 +8,6 @@ import torch
 
 from models.seg.nets.denseassp import DenseASPP
 from models.seg.nets.deeplabv3 import DeepLabV3
-from models.seg.nets.embednet import EmbedNet
 from models.seg.nets.pspnet import PSPNet
 from models.seg.loss.seg_modules import FSCELoss, FSOhemCELoss, FSAuxCELoss, FSAuxEncCELoss, FSAuxOhemCELoss
 from utils.tools.logger import Logger as Log
@@ -16,7 +15,6 @@ from utils.tools.logger import Logger as Log
 SEG_MODEL_DICT = {
     'deeplabv3': DeepLabV3,
     'pspnet': PSPNet,
-    'embednet': EmbedNet,
     'denseaspp': DenseASPP
 }
 
