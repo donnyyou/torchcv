@@ -61,12 +61,10 @@ class FCNSegmentorTest(object):
                 exit(1)
 
             meta_list = DCHelper.tolist(data_dict['meta'])
-            img_list = DCHelper.tolist(data_dict['img'])
             for i in range(len(meta_list)):
                 label_map = np.argmax(total_logits[i], axis=-1)
                 label_img = np.array(label_map, dtype=np.uint8)
-                ori_img_bgr = self.blob_helper.tensor2bgr(img_list[i][0])
-                ori_img_bgr = ImageHelper.resize(ori_img_bgr, target_size=meta_list[i]['ori_img_size'], interpolation='linear')
+                ori_img_bgr = ImageHelper.read_image(meta_list[i]['img_path'], tool='cv2', mode='bgr')
                 image_canvas = self.seg_parser.colorize(label_img, image_canvas=ori_img_bgr)
                 ImageHelper.save(image_canvas,
                                  save_path=os.path.join(out_dir, 'vis/{}.png'.format(meta_list[i]['filename'])))

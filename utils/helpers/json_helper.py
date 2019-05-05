@@ -24,13 +24,13 @@ class JsonHelper(object):
         return json_dict
 
     @staticmethod
-    def save_file(json_dict, json_file):
-        dir_name = os.path.dirname(json_file)
+    def save_file(json_dict, save_path):
+        dir_name = os.path.dirname(save_path)
         if not os.path.exists(dir_name):
             Log.info('Json Dir: {} not exists.'.format(dir_name))
             os.makedirs(dir_name)
 
-        with open(json_file, 'w') as write_stream:
+        with open(save_path, 'w') as write_stream:
             write_stream.write(json.dumps(json_dict))
 
     @staticmethod

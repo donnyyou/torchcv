@@ -296,10 +296,6 @@ class FRLoss(nn.Module):
         roi_loc_loss = self.fr_loc_loss(pred_roi_cls_locs, gt_roi_cls_locs,
                                         gt_roi_labels, self.configer.get('loss', 'params')['roi_sigma'])
         roi_cls_loss = F.cross_entropy(pred_roi_scores, gt_roi_labels, ignore_index=-1)
-        # Log.info('rpn loc {}'.format(rpn_loc_loss))
-        # Log.info('rpn cls {}'.format(rpn_cls_loss))
-        # Log.info('roi loc {}'.format(roi_loc_loss))
-        # Log.info('roi cls {}'.format(roi_cls_loss))
         rpn_loss = (rpn_loc_loss + rpn_cls_loss) * self.configer.get('loss', 'loss_weights')['rpn_loss']
         roi_loss = (roi_loc_loss + roi_cls_loss) * self.configer.get('loss', 'loss_weights')['roi_loss']
         return rpn_loss + roi_loss

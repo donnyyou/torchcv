@@ -21,7 +21,7 @@ class YOLODetectionLayer(object):
         for i in range(len(layer_out_list)):
             batch_size, _, grid_size_h, grid_size_w = layer_out_list[i].size()
             feat_stride = self.configer.get('network', 'stride_list')[i]
-            in_anchors = self.configer.get('gt', 'anchors_list')[i]
+            in_anchors = self.configer.get('anchor', 'anchors_list')[i]
             bbox_attrs = 4 + 1 + num_classes
             num_anchors = len(in_anchors)
 
@@ -48,8 +48,8 @@ class YOLODetectionLayer(object):
             grid_len_w = np.arange(grid_size_w)
             a, b = np.meshgrid(grid_len_w, grid_len_h)
 
-            x_offset = torch.FloatTensor(a).view(-1, 1)
-            y_offset = torch.FloatTensor(b).view(-1, 1)
+            x_offset = torch.from_numpy(a).float().view(-1, 1)
+            y_offset = torch.from_numpy(b).float().view(-1, 1)
 
             x_offset = x_offset.to(self.device)
             y_offset = y_offset.to(self.device)
@@ -60,10 +60,7 @@ class YOLODetectionLayer(object):
             detect_out[:, :, :2] += x_y_offset
 
             # log space transform height and the width
-            anchors = torch.FloatTensor(anchors)
-
-            anchors = anchors.to(self.device)
-
+            anchors = torch.from_numpy(anchors).to(self.device)
             anchors = anchors.contiguous().view(3, 1, 2)\
                 .repeat(1, grid_size_h * grid_size_w, 1).contiguous().view(-1, 2).unsqueeze(0)
             detect_out[:, :, 2:4] = torch.exp(detect_out[:, :, 2:4]) * anchors
@@ -73,6 +70,15 @@ class YOLODetectionLayer(object):
             detect_out[:, :, 2] /= grid_size_w
             detect_out[:, :, 3] /= grid_size_h
 
+            box_corner = detect_out.new(detect_out.shape)
+            box_corner[:, 0] = detect_out[:, 0] - detect_out[:, 2] / 2
+            box_corner[:, 1] = detect_out[:, 1] - detect_out[:, 3] / 2
+            box_corner[:, 2] = detect_out[:, 0] + detect_out[:, 2] / 2
+            box_corner[:, 3] = detect_out[:, 1] + detect_out[:, 3] / 2
+            # clip bounding box
+            box_corner[:, 0::2] = box_corner[:, 0::2].clamp(min=0, max=1.0)
+            box_corner[:, 1::2] = box_corner[:, 1::2].clamp(min=0, max=1.0)
+            detect_out[:, :4] = box_corner[:, :4]
             detect_list.append(detect_out)
 
         return layer_out_list, torch.cat(prediction_list, 1), torch.cat(detect_list, 1)
