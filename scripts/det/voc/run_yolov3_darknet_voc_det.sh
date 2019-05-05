@@ -8,12 +8,12 @@ export PYTHONPATH="/home/donny/Projects/TorchCV":$PYTHONPATH
 
 cd ../../../
 
-DATA_DIR="/home/donny/DataSet/VOC07_DET"
-MODEL_NAME="faster_rcnn"
-LOSS_TYPE="fr_loss"
-CHECKPOINTS_NAME="fr_vgg16_voc_det"$2
-PRETRAINED_MODEL="./pretrained_models/faster_rcnn_vgg16_caffe_pretrained.pth"
-HYPES_FILE='hypes/det/voc/fr_vgg16_voc_det.json'
+DATA_DIR="/home/donny/DataSet/VOC07+12_DET"
+MODEL_NAME="yolov3"
+LOSS_TYPE="yolov3_loss"
+CHECKPOINTS_NAME="yolov3_darknet_voc_det"$2
+PRETRAINED_MODEL="./pretrained_models/darknet53_pretrained.pth"
+HYPES_FILE='hypes/det/voc/yolov3_darknet_voc_det.json'
 
 LOG_DIR="./log/det/voc/"
 LOG_FILE="${LOG_DIR}${CHECKPOINTS_NAME}.log"
