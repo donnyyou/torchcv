@@ -73,8 +73,15 @@
       }
     },
     "test": {
-      "input_size": [416, 416],
-      "scale_search": [1.0]
+      "batch_size": 64,
+      "aug_trans": {
+        "trans_seq": []
+      },
+      "data_transformer": {
+        "size_mode": "fix_size",
+        "input_size": [416, 416],
+        "align_method": "only_scale"
+      }
     },
     "anchor": {
       "anchors_list": [
