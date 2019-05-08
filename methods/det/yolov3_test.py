@@ -40,13 +40,12 @@ class YOLOv3Test(object):
         for i, data_dict in enumerate(self.test_loader.get_testloader(test_dir=test_dir)):
             detections = self.det_net(data_dict, testing=True)
             meta_list = DCHelper.tolist(data_dict['meta'])
+            batch_detections = self.decode(detections, self.configer, meta_list[i])
             for i in range(len(meta_list)):
                 ori_img_bgr = ImageHelper.read_image(meta_list[i]['img_path'], tool='cv2', mode='bgr')
-                detections = self.decode(detections, self.configer, meta_list[i])
-                json_dict = self.__get_info_tree(detections)
-                image_canvas = self.det_parser.draw_bboxes(ori_img_bgr.copy(),
-                                                   json_dict,
-                                                   conf_threshold=self.configer.get('res', 'vis_conf_thre'))
+                json_dict = self.__get_info_tree(batch_detections[i])
+                image_canvas = self.det_parser.draw_bboxes(ori_img_bgr.copy(), json_dict,
+                                                           conf_threshold=self.configer.get('res', 'vis_conf_thre'))
                 ImageHelper.save(image_canvas,
                                  save_path=os.path.join(out_dir, 'vis/{}.png'.format(meta_list[i]['filename'])))
 
@@ -55,13 +54,14 @@ class YOLOv3Test(object):
                                      save_path=os.path.join(out_dir, 'json/{}.json'.format(meta_list[i]['filename'])))
 
     @staticmethod
-    def decode(pred_bboxes, configer, meta):
-        pred_bboxes[:, 0] *= meta['ori_img_size'][0]
-        pred_bboxes[:, 1] *= meta['ori_img_size'][1]
-        pred_bboxes[:, 2] *= meta['ori_img_size'][0]
-        pred_bboxes[:, 3] *= meta['ori_img_size'][1]
-        output = [None for _ in range(len(pred_bboxes))]
-        for image_i, image_pred in enumerate(pred_bboxes):
+    def decode(detections, configer, meta):
+        output = [None for _ in range(len(meta))]
+        for i in range(len(meta)):
+            image_pred = detections[i]
+            image_pred[:, 0] *= meta[i]['ori_img_size'][0]
+            image_pred[:, 1] *= meta[i]['ori_img_size'][1]
+            image_pred[:, 2] *= meta[i]['ori_img_size'][0]
+            image_pred[:, 3] *= meta[i]['ori_img_size'][1]
             # Filter out confidence scores below threshold
             conf_mask = (image_pred[:, 4] > configer.get('res', 'val_conf_thre')).squeeze()
             image_pred = image_pred[conf_mask]
@@ -70,13 +70,11 @@ class YOLOv3Test(object):
                 continue
 
             # Get score and class with highest confidence
-            class_conf, class_pred = torch.max(
-                image_pred[:, 5:5 + configer.get('data', 'num_classes')], 1, keepdim=True)
+            class_conf, class_pred = torch.max(image_pred[:, 5:5 + configer.get('data', 'num_classes')], 1, keepdim=True)
             # Detections ordered as (x1, y1, x2, y2, obj_conf, class_conf, class_pred)
             detections = torch.cat((image_pred[:, :5], class_conf.float(), class_pred.float()), 1)
-            output[image_i] = DetHelper.cls_nms(detections,
-                                                labels=class_pred.squeeze(1),
-                                                max_threshold=configer.get('res', 'nms')['max_threshold'])
+            output[i] = DetHelper.cls_nms(detections, labels=class_pred.squeeze(1),
+                                          max_threshold=configer.get('res', 'nms')['max_threshold'])
 
         return output
 

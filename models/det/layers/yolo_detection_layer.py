@@ -81,4 +81,4 @@ class YOLODetectionLayer(object):
             detect_out[:, :4] = box_corner[:, :4]
             detect_list.append(detect_out)
 
-        return layer_out_list, torch.cat(prediction_list, 1), torch.cat(detect_list, 1)
+        return torch.cat(prediction_list, 1), torch.cat(detect_list, 1)

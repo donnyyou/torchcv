@@ -13,8 +13,11 @@ class DCHelper(object):
 
     @staticmethod
     def tolist(dc):
+        assert isinstance(dc, DataContainer), type(dc)
         if dc.samples_per_gpu and not dc.stack:
             return list(itertools.chain(*dc.data))
+        elif dc.samples_per_gpu and dc.stack:
+            return list(itertools.chain(*[[item for item in sub_batch] for sub_batch in dc.data]))
         else:
             return dc.data
 

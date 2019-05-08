@@ -29,7 +29,7 @@ class DefaultLoader(data.Dataset):
         img = ImageHelper.read_image(self.img_list[index],
                                      tool=self.configer.get('data', 'image_tool'),
                                      mode=self.configer.get('data', 'input_mode'))
-
+        img_size = ImageHelper.get_size(img)
         bboxes, labels = self.__read_json_file(self.json_list[index])
 
         if self.aug_transform is not None:
@@ -41,10 +41,15 @@ class DefaultLoader(data.Dataset):
         if self.img_transform is not None:
             img = self.img_transform(img)
 
+        meta = dict(
+            ori_img_size=img_size,
+            border_size=ImageHelper.get_size(img)
+        )
         return dict(
-            img=DataContainer(img, stack=True),
-            bboxes=DataContainer(bboxes, stack=False),
-            labels=DataContainer(labels, stack=False),
+            img=DataContainer(img, stack=True, return_dc=True, samples_per_gpu=True),
+            bboxes=DataContainer(bboxes, stack=False, return_dc=True, samples_per_gpu=True),
+            labels=DataContainer(labels, stack=False, return_dc=True, samples_per_gpu=True),
+            meta=DataContainer(meta, stack=False, cpu_only=True, return_dc=True, samples_per_gpu=True)
         )
 
     def __len__(self):
