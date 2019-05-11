@@ -14,6 +14,8 @@ from utils.helpers.json_helper import JsonHelper
 from utils.helpers.image_helper import ImageHelper
 from utils.tools.logger import Logger as Log
 
+torch.multiprocessing.set_sharing_strategy('file_system')
+
 
 class DefaultLoader(data.Dataset):
 
@@ -38,13 +40,13 @@ class DefaultLoader(data.Dataset):
         labels = torch.from_numpy(labels).long()
         bboxes = torch.from_numpy(bboxes).float()
 
-        if self.img_transform is not None:
-            img = self.img_transform(img)
-
         meta = dict(
             ori_img_size=img_size,
             border_size=ImageHelper.get_size(img)
         )
+        if self.img_transform is not None:
+            img = self.img_transform(img)
+
         return dict(
             img=DataContainer(img, stack=True, return_dc=True, samples_per_gpu=True),
             bboxes=DataContainer(bboxes, stack=False, return_dc=True, samples_per_gpu=True),

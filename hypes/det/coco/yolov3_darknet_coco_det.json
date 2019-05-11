@@ -145,7 +145,8 @@
         "metric": "epoch",
         "is_warm": true,
         "warm": {
-          "warm_epoch": 0.2
+          "freeze_backbone": false,
+          "warm_iters": 1000
         },
         "base_lr": 0.0004,
         "lr_policy": "multistep",

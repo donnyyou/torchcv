@@ -25,7 +25,7 @@ DET_MODEL_DICT = {
 DET_LOSS_DICT = {
     'ssd_multibox_loss': SSDMultiBoxLoss,
     'ssd_focal_loss': SSDFocalLoss,
-    'yolov3_det_loss': YOLOv3Loss,
+    'yolov3_loss': YOLOv3Loss,
     'fr_loss': FRLoss
 }
 

@@ -4,6 +4,7 @@
 
 
 import math
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -247,9 +248,9 @@ class YOLOv3Loss(nn.Module):
                     gi = int(gx)
                     gj = int(gy)
                     # Get shape of gt box
-                    gt_box = torch.from_numpy(np.array([0, 0, gw, gh])).unsqueeze(0)
+                    gt_box = torch.FloatTensor([0, 0, gw, gh]).unsqueeze(0)
                     # Get shape of anchor box
-                    anchor_shapes = torch.from_numpy(np.concatenate((np.zeros((num_anchors, 2)), np.array(anchors)), 1))
+                    anchor_shapes = torch.from_numpy(np.concatenate((np.zeros((num_anchors, 2)), np.array(anchors)), 1)).float()
                     # Calculate iou between gt and anchor shapes
                     anch_ious = DetHelper.bbox_iou(gt_box, anchor_shapes)
                     # Where the overlap is larger than threshold set mask to zero (ignore)
@@ -288,7 +289,8 @@ class YOLOv3Loss(nn.Module):
         batch_target = torch.cat(batch_target_list, 1)
         batch_objmask = torch.cat(batch_objmask_list, 1)
         batch_noobjmask = torch.cat(batch_noobjmask_list, 1)
-        return batch_target, batch_objmask, batch_noobjmask
+        target_device = detections.device
+        return batch_target.to(target_device), batch_objmask.to(target_device), batch_noobjmask.to(target_device)
 
     def forward(self, prediction, detections, feat_list, data_dict):
         targets, objmask, noobjmask = self.build_targets(detections, feat_list, data_dict)

@@ -132,9 +132,3 @@ class Trainer(object):
                 assert solver_dict['lr']['metric'] == 'iters'
                 runner.scheduler.step(runner.runner_state['iters'])
 
-
-
-
-
-
-

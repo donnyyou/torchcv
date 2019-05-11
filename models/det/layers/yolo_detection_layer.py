@@ -60,7 +60,7 @@ class YOLODetectionLayer(object):
             detect_out[:, :, :2] += x_y_offset
 
             # log space transform height and the width
-            anchors = torch.from_numpy(anchors).to(self.device)
+            anchors = torch.from_numpy(np.array(anchors)).float().to(self.device)
             anchors = anchors.contiguous().view(3, 1, 2)\
                 .repeat(1, grid_size_h * grid_size_w, 1).contiguous().view(-1, 2).unsqueeze(0)
             detect_out[:, :, 2:4] = torch.exp(detect_out[:, :, 2:4]) * anchors
