@@ -168,13 +168,13 @@ class YOLOv3(object):
             object_list = list()
             if detections is not None:
                 for x1, y1, x2, y2, conf, cls_conf, cls_pred in detections:
-                    xmin = x1.cpu().item() / meta_list[idx]['ori_img_size'][0]
-                    ymin = y1.cpu().item() / meta_list[idx]['ori_img_size'][1]
-                    xmax = x2.cpu().item() / meta_list[idx]['ori_img_size'][0]
-                    ymax = y2.cpu().item() / meta_list[idx]['ori_img_size'][1]
-                    cf = conf.cpu().item()
-                    cls_pred = cls_pred.cpu().item()
-                    object_list.append([xmin, ymin, xmax, ymax, int(cls_pred), float('%.2f' % cf)])
+                    xmin = x1.item() / meta_list[idx]['ori_img_size'][0]
+                    ymin = y1.item() / meta_list[idx]['ori_img_size'][1]
+                    xmax = x2.item() / meta_list[idx]['ori_img_size'][0]
+                    ymax = y2.item() / meta_list[idx]['ori_img_size'][1]
+                    cf = float('%.2f' % conf.item())
+                    cls_pred = int(cls_pred.item())
+                    object_list.append([xmin, ymin, xmax, ymax, cls_pred, cf])
 
             batch_pred_bboxes.append(object_list)
 

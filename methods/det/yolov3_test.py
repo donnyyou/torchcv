@@ -84,10 +84,9 @@ class YOLOv3Test(object):
         if detections is not None:
             for x1, y1, x2, y2, conf, cls_conf, cls_pred in detections:
                 object_dict = dict()
-                object_dict['bbox'] = [x1.cpu().item(), y1.cpu().item(), x2.cpu().item(), y2.cpu().item()]
-                object_dict['label'] = int(cls_pred.cpu().item())
-                object_dict['score'] = float('%.2f' % conf.cpu().item())
-
+                object_dict['bbox'] = [x1.item(), y1.item(), x2.item(), y2.item()]
+                object_dict['label'] = int(cls_pred.item())
+                object_dict['score'] = float('%.2f' % conf.item())
                 object_list.append(object_dict)
 
         json_dict['objects'] = object_list

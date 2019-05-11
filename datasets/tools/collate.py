@@ -16,7 +16,8 @@ from utils.helpers.tensor_helper import TensorHelper
 from utils.tools.logger import Logger as Log
 
 
-def stack(batch, data_key=None, trans_dict=None):
+def stack(batch, data_key=None, device_ids=None):
+    device_ids = list(range(torch.cuda.device_count())) if device_ids is None else device_ids
     if isinstance(batch[0][data_key], DataContainer):
         if batch[0][data_key].stack:
             assert isinstance(batch[0][data_key].data, torch.Tensor) or \
@@ -26,10 +27,11 @@ def stack(batch, data_key=None, trans_dict=None):
                    isinstance(batch[0][data_key].data, collections.Mapping) or \
                    isinstance(batch[0][data_key].data, collections.Sequence)
             stacked = []
-            if batch[0][data_key].samples_per_gpu and 'samples_per_gpu' in trans_dict:
-                for i in range(0, len(batch), trans_dict['samples_per_gpu']):
+            if batch[0][data_key].samples_per_gpu:
+                samples_per_gpu = (len(batch) - 1 + len(device_ids)) // len(device_ids)
+                for i in range(0, len(batch), samples_per_gpu):
                     stacked.append(
-                        default_collate([sample[data_key].data for sample in batch[i:i + trans_dict['samples_per_gpu']]])
+                        default_collate([sample[data_key].data for sample in batch[i:i + samples_per_gpu]])
                     )
             else:
                 stacked = default_collate([sample[data_key].data for sample in batch])
@@ -42,9 +44,10 @@ def stack(batch, data_key=None, trans_dict=None):
                 return stacked
         else:
             stacked = []
-            if batch[0][data_key].samples_per_gpu and 'samples_per_gpu' in trans_dict:
-                for i in range(0, len(batch), trans_dict['samples_per_gpu']):
-                    stacked.append([sample[data_key].data for sample in batch[i:i + trans_dict['samples_per_gpu']]])
+            if batch[0][data_key].samples_per_gpu:
+                samples_per_gpu = (len(batch) - 1 + len(device_ids)) // len(device_ids)
+                for i in range(0, len(batch), samples_per_gpu):
+                    stacked.append([sample[data_key].data for sample in batch[i:i + samples_per_gpu]])
             else:
                 stacked = [sample[data_key].data for sample in batch]
 
@@ -58,10 +61,10 @@ def stack(batch, data_key=None, trans_dict=None):
         return default_collate([sample[data_key] for sample in batch])
 
 
-def collate(batch, trans_dict):
+def collate(batch, trans_dict, device_ids=None):
     data_keys = batch[0].keys()
     if trans_dict['size_mode'] == 'none':
-        return dict({key: stack(batch, data_key=key, trans_dict=trans_dict) for key in data_keys})
+        return dict({key: stack(batch, data_key=key, device_ids=device_ids) for key in data_keys})
 
     elif trans_dict['size_mode'] == 'fix_size':
         target_width, target_height = trans_dict['input_size']
@@ -196,4 +199,4 @@ def collate(batch, trans_dict):
                 batch[i]['bboxes'].data[:, 0::2] += left_pad
                 batch[i]['bboxes'].data[:, 1::2] += up_pad
 
-    return dict({key: stack(batch, data_key=key, trans_dict=trans_dict) for key in data_keys})
+    return dict({key: stack(batch, data_key=key, device_ids=device_ids) for key in data_keys})

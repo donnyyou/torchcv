@@ -22,6 +22,15 @@ class DCHelper(object):
             return dc.data
 
     @staticmethod
+    def totensor(dc):
+        assert isinstance(dc, DataContainer), type(dc)
+        if isinstance(dc.data, torch.Tensor):
+            return dc
+
+        assert isinstance(dc.data, (list, tuple)) and isinstance(dc.data[0], torch.Tensor)
+        return torch.cat(dc.data, 0)
+
+    @staticmethod
     def todc(data_list, samples_per_gpu, stack=False, cpu_only=False):
         stacked = []
         for i in range(0, len(data_list), samples_per_gpu):
