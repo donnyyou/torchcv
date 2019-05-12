@@ -141,7 +141,7 @@ class YOLOv3(object):
 
                 self.det_running_score.update(batch_pred_bboxes,
                                               [item['ori_bboxes'] for item in DCHelper.tolist(data_dict['meta'])],
-                                              [item['ori_labels'] for item in DCHelper.tolist(data_dict['labels'])])
+                                              [item['ori_labels'] for item in DCHelper.tolist(data_dict['meta'])])
 
                 # Update the vars of the val phase.
                 self.batch_time.update(time.time() - start_time)
@@ -151,8 +151,7 @@ class YOLOv3(object):
             # Print the log info & reset the states.
             Log.info(
                 'Test Time {batch_time.sum:.3f}s, ({batch_time.avg:.3f})\t'
-                'Loss {loss.avg:.8f}\n'.format(
-                    batch_time=self.batch_time, loss=self.val_losses))
+                'Loss {loss.avg:.8f}\n'.format(batch_time=self.batch_time, loss=self.val_losses))
             Log.info('Val mAP: {}'.format(self.det_running_score.get_mAP()))
             self.det_running_score.reset()
             self.batch_time.reset()

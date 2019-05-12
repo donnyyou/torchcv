@@ -136,7 +136,7 @@ class SingleShotDetector(object):
                 # batch_pred_bboxes = self._get_gt_object_list(batch_gt_bboxes, batch_gt_labels)
                 self.det_running_score.update(batch_pred_bboxes,
                                               [item['ori_bboxes'] for item in DCHelper.tolist(data_dict['meta'])],
-                                              [item['ori_labels'] for item in DCHelper.tolist(data_dict['labels'])])
+                                              [item['ori_labels'] for item in DCHelper.tolist(data_dict['meta'])])
 
                 # Update the vars of the val phase.
                 self.batch_time.update(time.time() - start_time)
