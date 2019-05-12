@@ -54,10 +54,10 @@ class YOLOv3Test(object):
                                      save_path=os.path.join(out_dir, 'json/{}.json'.format(meta_list[i]['filename'])))
 
     @staticmethod
-    def decode(detections, configer, meta):
+    def decode(batch_detections, configer, meta):
         output = [None for _ in range(len(meta))]
         for i in range(len(meta)):
-            image_pred = detections[i]
+            image_pred = batch_detections[i]
             image_pred[:, 0] *= meta[i]['ori_img_size'][0]
             image_pred[:, 1] *= meta[i]['ori_img_size'][1]
             image_pred[:, 2] *= meta[i]['ori_img_size'][0]

@@ -179,7 +179,8 @@
     "loss": {
       "loss_weights": {
         "coord_loss": 1.0,
-        "obj_loss": 5.0,
+        "obj_loss": 1.0,
+        "noobj_loss": 100.0,
         "cls_loss": 1.0
       },
       "loss_type": "yolov3_loss"

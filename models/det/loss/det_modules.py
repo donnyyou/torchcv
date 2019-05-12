@@ -209,8 +209,8 @@ class YOLOv3Loss(nn.Module):
     def __init__(self, configer):
         super(YOLOv3Loss, self).__init__()
         self.configer = configer
-        self.mse_loss = nn.MSELoss(reduction='sum')  # 'sum'
-        self.bce_loss = nn.BCELoss(reduction='sum')
+        self.mse_loss = nn.MSELoss(reduction='mean')  # 'sum'
+        self.bce_loss = nn.BCELoss(reduction='mean')
 
     def build_targets(self, detections, feat_list, data_dict):
         gt_bboxes = data_dict['bboxes']
@@ -310,21 +310,22 @@ class YOLOv3Loss(nn.Module):
         tcls = targets[..., 5:]  # Cls pred.
 
         #  losses.
-        obj_cnt = max(objmask.sum(), 1.0)
-        loss_x = self.bce_loss(x * objmask, tx * objmask)
-        loss_y = self.bce_loss(y * objmask, ty * objmask)
-        loss_w = self.mse_loss(w * objmask, tw * objmask)
-        loss_h = self.mse_loss(h * objmask, th * objmask)
-        loss_coord = (loss_x + loss_y + 0.5 * loss_w + 0.5 * loss_h) / obj_cnt
-        loss_hasobj = self.bce_loss(conf * objmask, objmask)
-        loss_noobj = self.bce_loss(conf * noobjmask, noobjmask * 0.0)
-        loss_obj = (loss_hasobj + 0.2 * loss_noobj) / obj_cnt
-        loss_cls = self.bce_loss(pred_cls * objmask.unsqueeze(2), tcls * objmask.unsqueeze(2))
-        loss_cls = loss_cls / obj_cnt
+        if objmask.sum() > 0:
+            loss_x = self.bce_loss(x[objmask], tx[objmask])
+            loss_y = self.bce_loss(y[objmask], ty[objmask])
+            loss_w = self.mse_loss(w[objmask], tw[objmask])
+            loss_h = self.mse_loss(h[objmask], th[objmask])
+            loss_coord = loss_x + loss_y + loss_w + loss_h
+            loss_obj = self.bce_loss(conf[objmask], objmask[objmask])
+            loss_noobj = self.bce_loss(conf[noobjmask], objmask[noobjmask])
+            loss_cls = self.bce_loss(pred_cls[objmask], tcls[objmask])
+        else:
+            loss_coord, loss_obj, loss_noobj, loss_cls = 0.0, 0.0, 0.0, 0.0
 
         #  total loss = losses * weight
         loss = loss_coord * self.configer.get('loss', 'loss_weights')['coord_loss'] + \
                loss_obj * self.configer.get('loss', 'loss_weights')['obj_loss'] + \
+               loss_noobj * self.configer.get('loss', 'loss_weights')['noobj_loss'] + \
                loss_cls * self.configer.get('loss', 'loss_weights')['cls_loss']
 
         return loss
