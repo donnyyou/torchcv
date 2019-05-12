@@ -140,8 +140,8 @@ class YOLOv3(object):
                 batch_pred_bboxes = self.__get_object_list(batch_detections, DCHelper.tolist(data_dict['meta']))
 
                 self.det_running_score.update(batch_pred_bboxes,
-                                              DCHelper.tolist(data_dict['bboxes']),
-                                              DCHelper.tolist(data_dict['labels']))
+                                              [item['ori_bboxes'] for item in DCHelper.tolist(data_dict['meta'])],
+                                              [item['ori_labels'] for item in DCHelper.tolist(data_dict['labels'])])
 
                 # Update the vars of the val phase.
                 self.batch_time.update(time.time() - start_time)
@@ -165,13 +165,9 @@ class YOLOv3(object):
             object_list = list()
             if detections is not None:
                 for x1, y1, x2, y2, conf, cls_conf, cls_pred in detections:
-                    xmin = x1.item() / meta_list[idx]['ori_img_size'][0]
-                    ymin = y1.item() / meta_list[idx]['ori_img_size'][1]
-                    xmax = x2.item() / meta_list[idx]['ori_img_size'][0]
-                    ymax = y2.item() / meta_list[idx]['ori_img_size'][1]
                     cf = float('%.2f' % conf.item())
                     cls_pred = int(cls_pred.item())
-                    object_list.append([xmin, ymin, xmax, ymax, cls_pred, cf])
+                    object_list.append([x1.item(), y1.item(), x2.item(), y2.item(), cls_pred, cf])
 
             batch_pred_bboxes.append(object_list)
 

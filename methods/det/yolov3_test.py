@@ -40,7 +40,7 @@ class YOLOv3Test(object):
         for i, data_dict in enumerate(self.test_loader.get_testloader(test_dir=test_dir)):
             detections = self.det_net(data_dict, testing=True)
             meta_list = DCHelper.tolist(data_dict['meta'])
-            batch_detections = self.decode(detections, self.configer, meta_list[i])
+            batch_detections = self.decode(detections, self.configer, meta_list)
             for i in range(len(meta_list)):
                 ori_img_bgr = ImageHelper.read_image(meta_list[i]['img_path'], tool='cv2', mode='bgr')
                 json_dict = self.__get_info_tree(batch_detections[i])
@@ -73,8 +73,9 @@ class YOLOv3Test(object):
             class_conf, class_pred = torch.max(image_pred[:, 5:5 + configer.get('data', 'num_classes')], 1, keepdim=True)
             # Detections ordered as (x1, y1, x2, y2, obj_conf, class_conf, class_pred)
             detections = torch.cat((image_pred[:, :5], class_conf.float(), class_pred.float()), 1)
-            output[i] = DetHelper.cls_nms(detections, labels=class_pred.squeeze(1),
-                                          max_threshold=configer.get('res', 'nms')['max_threshold'])
+            valid_ind = DetHelper.cls_nms(detections[:, :5], labels=class_pred.squeeze(1),
+                                          max_threshold=configer.get('res', 'nms')['max_threshold'], return_ind=True)
+            output[i] = detections[valid_ind]
 
         return output
 

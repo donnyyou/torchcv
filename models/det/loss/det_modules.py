@@ -11,6 +11,7 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 
 from utils.helpers.det_helper import DetHelper
+from models.det.layers.ssd_target_generator import SSDTargetGenerator
 from utils.tools.logger import Logger as Log
 
 
@@ -103,6 +104,7 @@ class SSDMultiBoxLoss(nn.Module):
     def __init__(self, configer):
         super(SSDMultiBoxLoss, self).__init__()
         self.num_classes = configer.get('data', 'num_classes')
+        self.ssd_target_generator = SSDTargetGenerator(configer)
 
     def _cross_entropy_loss(self, x, y):
         """Cross entropy loss w/o averaging across all samples.
@@ -150,7 +152,7 @@ class SSDMultiBoxLoss(nn.Module):
         y = flag * (diff ** 2) * 0.5 + (1 - flag) * (abs_diff - 0.5)
         return y.sum()
 
-    def forward(self, outputs, *targets, **kwargs):
+    def forward(self, feat_list, loc_preds, conf_preds, data_dict, **kwargs):
         """Compute loss between (loc_preds, loc_targets) and (conf_preds, conf_targets).
 
         Args:
@@ -168,8 +170,7 @@ class SSDMultiBoxLoss(nn.Module):
                     + CrossEntropyLoss(neg_conf_preds, neg_conf_targets)
 
         """
-        _, loc_preds, conf_preds = outputs
-        loc_targets, conf_targets = targets
+        loc_targets, conf_targets = self.ssd_target_generator(feat_list, data_dict)
         batch_size, num_boxes, _ = loc_preds.size()
 
         pos = conf_targets > 0  # [N,8732], pos means the box matched.

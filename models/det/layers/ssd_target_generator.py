@@ -16,7 +16,10 @@ class SSDTargetGenerator(object):
         self.configer = configer
         self.fr_proirbox_layer = SSDPriorBoxLayer(configer)
 
-    def __call__(self, feat_list, gt_bboxes, gt_labels, input_size):
+    def __call__(self, feat_list, data_dict):
+        gt_bboxes = data_dict['bboxes']
+        gt_labels = data_dict['labels']
+        input_size = [data_dict['img'].size(3), data_dict['img'].size(2)]
         anchor_boxes = self.fr_proirbox_layer(feat_list, input_size)
         target_bboxes = list()
         target_labels = list()

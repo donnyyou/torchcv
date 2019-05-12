@@ -12,12 +12,11 @@ from methods.det.single_shot_detector_test import SingleShotDetectorTest
 from methods.tools.runner_helper import RunnerHelper
 from methods.tools.trainer import Trainer
 from models.det.model_manager import ModelManager
-from models.det.layers.ssd_priorbox_layer import SSDPriorBoxLayer
-from models.det.layers.ssd_target_generator import SSDTargetGenerator
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
 from metrics.det.det_running_score import DetRunningScore
 from utils.visualizer.det_visualizer import DetVisualizer
+from utils.helpers.dc_helper import DCHelper
 
 
 class SingleShotDetector(object):
@@ -33,8 +32,6 @@ class SingleShotDetector(object):
         self.det_visualizer = DetVisualizer(configer)
         self.det_model_manager = ModelManager(configer)
         self.det_data_loader = DataLoader(configer)
-        self.ssd_target_generator = SSDTargetGenerator(configer)
-        self.ssd_priorbox_layer = SSDPriorBoxLayer(configer)
         self.det_running_score = DetRunningScore(configer)
 
         self.det_net = None
@@ -81,28 +78,11 @@ class SingleShotDetector(object):
         # data_tuple: (inputs, heatmap, maskmap, vecmap)
         for i, data_dict in enumerate(self.train_loader):
             Trainer.update(self, backbone_list=(0,), solver_dict=self.configer.get('solver'))
-            inputs = data_dict['img']
-            batch_gt_bboxes = data_dict['bboxes']
-            batch_gt_labels = data_dict['labels']
-            # Change the data type.
-            inputs = RunnerHelper.to_device(self, inputs)
-
             self.data_time.update(time.time() - start_time)
             # Forward pass.
-            outputs = self.det_net(inputs)
-            if self.configer.get('network', 'gathered'):
-                feat_list = outputs[0]
-            else:
-                feat_list = outputs[0][0]
-
-            bboxes, labels = self.ssd_target_generator(feat_list, batch_gt_bboxes,
-                                                       batch_gt_labels, [inputs.size(3), inputs.size(2)])
-
-            bboxes, labels = RunnerHelper.to_device(bboxes, labels)
-            # Compute the loss of the train batch & backward.
-            loss = self.det_loss(outputs, bboxes, labels, gathered=self.configer.get('network', 'gathered'))
-
-            self.train_losses.update(loss.item(), inputs.size(0))
+            out_dict = self.det_net(data_dict)
+            loss = out_dict['loss'].mean()
+            self.train_losses.update(loss.item(), len(DCHelper.tolist(data_dict['meta'])))
 
             self.optimizer.zero_grad()
             loss.backward()
@@ -143,29 +123,20 @@ class SingleShotDetector(object):
         start_time = time.time()
         with torch.no_grad():
             for j, data_dict in enumerate(self.val_loader):
-                inputs = data_dict['img']
-                batch_gt_bboxes = data_dict['bboxes']
-                batch_gt_labels = data_dict['labels']
-                inputs = RunnerHelper.to_device(self, inputs)
-                input_size = [inputs.size(3), inputs.size(2)]
                 # Forward pass.
-                outputs = self.det_net(inputs)
-                feat_list, loc, cls = RunnerHelper.gather(self, outputs)
+                out_dict = self.det_net(data_dict)
 
-                bboxes, labels = self.ssd_target_generator(feat_list, batch_gt_bboxes,
-                                                           batch_gt_labels, input_size)
-
-                bboxes, labels = RunnerHelper.to_device(bboxes, labels)
+                loss = out_dict['loss'].mean()
                 # Compute the loss of the val batch.
-                loss = self.det_loss(outputs, bboxes, labels, gathered=self.configer.get('network', 'gathered'))
-                self.val_losses.update(loss.item(), inputs.size(0))
+                self.val_losses.update(loss.item(), len(DCHelper.tolist(data_dict['meta'])))
 
-                batch_detections = SingleShotDetectorTest.decode(loc, cls,
-                                                                 self.ssd_priorbox_layer(feat_list, input_size),
-                                                                 self.configer, input_size)
+                batch_detections = SingleShotDetectorTest.decode(out_dict['loc'], out_dict['conf'],
+                                                                 self.configer, DCHelper.tolist(data_dict['meta']))
                 batch_pred_bboxes = self.__get_object_list(batch_detections)
                 # batch_pred_bboxes = self._get_gt_object_list(batch_gt_bboxes, batch_gt_labels)
-                self.det_running_score.update(batch_pred_bboxes, batch_gt_bboxes, batch_gt_labels)
+                self.det_running_score.update(batch_pred_bboxes,
+                                              [item['ori_bboxes'] for item in DCHelper.tolist(data_dict['meta'])],
+                                              [item['ori_labels'] for item in DCHelper.tolist(data_dict['labels'])])
 
                 # Update the vars of the val phase.
                 self.batch_time.update(time.time() - start_time)
@@ -183,32 +154,15 @@ class SingleShotDetector(object):
             self.val_losses.reset()
             self.det_net.train()
 
-    def _get_gt_object_list(self, batch_gt_bboxes, batch_gt_labels):
-        batch_pred_bboxes = list()
-        for i in range(len(batch_gt_bboxes)):
-            object_list = list()
-            if batch_gt_bboxes[i].numel() > 0:
-                for j in range(batch_gt_bboxes[i].size(0)):
-                    object_list.append([batch_gt_bboxes[i][j][0].item(), batch_gt_bboxes[i][j][1].item(),
-                                        batch_gt_bboxes[i][j][2].item(), batch_gt_bboxes[i][j][3].item(),
-                                        batch_gt_labels[i][j].item(), 1.0])
-
-            batch_pred_bboxes.append(object_list)
-        return batch_pred_bboxes
-
     def __get_object_list(self, batch_detections):
         batch_pred_bboxes = list()
         for idx, detections in enumerate(batch_detections):
             object_list = list()
             if detections is not None:
                 for x1, y1, x2, y2, conf, cls_pred in detections:
-                    xmin = x1.cpu().item()
-                    ymin = y1.cpu().item()
-                    xmax = x2.cpu().item()
-                    ymax = y2.cpu().item()
-                    cf = conf.cpu().item()
-                    cls_pred = cls_pred.cpu().item() - 1
-                    object_list.append([xmin, ymin, xmax, ymax, int(cls_pred), float('%.2f' % cf)])
+                    cf = float('%.2f' % conf.item())
+                    cls_pred = int(cls_pred.cpu().item() - 1)
+                    object_list.append([x1.item(), y1.item(), x2.item(), y2.item(), cls_pred, cf])
 
             batch_pred_bboxes.append(object_list)
 
