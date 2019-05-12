@@ -71,14 +71,14 @@ class YOLODetectionLayer(object):
             detect_out[:, :, 3] /= grid_size_h
 
             box_corner = detect_out.new(detect_out.shape)
-            box_corner[:, 0] = detect_out[:, 0] - detect_out[:, 2] / 2
-            box_corner[:, 1] = detect_out[:, 1] - detect_out[:, 3] / 2
-            box_corner[:, 2] = detect_out[:, 0] + detect_out[:, 2] / 2
-            box_corner[:, 3] = detect_out[:, 1] + detect_out[:, 3] / 2
+            box_corner[:, :, 0] = detect_out[:, :, 0] - detect_out[:, :, 2] / 2
+            box_corner[:, :, 1] = detect_out[:, :, 1] - detect_out[:, :, 3] / 2
+            box_corner[:, :, 2] = detect_out[:, :, 0] + detect_out[:, :, 2] / 2
+            box_corner[:, :, 3] = detect_out[:, :, 1] + detect_out[:, :, 3] / 2
             # clip bounding box
-            box_corner[:, 0::2] = box_corner[:, 0::2].clamp(min=0, max=1.0)
-            box_corner[:, 1::2] = box_corner[:, 1::2].clamp(min=0, max=1.0)
-            detect_out[:, :4] = box_corner[:, :4]
+            box_corner[:, :, 0::2] = box_corner[:, :, 0::2].clamp(min=0, max=1.0)
+            box_corner[:, :, 1::2] = box_corner[:, :, 1::2].clamp(min=0, max=1.0)
+            detect_out[:, :, :4] = box_corner[:, :, :4]
             detect_list.append(detect_out)
 
         return torch.cat(prediction_list, 1), torch.cat(detect_list, 1)
