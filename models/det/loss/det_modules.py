@@ -311,14 +311,14 @@ class YOLOv3Loss(nn.Module):
 
         #  losses.
         if objmask.sum() > 0:
-            loss_x = self.bce_loss(x[objmask], tx[objmask])
-            loss_y = self.bce_loss(y[objmask], ty[objmask])
-            loss_w = self.mse_loss(w[objmask], tw[objmask])
-            loss_h = self.mse_loss(h[objmask], th[objmask])
+            loss_x = self.bce_loss(x[objmask.byte()], tx[objmask.byte()])
+            loss_y = self.bce_loss(y[objmask.byte()], ty[objmask.byte()])
+            loss_w = self.mse_loss(w[objmask.byte()], tw[objmask.byte()])
+            loss_h = self.mse_loss(h[objmask.byte()], th[objmask.byte()])
             loss_coord = loss_x + loss_y + loss_w + loss_h
-            loss_obj = self.bce_loss(conf[objmask], objmask[objmask])
-            loss_noobj = self.bce_loss(conf[noobjmask], objmask[noobjmask])
-            loss_cls = self.bce_loss(pred_cls[objmask], tcls[objmask])
+            loss_obj = self.bce_loss(conf[objmask.byte()], objmask[objmask.byte()])
+            loss_noobj = self.bce_loss(conf[noobjmask.byte()], objmask[noobjmask.byte()])
+            loss_cls = self.bce_loss(pred_cls[objmask.byte()], tcls[objmask.byte()])
         else:
             loss_coord, loss_obj, loss_noobj, loss_cls = 0.0, 0.0, 0.0, 0.0
 
