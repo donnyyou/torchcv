@@ -76,8 +76,7 @@ class YOLODetectionLayer(object):
             box_corner[:, :, 2] = detect_out[:, :, 0] + detect_out[:, :, 2] / 2
             box_corner[:, :, 3] = detect_out[:, :, 1] + detect_out[:, :, 3] / 2
             # clip bounding box
-            box_corner[:, :, 0::2] = box_corner[:, :, 0::2].clamp(min=0, max=1.0)
-            box_corner[:, :, 1::2] = box_corner[:, :, 1::2].clamp(min=0, max=1.0)
+            box_corner.clamp(min=0, max=1.0)
             detect_out[:, :, :4] = box_corner[:, :, :4]
             detect_list.append(detect_out)
 
