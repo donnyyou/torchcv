@@ -117,7 +117,7 @@ class Vgg300SSD(nn.Module):
         out_head = self.ssd_head(x)
         final_out = out + out_head
 
-        pred_loc, pred_conf, dets_loc, dets_conf = self.ssd_detection_layer(final_out, testing=testing)
+        pred_loc, pred_conf, dets_loc, dets_conf = self.ssd_detection_layer(final_out, data_dict)
         if testing:
             return dets_loc, dets_conf
 

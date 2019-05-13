@@ -44,7 +44,7 @@ class SingleShotDetectorTest(object):
             meta_list = DCHelper.tolist(data_dict['meta'])
             batch_detections = self.decode(loc, conf, self.configer, meta_list)
             for i in range(len(meta_list)):
-                ori_img_bgr = ImageHelper.read_image(meta_list[i]['img_path'], tool='cv2', mode='bgr')
+                ori_img_bgr = ImageHelper.read_image(meta_list[i]['img_path'], tool='cv2', mode='BGR')
                 json_dict = self.__get_info_tree(batch_detections[i])
                 image_canvas = self.det_parser.draw_bboxes(ori_img_bgr.copy(), json_dict,
                                                            conf_threshold=self.configer.get('res', 'vis_conf_thre'))
