@@ -79,31 +79,17 @@ class OpenPose(object):
         start_time = time.time()
         # Adjust the learning rate after every epoch.
         self.runner_state['epoch'] += 1
-        self.scheduler.step(self.train_schedule_loss.avg, epoch=self.configer.get('epoch'))
-        self.train_schedule_loss.reset()
-        # data_tuple: (inputs, heatmap, maskmap, vecmap)
         for i, data_dict in enumerate(self.train_loader):
-            inputs = data_dict['img']
-            maskmap = data_dict['maskmap']
-            heatmap = data_dict['heatmap']
-            vecmap = data_dict['vecmap']
-
             self.data_time.update(time.time() - start_time)
-            # Change the data type.
-            inputs, heatmap, maskmap, vecmap = RunnerHelper.to_device(self, inputs, heatmap, maskmap, vecmap)
 
             # Forward pass.
-            paf_out, heatmap_out = self.pose_net(inputs)
+            out_dict = self.pose_net(data_dict)
 
             # Compute the loss of the train batch & backward.
-            loss_heatmap = self.mse_loss(heatmap_out, heatmap, mask=maskmap, weights=self.weights)
-            loss_associate = self.mse_loss(paf_out, vecmap, mask=maskmap, weights=self.weights)
-            loss = 2.0 * loss_heatmap + loss_associate
+            loss_dict = self.mse_loss(out_dict, data_dict, gathered=self.configer.get('network', 'gathered'))
 
+            loss = loss_dict['loss']
             self.train_losses.update(loss.item(), inputs.size(0))
-            self.train_schedule_loss.update(loss.item(), inputs.size(0))
-            self.train_loss_heatmap.update(loss_heatmap.item(), inputs.size(0))
-            self.train_loss_associate.update(loss_associate.item(), inputs.size(0))
 
             self.optimizer.zero_grad()
             loss.backward()
@@ -150,23 +136,12 @@ class OpenPose(object):
 
         with torch.no_grad():
             for i, data_dict in enumerate(self.val_loader):
-                inputs = data_dict['img']
-                maskmap = data_dict['maskmap']
-                heatmap = data_dict['heatmap']
-                vecmap = data_dict['vecmap']
-                # Change the data type.
-                inputs, heatmap, maskmap, vecmap = RunnerHelper.to_device(self, inputs, heatmap, maskmap, vecmap)
-
                 # Forward pass.
-                paf_out, heatmap_out = self.pose_net(inputs)
+                out_dict = self.pose_net(data_dict)
                 # Compute the loss of the val batch.
-                loss_heatmap = self.mse_loss(heatmap_out[-1], heatmap, maskmap)
-                loss_associate = self.mse_loss(paf_out[-1], vecmap, maskmap)
-                loss = 2.0 * loss_heatmap + loss_associate
+                loss_dict = self.mse_loss(out_dict, data_dict, gathered=self.configer.get('network', 'gathered'))
 
                 self.val_losses.update(loss.item(), inputs.size(0))
-                self.val_loss_heatmap.update(loss_heatmap.item(), inputs.size(0))
-                self.val_loss_associate.update(loss_associate.item(), inputs.size(0))
 
                 # Update the vars of the val phase.
                 self.batch_time.update(time.time() - start_time)
@@ -174,7 +149,6 @@ class OpenPose(object):
 
             self.runner_state['val_loss'] = self.val_losses.avg
             RunnerHelper.save_net(self, self.pose_net, val_loss=self.val_losses.avg)
-            Log.info('Loss Heatmap:{}, Loss Asso: {}'.format(self.val_loss_heatmap.avg, self.val_loss_associate.avg))
             # Print the log info & reset the states.
             Log.info(
                 'Test Time {batch_time.sum:.3f}s, ({batch_time.avg:.3f})\t'

@@ -15,7 +15,7 @@ CHECKPOINTS_NAME="yolov3_darknet_coco_det"$2
 PRETRAINED_MODEL="./pretrained_models/darknet53_weights_pretrained.pth"
 HYPES_FILE='hypes/det/coco/yolov3_darknet_coco_det.json'
 
-LOG_DIR="./log/det/coco/"
+LOG_DIR="./log/pose/coco/"
 LOG_FILE="${LOG_DIR}${CHECKPOINTS_NAME}.log"
 
 if [[ ! -d ${LOG_DIR} ]]; then
