@@ -89,6 +89,9 @@ class YOLOv3(object):
             out_dict = self.det_net(data_dict, testing=False)
             # Compute the loss of the train batch & backward.
             loss = out_dict['loss'].mean()
+            print('scatter loss: {}'.format(loss.item()))
+            loss = self.det_loss(out_dict['pred', out_dict['dets'], out_dict['feat_list'], data_dict])
+            print('gather loss: {}'.format(loss.item()))
             self.train_losses.update(loss.item(), len(DCHelper.tolist(data_dict['meta'])))
             self.optimizer.zero_grad()
             loss.backward()
@@ -134,6 +137,7 @@ class YOLOv3(object):
 
                 # Compute the loss of the val batch.
                 loss = out_dict['loss'].mean()
+                loss = self.det_loss(out_dict['pred', out_dict['dets'], out_dict['feat_list'], data_dict])
                 self.val_losses.update(loss.item(), len(DCHelper.tolist(data_dict['meta'])))
 
                 batch_detections = YOLOv3Test.decode(out_dict['dets'], self.configer, DCHelper.tolist(data_dict['meta']))

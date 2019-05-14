@@ -30,7 +30,7 @@ class DarkNetYolov3(nn.Module):
             return detections
 
         loss = self.yolov3_loss(predictions, detections, feat_list, data_dict)
-        return dict(dets=detections, loss=loss)
+        return dict(dets=detections, pred=predictions, feat_list=feat_list, loss=loss)
 
 
 class Yolov3Head(nn.Module):
