@@ -25,7 +25,7 @@ class DCHelper(object):
     def totensor(dc):
         assert isinstance(dc, DataContainer), type(dc)
         if isinstance(dc.data, torch.Tensor):
-            return dc
+            return dc.data
 
         assert isinstance(dc.data, (list, tuple)) and isinstance(dc.data[0], torch.Tensor)
         return torch.cat(dc.data, 0)

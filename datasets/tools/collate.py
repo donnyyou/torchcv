@@ -171,19 +171,13 @@ def collate(batch, trans_dict, device_ids=None):
 
             pad = [left_pad, pad_width-left_pad, up_pad, pad_height-up_pad]
 
-            batch[i]['img'] = DataContainer(
-                F.pad(batch[i]['img'].data, pad=pad, value=0), stack=batch[i]['img'].stack
-            )
+            batch[i]['img'].data = F.pad(batch[i]['img'].data, pad=pad, value=0)
 
             if 'labelmap' in data_keys:
-                batch[i]['labelmap'] = DataContainer(
-                    F.pad(batch[i]['labelmap'].data, pad=pad, value=-1), stack=batch[i]['labelmap'].stack
-                )
+                batch[i]['labelmap'].data = F.pad(batch[i]['labelmap'].data, pad=pad, value=-1)
 
             if 'maskmap' in data_keys:
-                batch[i]['maskmap'] = DataContainer(
-                    F.pad(batch[i]['maskmap'].data, pad=pad, value=1), stack=batch[i]['maskmap'].stack
-                )
+                batch[i]['maskmap'].data = F.pad(batch[i]['maskmap'].data, pad=pad, value=1)
 
             if 'polygons' in data_keys:
                 for object_id in range(len(batch[i]['polygons'])):
