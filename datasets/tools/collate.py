@@ -125,18 +125,13 @@ def collate(batch, trans_dict, device_ids=None):
 
             scaled_size_hw = (scaled_size[1], scaled_size[0])
 
-            batch[i]['img'] = DataContainer(TensorHelper.resize(batch[i]['img'].data,
-                                                                scaled_size_hw, mode='bilinear', align_corners=True),
-                                            stack=batch[i]['img'].stack)
+            batch[i]['img'].data = TensorHelper.resize(batch[i]['img'].data,
+                                                       scaled_size_hw, mode='bilinear', align_corners=True),
             if 'labelmap' in data_keys:
-                batch[i]['labelmap'] = DataContainer(TensorHelper.resize(batch[i]['labelmap'].data,
-                                                                         scaled_size_hw, mode='nearest'),
-                                                     stack=batch[i]['labelmap'].stack)
+                batch[i]['labelmap'].data = TensorHelper.resize(batch[i]['labelmap'].data, scaled_size_hw, mode='nearest')
 
             if 'maskmap' in data_keys:
-                batch[i]['maskmap'] = DataContainer(TensorHelper.resize(batch[i]['maskmap'].data,
-                                                                        scaled_size_hw, mode='nearest'),
-                                                    stack=batch[i]['maskmap'].stack)
+                batch[i]['maskmap'].data = TensorHelper.resize(batch[i]['maskmap'].data, scaled_size_hw, mode='nearest')
 
         pad_width = target_width - scaled_size[0]
         pad_height = target_height - scaled_size[1]
