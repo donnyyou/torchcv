@@ -63,8 +63,7 @@ class YOLOv3Test(object):
             image_pred[:, 2] *= meta[i]['ori_img_size'][0]
             image_pred[:, 3] *= meta[i]['ori_img_size'][1]
             # Filter out confidence scores below threshold
-            conf_mask = (image_pred[:, 4] > configer.get('res', 'val_conf_thre')).squeeze()
-            image_pred = image_pred[conf_mask]
+            image_pred = image_pred[image_pred[:, 4] > configer.get('res', 'val_conf_thre')]
             # If none are remaining => process next image
             if image_pred.numel() == 0:
                 continue
