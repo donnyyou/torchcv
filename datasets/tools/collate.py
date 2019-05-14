@@ -151,7 +151,7 @@ def collate(batch, trans_dict, device_ids=None):
             elif trans_dict['pad_mode'] == 'pad_border':
                 direction = random.randint(0, 1)
                 left_pad = pad_width if direction == 0 else 0
-                up_pad = pad_height if direction == 0  else 0
+                up_pad = pad_height if direction == 0 else 0
 
             elif trans_dict['pad_mode'] == 'pad_left_up':
                 left_pad = pad_width

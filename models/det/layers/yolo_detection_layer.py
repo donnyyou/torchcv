@@ -31,17 +31,15 @@ class YOLODetectionLayer(object):
             layer_out = layer_out.contiguous().view(batch_size, num_anchors, bbox_attrs, grid_size_h * grid_size_w)
             layer_out = layer_out.permute(0, 1, 3, 2).contiguous().view(batch_size, -1, bbox_attrs)
 
-            if self.configer.get('phase') != 'debug':
-                # Sigmoid the  centre_X, centre_Y. and object confidencce
-                layer_out[:, :, 0] = torch.sigmoid(layer_out[:, :, 0])
-                layer_out[:, :, 1] = torch.sigmoid(layer_out[:, :, 1])
-                layer_out[:, :, 4] = torch.sigmoid(layer_out[:, :, 4])
+            # Sigmoid the  centre_X, centre_Y. and object confidencce
+            layer_out[:, :, 0] = torch.sigmoid(layer_out[:, :, 0])
+            layer_out[:, :, 1] = torch.sigmoid(layer_out[:, :, 1])
+            layer_out[:, :, 4] = torch.sigmoid(layer_out[:, :, 4])
 
-                # Softmax the class scores
-                layer_out[:, :, 5: 5 + num_classes] = torch.sigmoid((layer_out[:, :, 5: 5 + num_classes]))
+            # Softmax the class scores
+            layer_out[:, :, 5: 5 + num_classes] = torch.sigmoid((layer_out[:, :, 5: 5 + num_classes]))
 
             prediction_list.append(layer_out)
-
             detect_out = layer_out.clone()
             # Add the center offsets
             grid_len_h = np.arange(grid_size_h)

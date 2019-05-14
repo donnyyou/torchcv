@@ -137,7 +137,7 @@ class YOLOv3(object):
                 self.val_losses.update(loss.item(), len(DCHelper.tolist(data_dict['meta'])))
 
                 batch_detections = YOLOv3Test.decode(out_dict['dets'], self.configer, DCHelper.tolist(data_dict['meta']))
-                batch_pred_bboxes = self.__get_object_list(batch_detections, DCHelper.tolist(data_dict['meta']))
+                batch_pred_bboxes = self.__get_object_list(batch_detections)
 
                 self.det_running_score.update(batch_pred_bboxes,
                                               [item['ori_bboxes'] for item in DCHelper.tolist(data_dict['meta'])],
@@ -158,7 +158,7 @@ class YOLOv3(object):
             self.val_losses.reset()
             self.det_net.train()
 
-    def __get_object_list(self, batch_detections, meta_list):
+    def __get_object_list(self, batch_detections):
         batch_pred_bboxes = list()
         for idx, detections in enumerate(batch_detections):
             object_list = list()
