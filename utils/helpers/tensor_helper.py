@@ -21,5 +21,5 @@ class TensorHelper(object):
         for i in range(4 - dim):
             tensor = tensor.squeeze(0)
 
-        return  tensor.type(tensor_type)
+        return tensor.type(tensor_type)
 

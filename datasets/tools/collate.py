@@ -125,13 +125,13 @@ def collate(batch, trans_dict, device_ids=None):
 
             scaled_size_hw = (scaled_size[1], scaled_size[0])
 
-            batch[i]['img'].data = TensorHelper.resize(batch[i]['img'].data,
-                                                       scaled_size_hw, mode='bilinear', align_corners=True),
+            batch[i]['img']._data = TensorHelper.resize(batch[i]['img'].data,
+                                                        scaled_size_hw, mode='bilinear', align_corners=True)
             if 'labelmap' in data_keys:
-                batch[i]['labelmap'].data = TensorHelper.resize(batch[i]['labelmap'].data, scaled_size_hw, mode='nearest')
+                batch[i]['labelmap']._data = TensorHelper.resize(batch[i]['labelmap'].data, scaled_size_hw, mode='nearest')
 
             if 'maskmap' in data_keys:
-                batch[i]['maskmap'].data = TensorHelper.resize(batch[i]['maskmap'].data, scaled_size_hw, mode='nearest')
+                batch[i]['maskmap']._data = TensorHelper.resize(batch[i]['maskmap'].data, scaled_size_hw, mode='nearest')
 
         pad_width = target_width - scaled_size[0]
         pad_height = target_height - scaled_size[1]
@@ -166,13 +166,13 @@ def collate(batch, trans_dict, device_ids=None):
 
             pad = [left_pad, pad_width-left_pad, up_pad, pad_height-up_pad]
 
-            batch[i]['img'].data = F.pad(batch[i]['img'].data, pad=pad, value=0)
+            batch[i]['img']._data = F.pad(batch[i]['img'].data, pad=pad, value=0)
 
             if 'labelmap' in data_keys:
-                batch[i]['labelmap'].data = F.pad(batch[i]['labelmap'].data, pad=pad, value=-1)
+                batch[i]['labelmap']._data = F.pad(batch[i]['labelmap'].data, pad=pad, value=-1)
 
             if 'maskmap' in data_keys:
-                batch[i]['maskmap'].data = F.pad(batch[i]['maskmap'].data, pad=pad, value=1)
+                batch[i]['maskmap']._data = F.pad(batch[i]['maskmap'].data, pad=pad, value=1)
 
             if 'polygons' in data_keys:
                 for object_id in range(len(batch[i]['polygons'])):
