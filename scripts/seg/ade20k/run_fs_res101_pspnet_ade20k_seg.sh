@@ -41,9 +41,6 @@ elif [[ "$1"x == "resume"x ]]; then
                        --resume_continue y --resume ./checkpoints/seg/ade20k/${CHECKPOINTS_NAME}_latest.pth \
                        --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL}  2>&1 | tee -a ${LOG_FILE}
 
-elif [[ "$1"x == "debug"x ]]; then
-  ${PYTHON} -u main.py --hypes ${HYPES_FILE} --phase debug --gpu 0 --log_to_file n  2>&1 | tee ${LOG_FILE}
-
 elif [[ "$1"x == "val"x ]]; then
   ${PYTHON} -u main.py --hypes ${HYPES_FILE} --phase test --gpu 0 1 2 3 --log_to_file n --gathered n \
                        --backbone ${BACKBONE} --model_name ${MODEL_NAME} --checkpoints_name ${CHECKPOINTS_NAME} \
