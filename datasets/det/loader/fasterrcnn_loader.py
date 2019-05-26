@@ -32,6 +32,7 @@ class FasterRCNNLoader(data.Dataset):
 
         img_size = ImageHelper.get_size(img)
         bboxes, labels = self.__read_json_file(self.json_list[index])
+        ori_bboxes, ori_labels = bboxes.copy(), labels.copy()
 
         if self.aug_transform is not None:
             img, bboxes, labels = self.aug_transform(img, bboxes=bboxes, labels=labels)
@@ -45,6 +46,8 @@ class FasterRCNNLoader(data.Dataset):
             ori_img_size=img_size,
             border_size=ImageHelper.get_size(img),
             img_scale=img_scale,
+            ori_bboxes=torch.from_numpy(ori_bboxes).float(),
+            ori_labels=torch.from_numpy(ori_labels).long()
         )
         if self.img_transform is not None:
             img = self.img_transform(img)

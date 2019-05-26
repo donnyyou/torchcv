@@ -82,8 +82,8 @@ class FasterRCNN(object):
             Trainer.update(self, solver_dict=self.configer.get('solver'))
             self.data_time.update(time.time() - start_time)
             # Forward pass.
-            loss = self.det_net(data_dict)
-            loss = loss.mean()
+            out_dict = self.det_net(data_dict)
+            loss = out_dict['loss'].mean()
             self.train_losses.update(loss.item(), len(DCHelper.tolist(data_dict['meta'])))
 
             self.optimizer.zero_grad()
@@ -126,23 +126,22 @@ class FasterRCNN(object):
         start_time = time.time()
         with torch.no_grad():
             for j, data_dict in enumerate(self.val_loader):
-                batch_gt_bboxes = DCHelper.tolist(data_dict['bboxes'])
-                batch_gt_labels = DCHelper.tolist(data_dict['labels'])
-                metas = DCHelper.tolist(data_dict['meta'])
                 # Forward pass.
-                loss, test_group = self.det_net(data_dict)
+                out_dict = self.det_net(data_dict)
                 # Compute the loss of the train batch & backward.
-                loss = loss.mean()
-                self.val_losses.update(loss.item(), len(metas))
-                test_indices_and_rois, test_roi_locs, test_roi_scores, test_rois_num = test_group
+                loss = out_dict['loss'].mean()
+                self.val_losses.update(loss.item(), len(DCHelper.tolist(data_dict['meta'])))
+                test_indices_and_rois, test_roi_locs, test_roi_scores, test_rois_num = out_dict['test_group']
                 batch_detections = FastRCNNTest.decode(test_roi_locs,
                                                        test_roi_scores,
                                                        test_indices_and_rois,
                                                        test_rois_num,
                                                        self.configer,
-                                                       metas)
+                                                       DCHelper.tolist(data_dict['meta']))
                 batch_pred_bboxes = self.__get_object_list(batch_detections)
-                self.det_running_score.update(batch_pred_bboxes, batch_gt_bboxes, batch_gt_labels)
+                self.det_running_score.update(batch_pred_bboxes,
+                                              [item['ori_bboxes'] for item in DCHelper.tolist(data_dict['meta'])],
+                                              [item['ori_labels'] for item in DCHelper.tolist(data_dict['meta'])])
 
                 # Update the vars of the val phase.
                 self.batch_time.update(time.time() - start_time)

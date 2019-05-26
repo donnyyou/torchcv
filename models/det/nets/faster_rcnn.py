@@ -70,35 +70,7 @@ class FasterRCNN(nn.Module):
         self.det_loss = FRLoss(self.configer)
 
     def forward(self, data_dict):
-        """Forward Faster R-CNN.
-        Scaling paramter :obj:`scale` is used by RPN to determine the
-        threshold to select small objects, which are going to be
-        rejected irrespective of their confidence scores.
-        Here are notations used.
-        * :math:`N` is the number of batch size
-        * :math:`R'` is the total number of RoIs produced across batches. \
-            Given :math:`R_i` proposed RoIs from the :math:`i` th image, \
-            :math:`R' = \\sum _{i=1} ^ N R_i`.
-        * :math:`L` is the number of classes excluding the background.
-        Classes are ordered by the background, the first class, ..., and
-        the :math:`L` th class.
-        Args:
-            x (autograd.Variable): 4D image variable.
-            scale (float): Amount of scaling applied to the raw image
-                during preprocessing.
-        Returns:
-            Variable, Variable, array, array:
-            Returns tuple of four values listed below.
-            * **roi_cls_locs**: Offsets and scalings for the proposed RoIs. \
-                Its shape is :math:`(R', (L + 1) \\times 4)`.
-            * **roi_scores**: Class predictions for the proposed RoIs. \
-                Its shape is :math:`(R', L + 1)`.
-            * **rois**: RoIs proposed by RPN. Its shape is \
-                :math:`(R', 4)`.
-            * **roi_indices**: Batch indices of RoIs. Its shape is \
-                :math:`(R',)`.
-        """
-        if self.configer.get('phase') == 'test' and not self.training:
+        if 'testing' in data_dict and data_dict['testing']:
             x = self.backbone(data_dict['img'])
             feat_list, rpn_locs, rpn_scores = self.rpn(x)
             indices_and_rois, test_rois_num = self.roi_generator(feat_list, rpn_locs, rpn_scores,
@@ -106,61 +78,35 @@ class FasterRCNN(nn.Module):
                                                                  self.configer.get('rpn', 'n_test_post_nms'),
                                                                  data_dict['meta'])
             roi_cls_locs, roi_scores = self.bbox_head(x, indices_and_rois, data_dict['meta'])
-            return indices_and_rois, roi_cls_locs, roi_scores, test_rois_num
+            return dict(test_group=[indices_and_rois, roi_cls_locs, roi_scores, test_rois_num])
 
-        elif self.configer.get('phase') == 'train' and not self.training:
-            x = self.backbone(data_dict['img'])
-            feat_list, rpn_locs, rpn_scores = self.rpn(x)
-            gt_rpn_locs, gt_rpn_labels = self.rpn_target_assigner(feat_list, data_dict['bboxes'], data_dict['meta'])
+        x = self.backbone(data_dict['img'])
+        feat_list, rpn_locs, rpn_scores = self.rpn(x)
+        gt_rpn_locs, gt_rpn_labels = self.rpn_target_assigner(feat_list, data_dict['bboxes'], data_dict['meta'])
 
-            test_indices_and_rois, test_rois_num = self.roi_generator(feat_list, rpn_locs, rpn_scores,
-                                                                      self.configer.get('rpn', 'n_test_pre_nms'),
-                                                                      self.configer.get('rpn', 'n_test_post_nms'),
-                                                                      data_dict['meta'])
-            test_roi_cls_locs, test_roi_scores = self.bbox_head(x, test_indices_and_rois, data_dict['meta'])
-            test_group = [test_indices_and_rois, test_roi_cls_locs, test_roi_scores, test_rois_num]
-            train_indices_and_rois, _ = self.roi_generator(feat_list, rpn_locs, rpn_scores,
-                                                           self.configer.get('rpn', 'n_train_pre_nms'),
-                                                           self.configer.get('rpn', 'n_train_post_nms'),
-                                                           data_dict['meta'])
-            sample_rois, gt_roi_bboxes, gt_roi_labels = self.roi_sampler(train_indices_and_rois,
-                                                                         data_dict['bboxes'],
-                                                                         data_dict['labels'],
-                                                                         data_dict['meta'])
+        test_indices_and_rois, test_rois_num = self.roi_generator(feat_list, rpn_locs, rpn_scores,
+                                                                  self.configer.get('rpn', 'n_test_pre_nms'),
+                                                                  self.configer.get('rpn', 'n_test_post_nms'),
+                                                                  data_dict['meta'])
+        test_roi_cls_locs, test_roi_scores = self.bbox_head(x, test_indices_and_rois, data_dict['meta'])
+        test_group = [test_indices_and_rois, test_roi_cls_locs, test_roi_scores, test_rois_num]
+        train_indices_and_rois, _ = self.roi_generator(feat_list, rpn_locs, rpn_scores,
+                                                       self.configer.get('rpn', 'n_train_pre_nms'),
+                                                       self.configer.get('rpn', 'n_train_post_nms'),
+                                                       data_dict['meta'])
+        sample_rois, gt_roi_bboxes, gt_roi_labels = self.roi_sampler(train_indices_and_rois,
+                                                                     data_dict['bboxes'],
+                                                                     data_dict['labels'],
+                                                                     data_dict['meta'])
 
-            sample_roi_locs, sample_roi_scores = self.bbox_head(x, sample_rois, data_dict['meta'])
-            sample_roi_locs = sample_roi_locs.contiguous().view(-1, self.configer.get('data', 'num_classes'), 4)
-            sample_roi_locs = sample_roi_locs[
-                torch.arange(0, sample_roi_locs.size()[0]).long().to(sample_roi_locs.device),
-                gt_roi_labels.long().to(sample_roi_locs.device)].contiguous().view(-1, 4)
-            train_group = [rpn_locs, rpn_scores, sample_roi_locs, sample_roi_scores]
-            target_group = [gt_rpn_locs, gt_rpn_labels, gt_roi_bboxes, gt_roi_labels]
-            return self.det_loss(train_group, target_group), test_group
-
-        elif self.configer.get('phase') == 'train' and self.training:
-            x = self.backbone(data_dict['img'])
-            feat_list, rpn_locs, rpn_scores = self.rpn(x)
-            gt_rpn_locs, gt_rpn_labels = self.rpn_target_assigner(feat_list, data_dict['bboxes'], data_dict['meta'])
-            train_indices_and_rois, _ = self.roi_generator(feat_list, rpn_locs, rpn_scores,
-                                                           self.configer.get('rpn', 'n_train_pre_nms'),
-                                                           self.configer.get('rpn', 'n_train_post_nms'),
-                                                           data_dict['meta'])
-            sample_rois, gt_roi_bboxes, gt_roi_labels = self.roi_sampler(train_indices_and_rois,
-                                                                         data_dict['bboxes'],
-                                                                         data_dict['labels'],
-                                                                         data_dict['meta'])
-            sample_roi_locs, sample_roi_scores = self.bbox_head(x, sample_rois, data_dict['meta'])
-            sample_roi_locs = sample_roi_locs.contiguous().view(-1, self.configer.get('data', 'num_classes'), 4)
-            sample_roi_locs = sample_roi_locs[
-                torch.arange(0, sample_roi_locs.size()[0]).long().to(sample_roi_locs.device),
-                gt_roi_labels.long().to(sample_roi_locs.device)].contiguous().view(-1, 4)
-            train_group = [rpn_locs, rpn_scores, sample_roi_locs, sample_roi_scores]
-            target_group = [gt_rpn_locs, gt_rpn_labels, gt_roi_bboxes, gt_roi_labels]
-            return self.det_loss(train_group, target_group)
-
-        else:
-            Log.error('Invalid Status.')
-            exit(1)
+        sample_roi_locs, sample_roi_scores = self.bbox_head(x, sample_rois, data_dict['meta'])
+        sample_roi_locs = sample_roi_locs.contiguous().view(-1, self.configer.get('data', 'num_classes'), 4)
+        sample_roi_locs = sample_roi_locs[
+            torch.arange(0, sample_roi_locs.size()[0]).long().to(sample_roi_locs.device),
+            gt_roi_labels.long().to(sample_roi_locs.device)].contiguous().view(-1, 4)
+        train_group = [rpn_locs, rpn_scores, sample_roi_locs, sample_roi_scores]
+        target_group = [gt_rpn_locs, gt_rpn_labels, gt_roi_bboxes, gt_roi_labels]
+        return dict(loss=self.det_loss(train_group, target_group), test_group=test_group)
 
 
 class NaiveRPN(nn.Module):
