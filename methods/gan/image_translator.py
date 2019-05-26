@@ -116,15 +116,14 @@ class ImageTranslator(object):
 
         self.runner_state['epoch'] += 1
 
-    def val(self, data_loader=None):
+    def val(self):
         """
           Validation function during the train phase.
         """
         self.gan_net.eval()
         start_time = time.time()
 
-        data_loader = self.val_loader if data_loader is None else data_loader
-        for j, data_dict in enumerate(data_loader):
+        for j, data_dict in enumerate(self.val_loader):
             with torch.no_grad():
                 # Forward pass.
                 out_dict = self.gan_net(data_dict)

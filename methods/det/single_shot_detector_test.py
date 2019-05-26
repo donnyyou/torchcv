@@ -38,7 +38,7 @@ class SingleShotDetectorTest(object):
         self.det_net = RunnerHelper.load_net(self, self.det_net)
         self.det_net.eval()
 
-    def __test_img(self, test_dir, out_dir):
+    def test(self, test_dir, out_dir):
         for i, data_dict in enumerate(self.test_loader.get_testloader(test_dir=test_dir)):
             loc, conf = self.det_net(data_dict, testing=True)
             meta_list = DCHelper.tolist(data_dict['meta'])

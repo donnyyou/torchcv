@@ -81,13 +81,6 @@ def collate(batch, trans_dict, device_ids=None):
     else:
         raise NotImplementedError('Size Mode {} is invalid!'.format(trans_dict['size_mode']))
 
-    if 'fit_stride' in trans_dict:
-        stride = trans_dict['fit_stride']
-        pad_w = 0 if (target_width % stride == 0) else stride - (target_width % stride)  # right
-        pad_h = 0 if (target_height % stride == 0) else stride - (target_height % stride)  # down
-        target_width = target_width + pad_w
-        target_height = target_height + pad_h
-
     for i in range(len(batch)):
         if 'meta' in data_keys:
             batch[i]['meta'].data['input_size'] = [target_width, target_height]
@@ -132,6 +125,13 @@ def collate(batch, trans_dict, device_ids=None):
 
             if 'maskmap' in data_keys:
                 batch[i]['maskmap']._data = TensorHelper.resize(batch[i]['maskmap'].data, scaled_size_hw, mode='nearest')
+
+        if 'fit_stride' in trans_dict:
+            stride = trans_dict['fit_stride']
+            pad_w = 0 if (target_width % stride == 0) else stride - (target_width % stride)  # right
+            pad_h = 0 if (target_height % stride == 0) else stride - (target_height % stride)  # down
+            target_width = target_width + pad_w
+            target_height = target_height + pad_h
 
         pad_width = target_width - scaled_size[0]
         pad_height = target_height - scaled_size[1]
