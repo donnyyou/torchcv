@@ -9,8 +9,8 @@ export PYTHONPATH="/home/donny/Projects/TorchCV":$PYTHONPATH
 cd ../../../
 
 DATA_DIR="/home/donny/DataSet/VOC07+12_DET"
-MODEL_NAME="ssd300"
-LOSS_TYPE="fr_loss"
+MODEL_NAME="vgg16_ssd512"
+LOSS_TYPE="ssd_multibox_loss"
 CHECKPOINTS_NAME="ssd512_vgg16_voc_det"$2
 PRETRAINED_MODEL="./pretrained_models/ssd_vgg16_caffe_pretrained.pth"
 HYPES_FILE='hypes/det/voc/ssd512_vgg16_voc_det.json'

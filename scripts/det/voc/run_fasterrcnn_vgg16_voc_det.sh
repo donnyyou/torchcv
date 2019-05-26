@@ -10,7 +10,7 @@ cd ../../../
 
 DATA_DIR="/home/donny/DataSet/VOC07_DET"
 MODEL_NAME="faster_rcnn"
-LOSS_TYPE="fr_loss"
+LOSS_TYPE="fasterrcnn_loss"
 CHECKPOINTS_NAME="fr_vgg16_voc_det"$2
 PRETRAINED_MODEL="./pretrained_models/faster_rcnn_vgg16_caffe_pretrained.pth"
 HYPES_FILE='hypes/det/voc/fasterrcnn_vgg16_voc_det.json'

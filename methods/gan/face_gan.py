@@ -61,14 +61,13 @@ class FaceGAN(object):
         # Adjust the learning rate after every epoch.
         for i, data_dict in enumerate(self.train_loader):
             Trainer.update(self, solver_dict=self.configer.get('solver'))
-            inputs = data_dict['imgA']
             self.data_time.update(time.time() - start_time)
 
             # Forward pass.
-            out_dict = self.gan_net(inputs)
+            out_dict = self.gan_net(data_dict)
             # outputs = self.module_utilizer.gather(outputs)
             loss = out_dict['loss'].mean()
-            self.train_losses.update(loss.item(), inputs.size(0))
+            self.train_losses.update(loss.item(), len(DCHelper.tolist(data_dict['meta'])))
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
@@ -111,14 +110,13 @@ class FaceGAN(object):
 
         data_loader = self.val_loader if data_loader is None else data_loader
         for j, data_dict in enumerate(data_loader):
-            inputs = data_dict['imgA']
 
             with torch.no_grad():
                 # Forward pass.
                 out_dict = self.gan_net(data_dict)
                 # Compute the loss of the val batch.
 
-            self.val_losses.update(out_dict['loss'].mean().item(), inputs.size(0))
+            self.val_losses.update(out_dict['loss'].mean().item(), len(DCHelper.tolist(data_dict['meta'])))
             meta_list = DCHelper.tolist(data_dict['meta'])
             probe_features = []
             gallery_features = []

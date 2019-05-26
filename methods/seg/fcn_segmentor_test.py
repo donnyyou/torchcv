@@ -37,7 +37,7 @@ class FCNSegmentorTest(object):
         self._init_model()
 
     def _init_model(self):
-        self.seg_net = self.seg_model_manager.semantic_segmentor()
+        self.seg_net = self.seg_model_manager.get_seg_model()
         self.seg_net = RunnerHelper.load_net(self, self.seg_net)
         self.seg_net.eval()
 
@@ -167,7 +167,7 @@ class FCNSegmentorTest(object):
 
         out_list = list()
         with torch.no_grad():
-            results = self.seg_net.forward(DCHelper.todc(split_batch, stack=True, samples_per_gpu=1))
+            results = self.seg_net.forward(dict(img=DCHelper.todc(split_batch, stack=True, samples_per_gpu=1)))
             for res in results:
                 out_list.append(res[-1].permute(0, 2, 3, 1).cpu().numpy())
 
@@ -208,7 +208,7 @@ class FCNSegmentorTest(object):
     def _predict(self, data_dict):
         with torch.no_grad():
             total_logits = list()
-            results = self.seg_net.forward(data_dict['img'])
+            results = self.seg_net.forward(data_dict)
             for res in results:
                 total_logits.append(res[-1].squeeze(0).permute(1, 2, 0).cpu().numpy())
 
@@ -229,20 +229,4 @@ class FCNSegmentorTest(object):
 
         return label_dst
 
-    def debug(self, vis_dir):
-        count = 0
-        for i, data_dict in enumerate(self.seg_data_loader.get_trainloader()):
-            inputs = data_dict['img']
-            targets = data_dict['labelmap']
-            for j in range(inputs.size(0)):
-                count = count + 1
-                if count > 20:
-                    exit(1)
-
-                image_bgr = self.blob_helper.tensor2bgr(inputs[j])
-                label_map = targets[j].numpy()
-                image_canvas = self.seg_parser.colorize(label_map, image_canvas=image_bgr)
-                cv2.imwrite(os.path.join(vis_dir, '{}_{}_vis.png'.format(i, j)), image_canvas)
-                cv2.imshow('main', image_canvas)
-                cv2.waitKey()
 

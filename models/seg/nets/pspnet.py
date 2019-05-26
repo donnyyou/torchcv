@@ -80,14 +80,16 @@ class PSPNet(nn.Sequential):
             nn.Conv2d(512, self.num_classes, kernel_size=1)
         )
 
-    def forward(self, x_):
-        x = self.backbone(x_)
+    def forward(self, data_dict):
+        x = self.backbone(data_dict['img'])
         aux_x = self.dsn(x[-2])
         x = self.ppm(x[-1])
         x = self.cls(x)
-        aux_x = F.interpolate(aux_x, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=True)
-        x = F.interpolate(x, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=True)
-        return aux_x, x
+        aux_x = F.interpolate(aux_x, size=(data_dict['img'].size(2), data_dict['img'].size(3)),
+                              mode="bilinear", align_corners=True)
+        x = F.interpolate(x, size=(data_dict['img'].size(2), data_dict['img'].size(3)),
+                          mode="bilinear", align_corners=True)
+        return dict(aux_out=aux_x, out=x)
 
 
 if __name__ == '__main__':

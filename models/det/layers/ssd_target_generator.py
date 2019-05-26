@@ -46,11 +46,11 @@ class SSDTargetGenerator(object):
 
                 conf = 1 + gt_labels[i][max_idx]  # [8732,], background class = 0
 
-                if self.configer.get('gt', 'anchor_method') == 'retina':
-                    conf[prior_box_iou < self.configer.get('gt', 'iou_threshold')] = -1
-                    conf[prior_box_iou < self.configer.get('gt', 'iou_threshold') - 0.1] = 0
+                if self.configer.get('anchor', 'anchor_method') == 'retina':
+                    conf[prior_box_iou < self.configer.get('anchor', 'iou_threshold')] = -1
+                    conf[prior_box_iou < self.configer.get('anchor', 'iou_threshold') - 0.1] = 0
                 else:
-                    conf[prior_box_iou < self.configer.get('gt', 'iou_threshold')] = 0  # background
+                    conf[prior_box_iou < self.configer.get('anchor', 'iou_threshold')] = 0  # background
 
                 # According to IOU, it give every prior box a class label.
                 # Then if the IOU is lower than the threshold, the class label is 0(background).

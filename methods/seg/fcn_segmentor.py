@@ -15,6 +15,7 @@ from methods.tools.trainer import Trainer
 from models.seg.model_manager import ModelManager
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
+from utils.helpers.dc_helper import DCHelper
 from metrics.seg.seg_running_score import SegRunningScore
 from utils.visualizer.seg_visualizer import SegVisualizer
 
@@ -44,7 +45,7 @@ class FCNSegmentor(object):
         self._init_model()
 
     def _init_model(self):
-        self.seg_net = self.seg_model_manager.semantic_segmentor()
+        self.seg_net = self.seg_model_manager.get_seg_model()
         self.seg_net = RunnerHelper.load_net(self, self.seg_net)
 
         self.optimizer, self.scheduler = Trainer.init(self._get_parameters(), self.configer.get('solver'))
@@ -78,19 +79,14 @@ class FCNSegmentor(object):
 
         for i, data_dict in enumerate(self.train_loader):
             Trainer.update(self, backbone_list=(0, ), solver_dict=self.configer.get('solver'))
-            inputs = data_dict['img']
-            targets = data_dict['labelmap']
             self.data_time.update(time.time() - start_time)
-            # Change the data type.
-
-            inputs, targets = RunnerHelper.to_device(self, inputs, targets)
 
             # Forward pass.
-            outputs = self.seg_net(inputs)
+            out_dict = self.seg_net(data_dict)
             # outputs = self.module_utilizer.gather(outputs)
             # Compute the loss of the train batch & backward.
-            loss = self.pixel_loss(outputs, targets, gathered=self.configer.get('network', 'gathered'))
-            self.train_losses.update(loss.item(), inputs.size(0))
+            loss = self.pixel_loss(out_dict, data_dict, gathered=self.configer.get('network', 'gathered'))
+            self.train_losses.update(loss.item(), len(DCHelper.tolist(data_dict['meta'])))
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
@@ -133,20 +129,16 @@ class FCNSegmentor(object):
 
         data_loader = self.val_loader if data_loader is None else data_loader
         for j, data_dict in enumerate(data_loader):
-            inputs = data_dict['img']
-            targets = data_dict['labelmap']
 
             with torch.no_grad():
-                # Change the data type.
-                inputs, targets = RunnerHelper.to_device(self, inputs, targets)
                 # Forward pass.
-                outputs = self.seg_net(inputs)
+                out_dict = self.seg_net(data_dict)
                 # Compute the loss of the val batch.
-                loss = self.pixel_loss(outputs, targets, gathered=self.configer.get('network', 'gathered'))
-                outputs = RunnerHelper.gather(self, outputs)
+                loss = self.pixel_loss(out_dict, data_dict, gathered=self.configer.get('network', 'gathered'))
+                out_dict = RunnerHelper.gather(self, out_dict)
 
-            self.val_losses.update(loss.item(), inputs.size(0))
-            self._update_running_score(outputs[-1], data_dict['meta'])
+            self.val_losses.update(loss.item(), len(DCHelper.tolist(data_dict['meta'])))
+            self._update_running_score(out_dict['out'], DCHelper.tolist(data_dict['meta']))
 
             # Update the vars of the val phase.
             self.batch_time.update(time.time() - start_time)

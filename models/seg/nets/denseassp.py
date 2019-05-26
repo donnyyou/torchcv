@@ -70,8 +70,8 @@ class DenseASPP(nn.Module):
             nn.Conv2d(num_features, self.configer.get('data', 'num_classes'), kernel_size=1, padding=0)
         )
 
-    def forward(self, x):
-        x = self.backbone(x)
+    def forward(self, data_dict):
+        x = self.backbone(data_dict['img'])
         feature = self.trans(x)
 
         aspp3 = self.ASPP_3(feature)
@@ -89,10 +89,11 @@ class DenseASPP(nn.Module):
         aspp24 = self.ASPP_24(feature)
         feature = torch.cat((aspp24, feature), dim=1)
 
-        cls = self.classification(feature)
+        x = self.classification(feature)
 
-        out = F.interpolate(cls, scale_factor=8, mode='bilinear', align_corners=False)
-        return out
+        x = F.interpolate(x, size=(data_dict['img'].size(2), data_dict['img'].size(3)),
+                          mode="bilinear", align_corners=True)
+        return dict(out=out)
 
 
 class _DenseAsppBlock(nn.Sequential):

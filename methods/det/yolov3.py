@@ -84,7 +84,7 @@ class YOLOv3(object):
 
             self.data_time.update(time.time() - start_time)
             # Forward pass.
-            out_dict = self.det_net(data_dict, testing=False)
+            out_dict = self.det_net(data_dict)
             # Compute the loss of the train batch & backward.
             loss = out_dict['loss'].mean()
             self.train_losses.update(loss.item(), len(DCHelper.tolist(data_dict['meta'])))
@@ -128,7 +128,7 @@ class YOLOv3(object):
         with torch.no_grad():
             for i, data_dict in enumerate(self.val_loader):
                 # Forward pass.
-                out_dict = self.det_net(data_dict, testing=False)
+                out_dict = self.det_net(data_dict)
 
                 # Compute the loss of the val batch.
                 loss = out_dict['loss'].mean()

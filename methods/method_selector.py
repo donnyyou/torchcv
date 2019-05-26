@@ -52,10 +52,10 @@ DET_TEST_DICT = {
 }
 
 CLS_METHOD_DICT = {
-    'image_classifier': ImageClassifier,
+    'get_cls_model': ImageClassifier,
 }
 CLS_TEST_DICT = {
-    'image_classifier': ImageClassifierTest,
+    'get_cls_model': ImageClassifierTest,
 }
 
 GAN_METHOD_DICT = {

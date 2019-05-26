@@ -29,7 +29,7 @@ class ModelManager(object):
     def __init__(self, configer):
         self.configer = configer
 
-    def multi_pose_detector(self):
+    def get_multi_pose_model(self):
         model_name = self.configer.get('network', 'model_name')
 
         if model_name not in MULTI_POSE_MODEL_DICT:
@@ -40,7 +40,7 @@ class ModelManager(object):
 
         return model
 
-    def single_pose_detector(self):
+    def get_single_pose_model(self):
         model_name = self.configer.get('network', 'model_name')
 
         if model_name not in SINGLE_POSE_MODEL_DICT:

@@ -166,13 +166,9 @@ class FasterRCNN(object):
             object_list = list()
             if detections is not None:
                 for x1, y1, x2, y2, conf, cls_pred in detections:
-                    xmin = x1.cpu().item()
-                    ymin = y1.cpu().item()
-                    xmax = x2.cpu().item()
-                    ymax = y2.cpu().item()
-                    cf = conf.cpu().item()
+                    cf = float('%.2f' % conf.item())
                     cls_pred = int(cls_pred.cpu().item()) - 1
-                    object_list.append([xmin, ymin, xmax, ymax, cls_pred, float('%.2f' % cf)])
+                    object_list.append([x1.item(), y1.item(), x2.item(), y2.item(), cls_pred, cf])
 
             batch_pred_bboxes.append(object_list)
 

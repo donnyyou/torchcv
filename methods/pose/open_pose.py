@@ -11,6 +11,7 @@ from datasets.pose.data_loader import DataLoader
 from methods.tools.runner_helper import RunnerHelper
 from methods.tools.trainer import Trainer
 from models.pose.model_manager import ModelManager
+from utils.helpers.dc_helper import DCHelper
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
 from utils.visualizer.pose_visualizer import PoseVisualizer
@@ -45,7 +46,7 @@ class OpenPose(object):
         self._init_model()
 
     def _init_model(self):
-        self.pose_net = self.pose_model_manager.multi_pose_detector()
+        self.pose_net = self.pose_model_manager.get_multi_pose_model()
         self.pose_net = RunnerHelper.load_net(self, self.pose_net)
 
         self.optimizer, self.scheduler = Trainer.init(self._get_parameters(), self.configer.get('solver'))
@@ -80,8 +81,8 @@ class OpenPose(object):
         # Adjust the learning rate after every epoch.
         self.runner_state['epoch'] += 1
         for i, data_dict in enumerate(self.train_loader):
+            Trainer.update(self, backbone_list=(0,), solver_dict=self.configer.get('solver'))
             self.data_time.update(time.time() - start_time)
-
             # Forward pass.
             out_dict = self.pose_net(data_dict)
 
@@ -89,7 +90,7 @@ class OpenPose(object):
             loss_dict = self.mse_loss(out_dict, data_dict, gathered=self.configer.get('network', 'gathered'))
 
             loss = loss_dict['loss']
-            self.train_losses.update(loss.item(), inputs.size(0))
+            self.train_losses.update(loss.item(), len(DCHelper.tolist(data_dict['meta'])))
 
             self.optimizer.zero_grad()
             loss.backward()
@@ -141,7 +142,7 @@ class OpenPose(object):
                 # Compute the loss of the val batch.
                 loss_dict = self.mse_loss(out_dict, data_dict, gathered=self.configer.get('network', 'gathered'))
 
-                self.val_losses.update(loss.item(), inputs.size(0))
+                self.val_losses.update(loss_dict['loss'].mean().item(), len(DCHelper.tolist(data_dict['meta'])))
 
                 # Update the vars of the val phase.
                 self.batch_time.update(time.time() - start_time)

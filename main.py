@@ -197,8 +197,6 @@ if __name__ == "__main__":
             Controller.init(runner)
 
         Controller.train(runner)
-    elif configer.get('phase') == 'debug':
-        Controller.debug(runner)
     elif configer.get('phase') == 'test' and configer.get('network', 'resume') is not None:
         Controller.test(runner)
     else:

@@ -321,7 +321,8 @@ class YOLOv3Loss(nn.Module):
             loss_noobj = self.bce_loss(conf[noobjmask.byte()], objmask[noobjmask.byte()])
             loss_cls = self.bce_loss(pred_cls[objmask.byte()], tcls[objmask.byte()])
         else:
-            loss_coord, loss_obj, loss_noobj, loss_cls = 0.0, 0.0, 0.0, 0.0
+            zero = torch.tensor([0.0]).to(prediction.device)
+            loss_coord, loss_obj, loss_noobj, loss_cls = zero, zero, zero, zero
 
         #  total loss = losses * weight
         loss = loss_coord * self.configer.get('loss', 'loss_weights')['coord_loss'] + \
@@ -360,10 +361,10 @@ class FRLocLoss(nn.Module):
         return y.sum()
 
 
-class FRLoss(nn.Module):
+class FasterRCNNLoss(nn.Module):
 
     def __init__(self, configer):
-        super(FRLoss, self).__init__()
+        super(FasterRCNNLoss, self).__init__()
         self.configer = configer
         self.fr_loc_loss = FRLocLoss(configer)
 

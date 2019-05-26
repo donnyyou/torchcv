@@ -22,12 +22,12 @@ class DarkNetYolov3(nn.Module):
         self.yolo_detection_layer = YOLODetectionLayer(self.configer)
         self.yolov3_loss = YOLOv3Loss(self.configer)
 
-    def forward(self, data_dict, testing=False):
+    def forward(self, data_dict):
         tuple_features = self.backbone(data_dict['img'])
         feat_list = self.yolov3_head(tuple_features)
         predictions, detections = self.yolo_detection_layer(feat_list)
-        if testing:
-            return detections
+        if 'testing' in data_dict and data_dict['testing']:
+            return dict(dets=detections)
 
         loss = self.yolov3_loss(predictions, detections, feat_list, data_dict)
         return dict(dets=detections, pred=predictions, feat_list=feat_list, loss=loss)

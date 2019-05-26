@@ -17,7 +17,7 @@ PRETRAINED_MODEL="./pretrained_models/3x3resnet101-imagenet.pth"
 
 HYPES_FILE='hypes/seg/ade20k/fs_pspnet_ade20k_seg.json'
 MAX_ITERS=150000
-LOSS_TYPE="fs_auxce_loss"
+LOSS_TYPE="seg_auxce_loss"
 
 LOG_DIR="./log/seg/ade20k/"
 LOG_FILE="${LOG_DIR}${CHECKPOINTS_NAME}.log"

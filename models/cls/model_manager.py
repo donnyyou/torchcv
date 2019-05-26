@@ -34,7 +34,7 @@ class ModelManager(object):
     def __init__(self, configer):
         self.configer = configer
 
-    def image_classifier(self):
+    def get_cls_model(self):
         model_name = self.configer.get('network', 'model_name')
 
         if model_name not in CLS_MODEL_DICT:

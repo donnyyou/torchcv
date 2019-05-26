@@ -67,7 +67,8 @@ class DeepLabV3(nn.Module):
         self.num_classes = self.configer.get('data', 'num_classes')
         self.backbone = BackboneSelector(configer).get_backbone()
 
-        self.head = nn.Sequential(ASPPModule(2048, norm_type=self.configer.get('network', 'norm_type')),
+        self.head = nn.Sequential(ASPPModule(self.backbone.get_num_features(), 
+                                             norm_type=self.configer.get('network', 'norm_type')),
                                   nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True))
         self.dsn = nn.Sequential(
             nn.Conv2d(1024, 512, kernel_size=3, stride=1, padding=1),
@@ -76,17 +77,19 @@ class DeepLabV3(nn.Module):
             nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True)
         )
 
-    def forward(self, x_):
-        x = self.backbone(x_)
+    def forward(self, data_dict):
+        x = self.backbone(data_dict['img'])
         x_dsn = self.dsn(x[-2])
         x = self.head(x[-1])
-        x_dsn = F.interpolate(x_dsn, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=True)
-        x = F.interpolate(x, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=True)
-        return x_dsn, x
+        x_dsn = F.interpolate(x_dsn, size=(data_dict['img'].size(2), data_dict['img'].size(3)),
+                              mode="bilinear", align_corners=True)
+        x = F.interpolate(x, size=(data_dict['img'].size(2), data_dict['img'].size(3)),
+                          mode="bilinear", align_corners=True)
+        return dict(aux_out=x_dsn, out=x)
 
 
 if __name__ == '__main__':
-    model = DeepLabv3(20, multi_grid=[1, 2, 1])
+    model = DeepLabV3(20, multi_grid=[1, 2, 1])
     model.freeze_bn()
     model.eval()
     image = torch.autograd.Variable(torch.randn(1, 3, 512, 512), volatile=True)
