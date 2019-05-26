@@ -73,8 +73,15 @@
       }
     },
     "test": {
-      "input_size": [300, 300],
-      "scale_search": [1.0]
+      "batch_size": 32,
+      "aug_trans": {
+        "trans_seq": []
+      },
+      "data_transformer": {
+        "size_mode": "fix_size",
+        "input_size": [300, 300],
+        "align_method": "only_scale"
+      }
     },
     "anchor": {
       "anchor_method": "ssd",
@@ -116,10 +123,10 @@
         "metric": "epoch",
         "is_warm": true,
         "warm": {
-          "warm_epoch": 6,
+          "warm_iters": 1000,
           "freeze_backbone": false
         },
-        "base_lr": 0.004,
+        "base_lr": 0.001,
         "lr_policy": "multistep",
         "multistep": {
           "gamma": 0.1,

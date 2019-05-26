@@ -8,7 +8,7 @@ from torch import nn
 from torch.nn import functional as F
 from torchvision.models import vgg16
 
-from models.det.loss.det_modules import FRLoss
+from models.det.loss.det_modules import FasterRCNNLoss
 from models.det.layers.fr_roi_generator import FRROIGenerator
 from models.det.layers.fr_roi_sampler import FRROISampler
 from models.det.layers.rpn_detection_layer import RPNDetectionLayer
@@ -67,7 +67,7 @@ class FasterRCNN(nn.Module):
         self.roi_generator = FRROIGenerator(configer)
         self.roi_sampler = FRROISampler(configer)
         self.bbox_head = BBoxHead(configer, self.classifier)
-        self.det_loss = FRLoss(self.configer)
+        self.det_loss = FasterRCNNLoss(self.configer)
 
     def forward(self, data_dict):
         if 'testing' in data_dict and data_dict['testing']:

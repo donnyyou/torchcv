@@ -4,11 +4,11 @@
 # Generate train & val data.
 
 
-export PYTHONPATH='/home/donny/Projects/PytorchCV'
+export PYTHONPATH='/home/donny/Projects/torchcv'
 
 
-ROOT_DIR='/home/donny/DataSet/VOC/VOCdevkit'
-DATA_SET='VOC07'
+ROOT_DIR='/home/donny/DataSet/voc/VOCdevkit'
+DATA_SET='VOC07+12'
 SAVE_DIR='/home/donny/DataSet/'${DATA_SET}'_DET'
 
 
