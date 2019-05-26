@@ -42,7 +42,7 @@ class FCNSegmentorTest(object):
         self.seg_net.eval()
 
     def test(self, test_dir, out_dir):
-        for i, data_dict in enumerate(self.test_loader.get_testloader(test_dir=test_dir)):
+        for _, data_dict in enumerate(self.test_loader.get_testloader(test_dir=test_dir)):
             total_logits = None
             if self.configer.get('test', 'mode') == 'ss_test':
                 total_logits = self.ss_test(data_dict)

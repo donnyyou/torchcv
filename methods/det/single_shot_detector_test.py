@@ -39,8 +39,9 @@ class SingleShotDetectorTest(object):
         self.det_net.eval()
 
     def test(self, test_dir, out_dir):
-        for i, data_dict in enumerate(self.test_loader.get_testloader(test_dir=test_dir)):
-            loc, conf = self.det_net(data_dict, testing=True)
+        for _, data_dict in enumerate(self.test_loader.get_testloader(test_dir=test_dir)):
+            data_dict['testing'] = True
+            loc, conf = self.det_net(data_dict)
             meta_list = DCHelper.tolist(data_dict['meta'])
             batch_detections = self.decode(loc, conf, self.configer, meta_list)
             for i in range(len(meta_list)):

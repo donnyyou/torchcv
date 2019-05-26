@@ -32,13 +32,13 @@ class DefaultLoader(data.Dataset):
         if self.aug_transform is not None:
             img = self.aug_transform(img)
 
-        border_hw = ImageHelper.get_size(img)[::-1]
+        border_size = ImageHelper.get_size(img)
         if self.img_transform is not None:
             img = self.img_transform(img)
 
         meta = dict(
             ori_img_size=ori_img_size,
-            border_hw=border_hw,
+            border_size=border_size,
             img_path=self.item_list[index][0],
             filename=self.item_list[index][1]
         )
