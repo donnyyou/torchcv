@@ -7,18 +7,18 @@
 import torch
 
 from models.pose.nets.open_pose_org import get_open_pose_org
-from models.pose.nets.cpm_net import CPMNet
+from models.pose.nets.cpm import CPM
 from models.pose.nets.open_pose import OpenPose
 from models.pose.loss.pose_modules import OpenPoseLoss
 from utils.tools.logger import Logger as Log
 
 MULTI_POSE_MODEL_DICT = {
-    'open_pose': OpenPose,
-    'open_pose_org': get_open_pose_org,
+    'openpose': OpenPose,
+    'openpose_org': get_open_pose_org,
 }
 
 SINGLE_POSE_MODEL_DICT = {
-    'cpm_net': CPMNet
+    'cpm': CPM
 }
 
 POSE_LOSS_DICT = {

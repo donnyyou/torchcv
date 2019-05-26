@@ -8,12 +8,12 @@ export PYTHONPATH="/home/donny/Projects/TorchCV":$PYTHONPATH
 
 cd ../../../
 
-DATA_DIR="/home/donny/DataSet/COCO_INS_2014"
-MODEL_NAME="darknet_yolov3"
-LOSS_TYPE="yolov3_loss"
-CHECKPOINTS_NAME="yolov3_darknet_coco_det"$2
-PRETRAINED_MODEL="./pretrained_models/darknet53_weights_pretrained.pth"
-HYPES_FILE='hypes/det/coco/yolov3_darknet_coco_det.json'
+DATA_DIR="/home/donny/DataSet/COCO_KPTS"
+MODEL_NAME="openpose"
+LOSS_TYPE="openpose_loss"
+CHECKPOINTS_NAME="openpose_vgg19_coco_pose"$2
+PRETRAINED_MODEL="./pretrained_models/vgg19_pytorch_pretrained.pth"
+HYPES_FILE='hypes/pose/coco/openpose_vgg19_coco_pose.json'
 
 LOG_DIR="./log/pose/coco/"
 LOG_FILE="${LOG_DIR}${CHECKPOINTS_NAME}.log"
