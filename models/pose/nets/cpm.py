@@ -9,9 +9,9 @@ import torch.nn.functional as F
 import torch
 
 
-class CPMNet(nn.Module):
+class CPM(nn.Module):
     def __init__(self, configer):
-        super(CPMNet, self).__init__()
+        super(CPM, self).__init__()
         self.out_c = configer.get('network', 'heatmap_out')
         self.pool_center_lower = nn.AvgPool2d(kernel_size=9, stride=8)
         self.conv1_stage1 = nn.Conv2d(3, 128, kernel_size=9, padding=4)

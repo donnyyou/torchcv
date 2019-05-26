@@ -16,7 +16,8 @@ from utils.helpers.tensor_helper import TensorHelper
 from utils.tools.logger import Logger as Log
 
 
-def stack(batch, data_key=None, trans_dict=None):
+def stack(batch, data_key=None, device_ids=None):
+    device_ids = list(range(torch.cuda.device_count())) if device_ids is None else device_ids
     if isinstance(batch[0][data_key], DataContainer):
         if batch[0][data_key].stack:
             assert isinstance(batch[0][data_key].data, torch.Tensor) or \
@@ -27,9 +28,10 @@ def stack(batch, data_key=None, trans_dict=None):
                    isinstance(batch[0][data_key].data, collections.Sequence)
             stacked = []
             if batch[0][data_key].samples_per_gpu:
-                for i in range(0, len(batch), trans_dict['samples_per_gpu']):
+                samples_per_gpu = (len(batch) - 1 + len(device_ids)) // len(device_ids)
+                for i in range(0, len(batch), samples_per_gpu):
                     stacked.append(
-                        default_collate([sample[data_key].data for sample in batch[i:i + trans_dict['samples_per_gpu']]])
+                        default_collate([sample[data_key].data for sample in batch[i:i + samples_per_gpu]])
                     )
             else:
                 stacked = default_collate([sample[data_key].data for sample in batch])
@@ -43,8 +45,9 @@ def stack(batch, data_key=None, trans_dict=None):
         else:
             stacked = []
             if batch[0][data_key].samples_per_gpu:
-                for i in range(0, len(batch), trans_dict['samples_per_gpu']):
-                    stacked.append([sample[data_key].data for sample in batch[i:i + trans_dict['samples_per_gpu']]])
+                samples_per_gpu = (len(batch) - 1 + len(device_ids)) // len(device_ids)
+                for i in range(0, len(batch), samples_per_gpu):
+                    stacked.append([sample[data_key].data for sample in batch[i:i + samples_per_gpu]])
             else:
                 stacked = [sample[data_key].data for sample in batch]
 
@@ -58,10 +61,10 @@ def stack(batch, data_key=None, trans_dict=None):
         return default_collate([sample[data_key] for sample in batch])
 
 
-def collate(batch, trans_dict):
+def collate(batch, trans_dict, device_ids=None):
     data_keys = batch[0].keys()
     if trans_dict['size_mode'] == 'none':
-        return dict({key: stack(batch, data_key=key, trans_dict=trans_dict) for key in data_keys})
+        return dict({key: stack(batch, data_key=key, device_ids=device_ids) for key in data_keys})
 
     elif trans_dict['size_mode'] == 'fix_size':
         target_width, target_height = trans_dict['input_size']
@@ -77,13 +80,6 @@ def collate(batch, trans_dict):
 
     else:
         raise NotImplementedError('Size Mode {} is invalid!'.format(trans_dict['size_mode']))
-
-    if 'fit_stride' in trans_dict:
-        stride = trans_dict['fit_stride']
-        pad_w = 0 if (target_width % stride == 0) else stride - (target_width % stride)  # right
-        pad_h = 0 if (target_height % stride == 0) else stride - (target_height % stride)  # down
-        target_width = target_width + pad_w
-        target_height = target_height + pad_h
 
     for i in range(len(batch)):
         if 'meta' in data_keys:
@@ -122,18 +118,20 @@ def collate(batch, trans_dict):
 
             scaled_size_hw = (scaled_size[1], scaled_size[0])
 
-            batch[i]['img'] = DataContainer(TensorHelper.resize(batch[i]['img'].data,
-                                                                scaled_size_hw, mode='bilinear', align_corners=True),
-                                            stack=batch[i]['img'].stack)
+            batch[i]['img']._data = TensorHelper.resize(batch[i]['img'].data,
+                                                        scaled_size_hw, mode='bilinear', align_corners=True)
             if 'labelmap' in data_keys:
-                batch[i]['labelmap'] = DataContainer(TensorHelper.resize(batch[i]['labelmap'].data,
-                                                                         scaled_size_hw, mode='nearest'),
-                                                     stack=batch[i]['labelmap'].stack)
+                batch[i]['labelmap']._data = TensorHelper.resize(batch[i]['labelmap'].data, scaled_size_hw, mode='nearest')
 
             if 'maskmap' in data_keys:
-                batch[i]['maskmap'] = DataContainer(TensorHelper.resize(batch[i]['maskmap'].data,
-                                                                        scaled_size_hw, mode='nearest'),
-                                                    stack=batch[i]['maskmap'].stack)
+                batch[i]['maskmap']._data = TensorHelper.resize(batch[i]['maskmap'].data, scaled_size_hw, mode='nearest')
+
+        if 'fit_stride' in trans_dict:
+            stride = trans_dict['fit_stride']
+            pad_w = 0 if (target_width % stride == 0) else stride - (target_width % stride)  # right
+            pad_h = 0 if (target_height % stride == 0) else stride - (target_height % stride)  # down
+            target_width = target_width + pad_w
+            target_height = target_height + pad_h
 
         pad_width = target_width - scaled_size[0]
         pad_height = target_height - scaled_size[1]
@@ -148,7 +146,7 @@ def collate(batch, trans_dict):
             elif trans_dict['pad_mode'] == 'pad_border':
                 direction = random.randint(0, 1)
                 left_pad = pad_width if direction == 0 else 0
-                up_pad = pad_height if direction == 0  else 0
+                up_pad = pad_height if direction == 0 else 0
 
             elif trans_dict['pad_mode'] == 'pad_left_up':
                 left_pad = pad_width
@@ -168,19 +166,13 @@ def collate(batch, trans_dict):
 
             pad = [left_pad, pad_width-left_pad, up_pad, pad_height-up_pad]
 
-            batch[i]['img'] = DataContainer(
-                F.pad(batch[i]['img'].data, pad=pad, value=0), stack=batch[i]['img'].stack
-            )
+            batch[i]['img']._data = F.pad(batch[i]['img'].data, pad=pad, value=0)
 
             if 'labelmap' in data_keys:
-                batch[i]['labelmap'] = DataContainer(
-                    F.pad(batch[i]['labelmap'].data, pad=pad, value=-1), stack=batch[i]['labelmap'].stack
-                )
+                batch[i]['labelmap']._data = F.pad(batch[i]['labelmap'].data, pad=pad, value=-1)
 
             if 'maskmap' in data_keys:
-                batch[i]['maskmap'] = DataContainer(
-                    F.pad(batch[i]['maskmap'].data, pad=pad, value=1), stack=batch[i]['maskmap'].stack
-                )
+                batch[i]['maskmap']._data = F.pad(batch[i]['maskmap'].data, pad=pad, value=1)
 
             if 'polygons' in data_keys:
                 for object_id in range(len(batch[i]['polygons'])):
@@ -196,4 +188,4 @@ def collate(batch, trans_dict):
                 batch[i]['bboxes'].data[:, 0::2] += left_pad
                 batch[i]['bboxes'].data[:, 1::2] += up_pad
 
-    return dict({key: stack(batch, data_key=key, trans_dict=trans_dict) for key in data_keys})
+    return dict({key: stack(batch, data_key=key, device_ids=device_ids) for key in data_keys})

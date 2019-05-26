@@ -41,12 +41,11 @@ class DetVisualizer(object):
             log.error('Dir:{} not exists!'.format(base_dir))
             os.makedirs(base_dir)
 
-        img_path = os.path.join(base_dir, '{}.jpg'.format(name))
+        img_path = os.path.join(base_dir, name if ImageHelper.is_img(name) else '{}.jpg'.format(name))
 
         for bbox in bboxes_list:
-            image = cv2.rectangle(image, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (0, 255, 0), -1)
+            image = cv2.rectangle(image, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (0, 255, 0), 2)
 
-        image = cv2.resize(image, tuple(self.configer.get('data', 'input_size')))
         cv2.imwrite(img_path, image)
 
     def vis_rois(self, inputs, indices_and_rois, rois_labels=None, name='default', sub_dir='rois'):

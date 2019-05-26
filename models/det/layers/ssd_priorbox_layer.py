@@ -30,34 +30,34 @@ class SSDPriorBoxLayer(object):
             fm_h = feature_map_h[i]
             boxes = []
             stride_offset_w, stride_offset_h = 0.5 * stride_w_list[i], 0.5 * stride_h_list[i]
-            if self.configer.get('gt', 'anchor_method') == 'ssd':
-                s_w = self.configer.get('gt', 'cur_anchor_sizes')[i]
-                s_h = self.configer.get('gt', 'cur_anchor_sizes')[i]
+            if self.configer.get('anchor', 'anchor_method') == 'ssd':
+                s_w = self.configer.get('anchor', 'cur_anchor_sizes')[i]
+                s_h = self.configer.get('anchor', 'cur_anchor_sizes')[i]
                 boxes.append((stride_offset_w, stride_offset_h, s_w, s_h))
-                extra_s = math.sqrt(self.configer.get('gt', 'cur_anchor_sizes')[i]
-                                    * self.configer.get('gt', 'cur_anchor_sizes')[i + 1])
+                extra_s = math.sqrt(self.configer.get('anchor', 'cur_anchor_sizes')[i]
+                                    * self.configer.get('anchor', 'cur_anchor_sizes')[i + 1])
 
                 boxes.append((stride_offset_w, stride_offset_h, extra_s, extra_s))
 
-                for ar in self.configer.get('gt', 'aspect_ratio_list')[i]:
+                for ar in self.configer.get('anchor', 'aspect_ratio_list')[i]:
                     boxes.append((stride_offset_w, stride_offset_h, s_w * math.sqrt(ar), s_h / math.sqrt(ar)))
                     boxes.append((stride_offset_w, stride_offset_h, s_w / math.sqrt(ar), s_h * math.sqrt(ar)))
 
-            elif self.configer.get('gt', 'anchor_method') == 'retina':
-                s_w = self.configer.get('gt', 'cur_anchor_sizes')[i]
-                s_h = self.configer.get('gt', 'cur_anchor_sizes')[i]
-                for sr in self.configer.get('gt', 'scale_ratio_list'):
+            elif self.configer.get('anchor', 'anchor_method') == 'retina':
+                s_w = self.configer.get('anchor', 'cur_anchor_sizes')[i]
+                s_h = self.configer.get('anchor', 'cur_anchor_sizes')[i]
+                for sr in self.configer.get('anchor', 'scale_ratio_list'):
                     s_w = sr * s_w
                     s_h = sr * s_h
-                    for ar in self.configer.get('gt', 'aspect_ratio_list'):
+                    for ar in self.configer.get('anchor', 'aspect_ratio_list'):
                         boxes.append((stride_offset_w, stride_offset_h, s_w * ar, s_h / ar))
 
             else:
-                Log.error('Anchor Method {} not valid.'.format(self.configer.get('gt', 'anchor_method')))
+                Log.error('Anchor Method {} not valid.'.format(self.configer.get('anchor', 'anchor_method')))
                 exit(1)
 
             anchor_bases = torch.FloatTensor(np.array(boxes))
-            assert anchor_bases.size(0) == self.configer.get('gt', 'num_anchor_list')[i]
+            assert anchor_bases.size(0) == self.configer.get('anchor', 'num_anchor_list')[i]
             anchors = anchor_bases.contiguous().view(1, -1, 4).repeat(fm_h * fm_w, 1, 1).contiguous().view(-1, 4)
             grid_len_h = np.arange(0, img_h - stride_offset_h, stride_h_list[i])
             grid_len_w = np.arange(0, img_w - stride_offset_w, stride_w_list[i])
@@ -67,7 +67,7 @@ class SSDPriorBoxLayer(object):
             y_offset = torch.FloatTensor(b).view(-1, 1)
 
             x_y_offset = torch.cat((x_offset, y_offset), 1).contiguous().view(-1, 1, 2)
-            x_y_offset = x_y_offset.repeat(1, self.configer.get('gt', 'num_anchor_list')[i], 1).contiguous().view(-1, 2)
+            x_y_offset = x_y_offset.repeat(1, self.configer.get('anchor', 'num_anchor_list')[i], 1).contiguous().view(-1, 2)
             anchors[:, :2] = anchors[:, :2] + x_y_offset
             anchor_boxes_list.append(anchors)
 

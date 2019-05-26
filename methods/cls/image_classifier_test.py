@@ -41,7 +41,7 @@ class ImageClassifierTest(object):
         self._init_model()
 
     def _init_model(self):
-        self.cls_net = self.cls_model_manager.image_classifier()
+        self.cls_net = self.cls_model_manager.get_cls_model()
         self.cls_net = RunnerHelper.load_net(self, self.cls_net)
         self.cls_net.eval()
 

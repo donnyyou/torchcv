@@ -11,6 +11,7 @@ from datasets.pose.data_loader import DataLoader
 from methods.tools.runner_helper import RunnerHelper
 from methods.tools.trainer import Trainer
 from models.pose.model_manager import ModelManager
+from utils.helpers.dc_helper import DCHelper
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
 from utils.visualizer.pose_visualizer import PoseVisualizer
@@ -40,7 +41,7 @@ class ConvPoseMachine(object):
         self._init_model()
 
     def _init_model(self):
-        self.pose_net = self.pose_model_manager.single_pose_detector()
+        self.pose_net = self.pose_model_manager.get_single_pose_model()
         self.pose_net = RunnerHelper.load_net(self, self.pose_net)
 
         self.optimizer, self.scheduler = Trainer.init(self._get_parameters(), self.configer.get('solver'))
@@ -48,7 +49,7 @@ class ConvPoseMachine(object):
         self.train_loader = self.pose_data_loader.get_trainloader()
         self.val_loader = self.pose_data_loader.get_valloader()
 
-        self.mse_loss = self.pose_model_manager.get_pose_loss()
+        self.cpm_loss = self.pose_model_manager.get_pose_loss()
 
     def _get_parameters(self):
 
@@ -66,21 +67,17 @@ class ConvPoseMachine(object):
         # data_tuple: (inputs, heatmap, maskmap, tagmap, num_objects)
         for i, data_dict in enumerate(self.train_loader):
             Trainer.update(self, solver_dict=self.configer.get('solver'))
-            inputs = data_dict['img']
-            heatmap = data_dict['heatmap']
 
             self.data_time.update(time.time() - start_time)
             # Change the data type.
-            inputs, heatmap = RunnerHelper.to_device(self, inputs, heatmap)
-            # self.pose_visualizer.vis_peaks(heatmap[0], inputs[0], name='cpm')
 
             # Forward pass.
-            outputs = self.pose_net(inputs)
+            out_dict = self.pose_net(data_dict)
 
             # Compute the loss of the train batch & backward.
-            loss = self.mse_loss(outputs, heatmap)
+            loss = self.cpm_loss(out_dict, data_dict, gathered=self.configer.get('network', 'gathered'))
 
-            self.train_losses.update(loss.item(), inputs.size(0))
+            self.train_losses.update(loss.item(), len(DCHelper.tolist(data_dict['meta'])))
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
@@ -121,18 +118,13 @@ class ConvPoseMachine(object):
 
         with torch.no_grad():
             for j, data_dict in enumerate(self.val_loader):
-                inputs = data_dict['img']
-                heatmap = data_dict['heatmap']
-                # Change the data type.
-                inputs, heatmap = RunnerHelper.to_device(self, inputs, heatmap)
-
                 # Forward pass.
-                outputs = self.pose_net(inputs)
+                out_dict = self.pose_net(data_dict)
 
                 # Compute the loss of the val batch.
-                loss = self.mse_loss(outputs[-1], heatmap)
+                loss = self.cpm_loss(out_dict, data_dict, gathered=self.configer.get('network', 'gathered'))
 
-                self.val_losses.update(loss.item(), inputs.size(0))
+                self.val_losses.update(loss.item(), len(DCHelper.tolist(data_dict['meta'])))
 
                 # Update the vars of the val phase.
                 self.batch_time.update(time.time() - start_time)

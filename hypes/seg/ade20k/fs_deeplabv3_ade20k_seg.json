@@ -125,7 +125,7 @@
       "max_iters": 150000
     },
     "loss": {
-      "loss_type": "fs_auxce_loss",
+      "loss_type": "seg_auxce_loss",
       "loss_weights": {
         "aux_loss": 0.4,
         "seg_loss": 1.0

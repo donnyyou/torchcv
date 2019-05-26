@@ -95,9 +95,8 @@
     },
     "network":{
       "backbone": "vgg19_dilated8",
-      "model_name": "open_pose",
+      "model_name": "openpose",
       "stride": 8,
-      "loss_weights": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
       "paf_out": 38,
       "heatmap_out": 19,
       "checkpoints_name": "op_vgg19_coco_pose",
@@ -171,6 +170,7 @@
       "limb_pos_ratio": 0.8
     },
     "loss": {
+      "loss_weights": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
       "loss_type": "op_mse_loss",
       "params": {
         "mse_reduction": "sum"

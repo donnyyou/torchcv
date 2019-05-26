@@ -13,10 +13,22 @@ class DCHelper(object):
 
     @staticmethod
     def tolist(dc):
+        assert isinstance(dc, DataContainer), type(dc)
         if dc.samples_per_gpu and not dc.stack:
             return list(itertools.chain(*dc.data))
+        elif dc.samples_per_gpu and dc.stack:
+            return list(itertools.chain(*[[item for item in sub_batch] for sub_batch in dc.data]))
         else:
             return dc.data
+
+    @staticmethod
+    def totensor(dc):
+        assert isinstance(dc, DataContainer), type(dc)
+        if isinstance(dc.data, torch.Tensor):
+            return dc.data
+
+        assert isinstance(dc.data, (list, tuple)) and isinstance(dc.data[0], torch.Tensor)
+        return torch.cat(dc.data, 0)
 
     @staticmethod
     def todc(data_list, samples_per_gpu, stack=False, cpu_only=False):

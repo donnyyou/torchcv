@@ -9,8 +9,9 @@ import torch
 from models.seg.nets.denseassp import DenseASPP
 from models.seg.nets.deeplabv3 import DeepLabV3
 from models.seg.nets.pspnet import PSPNet
-from models.seg.loss.seg_modules import FSCELoss, FSOhemCELoss, FSAuxCELoss, FSAuxEncCELoss, FSAuxOhemCELoss
+from models.seg.loss.seg_modules import SegCELoss, SegOhemCELoss, SegAuxCELoss, SegAuxEncCELoss, SegAuxOhemCELoss
 from utils.tools.logger import Logger as Log
+
 
 SEG_MODEL_DICT = {
     'deeplabv3': DeepLabV3,
@@ -19,19 +20,20 @@ SEG_MODEL_DICT = {
 }
 
 SEG_LOSS_DICT = {
-    'fs_ce_loss': FSCELoss,
-    'fs_ohemce_loss': FSOhemCELoss,
-    'fs_auxce_loss':FSAuxCELoss,
-    'fs_auxencce_loss': FSAuxEncCELoss,
-    'fs_auxohemce_loss': FSAuxOhemCELoss
+    'seg_ce_loss': SegCELoss,
+    'seg_ohemce_loss': SegOhemCELoss,
+    'seg_auxce_loss':SegAuxCELoss,
+    'seg_auxencce_loss': SegAuxEncCELoss,
+    'seg_auxohemce_loss': SegAuxOhemCELoss
 }
+
 
 class ModelManager(object):
 
     def __init__(self, configer):
         self.configer = configer
 
-    def semantic_segmentor(self):
+    def get_seg_model(self):
         model_name = self.configer.get('network', 'model_name')
 
         if model_name not in SEG_MODEL_DICT:

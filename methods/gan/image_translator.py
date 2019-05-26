@@ -12,6 +12,7 @@ from methods.tools.runner_helper import RunnerHelper
 from methods.tools.trainer import Trainer
 from models.gan.model_manager import ModelManager
 from utils.tools.average_meter import AverageMeter
+from utils.helpers.dc_helper import DCHelper
 from utils.tools.logger import Logger as Log
 
 
@@ -69,7 +70,6 @@ class ImageTranslator(object):
         self.scheduler_G.step(self.runner_state['epoch'])
         self.scheduler_D.step(self.runner_state['epoch'])
         for i, data_dict in enumerate(self.train_loader):
-            inputs = data_dict['imgA']
             self.data_time.update(time.time() - start_time)
 
             # Forward pass.
@@ -85,7 +85,7 @@ class ImageTranslator(object):
             loss_D.backward()
             self.optimizer_D.step()
             loss = loss_G + loss_D
-            self.train_losses.update(loss.item(), inputs.size(0))
+            self.train_losses.update(loss.item(), len(DCHelper.tolist(data_dict['meta'])))
 
             # Update the vars of the train phase.
             self.batch_time.update(time.time() - start_time)
@@ -116,23 +116,21 @@ class ImageTranslator(object):
 
         self.runner_state['epoch'] += 1
 
-    def val(self, data_loader=None):
+    def val(self):
         """
           Validation function during the train phase.
         """
         self.gan_net.eval()
         start_time = time.time()
 
-        data_loader = self.val_loader if data_loader is None else data_loader
-        for j, data_dict in enumerate(data_loader):
-            inputs = data_dict['imgA']
-
+        for j, data_dict in enumerate(self.val_loader):
             with torch.no_grad():
                 # Forward pass.
                 out_dict = self.gan_net(data_dict)
                 # Compute the loss of the val batch.
 
-            self.val_losses.update(out_dict['loss_G'].mean().item() + out_dict['loss_D'].mean().item(), inputs.size(0))
+            self.val_losses.update(out_dict['loss_G'].mean().item() + out_dict['loss_D'].mean().item(),
+                                   len(DCHelper.tolist(data_dict['meta'])))
             # Update the vars of the val phase.
             self.batch_time.update(time.time() - start_time)
             start_time = time.time()

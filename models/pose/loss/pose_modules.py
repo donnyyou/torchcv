@@ -9,40 +9,36 @@ import torch.nn as nn
 from torch.autograd import Variable
 
 
-class OPMseLoss(nn.Module):
+class OpenPoseLoss(nn.Module):
     def __init__(self, configer):
-        super(OPMseLoss, self).__init__()
+        super(OpenPoseLoss, self).__init__()
         self.configer = configer
-        reduction = 'elementwise_mean'
+        reduction = 'mean'
         if self.configer.exists('loss', 'params') and 'mse_reduction' in self.configer.get('loss', 'params'):
             reduction = self.configer.get('loss', 'params')['mse_reduction']
 
         self.mse_loss = nn.MSELoss(reduction=reduction)
 
-    def forward(self, inputs, *targets, mask=None, weights=None):
-        loss = 0.0
-        if isinstance(inputs, list):
-            if weights is not None:
-                for i in range(len(inputs)):
-                    if mask is not None:
-                        loss += weights[i] * self.mse_loss(inputs[i]*mask, targets)
-                    else:
-                        loss += weights[i] * self.mse_loss(inputs[i], targets)
+    def forward(self, out_dict, data_dict, **kwargs):
+        vec_weights = self.configer.get('loss', 'loss_weights')['vec_loss']
+        heat_weights = self.configer.get('loss', 'loss_weights')['heat_loss']
+        loss_vec = 0.0
+        for i in range(len(out_dict['paf'])):
+            if 'mask' in data_dict:
+                loss_vec += vec_weights[i] * self.mse_loss(out_dict['paf'][i]*data_dict['mask'], data_dict['vecmap'])
             else:
-                for i in range(len(inputs)):
-                    if mask is not None:
-                        loss += self.mse_loss(inputs[i]*mask, targets)
-                    else:
-                        loss += self.mse_loss(inputs[i], targets)
+                loss_vec += vec_weights[i] * self.mse_loss(out_dict['paf'][i]*data_dict['mask'], data_dict['vecmap'])
 
-        else:
-            if mask is not None:
-                loss = self.mse_loss(inputs*mask, targets)
+        loss_heat = 0.0
+        for i in range(len(out_dict['heat'])):
+            if 'mask' in data_dict:
+                loss_heat += heat_weights[i] * self.mse_loss(out_dict['paf'][i]*data_dict['mask'], data_dict['heatmap'])
             else:
-                loss = self.mse_loss(inputs, targets)
+                loss_heat += heat_weights[i] * self.mse_loss(out_dict['paf'][i]*data_dict['mask'], data_dict['heatmap'])
 
+        loss = loss_vec + loss_heat
         if self.configer.get('mse_loss', 'reduction') == 'sum':
-            loss = loss / targets.size(0)
+            loss = loss / data_dict['img'].size(0)
 
         return loss
 

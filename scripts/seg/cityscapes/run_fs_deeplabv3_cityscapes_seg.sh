@@ -17,7 +17,7 @@ PRETRAINED_MODEL="./pretrained_models/3x3resnet101-imagenet.pth"
 
 HYPES_FILE='hypes/seg/cityscapes/fs_deeplabv3_cityscapes_seg.json'
 MAX_ITERS=40000
-LOSS_TYPE="fs_auxce_loss"
+LOSS_TYPE="seg_auxce_loss"
 
 LOG_DIR="./log/seg/cityscapes/"
 LOG_FILE="${LOG_DIR}${CHECKPOINTS_NAME}.log"

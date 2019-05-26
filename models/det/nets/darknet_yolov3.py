@@ -10,6 +10,7 @@ from collections import OrderedDict
 
 from models.backbones.backbone_selector import BackboneSelector
 from models.det.layers.yolo_detection_layer import YOLODetectionLayer
+from models.det.loss.det_modules import YOLOv3Loss
 
 
 class DarkNetYolov3(nn.Module):
@@ -18,11 +19,18 @@ class DarkNetYolov3(nn.Module):
         self.configer = configer
         self.backbone = BackboneSelector(configer).get_backbone()
         self.yolov3_head = Yolov3Head(configer, out_filters=self.backbone.num_features)
+        self.yolo_detection_layer = YOLODetectionLayer(self.configer)
+        self.yolov3_loss = YOLOv3Loss(self.configer)
 
-    def forward(self, x):
-        tuple_features = self.backbone(x)
-        out = self.yolov3_head(tuple_features)
-        return out
+    def forward(self, data_dict):
+        tuple_features = self.backbone(data_dict['img'])
+        feat_list = self.yolov3_head(tuple_features)
+        predictions, detections = self.yolo_detection_layer(feat_list)
+        if 'testing' in data_dict and data_dict['testing']:
+            return dict(dets=detections)
+
+        loss = self.yolov3_loss(predictions, detections, feat_list, data_dict)
+        return dict(dets=detections, pred=predictions, feat_list=feat_list, loss=loss)
 
 
 class Yolov3Head(nn.Module):
@@ -35,7 +43,7 @@ class Yolov3Head(nn.Module):
         _out_filters = out_filters
 
         #  embedding0
-        final_out_filter0 = len(self.configer.get("gt", "anchors_list")[0]) * (5 + self.num_classes)
+        final_out_filter0 = len(self.configer.get("anchor", "anchors_list")[0]) * (5 + self.num_classes)
 
         self.embedding0 = self._make_embedding([512, 1024], _out_filters[-1])
         self.conv_out1 = nn.Sequential(
@@ -48,7 +56,7 @@ class Yolov3Head(nn.Module):
         )
 
         #  embedding1
-        final_out_filter1 = len(self.configer.get("gt", "anchors_list")[1]) * (5 + self.num_classes)
+        final_out_filter1 = len(self.configer.get("anchor", "anchors_list")[1]) * (5 + self.num_classes)
 
         self.embedding1_cbl = self._make_cbl(512, 256, 1)
         self.embedding1 = self._make_embedding([256, 512], _out_filters[-2] + 256)
@@ -61,7 +69,7 @@ class Yolov3Head(nn.Module):
             ])
         )
         #  embedding2
-        final_out_filter2 = len(self.configer.get("gt", "anchors_list")[2]) * (5 + self.num_classes)
+        final_out_filter2 = len(self.configer.get("anchor", "anchors_list")[2]) * (5 + self.num_classes)
 
         self.embedding2_cbl = self._make_cbl(256, 128, 1)
         self.embedding2 = self._make_embedding([128, 256], _out_filters[-3] + 128)
@@ -73,7 +81,6 @@ class Yolov3Head(nn.Module):
                 ("conv_out", nn.Conv2d(256, final_out_filter2, kernel_size=1, stride=1, padding=0, bias=True))
             ])
         )
-        self.yolo_detection_layer = YOLODetectionLayer(self.configer)
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -122,5 +129,4 @@ class Yolov3Head(nn.Module):
         x2_in = torch.cat([F.interpolate(x2_in, scale_factor=2, mode='nearest'), tuple_features[-3]], 1)
         x2_in = _branch(self.embedding2, x2_in)
         out2 = self.conv_out3(x2_in)
-        output = self.yolo_detection_layer([out0, out1, out2])
-        return output
+        return [out0, out1, out2]

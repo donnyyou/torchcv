@@ -5,15 +5,18 @@
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
+
+from models.det.layers.ssd_priorbox_layer import SSDPriorBoxLayer
 
 
 class SSDDetectionLayer(nn.Module):
 
     def __init__(self, configer):
         super(SSDDetectionLayer, self).__init__()
-
+        self.ssd_priorbox_layer = SSDPriorBoxLayer(configer)
         self.num_classes = configer.get('data', 'num_classes')
-        self.num_anchors = configer.get('gt', 'num_anchor_list')
+        self.num_anchors = configer.get('anchor', 'num_anchor_list')
         self.num_features = configer.get('network', 'num_feature_list')
         self.ssd_head_index = configer.get('network', 'head_index_list')
 
@@ -36,7 +39,7 @@ class SSDDetectionLayer(nn.Module):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
 
-    def forward(self, feat_list):
+    def forward(self, feat_list, data_dict):
         y_locs = []
         y_confs = []
 
@@ -52,7 +55,18 @@ class SSDDetectionLayer(nn.Module):
             y_conf = y_conf.view(N, -1, self.num_classes)
             y_confs.append(y_conf)
 
-        loc_preds = torch.cat(y_locs, 1)
-        conf_preds = torch.cat(y_confs, 1)
+        pred_loc = torch.cat(y_locs, 1)
+        pred_conf = torch.cat(y_confs, 1)
+        input_size = [data_dict['img'].size(3), data_dict['img'].size(2)]
+        default_boxes = self.ssd_priorbox_layer(feat_list, input_size)
+        default_boxes = default_boxes.unsqueeze(0).repeat(pred_loc.size(0), 1, 1).to(pred_loc.device)
 
-        return loc_preds, conf_preds
+        variances = [0.1, 0.2]
+        wh = torch.exp(pred_loc[:, :, 2:] * variances[1]) * default_boxes[:, :, 2:]
+        cxcy = pred_loc[:, :, :2] * variances[0] * default_boxes[:, :, 2:] + default_boxes[:, :, :2]
+        dets_loc = torch.cat([cxcy - wh / 2, cxcy + wh / 2], 2)  # [b, 8732,4]
+        # clip bounding box
+        dets_loc[:, :, 0::2] = dets_loc[:, :, 0::2].clamp(min=0, max=input_size[0] - 1).div(input_size[0])
+        dets_loc[:, :, 1::2] = dets_loc[:, :, 1::2].clamp(min=0, max=input_size[1] - 1).div(input_size[1])
+        dets_conf = F.softmax(pred_conf, dim=-1)
+        return pred_loc, pred_conf, dets_loc, dets_conf

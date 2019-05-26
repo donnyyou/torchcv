@@ -11,6 +11,7 @@ from datasets.cls.data_loader import DataLoader
 from methods.tools.runner_helper import RunnerHelper
 from methods.tools.trainer import Trainer
 from models.cls.model_manager import ModelManager
+from utils.helpers.dc_helper import DCHelper
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
 from metrics.cls.cls_running_score import ClsRunningScore
@@ -40,7 +41,7 @@ class ImageClassifier(object):
         self._init_model()
 
     def _init_model(self):
-        self.cls_net = self.cls_model_manager.image_classifier()
+        self.cls_net = self.cls_model_manager.get_cls_model()
         self.cls_net = RunnerHelper.load_net(self, self.cls_net)
         self.optimizer, self.scheduler = Trainer.init(self._get_parameters(), self.configer.get('solver'))
 
@@ -64,18 +65,14 @@ class ImageClassifier(object):
 
         for i, data_dict in enumerate(self.train_loader):
             Trainer.update(self, solver_dict=self.configer.get('solver'))
-            inputs = data_dict['img']
-            labels = data_dict['label']
             self.data_time.update(time.time() - start_time)
-            # Change the data type.
-            inputs, labels = RunnerHelper.to_device(self, inputs, labels)
             # Forward pass.
-            outputs = self.cls_net(inputs)
+            out_dict = self.cls_net(data_dict)
             # Compute the loss of the train batch & backward.
 
-            loss = self.ce_loss(outputs, labels, gathered=self.configer.get('network', 'gathered'))
+            loss = self.ce_loss(out_dict, data_dict, gathered=self.configer.get('network', 'gathered'))
 
-            self.train_losses.update(loss.item(), inputs.size(0))
+            self.train_losses.update(loss.item(), len(DCHelper.tolist(data_dict['meta'])))
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
@@ -117,17 +114,13 @@ class ImageClassifier(object):
 
         with torch.no_grad():
             for j, data_dict in enumerate(self.val_loader):
-                inputs = data_dict['img']
-                labels = data_dict['label']
-                # Change the data type.
-                inputs, labels = RunnerHelper.to_device(self, inputs, labels)
                 # Forward pass.
-                outputs = self.cls_net(inputs)
+                out_dict = self.cls_net(data_dict)
                 # Compute the loss of the val batch.
-                loss = self.ce_loss(outputs, labels, gathered=self.configer.get('network', 'gathered'))
-                outputs = RunnerHelper.gather(self, outputs)
-                self.cls_running_score.update(outputs, labels)
-                self.val_losses.update(loss.item(), inputs.size(0))
+                loss = self.ce_loss(out_dict, data_dict, gathered=self.configer.get('network', 'gathered'))
+                out_dict = RunnerHelper.gather(self, out_dict)
+                self.cls_running_score.update(out_dict['out'], DCHelper.tolist(data_dict['labels']))
+                self.val_losses.update(loss.item(), len(DCHelper.tolist(data_dict['meta'])))
 
                 # Update the vars of the val phase.
                 self.batch_time.update(time.time() - start_time)

@@ -6,18 +6,16 @@
 
 import torch
 
-from models.det.nets.darknet_yolov2 import DarkNetYolov2
 from models.det.nets.darknet_yolov3 import DarkNetYolov3
-from models.det.nets.vgg300_ssd import Vgg300SSD
-from models.det.nets.vgg512_ssd import Vgg512SSD
+from models.det.nets.vgg16_ssd300 import Vgg16SSD300
+from models.det.nets.vgg16_ssd512 import Vgg16SSD512
 from models.det.nets.faster_rcnn import FasterRCNN
-from models.det.loss.det_modules import SSDMultiBoxLoss, SSDFocalLoss, YOLOv3Loss, FRLoss
+from models.det.loss.det_modules import SSDMultiBoxLoss, SSDFocalLoss, YOLOv3Loss, FasterRCNNLoss
 from utils.tools.logger import Logger as Log
 
 DET_MODEL_DICT = {
-    'vgg300_ssd': Vgg300SSD,
-    'vgg512_ssd': Vgg512SSD,
-    'darknet_yolov2': DarkNetYolov2,
+    'vgg16_ssd300': Vgg16SSD300,
+    'vgg16_ssd512': Vgg16SSD512,
     'darknet_yolov3': DarkNetYolov3,
     'faster_rcnn': FasterRCNN,
 }
@@ -25,8 +23,8 @@ DET_MODEL_DICT = {
 DET_LOSS_DICT = {
     'ssd_multibox_loss': SSDMultiBoxLoss,
     'ssd_focal_loss': SSDFocalLoss,
-    'yolov3_det_loss': YOLOv3Loss,
-    'fr_loss': FRLoss
+    'yolov3_loss': YOLOv3Loss,
+    'fasterrcnn_loss': FasterRCNNLoss
 }
 
 

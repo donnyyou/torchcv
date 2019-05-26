@@ -14,6 +14,8 @@ from utils.helpers.json_helper import JsonHelper
 from utils.helpers.image_helper import ImageHelper
 from utils.tools.logger import Logger as Log
 
+torch.multiprocessing.set_sharing_strategy('file_system')
+
 
 class DefaultLoader(data.Dataset):
 
@@ -29,8 +31,9 @@ class DefaultLoader(data.Dataset):
         img = ImageHelper.read_image(self.img_list[index],
                                      tool=self.configer.get('data', 'image_tool'),
                                      mode=self.configer.get('data', 'input_mode'))
-
+        img_size = ImageHelper.get_size(img)
         bboxes, labels = self.__read_json_file(self.json_list[index])
+        ori_bboxes, ori_labels = bboxes.copy(), labels.copy()
 
         if self.aug_transform is not None:
             img, bboxes, labels = self.aug_transform(img, bboxes=bboxes, labels=labels)
@@ -38,13 +41,20 @@ class DefaultLoader(data.Dataset):
         labels = torch.from_numpy(labels).long()
         bboxes = torch.from_numpy(bboxes).float()
 
+        meta = dict(
+            ori_img_size=img_size,
+            border_size=ImageHelper.get_size(img),
+            ori_bboxes=torch.from_numpy(ori_bboxes).float(),
+            ori_labels=torch.from_numpy(ori_labels).long()
+        )
         if self.img_transform is not None:
             img = self.img_transform(img)
 
         return dict(
-            img=DataContainer(img, stack=True),
-            bboxes=DataContainer(bboxes, stack=False),
-            labels=DataContainer(labels, stack=False),
+            img=DataContainer(img, stack=True, return_dc=True, samples_per_gpu=True),
+            bboxes=DataContainer(bboxes, stack=False, return_dc=True, samples_per_gpu=True),
+            labels=DataContainer(labels, stack=False, return_dc=True, samples_per_gpu=True),
+            meta=DataContainer(meta, stack=False, cpu_only=True, return_dc=True, samples_per_gpu=True)
         )
 
     def __len__(self):

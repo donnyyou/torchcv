@@ -12,12 +12,11 @@ from methods.det.yolov3_test import YOLOv3Test
 from methods.tools.runner_helper import RunnerHelper
 from methods.tools.trainer import Trainer
 from models.det.model_manager import ModelManager
-from models.det.layers.yolo_detection_layer import YOLODetectionLayer
-from models.det.layers.yolo_target_generator import YOLOTargetGenerator
 from utils.tools.average_meter import AverageMeter
 from utils.tools.logger import Logger as Log
 from metrics.det.det_running_score import DetRunningScore
 from utils.visualizer.det_visualizer import DetVisualizer
+from utils.helpers.dc_helper import DCHelper
 
 
 class YOLOv3(object):
@@ -33,8 +32,6 @@ class YOLOv3(object):
         self.det_visualizer = DetVisualizer(configer)
         self.det_model_manager = ModelManager(configer)
         self.det_data_loader = DataLoader(configer)
-        self.yolo_detection_layer = YOLODetectionLayer(configer)
-        self.yolo_target_generator = YOLOTargetGenerator(configer)
         self.det_running_score = DetRunningScore(configer)
 
         self.det_net = None
@@ -54,8 +51,6 @@ class YOLOv3(object):
 
         self.train_loader = self.det_data_loader.get_trainloader()
         self.val_loader = self.det_data_loader.get_valloader()
-
-        self.det_loss = self.det_model_manager.get_det_loss()
 
     def _get_parameters(self):
         lr_1 = []
@@ -83,27 +78,16 @@ class YOLOv3(object):
 
         # data_tuple: (inputs, heatmap, maskmap, vecmap)
         for i, data_dict in enumerate(self.train_loader):
-            Trainer.update(self, backbone_list=(0, ), solver_dict=self.configer.get('solver'))
-            inputs = data_dict['img']
-            batch_gt_bboxes = data_dict['bboxes']
-            batch_gt_labels = data_dict['labels']
-            input_size = [inputs.size(3), inputs.size(2)]
+            Trainer.update(self, backbone_list=(0, ),
+                           backbone_lr_list=(self.configer.get('solver', 'lr')['base_lr'], ),
+                           solver_dict=self.configer.get('solver'))
 
             self.data_time.update(time.time() - start_time)
-            # Change the data type.
-            inputs = RunnerHelper.to_device(self, inputs)
-
             # Forward pass.
-            feat_list, predictions, _ = self.det_net(inputs)
-
-            targets, objmask, noobjmask = self.yolo_target_generator(feat_list, batch_gt_bboxes,
-                                                                     batch_gt_labels, input_size)
-            targets, objmask, noobjmask = RunnerHelper.to_device(self, targets, objmask, noobjmask)
+            out_dict = self.det_net(data_dict)
             # Compute the loss of the train batch & backward.
-            loss = self.det_loss(predictions, targets, objmask, noobjmask)
-
-            self.train_losses.update(loss.item(), inputs.size(0))
-
+            loss = out_dict['loss'].mean()
+            self.train_losses.update(loss.item(), len(DCHelper.tolist(data_dict['meta'])))
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
@@ -143,26 +127,19 @@ class YOLOv3(object):
         start_time = time.time()
         with torch.no_grad():
             for i, data_dict in enumerate(self.val_loader):
-                inputs = data_dict['img']
-                batch_gt_bboxes = data_dict['bboxes']
-                batch_gt_labels = data_dict['labels']
-                input_size = [inputs.size(3), inputs.size(2)]
                 # Forward pass.
-                inputs = RunnerHelper.to_device(self, inputs)
-                feat_list, predictions, detections = self.det_net(inputs)
-
-                targets, objmask, noobjmask = self.yolo_target_generator(feat_list, batch_gt_bboxes,
-                                                                         batch_gt_labels, input_size)
-                targets, objmask, noobjmask = RunnerHelper.to_device(self, targets, objmask, noobjmask)
+                out_dict = self.det_net(data_dict)
 
                 # Compute the loss of the val batch.
-                loss = self.det_loss(predictions, targets, objmask, noobjmask)
-                self.val_losses.update(loss.item(), inputs.size(0))
+                loss = out_dict['loss'].mean()
+                self.val_losses.update(loss.item(), len(DCHelper.tolist(data_dict['meta'])))
 
-                batch_detections = YOLOv3Test.decode(detections, self.configer, input_size)
-                batch_pred_bboxes = self.__get_object_list(batch_detections, input_size)
+                batch_detections = YOLOv3Test.decode(out_dict['dets'], self.configer, DCHelper.tolist(data_dict['meta']))
+                batch_pred_bboxes = self.__get_object_list(batch_detections)
 
-                self.det_running_score.update(batch_pred_bboxes, batch_gt_bboxes, batch_gt_labels)
+                self.det_running_score.update(batch_pred_bboxes,
+                                              [item['ori_bboxes'] for item in DCHelper.tolist(data_dict['meta'])],
+                                              [item['ori_labels'] for item in DCHelper.tolist(data_dict['meta'])])
 
                 # Update the vars of the val phase.
                 self.batch_time.update(time.time() - start_time)
@@ -172,27 +149,22 @@ class YOLOv3(object):
             # Print the log info & reset the states.
             Log.info(
                 'Test Time {batch_time.sum:.3f}s, ({batch_time.avg:.3f})\t'
-                'Loss {loss.avg:.8f}\n'.format(
-                    batch_time=self.batch_time, loss=self.val_losses))
+                'Loss {loss.avg:.8f}\n'.format(batch_time=self.batch_time, loss=self.val_losses))
             Log.info('Val mAP: {}'.format(self.det_running_score.get_mAP()))
             self.det_running_score.reset()
             self.batch_time.reset()
             self.val_losses.reset()
             self.det_net.train()
 
-    def __get_object_list(self, batch_detections, input_size):
+    def __get_object_list(self, batch_detections):
         batch_pred_bboxes = list()
         for idx, detections in enumerate(batch_detections):
             object_list = list()
             if detections is not None:
                 for x1, y1, x2, y2, conf, cls_conf, cls_pred in detections:
-                    xmin = x1.cpu().item()
-                    ymin = y1.cpu().item()
-                    xmax = x2.cpu().item()
-                    ymax = y2.cpu().item()
-                    cf = conf.cpu().item()
-                    cls_pred = cls_pred.cpu().item()
-                    object_list.append([xmin, ymin, xmax, ymax, int(cls_pred), float('%.2f' % cf)])
+                    cf = float('%.2f' % conf.item())
+                    cls_pred = int(cls_pred.item())
+                    object_list.append([x1.item(), y1.item(), x2.item(), y2.item(), cls_pred, cf])
 
             batch_pred_bboxes.append(object_list)
 

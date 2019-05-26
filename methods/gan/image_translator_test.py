@@ -51,9 +51,9 @@ class ImageTranslatorTest(object):
 
         if test_loader_A is not None:
             for data_dict in test_loader_A:
-                new_data_dict = dict(imgA=data_dict['img'])
+                new_data_dict = dict(imgA=data_dict['img'], testing=True)
                 with torch.no_grad():
-                    out_dict = self.gan_net(new_data_dict, testing=True)
+                    out_dict = self.gan_net(new_data_dict)
 
                 meta_list = DCHelper.tolist(data_dict['meta'])
                 for key, value in out_dict.items():
@@ -65,9 +65,9 @@ class ImageTranslatorTest(object):
 
         if test_loader_B is not None:
             for data_dict in test_loader_B:
-                new_data_dict = dict(imgB=data_dict['img'])
+                new_data_dict = dict(imgB=data_dict['img'], testing=True)
                 with torch.no_grad():
-                    out_dict = self.gan_net(new_data_dict, testing=True)
+                    out_dict = self.gan_net(new_data_dict)
                 meta_list = DCHelper.tolist(data_dict['meta'])
                 for key, value in out_dict.items():
                     for i in range(len(value)):

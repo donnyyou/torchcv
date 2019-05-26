@@ -21,7 +21,7 @@ except ImportError:
 class DetHelper(object):
 
     @staticmethod
-    def cls_nms(dets, labels, max_threshold=0.0, cls_keep_num=None, device_id=None):
+    def cls_nms(dets, labels, max_threshold=0.0, cls_keep_num=None, device_id=None, return_ind=False):
         if isinstance(labels, torch.Tensor):
             labels = labels.detach().cpu().numpy()
 
@@ -40,7 +40,7 @@ class DetHelper(object):
             cls_keep_list.append(cls_index[cls_keep.cpu().numpy()])
 
         keep_index = np.concatenate(cls_keep_list, 0)
-        return dets[keep_index]
+        return keep_index if return_ind else dets[keep_index]
 
     @staticmethod
     def cls_softnms(dets, labels, max_threshold=0.0, min_score=0.001, sigma=0.5, method='linear', cls_keep_num=None):

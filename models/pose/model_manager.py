@@ -7,29 +7,29 @@
 import torch
 
 from models.pose.nets.open_pose_org import get_open_pose_org
-from models.pose.nets.cpm_net import CPMNet
+from models.pose.nets.cpm import CPM
 from models.pose.nets.open_pose import OpenPose
-from models.pose.loss.pose_modules import OPMseLoss
+from models.pose.loss.pose_modules import OpenPoseLoss
 from utils.tools.logger import Logger as Log
 
 MULTI_POSE_MODEL_DICT = {
-    'open_pose': OpenPose,
-    'open_pose_org': get_open_pose_org,
+    'openpose': OpenPose,
+    'openpose_org': get_open_pose_org,
 }
 
 SINGLE_POSE_MODEL_DICT = {
-    'cpm_net': CPMNet
+    'cpm': CPM
 }
 
 POSE_LOSS_DICT = {
-    'op_mse_loss': OPMseLoss,
+    'openpose_loss': OpenPoseLoss,
 }
 
 class ModelManager(object):
     def __init__(self, configer):
         self.configer = configer
 
-    def multi_pose_detector(self):
+    def get_multi_pose_model(self):
         model_name = self.configer.get('network', 'model_name')
 
         if model_name not in MULTI_POSE_MODEL_DICT:
@@ -40,7 +40,7 @@ class ModelManager(object):
 
         return model
 
-    def single_pose_detector(self):
+    def get_single_pose_model(self):
         model_name = self.configer.get('network', 'model_name')
 
         if model_name not in SINGLE_POSE_MODEL_DICT:

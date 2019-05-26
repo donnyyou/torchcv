@@ -9,6 +9,7 @@ from torch import nn
 import torch.nn.init as init
 
 from models.det.layers.ssd_detection_layer import SSDDetectionLayer
+from models.det.loss.det_modules import SSDMultiBoxLoss
 from utils.tools.logger import Logger as Log
 
 
@@ -79,9 +80,9 @@ def vgg_backbone(configer):
     return model
 
 
-class Vgg512SSD(nn.Module):
+class Vgg16SSD512(nn.Module):
     def __init__(self, configer):
-        super(Vgg512SSD, self).__init__()
+        super(Vgg16SSD512, self).__init__()
         self.backbone = vgg_backbone(configer).named_modules()
         cnt = 0
         self.sub_backbone_1 = nn.ModuleList()
@@ -100,8 +101,10 @@ class Vgg512SSD(nn.Module):
         self.norm4 = L2Norm(512, 20)
         self.ssd_head = SSDHead(configer)
         self.ssd_detection_layer = SSDDetectionLayer(configer)
+        self.ssd_loss = SSDMultiBoxLoss(configer)
 
-    def forward(self, x):
+    def forward(self, data_dict):
+        x = data_dict['img']
         out = []
         for module in self.sub_backbone_1:
             x = module(x)
@@ -114,9 +117,12 @@ class Vgg512SSD(nn.Module):
         out_head = self.ssd_head(x)
         final_out = out + out_head
 
-        loc_preds, conf_preds = self.ssd_detection_layer(final_out)
+        pred_loc, pred_conf, dets_loc, dets_conf = self.ssd_detection_layer(final_out, data_dict)
+        if 'testing' in data_dict and data_dict['testing']:
+            return dict(loc=dets_loc, conf=dets_conf)
 
-        return final_out, loc_preds, conf_preds
+        loss = self.ssd_loss(final_out, pred_loc, pred_conf, data_dict)
+        return dict(loc=dets_loc, conf=dets_conf, loss=loss)
 
 
 class SSDHead(nn.Module):

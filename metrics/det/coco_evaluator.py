@@ -66,7 +66,7 @@ class CocoEvaluator(object):
 
 if __name__ == "__main__":
     # Example:
-    # python coco_evaluator.py --hypes ../../../../hypes/pose/coco/op_vgg19_coco_pose.json
+    # python coco_evaluator.py --hypes ../../../../hypes/pose/coco/openpose_vgg19_coco_pose.json
     #                          --json_dir ../../../results/pose/coco/test_dir/coco/json/
     #                          --gt_file /home/donny/DataSet/MSCOCO/annotations/person_instances_val2017.json
     parser = argparse.ArgumentParser()

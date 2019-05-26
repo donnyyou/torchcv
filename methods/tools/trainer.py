@@ -88,53 +88,24 @@ class Trainer(object):
         return optimizer, scheduler
 
     @staticmethod
-    def update(runner, backbone_list=(), solver_dict=None):
-        if 'is_warm' not in solver_dict['lr'] or not solver_dict['lr']['is_warm']:
-            if solver_dict['lr']['metric'] == 'epoch':
-                runner.scheduler.step(runner.runner_state['epoch'])
-            else:
-                assert solver_dict['lr']['metric'] == 'iters'
-                runner.scheduler.step(runner.runner_state['iters'])
-
-            return
-
-        warm_params = solver_dict['lr']['warm']
-        if runner.runner_state['iters'] < warm_params['warm_iters']:
-            if warm_params['freeze_backbone']:
-                for backbone_index in backbone_list:
-                    runner.optimizer.param_groups[backbone_index]['lr'] = 0.0
-
-            else:
-                lr_ratio = (runner.runner_state['iters'] + 1) / warm_params['warm_iters']
-
-                base_lr_list = runner.scheduler.get_lr()
-                for param_group, base_lr in zip(runner.optimizer.param_groups, base_lr_list):
-                    param_group['lr'] = base_lr * (lr_ratio ** 4)
-
-        elif runner.runner_state['iters'] == warm_params['warm_iters']:
-            try:
-                base_lr_list = runner.scheduler.get_lr()
-                for param_group, base_lr in zip(runner.optimizer.param_groups, base_lr_list):
-                    param_group['lr'] = base_lr
-
-            except AttributeError:
-                nbb_lr = solver_dict['lr']['base_lr'] * solver_dict['lr']['nbb_mult']
-                for i, param_group in enumerate(runner.optimizer.param_groups):
-                    if i in backbone_list:
-                        continue
-
-                    param_group[i]['lr'] = nbb_lr
-
+    def update(runner, backbone_list=(), backbone_lr_list=None, solver_dict=None):
+        if solver_dict['lr']['metric'] == 'epoch':
+            runner.scheduler.step(runner.runner_state['epoch'])
         else:
-            if solver_dict['lr']['metric'] == 'epoch':
-                runner.scheduler.step(runner.runner_state['epoch'])
-            else:
-                assert solver_dict['lr']['metric'] == 'iters'
-                runner.scheduler.step(runner.runner_state['iters'])
+            assert solver_dict['lr']['metric'] == 'iters'
+            runner.scheduler.step(runner.runner_state['iters'])
 
+        if 'is_warm' in solver_dict['lr'] and solver_dict['lr']['is_warm']:
+            if runner.runner_state['iters'] < solver_dict['lr']['warm']['warm_iters']:
+                if solver_dict['lr']['warm']['freeze_backbone']:
+                    for backbone_index in backbone_list:
+                        runner.optimizer.param_groups[backbone_index]['lr'] = 0.0
 
+                else:
+                    lr_ratio = (runner.runner_state['iters'] + 1) / solver_dict['lr']['warm']['warm_iters']
+                    for backbone_index, base_lr in zip(backbone_list, backbone_lr_list):
+                        runner.optimizer.param_groups[backbone_index]['lr'] = base_lr * (lr_ratio ** 4)
 
-
-
-
-
+            elif runner.runner_state['iters'] == solver_dict['lr']['warm']['warm_iters']:
+                for backbone_index, base_lr in zip(backbone_list, backbone_lr_list):
+                    runner.optimizer.param_groups[backbone_index]['lr'] = base_lr
