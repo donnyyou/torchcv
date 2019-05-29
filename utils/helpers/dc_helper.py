@@ -13,6 +13,9 @@ class DCHelper(object):
 
     @staticmethod
     def tolist(dc):
+        if isinstance(dc, (list, tuple)):
+            return dc
+
         assert isinstance(dc, DataContainer), type(dc)
         if dc.samples_per_gpu and not dc.stack:
             return list(itertools.chain(*dc.data))

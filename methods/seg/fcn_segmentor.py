@@ -85,7 +85,8 @@ class FCNSegmentor(object):
             out_dict = self.seg_net(data_dict)
             # outputs = self.module_utilizer.gather(outputs)
             # Compute the loss of the train batch & backward.
-            loss = self.pixel_loss(out_dict, data_dict, gathered=self.configer.get('network', 'gathered'))
+            loss_dict = self.pixel_loss(out_dict, data_dict, gathered=self.configer.get('network', 'gathered'))
+            loss = loss_dict['loss']
             self.train_losses.update(loss.item(), len(DCHelper.tolist(data_dict['meta'])))
             self.optimizer.zero_grad()
             loss.backward()
@@ -134,10 +135,10 @@ class FCNSegmentor(object):
                 # Forward pass.
                 out_dict = self.seg_net(data_dict)
                 # Compute the loss of the val batch.
-                loss = self.pixel_loss(out_dict, data_dict, gathered=self.configer.get('network', 'gathered'))
+                loss_dict = self.pixel_loss(out_dict, data_dict, gathered=self.configer.get('network', 'gathered'))
                 out_dict = RunnerHelper.gather(self, out_dict)
 
-            self.val_losses.update(loss.item(), len(DCHelper.tolist(data_dict['meta'])))
+            self.val_losses.update(loss_dict['loss'].item(), len(DCHelper.tolist(data_dict['meta'])))
             self._update_running_score(out_dict['out'], DCHelper.tolist(data_dict['meta']))
 
             # Update the vars of the val phase.
