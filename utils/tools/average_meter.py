@@ -24,9 +24,8 @@ class AverageMeter(object):
 
 class DictAverageMeter(object):
     """ Computes ans stores the average and current value"""
-    def __init__(self, *key_list):
-        self.key_list = key_list
-        self.reset()
+    def __init__(self):
+        self.key_list = None
 
     def reset(self):
         self.val = {key:0. for key in self.key_list}
@@ -35,6 +34,10 @@ class DictAverageMeter(object):
         self.count = {key:0 for key in self.key_list}
 
     def update(self, val_dict, n_dict=None):
+        if self.key_list is None:
+            self.key_list = val_dict.keys()
+            self.reset()
+
         if isinstance(n_dict, (int, float)):
             new_n_dict = {k: n_dict for k in val_dict.keys()}
             n_dict = new_n_dict
@@ -55,9 +58,8 @@ class DictAverageMeter(object):
 
 class ListAverageMeter(object):
     """ Computes ans stores the average and current value"""
-    def __init__(self, len=1):
-        self.len = len
-        self.reset()
+    def __init__(self):
+        self.len = None
 
     def reset(self):
         self.val = [0.] * self.len
@@ -66,6 +68,10 @@ class ListAverageMeter(object):
         self.count = [0] * self.len
 
     def update(self, val_list, n_list=None):
+        if self.len is None:
+            self.len = len(val_list)
+            self.reset()
+
         if isinstance(n_list, (int, float)):
             new_n_list = [n_list] * len(val_list)
             n_list = new_n_list

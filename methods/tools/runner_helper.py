@@ -18,13 +18,15 @@ from utils.tools.logger import Logger as Log
 class RunnerHelper(object):
 
     @staticmethod
-    def to_device(runner, *params):
+    def to_device(runner, in_data):
         device = torch.device('cpu' if runner.configer.get('gpu') is None else 'cuda')
-        return_list = list()
-        for i in range(len(params)):
-            return_list.append(params[i].to(device))
+        if isinstance(in_data, (list, tuple)):
+            return [item.to(device) if isinstance(item, torch.Tensor) else item for item in in_data]
 
-        return return_list[0] if len(params) == 1 else return_list
+        if isinstance(in_data, dict):
+            return {k: v.to(device) if isinstance(v, torch.Tensor) else v for k, v in in_data.items()}
+
+        return in_data.to(device) if isinstance(in_data, torch.Tensor) else in_data
 
     @staticmethod
     def _make_parallel(runner, net):
