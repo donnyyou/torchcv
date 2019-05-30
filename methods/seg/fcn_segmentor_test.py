@@ -167,9 +167,9 @@ class FCNSegmentorTest(object):
 
         out_list = list()
         with torch.no_grad():
-            results = self.seg_net.forward(dict(img=DCHelper.todc(split_batch, stack=True, samples_per_gpu=1)))
+            results = self.seg_net(dict(img=DCHelper.todc(split_batch, stack=True, samples_per_gpu=True)))
             for res in results:
-                out_list.append(res[-1].permute(0, 2, 3, 1).cpu().numpy())
+                out_list.append(res['out'].permute(0, 2, 3, 1).cpu().numpy())
 
         total_logits = [np.zeros((hw[0], hw[1],
                                   self.configer.get('data', 'num_classes')), np.float32) for hw in hw_list]
@@ -208,9 +208,9 @@ class FCNSegmentorTest(object):
     def _predict(self, data_dict):
         with torch.no_grad():
             total_logits = list()
-            results = self.seg_net.forward(data_dict)
+            results = self.seg_net(data_dict)
             for res in results:
-                total_logits.append(res[-1].squeeze(0).permute(1, 2, 0).cpu().numpy())
+                total_logits.append(res['out'].squeeze(0).permute(1, 2, 0).cpu().numpy())
 
             for i, meta in enumerate(DCHelper.tolist(data_dict['meta'])):
                 total_logits[i] = cv2.resize(total_logits[i][:meta['border_hw'][0], :meta['border_hw'][1]],
