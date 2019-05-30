@@ -160,16 +160,12 @@ class RunnerHelper(object):
                 runner.runner_state['min_val_loss'] = val_loss
 
         if iters is not None:
-            if iters - runner.runner_state['last_iters'] >= runner.configer.get('solver', 'save_iters'):
-                latest_name = '{}_iters{}.pth'.format(runner.configer.get('network', 'checkpoints_name'), iters)
-                torch.save(state, os.path.join(checkpoints_dir, latest_name))
-                runner.runner_state['last_iters'] = iters
+            latest_name = '{}_iters{}.pth'.format(runner.configer.get('network', 'checkpoints_name'), iters)
+            torch.save(state, os.path.join(checkpoints_dir, latest_name))
 
         if epoch is not None:
-            if epoch - runner.runner_state['last_epoch'] >= runner.configer.get('solver', 'save_epoch'):
-                latest_name = '{}_epoch{}.pth'.format(runner.configer.get('network', 'checkpoints_name'), epoch)
-                torch.save(state, os.path.join(checkpoints_dir, latest_name))
-                runner.runner_state['last_epoch'] = epoch
+            latest_name = '{}_epoch{}.pth'.format(runner.configer.get('network', 'checkpoints_name'), epoch)
+            torch.save(state, os.path.join(checkpoints_dir, latest_name))
 
     @staticmethod
     def freeze_bn(net, norm_type=None):
