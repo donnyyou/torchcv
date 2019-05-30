@@ -63,10 +63,9 @@
       "aug_trans": {
         "trans_seq": []
       },
-      "batch_size": 8,
+      "batch_size": 4,
       "data_transformer": {
-        "size_mode": "none",
-        "samples_per_gpu": 1
+        "size_mode": "none"
       },
       "mscrop_test":{
         "scale_search": [0.75, 1.0, 1.25],

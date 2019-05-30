@@ -106,7 +106,7 @@ class FCNSegmentorTest(object):
 
     def sscrop_test(self, in_data_dict, params_dict):
         data_dict = self.blob_helper.get_blob(in_data_dict, scale=1.0)
-        if any(image.size()[3] < params_dict['crop_size'][0] or image.size()[2] < params_dict['crop_size'][1]
+        if any(image.size()[2] < params_dict['crop_size'][0] or image.size()[1] < params_dict['crop_size'][1]
                    for image in DCHelper.tolist(data_dict['img'])):
             results = self._predict(data_dict)
         else:
@@ -120,7 +120,7 @@ class FCNSegmentorTest(object):
                         for meta in DCHelper.tolist(in_data_dict['meta'])]
         for scale in params_dict['scale_search']:
             data_dict = self.blob_helper.get_blob(in_data_dict, scale=scale)
-            if any(image.size()[3] < params_dict['crop_size'][0] or image.size()[2] < params_dict['crop_size'][1]
+            if any(image.size()[2] < params_dict['crop_size'][0] or image.size()[1] < params_dict['crop_size'][1]
                    for image in DCHelper.tolist(data_dict['img'])):
                 results = self._predict(data_dict)
             else:
@@ -131,7 +131,7 @@ class FCNSegmentorTest(object):
 
         for scale in params_dict['scale_search']:
             data_dict = self.blob_helper.get_blob(in_data_dict, scale=scale, flip=True)
-            if any(image.size()[3] < params_dict['crop_size'][0] or image.size()[2] < params_dict['crop_size'][1]
+            if any(image.size()[2] < params_dict['crop_size'][0] or image.size()[1] < params_dict['crop_size'][1]
                    for image in DCHelper.tolist(data_dict['img'])):
                 results = self._predict(data_dict)
             else:
@@ -148,7 +148,7 @@ class FCNSegmentorTest(object):
         width_starts_list = list()
         hw_list = list()
         for image in DCHelper.tolist(data_dict['img']):
-            height, width = image.size()[2:]
+            height, width = image.size()[1:]
             hw_list.append([height, width])
             np_image = image.squeeze(0).permute(1, 2, 0).cpu().numpy()
             height_starts = self._decide_intersection(height, crop_size[1], crop_stride_ratio)
@@ -163,13 +163,13 @@ class FCNSegmentorTest(object):
             width_starts_list.append(width_starts)
             split_crops = np.concatenate(split_crops, axis=0)  # (n, crop_image_size, crop_image_size, 3)
             inputs = torch.from_numpy(split_crops).permute(0, 3, 1, 2).to(self.device)
-            split_batch.append(inputs)
+            split_batch.extend(list(inputs))
 
         out_list = list()
         with torch.no_grad():
-            results = self.seg_net.forward(dict(img=DCHelper.todc(split_batch, stack=True, samples_per_gpu=1)))
+            results = self.seg_net(dict(img=DCHelper.todc(split_batch, stack=True, samples_per_gpu=True)))
             for res in results:
-                out_list.append(res[-1].permute(0, 2, 3, 1).cpu().numpy())
+                out_list.append(res['out'].permute(0, 2, 3, 1).cpu().numpy())
 
         total_logits = [np.zeros((hw[0], hw[1],
                                   self.configer.get('data', 'num_classes')), np.float32) for hw in hw_list]
@@ -208,9 +208,9 @@ class FCNSegmentorTest(object):
     def _predict(self, data_dict):
         with torch.no_grad():
             total_logits = list()
-            results = self.seg_net.forward(data_dict)
+            results = self.seg_net(data_dict)
             for res in results:
-                total_logits.append(res[-1].squeeze(0).permute(1, 2, 0).cpu().numpy())
+                total_logits.append(res['out'].squeeze(0).permute(1, 2, 0).cpu().numpy())
 
             for i, meta in enumerate(DCHelper.tolist(data_dict['meta'])):
                 total_logits[i] = cv2.resize(total_logits[i][:meta['border_hw'][0], :meta['border_hw'][1]],

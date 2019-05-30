@@ -4,11 +4,11 @@
 nvidia-smi
 PYTHON="python"
 
-export PYTHONPATH="/home/donny/Projects/TorchCV":${PYTHONPATH}
+export PYTHONPATH="/home/donny/Projects/torchcv":${PYTHONPATH}
 
 cd ../../../
 
-DATA_DIR="/home/donny/DataSet/CityScape"
+DATA_DIR="/home/donny/DataSet/Cityscapes"
 
 BACKBONE="deepbase_resnet101_dilated8"
 MODEL_NAME="denseaspp"
