@@ -23,12 +23,12 @@ class BlobHelper(object):
 
         img_list, meta_list = [], []
         for image, meta in zip(DCHelper.tolist(data_dict['img']), DCHelper.tolist(data_dict['meta'])):
-            b, c, h, w = image.size()
+            c, h, w = image.size()
             border_hw = [int(h*scale), int(w*scale)]
             meta['border_hw'] = border_hw
             image = TensorHelper.resize(image, border_hw, mode='bilinear', align_corners=True)
             if flip:
-                image = image.flip([3])
+                image = image.flip([2])
 
             if self.configer.exists('test', 'fit_stride'):
                 stride = self.configer.get('test', 'fit_stride')
@@ -36,8 +36,8 @@ class BlobHelper(object):
                 pad_w = 0 if (border_hw[1] % stride == 0) else stride - (border_hw[1] % stride)  # right
                 pad_h = 0 if (border_hw[0] % stride == 0) else stride - (border_hw[0] % stride)  # down
 
-                expand_image = torch.zeros((b, c, border_hw[0] + pad_h, border_hw[1] + pad_w)).to(image.device)
-                expand_image[:, :, 0:border_hw[0], 0:border_hw[1]] = image
+                expand_image = torch.zeros((c, border_hw[0] + pad_h, border_hw[1] + pad_w)).to(image.device)
+                expand_image[:, 0:border_hw[0], 0:border_hw[1]] = image
                 image = expand_image
 
             img_list.append(image)
