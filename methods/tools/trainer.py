@@ -90,18 +90,14 @@ class Trainer(object):
     @staticmethod
     def update(runner, backbone_list=(), backbone_lr_list=None, solver_dict=None):
         if solver_dict['lr']['metric'] == 'epoch':
-            if runner.runner_state['last_epoch'] == runner.runner_state['epoch']:
-                return
-
-            runner.scheduler.step(runner.runner_state['epoch'])
-            runner.runner_state['last_epoch'] = runner.runner_state['epoch']
+            if runner.runner_state['last_epoch'] != runner.runner_state['epoch']:
+                runner.scheduler.step(runner.runner_state['epoch'])
+                runner.runner_state['last_epoch'] = runner.runner_state['epoch']
         else:
             assert solver_dict['lr']['metric'] == 'iters'
-            if runner.runner_state['last_iters'] == runner.runner_state['iters']:
-                return
-
-            runner.scheduler.step(runner.runner_state['iters'])
-            runner.runner_state['last_iters'] = runner.runner_state['iters']
+            if runner.runner_state['last_iters'] != runner.runner_state['iters']:
+                runner.scheduler.step(runner.runner_state['iters'])
+                runner.runner_state['last_iters'] = runner.runner_state['iters']
 
         if 'is_warm' in solver_dict['lr'] and solver_dict['lr']['is_warm']:
             if runner.runner_state['iters'] < solver_dict['lr']['warm']['warm_iters']:
