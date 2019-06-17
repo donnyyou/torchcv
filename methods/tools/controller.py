@@ -65,16 +65,11 @@ class Controller(object):
                                runner.configer.get('network', 'checkpoints_name'),
                                runner.configer.get('test', 'out_dir'))
 
-        test_img = runner.configer.get('test', 'test_img')
         test_dir = runner.configer.get('test', 'test_dir')
-        if test_img is None and test_dir is None:
-            Log.error('test_img & test_dir not exists.')
+        if test_dir is None:
+            Log.error('test_dir not given!!!')
             exit(1)
 
-        if test_img is not None:
-            runner.test_img(test_img, out_dir)
-
-        if test_dir is not None:
-            runner.test(test_dir, out_dir)
+        runner.test(test_dir, out_dir)
 
         Log.info('Testing end...')

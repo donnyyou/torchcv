@@ -123,8 +123,6 @@ if __name__ == "__main__":
                         dest='logging:log_to_file', help='Whether to write logging into files.')
 
     # ***********  Params for test or submission.  **********
-    parser.add_argument('--test_img', default=None, type=str,
-                        dest='test:test_img', help='The test path of image.')
     parser.add_argument('--test_dir', default=None, type=str,
                         dest='test:test_dir', help='The test directory of images.')
     parser.add_argument('--root_dir', default=None, type=str,

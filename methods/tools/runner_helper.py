@@ -11,7 +11,6 @@ import torch
 import torch.nn as nn
 from torch.nn.parallel.scatter_gather import gather as torch_gather
 
-from extensions.tools.parallel.data_parallel import DataParallelModel
 from utils.tools.logger import Logger as Log
 
 
@@ -33,6 +32,7 @@ class RunnerHelper(object):
         if len(runner.configer.get('gpu')) == 1 or len(range(torch.cuda.device_count())) == 1:
             runner.configer.update(['network', 'gathered'], True)
 
+        from extensions.tools.parallel.data_parallel import DataParallelModel
         return DataParallelModel(net, gather_=runner.configer.get('network', 'gathered'))
 
     @staticmethod
