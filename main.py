@@ -67,8 +67,6 @@ if __name__ == "__main__":
                         dest='network:backbone', help='The base network of model.')
     parser.add_argument('--norm_type', default=None, type=str,
                         dest='network:norm_type', help='The BN type of the network.')
-    parser.add_argument('--multi_grid', default=None, nargs='+', type=int,
-                        dest='network:multi_grid', help='The multi_grid for resnet backbone.')
     parser.add_argument('--pretrained', type=str, default=None,
                         dest='network:pretrained', help='The path to pretrained model.')
     parser.add_argument('--resume', default=None, type=str,
@@ -119,14 +117,12 @@ if __name__ == "__main__":
                         dest='logging:log_file', help='The path of log files.')
     parser.add_argument('--rewrite', type=str2bool, nargs='?', default=True,
                         dest='logging:rewrite', help='Whether to rewrite files.')
-    parser.add_argument('--log_to_file', type=str2bool, nargs='?', default=True,
+    parser.add_argument('--log_to_file', type=str2bool, nargs='?', default=False,
                         dest='logging:log_to_file', help='Whether to write logging into files.')
 
     # ***********  Params for test or submission.  **********
     parser.add_argument('--test_dir', default=None, type=str,
                         dest='test:test_dir', help='The test directory of images.')
-    parser.add_argument('--root_dir', default=None, type=str,
-                        dest='test:root_dir', help='The root directory of images.')
     parser.add_argument('--out_dir', default='none', type=str,
                         dest='test:out_dir', help='The test out directory of images.')
 

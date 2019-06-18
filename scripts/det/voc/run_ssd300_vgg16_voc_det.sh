@@ -24,14 +24,14 @@ if [[ ! -d ${LOG_DIR} ]]; then
 fi
 
 if [[ "$1"x == "train"x ]]; then
-  ${PYTHON} -u main.py --hypes ${HYPES_FILE} --phase train --log_to_file n --gpu 0 --cudnn y \
+  ${PYTHON} -u main.py --hypes ${HYPES_FILE} --phase train --log_to_file n --gpu 0 \
                        --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --model_name ${MODEL_NAME} \
                        --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL}  2>&1 | tee ${LOG_FILE}
 
 elif [[ "$1"x == "resume"x ]]; then
-  ${PYTHON} -u main.py --hypes ${HYPES_FILE} --phase train --log_to_file n --gpu 0 --cudnn y \
+  ${PYTHON} -u main.py --hypes ${HYPES_FILE} --phase train --log_to_file n --gpu 0 \
                        --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --model_name ${MODEL_NAME} \
-                       --resume_continue y --resume ./checkpoints/cityscapes/${CHECKPOINTS_NAME}_latest.pth \
+                       --resume_continue y --resume ./checkpoints/det/voc/${CHECKPOINTS_NAME}_latest.pth \
                        --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL}  2>&1 | tee -a ${LOG_FILE}
 
 elif [[ "$1"x == "val"x ]]; then
