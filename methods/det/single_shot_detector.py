@@ -62,7 +62,7 @@ class SingleShotDetector(object):
                 lr_1.append(value)
 
         params = [{'params': lr_1, 'lr': self.configer.get('solver', 'lr')['base_lr']},
-                  {'params': lr_10, 'lr': self.configer.get('solver', 'lr')['base_lr'] * 4.0}]
+                  {'params': lr_10, 'lr': self.configer.get('solver', 'lr')['base_lr'] * 1.0}]
 
         return params
 

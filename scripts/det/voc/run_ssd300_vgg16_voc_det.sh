@@ -36,7 +36,7 @@ elif [[ "$1"x == "resume"x ]]; then
 
 elif [[ "$1"x == "val"x ]]; then
   ${PYTHON} -u main.py --hypes ${HYPES_FILE} --phase test --log_to_file n --model_name ${MODEL_NAME} \
-                       --phase test --gpu 0 --resume ./checkpoints/cityscapes/${CHECKPOINTS_NAME}_latest.pth \
+                       --phase test --gpu 0 --resume ./checkpoints/det/voc/${CHECKPOINTS_NAME}_latest.pth \
                        --test_dir ${DATA_DIR}/val/image --out_dir val  2>&1 | tee -a ${LOG_FILE}
   cd metrics/det/
   ${PYTHON} -u voc_evaluator.py --hypes "../../../"${HYPES_FILE} \
