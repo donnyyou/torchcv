@@ -12,8 +12,8 @@ import argparse
 import torch
 import torch.backends.cudnn as cudnn
 
-from methods.method_selector import MethodSelector
-from methods.tools.controller import Controller
+from runner.method_selector import MethodSelector
+from runner.tools.controller import Controller
 from utils.tools.configer import Configer
 from utils.tools.logger import Logger as Log
 
@@ -33,8 +33,8 @@ def str2bool(v):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--hypes', default=None, type=str,
-                        dest='hypes', help='The file of the hyper parameters.')
+    parser.add_argument('--config_file', default=None, type=str,
+                        dest='config_file', help='The file of the hyper parameters.')
     parser.add_argument('--phase', default='train', type=str,
                         dest='phase', help='The phase of module.')
     parser.add_argument('--gpu', default=[0, 1, 2, 3], nargs='+', type=int,
@@ -42,89 +42,89 @@ if __name__ == "__main__":
 
     # ***********  Params for data.  **********
     parser.add_argument('--data_dir', default=None, type=str,
-                        dest='data:data_dir', help='The Directory of the data.')
+                        dest='datasets.data_dir', help='The Directory of the datasets.')
     parser.add_argument('--tag', default=None, type=str,
-                        dest='data:tag', help='The Tag of the data.')
+                        dest='datasets.tag', help='The Tag of the datasets.')
     parser.add_argument('--include_val', type=str2bool, nargs='?', default=False,
-                        dest='data:include_val', help='Include validation set for final training.')
+                        dest='datasets.include_val', help='Include validation set for final training.')
     parser.add_argument('--drop_last', type=str2bool, nargs='?', default=False,
-                        dest='data:drop_last', help='Fix bug for syncbn.')
+                        dest='datasets.drop_last', help='Fix bug for syncbn.')
     parser.add_argument('--workers', default=None, type=int,
-                        dest='data:workers', help='The number of workers to load data.')
+                        dest='datasets.workers', help='The number of workers to load datasets.')
     parser.add_argument('--train_batch_size', default=None, type=int,
-                        dest='train:batch_size', help='The batch size of training.')
+                        dest='train.batch_size', help='The batch size of training.')
     parser.add_argument('--val_batch_size', default=None, type=int,
-                        dest='val:batch_size', help='The batch size of validation.')
+                        dest='val.batch_size', help='The batch size of validation.')
 
     # ***********  Params for model.  **********
     parser.add_argument('--model_name', default=None, type=str,
-                        dest='network:model_name', help='The name of model.')
+                        dest='network.model_name', help='The name of model.')
     parser.add_argument('--checkpoints_root', default=None, type=str,
-                        dest='network:checkpoints_root', help='The root dir of model save path.')
+                        dest='network.checkpoints_root', help='The root dir of model save path.')
     parser.add_argument('--checkpoints_name', default=None, type=str,
-                        dest='network:checkpoints_name', help='The name of checkpoint model.')
+                        dest='network.checkpoints_name', help='The name of checkpoint model.')
     parser.add_argument('--backbone', default=None, type=str,
-                        dest='network:backbone', help='The base network of model.')
+                        dest='network.backbone', help='The base network of model.')
     parser.add_argument('--norm_type', default=None, type=str,
-                        dest='network:norm_type', help='The BN type of the network.')
+                        dest='network.norm_type', help='The BN type of the network.')
     parser.add_argument('--pretrained', type=str, default=None,
-                        dest='network:pretrained', help='The path to pretrained model.')
+                        dest='network.pretrained', help='The path to pretrained model.')
     parser.add_argument('--resume', default=None, type=str,
-                        dest='network:resume', help='The path of checkpoints.')
+                        dest='network.resume', help='The path of checkpoints.')
     parser.add_argument('--resume_strict', type=str2bool, nargs='?', default=True,
-                        dest='network:resume_strict', help='Fully match keys or not.')
+                        dest='network.resume_strict', help='Fully match keys or not.')
     parser.add_argument('--resume_continue', type=str2bool, nargs='?', default=False,
-                        dest='network:resume_continue', help='Whether to continue training.')
+                        dest='network.resume_continue', help='Whether to continue training.')
     parser.add_argument('--resume_val', type=str2bool, nargs='?', default=True,
-                        dest='network:resume_val', help='Whether to validate during resume.')
+                        dest='network.resume_val', help='Whether to validate during resume.')
     parser.add_argument('--gathered', type=str2bool, nargs='?', default=True,
-                        dest='network:gathered', help='Whether to gather the output of model.')
+                        dest='network.gathered', help='Whether to gather the output of model.')
     parser.add_argument('--loss_balance', type=str2bool, nargs='?', default=False,
-                        dest='network:loss_balance', help='Whether to balance GPU usage.')
+                        dest='network.loss_balance', help='Whether to balance GPU usage.')
 
     # ***********  Params for solver.  **********
     parser.add_argument('--optim_method', default=None, type=str,
-                        dest='solver:optim:optim_method', help='The optim method that used.')
+                        dest='solver.optim.optim_method', help='The optim method that used.')
     parser.add_argument('--base_lr', default=None, type=float,
-                        dest='solver:lr:base_lr', help='The learning rate.')
+                        dest='solver.lr.base_lr', help='The learning rate.')
     parser.add_argument('--nbb_mult', default=1.0, type=float,
-                        dest='solver:lr:nbb_mult', help='The not backbone mult ratio of learning rate.')
+                        dest='solver.lr.nbb_mult', help='The not backbone mult ratio of learning rate.')
     parser.add_argument('--lr_policy', default=None, type=str,
-                        dest='solver:lr:lr_policy', help='The policy of lr during training.')
+                        dest='solver.lr.lr_policy', help='The policy of lr during training.')
     parser.add_argument('--max_epoch', default=None, type=int,
-                        dest='solver:max_epoch', help='The max epoch of training.')
+                        dest='solver.max_epoch', help='The max epoch of training.')
     parser.add_argument('--max_iters', default=None, type=int,
-                        dest='solver:max_iters', help='The max iters of training.')
+                        dest='solver.max_iters', help='The max iters of training.')
     parser.add_argument('--display_iter', default=None, type=int,
-                        dest='solver:display_iter', help='The display iteration of train logs.')
+                        dest='solver.display_iter', help='The display iteration of train logs.')
     parser.add_argument('--test_interval', default=None, type=int,
-                        dest='solver:test_interval', help='The test interval of validation.')
+                        dest='solver.test_interval', help='The test interval of validation.')
     parser.add_argument('--save_iters', default=None, type=int,
-                        dest='solver:save_iters', help='The saving iters of checkpoint model.')
+                        dest='solver.save_iters', help='The saving iters of checkpoint model.')
     parser.add_argument('--save_epoch', default=None, type=int,
-                        dest='solver:save_epoch', help='The saving epoch of checkpoint model.')
+                        dest='solver.save_epoch', help='The saving epoch of checkpoint model.')
 
     # ***********  Params for loss.  **********
     parser.add_argument('--loss_type', default=None, type=str,
-                        dest='loss:loss_type', help='The loss type of the network.')
+                        dest='loss.loss_type', help='The loss type of the network.')
 
     # ***********  Params for logging.  **********
     parser.add_argument('--logfile_level', default=None, type=str,
-                        dest='logging:logfile_level', help='To set the log level to files.')
+                        dest='logging.logfile_level', help='To set the log level to files.')
     parser.add_argument('--stdout_level', default=None, type=str,
-                        dest='logging:stdout_level', help='To set the level to print to screen.')
+                        dest='logging.stdout_level', help='To set the level to print to screen.')
     parser.add_argument('--log_file', default=None, type=str,
-                        dest='logging:log_file', help='The path of log files.')
+                        dest='logging.log_file', help='The path of log files.')
     parser.add_argument('--rewrite', type=str2bool, nargs='?', default=True,
-                        dest='logging:rewrite', help='Whether to rewrite files.')
+                        dest='logging.rewrite', help='Whether to rewrite files.')
     parser.add_argument('--log_to_file', type=str2bool, nargs='?', default=False,
-                        dest='logging:log_to_file', help='Whether to write logging into files.')
+                        dest='logging.log_to_file', help='Whether to write logging into files.')
 
     # ***********  Params for test or submission.  **********
     parser.add_argument('--test_dir', default=None, type=str,
-                        dest='test:test_dir', help='The test directory of images.')
+                        dest='test.test_dir', help='The test directory of images.')
     parser.add_argument('--out_dir', default='none', type=str,
-                        dest='test:out_dir', help='The test out directory of images.')
+                        dest='test.out_dir', help='The test out directory of images.')
 
     # ***********  Params for env.  **********
     parser.add_argument('--seed', default=None, type=int, help='manual seed')
@@ -140,14 +140,14 @@ if __name__ == "__main__":
     cudnn.benchmark = args_parser.cudnn
 
     configer = Configer(args_parser=args_parser)
-    abs_data_dir = os.path.expanduser(configer.get('data', 'data_dir'))
-    configer.update(['data', 'data_dir'], abs_data_dir)
+    abs_data_dir = os.path.expanduser(configer.get('datasets', 'data_dir'))
+    configer.update('datasets.data_dir', abs_data_dir)
 
     if configer.get('gpu') is not None:
         os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(str(gpu_id) for gpu_id in configer.get('gpu'))
 
     if configer.get('network', 'norm_type') is None:
-        configer.update(['network', 'norm_type'], 'batchnorm')
+        configer.update('network.norm_type', 'batchnorm')
 
     if configer.get('phase') == 'train':
         assert len(configer.get('gpu')) > 1 or 'sync' not in configer.get('network', 'norm_type')
@@ -158,9 +158,9 @@ if __name__ == "__main__":
     if configer.get('logging', 'log_to_file'):
         log_file = configer.get('logging', 'log_file')
         new_log_file = '{}_{}'.format(log_file, time.strftime("%Y-%m-%d_%X", time.localtime()))
-        configer.update(['logging', 'log_file'], new_log_file)
+        configer.update('logging.log_file', new_log_file)
     else:
-        configer.update(['logging', 'logfile_level'], None)
+        configer.update('logging.logfile_level', None)
 
     Log.init(logfile_level=configer.get('logging', 'logfile_level'),
              stdout_level=configer.get('logging', 'stdout_level'),

@@ -15,7 +15,7 @@ class YOLODetectionLayer(object):
         self.device = torch.device('cpu' if self.configer.get('gpu') is None else 'cuda')
 
     def __call__(self, layer_out_list):
-        num_classes = self.configer.get('data', 'num_classes')
+        num_classes = self.configer.get('datasets', 'num_classes')
         detect_list = list()
         prediction_list = list()
         for i in range(len(layer_out_list)):

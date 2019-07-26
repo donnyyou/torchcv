@@ -659,7 +659,7 @@ class CityscapesEvaluator(object):
     def evaluate(self, pred_dir=None, gt_dir=None):
         """
         :param pred_dir: directory of model output results(must be consistent with val directory)
-        :param gt_dir: directory of  cityscapes data(root)
+        :param gt_dir: directory of  cityscapes datasets(root)
         :return:
         """
         pred_path = pred_dir

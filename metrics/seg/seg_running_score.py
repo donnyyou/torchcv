@@ -11,7 +11,7 @@ class SegRunningScore(object):
 
     def __init__(self, configer):
         self.configer = configer
-        self.n_classes = self.configer.get('data', 'num_classes')
+        self.n_classes = self.configer.get('datasets', 'num_classes')
         self.confusion_matrix = np.zeros((self.n_classes, self.n_classes))
 
     def _fast_hist(self, label_true, label_pred, n_class):

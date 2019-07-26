@@ -53,7 +53,7 @@ class ModelManager(object):
 
         loss = CLS_LOSS_DICT[key](self.configer)
         if self.configer.get('network', 'loss_balance') and len(range(torch.cuda.device_count())) > 1:
-            from extensions.tools.parallel.data_parallel import DataParallelCriterion
+            from exts.tools.parallel.data_parallel import DataParallelCriterion
             loss = DataParallelCriterion(loss)
 
         return loss

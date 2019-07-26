@@ -66,12 +66,12 @@ class CocoEvaluator(object):
 
 if __name__ == "__main__":
     # Example:
-    # python coco_evaluator.py --hypes ../../../../hypes/pose/coco/openpose_vgg19_coco_pose.json
+    # python coco_evaluator.py --configs ../../../../configs/pose/coco/openpose_vgg19_coco_pose.conf
     #                          --json_dir ../../../results/pose/coco/test_dir/coco/json/
     #                          --gt_file /home/donny/DataSet/MSCOCO/annotations/person_instances_val2017.json
     parser = argparse.ArgumentParser()
     parser.add_argument('--hypes_file', default=None, type=str,
-                        dest='hypes_file', help='The hypes file of pose.')
+                        dest='hypes_file', help='The configs file of pose.')
     parser.add_argument('--gt_file', default=None, type=str,
                         dest='gt_file', help='The groundtruth annotations file of coco instances.')
     parser.add_argument('--json_dir', default=None, type=str,

@@ -70,9 +70,9 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--save_dir', default=None, type=str,
-                        dest='save_dir', help='The directory to save the data.')
+                        dest='save_dir', help='The directory to save the datasets.')
     parser.add_argument('--ori_root_dir', default=None, type=str,
-                        dest='ori_root_dir', help='The directory of the cityscapes data.')
+                        dest='ori_root_dir', help='The directory of the cityscapes datasets.')
 
     args = parser.parse_args()
 

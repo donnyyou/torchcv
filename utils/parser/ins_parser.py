@@ -96,7 +96,7 @@ class InsParser(object):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--hypes_file', default='../../hypes/seg/coco/mr_fpn_coco_seg.json', type=str,
+    parser.add_argument('--hypes_file', default='../../configs/seg/coco/mr_fpn_coco_seg.conf', type=str,
                         dest='hypes_file', help='The file of the hyper parameters.')
     parser.add_argument('--image_file', default=None, type=str,
                         dest='image_file', help='The image file of Ins Parser.')

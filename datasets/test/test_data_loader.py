@@ -21,17 +21,17 @@ class TestDataLoader(object):
     def __init__(self, configer):
         self.configer = configer
 
-        if self.configer.get('data', 'image_tool') == 'pil':
+        if self.configer.get('datasets', 'image_tool') == 'pil':
             self.aug_test_transform = pil_aug_trans.PILAugCompose(self.configer, split='test')
-        elif self.configer.get('data', 'image_tool') == 'cv2':
+        elif self.configer.get('datasets', 'image_tool') == 'cv2':
             self.aug_test_transform = cv2_aug_trans.CV2AugCompose(self.configer, split='test')
         else:
-            Log.error('Not support {} image tool.'.format(self.configer.get('data', 'image_tool')))
+            Log.error('Not support {} image tool.'.format(self.configer.get('datasets', 'image_tool')))
             exit(1)
 
         self.img_transform = Compose([
             ToTensor(),
-            Normalize(**self.configer.get('data', 'normalize')), ])
+            Normalize(**self.configer.get('datasets', 'normalize')), ])
 
     def get_testloader(self, test_dir=None, list_path=None, json_path=None):
         if not self.configer.exists('test', 'loader') or self.configer.get('test', 'loader') == 'default':
@@ -42,7 +42,7 @@ class TestDataLoader(object):
                               img_transform=self.img_transform,
                               configer=self.configer),
                 batch_size=self.configer.get('test', 'batch_size'), shuffle=False,
-                num_workers=self.configer.get('data', 'workers'), pin_memory=True,
+                num_workers=self.configer.get('datasets', 'workers'), pin_memory=True,
                 collate_fn=lambda *args: collate(
                     *args, trans_dict=self.configer.get('test', 'data_transformer')
                 )
@@ -59,7 +59,7 @@ class TestDataLoader(object):
                            img_transform=self.img_transform,
                            configer=self.configer),
                 batch_size=self.configer.get('test', 'batch_size'), shuffle=False,
-                num_workers=self.configer.get('data', 'workers'), pin_memory=True,
+                num_workers=self.configer.get('datasets', 'workers'), pin_memory=True,
                 collate_fn=lambda *args: collate(
                     *args, trans_dict=self.configer.get('test', 'data_transformer')
                 )
@@ -76,7 +76,7 @@ class TestDataLoader(object):
                            img_transform=self.img_transform,
                            configer=self.configer),
                 batch_size=self.configer.get('test', 'batch_size'), shuffle=False,
-                num_workers=self.configer.get('data', 'workers'), pin_memory=True,
+                num_workers=self.configer.get('datasets', 'workers'), pin_memory=True,
                 collate_fn=lambda *args: collate(
                     *args, trans_dict=self.configer.get('test', 'data_transformer')
                 )
@@ -93,7 +93,7 @@ class TestDataLoader(object):
                               img_transform=self.img_transform,
                               configer=self.configer),
                 batch_size=self.configer.get('test', 'batch_size'), shuffle=False,
-                num_workers=self.configer.get('data', 'workers'), pin_memory=True,
+                num_workers=self.configer.get('datasets', 'workers'), pin_memory=True,
                 collate_fn=lambda *args: collate(
                     *args, trans_dict=self.configer.get('test', 'data_transformer')
                 )

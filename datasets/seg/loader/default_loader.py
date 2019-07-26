@@ -7,7 +7,7 @@ import os
 import numpy as np
 from torch.utils import data
 
-from extensions.tools.parallel import DataContainer
+from exts.tools.parallel import DataContainer
 from utils.helpers.image_helper import ImageHelper
 from utils.tools.logger import Logger as Log
 
@@ -26,15 +26,15 @@ class DefaultLoader(data.Dataset):
 
     def __getitem__(self, index):
         img = ImageHelper.read_image(self.img_list[index],
-                                     tool=self.configer.get('data', 'image_tool'),
-                                     mode=self.configer.get('data', 'input_mode'))
+                                     tool=self.configer.get('datasets', 'image_tool'),
+                                     mode=self.configer.get('datasets', 'input_mode'))
         img_size = ImageHelper.get_size(img)
         labelmap = ImageHelper.read_image(self.label_list[index],
-                                          tool=self.configer.get('data', 'image_tool'), mode='P')
-        if self.configer.exists('data', 'label_list'):
+                                          tool=self.configer.get('datasets', 'image_tool'), mode='P')
+        if self.configer.exists('datasets', 'label_list'):
             labelmap = self._encode_label(labelmap)
 
-        if self.configer.exists('data', 'reduce_zero_label'):
+        if self.configer.exists('datasets', 'reduce_zero_label'):
             labelmap = self._reduce_zero_label(labelmap)
 
         ori_target = ImageHelper.to_np(labelmap)
@@ -62,14 +62,14 @@ class DefaultLoader(data.Dataset):
         )
 
     def _reduce_zero_label(self, labelmap):
-        if not self.configer.get('data', 'reduce_zero_label'):
+        if not self.configer.get('datasets', 'reduce_zero_label'):
             return labelmap
 
         labelmap = np.array(labelmap)
         labelmap[labelmap == 0] = 255
         labelmap = labelmap - 1
         labelmap[labelmap == 254] = 255
-        if self.configer.get('data', 'image_tool') == 'pil':
+        if self.configer.get('datasets', 'image_tool') == 'pil':
             labelmap = ImageHelper.to_img(labelmap.astype(np.uint8))
 
         return labelmap
@@ -78,11 +78,11 @@ class DefaultLoader(data.Dataset):
         labelmap = np.array(labelmap)
         shape = labelmap.shape
         encoded_labelmap = np.ones(shape=(shape[0], shape[1]), dtype=np.float32) * 255
-        for i in range(len(self.configer.get('data', 'label_list'))):
-            class_id = self.configer.get('data', 'label_list')[i]
+        for i in range(len(self.configer.get('datasets', 'label_list'))):
+            class_id = self.configer.get('datasets', 'label_list')[i]
             encoded_labelmap[labelmap == class_id] = i
 
-        if self.configer.get('data', 'image_tool') == 'pil':
+        if self.configer.get('datasets', 'image_tool') == 'pil':
             encoded_labelmap = ImageHelper.to_img(encoded_labelmap.astype(np.uint8))
 
         return encoded_labelmap
@@ -104,7 +104,7 @@ class DefaultLoader(data.Dataset):
             img_list.append(img_path)
             label_list.append(label_path)
 
-        if dataset == 'train' and self.configer.get('data', 'include_val'):
+        if dataset == 'train' and self.configer.get('datasets', 'include_val'):
             image_dir = os.path.join(root_dir, 'val/image')
             label_dir = os.path.join(root_dir, 'val/label')
             for file_name in os.listdir(label_dir):

@@ -9,7 +9,7 @@ import torch
 import numpy as np
 import torch.utils.data as data
 
-from extensions.tools.parallel import DataContainer
+from exts.tools.parallel import DataContainer
 from utils.helpers.json_helper import JsonHelper
 from utils.helpers.image_helper import ImageHelper
 from utils.tools.logger import Logger as Log
@@ -29,8 +29,8 @@ class DefaultLoader(data.Dataset):
 
     def __getitem__(self, index):
         img = ImageHelper.read_image(self.img_list[index],
-                                     tool=self.configer.get('data', 'image_tool'),
-                                     mode=self.configer.get('data', 'input_mode'))
+                                     tool=self.configer.get('datasets', 'image_tool'),
+                                     mode=self.configer.get('datasets', 'input_mode'))
         img_size = ImageHelper.get_size(img)
         bboxes, labels = self.__read_json_file(self.json_list[index])
         ori_bboxes, ori_labels = bboxes.copy(), labels.copy()
@@ -73,7 +73,7 @@ class DefaultLoader(data.Dataset):
         bboxes = list()
 
         for object in json_dict['objects']:
-            if 'difficult' in object and object['difficult'] and not self.configer.get('data', 'keep_difficult'):
+            if 'difficult' in object and object['difficult'] and not self.configer.get('datasets', 'keep_difficult'):
                 continue
 
             labels.append(object['label'])
@@ -98,7 +98,7 @@ class DefaultLoader(data.Dataset):
             json_list.append(json_path)
             img_list.append(img_path)
 
-        if dataset == 'train' and self.configer.get('data', 'include_val'):
+        if dataset == 'train' and self.configer.get('datasets', 'include_val'):
             image_dir = os.path.join(root_dir, 'val/image')
             json_dir = os.path.join(root_dir, 'val/json')
             for file_name in os.listdir(json_dir):

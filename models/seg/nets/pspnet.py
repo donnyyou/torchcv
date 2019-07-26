@@ -62,7 +62,7 @@ class PSPNet(nn.Sequential):
     def __init__(self, configer):
         super(PSPNet, self).__init__()
         self.configer = configer
-        self.num_classes = self.configer.get('data', 'num_classes')
+        self.num_classes = self.configer.get('datasets', 'num_classes')
         self.backbone = BackboneSelector(configer).get_backbone()
         num_features = self.backbone.get_num_features()
         self.dsn = nn.Sequential(

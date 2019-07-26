@@ -8,7 +8,7 @@ import os
 import random
 import torch.utils.data as data
 
-from extensions.tools.parallel import DataContainer
+from exts.tools.parallel import DataContainer
 from utils.helpers.image_helper import ImageHelper
 
 
@@ -24,13 +24,13 @@ class CycleGANLoader(data.Dataset):
 
     def __getitem__(self, index):
         imgA = ImageHelper.read_image(self.imgA_list[index],
-                                      tool=self.configer.get('data', 'image_tool'),
-                                      mode=self.configer.get('data', 'input_mode'))
+                                      tool=self.configer.get('datasets', 'image_tool'),
+                                      mode=self.configer.get('datasets', 'input_mode'))
 
         indexB = random.randint(0, len(self.imgB_list) - 1)
         imgB = ImageHelper.read_image(self.imgB_list[indexB],
-                                      tool=self.configer.get('data', 'image_tool'),
-                                      mode=self.configer.get('data', 'input_mode'))
+                                      tool=self.configer.get('datasets', 'image_tool'),
+                                      mode=self.configer.get('datasets', 'input_mode'))
 
         if self.aug_transform is not None:
             imgA = self.aug_transform(imgA)
@@ -63,7 +63,7 @@ class CycleGANLoader(data.Dataset):
             imgB_path = os.path.join(imageB_dir, file_name)
             imgB_list.append(imgB_path)
 
-        if dataset == 'train' and self.configer.get('data', 'include_val'):
+        if dataset == 'train' and self.configer.get('datasets', 'include_val'):
             imageA_dir = os.path.join(root_dir, 'val/imageA')
             imageB_dir = os.path.join(root_dir, 'val/imageB')
 

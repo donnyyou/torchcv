@@ -8,12 +8,12 @@ import torch
 
 from utils.tools.logger import Logger as Log
 try:
-    from extensions.ops.nms.nms_wrapper import nms
+    from exts.ops.nms.nms_wrapper import nms
 except ImportError:
     print('DetHelper NMS ImportError.')
 
 try:
-    from extensions.ops.nms.nms_wrapper import soft_nms
+    from exts.ops.nms.nms_wrapper import soft_nms
 except ImportError:
     print('DetHelper Soft-NMS ImportError.')
 

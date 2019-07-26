@@ -9,7 +9,7 @@ import torch
 import numpy as np
 import torch.utils.data as data
 
-from extensions.tools.parallel import DataContainer
+from exts.tools.parallel import DataContainer
 from datasets.pose.utils.heatmap_generator import HeatmapGenerator
 from datasets.pose.utils.paf_generator import PafGenerator
 from utils.helpers.json_helper import JsonHelper
@@ -30,14 +30,14 @@ class OpenPoseLoader(data.Dataset):
 
     def __getitem__(self, index):
         img = ImageHelper.read_image(self.img_list[index],
-                                     tool=self.configer.get('data', 'image_tool'),
-                                     mode=self.configer.get('data', 'input_mode'))
+                                     tool=self.configer.get('datasets', 'image_tool'),
+                                     mode=self.configer.get('datasets', 'input_mode'))
         if os.path.exists(self.mask_list[index]):
             maskmap = ImageHelper.read_image(self.mask_list[index],
-                                             tool=self.configer.get('data', 'image_tool'), mode='P')
+                                             tool=self.configer.get('datasets', 'image_tool'), mode='P')
         else:
             maskmap = np.ones((img.size[1], img.size[0]), dtype=np.uint8)
-            if self.configer.get('data', 'image_tool') == 'pil':
+            if self.configer.get('datasets', 'image_tool') == 'pil':
                 maskmap = ImageHelper.to_img(maskmap)
 
         kpts, bboxes = self.__read_json_file(self.json_list[index])
@@ -113,7 +113,7 @@ class OpenPoseLoader(data.Dataset):
             mask_list.append(mask_path)
             img_list.append(img_path)
 
-        if dataset == 'train' and self.configer.get('data', 'include_val'):
+        if dataset == 'train' and self.configer.get('datasets', 'include_val'):
             image_dir = os.path.join(root_dir, 'val/image')
             json_dir = os.path.join(root_dir, 'val/json')
             mask_dir = os.path.join(root_dir, 'val/mask')

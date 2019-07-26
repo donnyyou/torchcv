@@ -34,7 +34,7 @@ class TensorVisualizer(object):
             Log.error('Dir:{} not exists!'.format(base_dir))
             os.makedirs(base_dir)
 
-        tensor_img = cv2.resize(tensor, tuple(self.configer.get('data', 'input_size')))
+        tensor_img = cv2.resize(tensor, tuple(self.configer.get('datasets', 'input_size')))
         cv2.imwrite(tensor_img, os.path.join(base_dir, '{}.jpg'.format(name)))
 
     def vis_img(self, image_in, name='default', sub_dir='images'):
@@ -56,7 +56,7 @@ class TensorVisualizer(object):
             Log.error('Dir:{} not exists!'.format(base_dir))
             os.makedirs(base_dir)
 
-        img = cv2.resize(image, tuple(self.configer.get('data', 'input_size')))
+        img = cv2.resize(image, tuple(self.configer.get('datasets', 'input_size')))
         cv2.imwrite(img, os.path.join(base_dir, '{}.jpg'.format(name)))
 
 

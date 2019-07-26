@@ -17,7 +17,7 @@ class HeatmapGenerator(object):
     def __call__(self, gt_kpts, input_size, maskmap=None):
         width, height = input_size
         stride = self.configer.get('network', 'stride')
-        num_keypoints = self.configer.get('data', 'num_kpts')
+        num_keypoints = self.configer.get('datasets', 'num_kpts')
         sigma = self.configer.get('heatmap', 'sigma')
         method = self.configer.get('heatmap', 'method')
 

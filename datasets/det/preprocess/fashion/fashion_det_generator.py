@@ -86,15 +86,15 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--save_dir', default=None, type=str,
-                        dest='save_dir', help='The directory to save the data.')
+                        dest='save_dir', help='The directory to save the datasets.')
     parser.add_argument('--ori_img_dir', default=None, type=str,
-                        dest='ori_img_dir', help='The directory of the image data.')
+                        dest='ori_img_dir', help='The directory of the image datasets.')
     parser.add_argument('--ori_type_file', default=None, type=str,
-                        dest='ori_type_file', help='The directory of the type data.')
+                        dest='ori_type_file', help='The directory of the type datasets.')
     parser.add_argument('--ori_bbox_file', default=None, type=str,
-                        dest='ori_bbox_file', help='The directory of the bbox data.')
+                        dest='ori_bbox_file', help='The directory of the bbox datasets.')
     parser.add_argument('--val_interval', default=10, type=float,
-                        dest='val_interval', help='The ratio of train & val data.')
+                        dest='val_interval', help='The ratio of train & val datasets.')
 
     args = parser.parse_args()
 

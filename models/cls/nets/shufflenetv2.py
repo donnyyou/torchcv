@@ -211,7 +211,7 @@ class ShuffleNetV2(nn.Module):
                                        nn.AvgPool2d(self.configer.get('network', 'pooled_size'), [1, 1]))
 
         # building classifier
-        self.classifier = nn.Linear(self.block_def[-1][0], self.configer.get('data', 'num_classes'))
+        self.classifier = nn.Linear(self.block_def[-1][0], self.configer.get('datasets', 'num_classes'))
 
         for name, m in self.named_modules():
             if any(map(lambda x: isinstance(m, x), [nn.Linear, nn.Conv1d, nn.Conv2d])):
@@ -303,7 +303,7 @@ class ShuffleResNetV2(nn.Module):
                                        nn.AvgPool2d(self.configer.get('network', 'pooled_size'), [1, 1]))
 
         # building classifier
-        self.classifier = nn.Linear(self.block_def[-1][0], self.configer.get('data', 'num_classes'))
+        self.classifier = nn.Linear(self.block_def[-1][0], self.configer.get('datasets', 'num_classes'))
 
         for name, m in self.named_modules():
             if any(map(lambda x: isinstance(m, x), [nn.Linear, nn.Conv1d, nn.Conv2d])):

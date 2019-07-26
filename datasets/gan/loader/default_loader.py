@@ -7,7 +7,7 @@
 import os
 import torch.utils.data as data
 
-from extensions.tools.parallel import DataContainer
+from exts.tools.parallel import DataContainer
 from utils.helpers.image_helper import ImageHelper
 from utils.tools.logger import Logger as Log
 
@@ -24,12 +24,12 @@ class DefaultLoader(data.Dataset):
 
     def __getitem__(self, index):
         imgA = ImageHelper.read_image(self.imgA_list[index],
-                                      tool=self.configer.get('data', 'image_tool'),
-                                      mode=self.configer.get('data', 'input_mode'))
+                                      tool=self.configer.get('datasets', 'image_tool'),
+                                      mode=self.configer.get('datasets', 'input_mode'))
 
         imgB = ImageHelper.read_image(self.imgB_list[index],
-                                      tool=self.configer.get('data', 'image_tool'),
-                                      mode=self.configer.get('data', 'input_mode'))
+                                      tool=self.configer.get('datasets', 'image_tool'),
+                                      mode=self.configer.get('datasets', 'input_mode'))
 
         if self.aug_transform is not None:
             imgA, imgB = self.aug_transform([imgA, imgB])
@@ -66,7 +66,7 @@ class DefaultLoader(data.Dataset):
             imgA_list.append(imgA_path)
             imgB_list.append(imgB_path)
 
-        if dataset == 'train' and self.configer.get('data', 'include_val'):
+        if dataset == 'train' and self.configer.get('datasets', 'include_val'):
             imageA_dir = os.path.join(root_dir, 'val/imageA')
             imageB_dir = os.path.join(root_dir, 'val/imageB')
             for file_name in os.listdir(imageA_dir):

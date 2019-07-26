@@ -88,7 +88,7 @@ class SegVisualizer(object):
             pred = preds[img_id]
             result = np.zeros(shape=(pred.shape[0], pred.shape[1], 3), dtype=np.uint8)
 
-            for i in range(self.configer.get('data', 'num_classes')):
+            for i in range(self.configer.get('datasets', 'num_classes')):
                 mask0 = np.zeros_like(label, dtype=np.uint8)
                 mask1 = np.zeros_like(label, dtype=np.uint8)
                 mask0[label[:] == i] += 1
@@ -171,7 +171,7 @@ class SegVisualizer(object):
             pred = preds[img_id]
             result = np.zeros(shape=(pred.shape[0], pred.shape[1], 3), dtype=np.uint8)
 
-            for i in range(self.configer.get('data', 'num_classes')):
+            for i in range(self.configer.get('datasets', 'num_classes')):
                 mask0 = np.zeros_like(label, dtype=np.uint8)
                 mask1 = np.zeros_like(label, dtype=np.uint8)
                 mask0[label[:] == i] += 1

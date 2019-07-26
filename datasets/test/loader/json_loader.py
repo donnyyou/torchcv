@@ -7,7 +7,7 @@
 import os
 import torch.utils.data as data
 
-from extensions.tools.parallel import DataContainer
+from exts.tools.parallel import DataContainer
 from utils.helpers.json_helper import JsonHelper
 from utils.helpers.image_helper import ImageHelper
 from utils.tools.logger import Logger as Log
@@ -24,8 +24,8 @@ class JsonLoader(data.Dataset):
 
     def __getitem__(self, index):
         img = ImageHelper.read_image(self.item_list[index][0],
-                                     tool=self.configer.get('data', 'image_tool'),
-                                     mode=self.configer.get('data', 'input_mode'))
+                                     tool=self.configer.get('datasets', 'image_tool'),
+                                     mode=self.configer.get('datasets', 'input_mode'))
 
         ori_img_size = ImageHelper.get_size(img)
         if self.aug_transform is not None:

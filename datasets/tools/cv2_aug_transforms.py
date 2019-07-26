@@ -1116,7 +1116,7 @@ class CV2AugCompose(object):
 
     def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
 
-        if self.configer.get('data', 'input_mode') == 'RGB':
+        if self.configer.get('datasets', 'input_mode') == 'RGB':
             img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
         aug_trans = self.configer.get(self.split, 'aug_trans')
@@ -1134,7 +1134,7 @@ class CV2AugCompose(object):
              bboxes, labels, polygons) = self.transforms[trans_key](img, labelmap, maskmap,
                                                                        kpts, bboxes, labels, polygons)
 
-        if self.configer.get('data', 'input_mode') == 'RGB':
+        if self.configer.get('datasets', 'input_mode') == 'RGB':
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
         out_list = [img]

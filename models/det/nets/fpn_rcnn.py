@@ -155,7 +155,7 @@ class FpnRCNN(nn.Module):
                                                                          gt_labels, input_size)
 
             sample_roi_locs, sample_roi_scores = self.head(mrcnn_feature_maps, sample_rois, input_size)
-            sample_roi_locs = sample_roi_locs.contiguous().view(-1, self.configer.get('data', 'num_classes'), 4)
+            sample_roi_locs = sample_roi_locs.contiguous().view(-1, self.configer.get('datasets', 'num_classes'), 4)
             sample_roi_locs = sample_roi_locs[
                 torch.arange(0, sample_roi_locs.size()[0]).long().to(sample_roi_locs.device),
                 gt_roi_labels.long().to(sample_roi_locs.device)].contiguous().view(-1, 4)
@@ -177,7 +177,7 @@ class FpnRCNN(nn.Module):
                                                                          gt_labels, input_size)
 
             sample_roi_locs, sample_roi_scores = self.head(mrcnn_feature_maps, sample_rois, input_size)
-            sample_roi_locs = sample_roi_locs.contiguous().view(-1, self.configer.get('data', 'num_classes'), 4)
+            sample_roi_locs = sample_roi_locs.contiguous().view(-1, self.configer.get('datasets', 'num_classes'), 4)
             sample_roi_locs = sample_roi_locs[
                 torch.arange(0, sample_roi_locs.size()[0]).long().to(sample_roi_locs.device),
                 gt_roi_labels.long().to(sample_roi_locs.device)].contiguous().view(-1, 4)
@@ -231,13 +231,13 @@ class RoIHead(nn.Module):
         # n_class includes the background
         super(RoIHead, self).__init__()
         self.configer = configer
-        self.score = nn.Linear(1024, self.configer.get('data', 'num_classes'))
+        self.score = nn.Linear(1024, self.configer.get('datasets', 'num_classes'))
         if self.configer.get('roi', 'class_agnostic'):
             self.cls_loc = nn.Linear(1024, 4)
         else:
-            self.cls_loc = nn.Linear(1024, 4 * self.configer.get('data', 'num_classes'))
+            self.cls_loc = nn.Linear(1024, 4 * self.configer.get('datasets', 'num_classes'))
 
-        from extensions.roialign.module import RoIAlign2D
+        from exts.roialign.module import RoIAlign2D
         self.roi_align = RoIAlign2D(pooled_height=int(self.configer.get('roi', 'pooled_height')),
                                     pooled_width=int(self.configer.get('roi', 'pooled_width')),
                                     spatial_scale=1.0 / float(self.configer.get('roi', 'spatial_stride')),

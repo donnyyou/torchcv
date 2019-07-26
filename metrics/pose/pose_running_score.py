@@ -23,7 +23,7 @@ class PoseRunningScore(object):
 
         # for every human keypoint annotation
         for i in range(gt_count):
-            anno_keypoints = np.reshape(np.array(gt_kpts[i]), (self.configer.get('data', 'num_keypoints'), 3))
+            anno_keypoints = np.reshape(np.array(gt_kpts[i]), (self.configer.get('datasets', 'num_keypoints'), 3))
             visible = anno_keypoints[:, 2] == 1
             scale = max(np.max(anno_keypoints[:, 0]) - np.min(anno_keypoints[:, 0]),
                         np.max(anno_keypoints[:, 0]) - np.min(anno_keypoints[:, 0])) ** 2 + 1e-8
@@ -35,7 +35,7 @@ class PoseRunningScore(object):
                 # for every predicted human
                 for j in range(pred_count):
                     predict_keypoints = np.reshape(np.array(pred_kpts[j]),
-                                                   (self.configer.get('data', 'num_keypoints'), 3))
+                                                   (self.configer.get('datasets', 'num_keypoints'), 3))
                     dis = np.sum((anno_keypoints[visible, :2] - predict_keypoints[visible, :2]) ** 2, axis=1)
                     oks[i, j] = np.mean(
                         np.exp(-dis / 2 / self.configer.get('details', 'delta')[visible] ** 2 / (scale + 1))

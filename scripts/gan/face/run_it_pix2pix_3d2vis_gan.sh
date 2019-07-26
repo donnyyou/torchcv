@@ -12,7 +12,7 @@ DATA_DIR="/home/donny/DataSet/GAN/3D2VIS"
 
 MODEL_NAME="pix2pix"
 CHECKPOINTS_NAME="it_pix2pix_3d2vis_gan"$2
-HYPES_FILE='hypes/gan/face/it_pix2pix_3d2vis_gan.json'
+CONFIG_FILE='configs/gan/face/it_pix2pix_3d2vis_gan.conf'
 MAX_EPOCH=200
 
 LOG_DIR="./log/gan/face/"
@@ -25,18 +25,18 @@ fi
 
 
 if [[ "$1"x == "train"x ]]; then
-  ${PYTHON} -u main.py --hypes ${HYPES_FILE} --phase train --gpu 0 --model_name ${MODEL_NAME} \
+  ${PYTHON} -u main.py --hypes ${CONFIG_FILE} --phase train --gpu 0 --model_name ${MODEL_NAME} \
                        --data_dir ${DATA_DIR} --max_epoch ${MAX_EPOCH} \
                        --checkpoints_name ${CHECKPOINTS_NAME}  2>&1 | tee ${LOG_FILE}
 
 elif [[ "$1"x == "resume"x ]]; then
-  ${PYTHON} -u main.py --hypes ${HYPES_FILE} --phase train --gpu 0 --model_name ${MODEL_NAME} \
+  ${PYTHON} -u main.py --hypes ${CONFIG_FILE} --phase train --gpu 0 --model_name ${MODEL_NAME} \
                        --data_dir ${DATA_DIR} --max_iters ${MAX_EPOCH} \
                        --resume_continue y --resume ./checkpoints/gan/face/${CHECKPOINTS_NAME}_latest.pth \
                        --checkpoints_name ${CHECKPOINTS_NAME}  2>&1 | tee -a ${LOG_FILE}
 
 elif [[ "$1"x == "test"x ]]; then
-  ${PYTHON} -u main.py --hypes ${HYPES_FILE} --phase test --gpu 0 \
+  ${PYTHON} -u main.py --hypes ${CONFIG_FILE} --phase test --gpu 0 \
                        --model_name ${MODEL_NAME} --checkpoints_name ${CHECKPOINTS_NAME} \
                        --resume ./checkpoints/gan/face/${CHECKPOINTS_NAME}_latest.pth \
                        --test_dir ${DATA_DIR}/val --out_dir test  2>&1 | tee -a ${LOG_FILE}

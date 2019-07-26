@@ -15,7 +15,7 @@ class DetRunningScore(object):
         self.pred_list = list()
         self.num_positive = list()
 
-        for i in range(self.configer.get('data', 'num_classes')):
+        for i in range(self.configer.get('datasets', 'num_classes')):
             self.gt_list.append(dict())
             self.pred_list.append(list())
             self.num_positive.append(1e-9)
@@ -58,7 +58,7 @@ class DetRunningScore(object):
         ap_list = list()
         rc_list = list()
         pr_list = list()
-        for i in range(self.configer.get('data', 'num_classes')):
+        for i in range(self.configer.get('datasets', 'num_classes')):
 
             class_recs = self.gt_list[i]
             pred_recs = self.pred_list[i]
@@ -127,7 +127,7 @@ class DetRunningScore(object):
         image_name_prefix = str(time.time())
         for i in range(len(batch_gt_bboxes)):
             image_name = '{}_{}'.format(image_name_prefix, i)
-            for cls in range(self.configer.get('data', 'num_classes')):
+            for cls in range(self.configer.get('datasets', 'num_classes')):
                 self.gt_list[cls][image_name] = {
                     'bbox': np.array([batch_gt_bboxes[i][j].cpu().numpy()
                                       for j in range(batch_gt_bboxes[i].size(0))
@@ -143,17 +143,17 @@ class DetRunningScore(object):
         # compute mAP by APs under different oks thresholds
         use_07_metric = self.configer.get('val', 'use_07_metric')
         rc_list, pr_list, ap_list = self._voc_eval(use_07_metric=use_07_metric)
-        if self.num_positive[self.configer.get('data', 'num_classes') - 1] < 1:
-            return sum(ap_list) / (self.configer.get('data', 'num_classes') - 1)
+        if self.num_positive[self.configer.get('datasets', 'num_classes') - 1] < 1:
+            return sum(ap_list) / (self.configer.get('datasets', 'num_classes') - 1)
         else:
-            return sum(ap_list) / self.configer.get('data', 'num_classes')
+            return sum(ap_list) / self.configer.get('datasets', 'num_classes')
 
     def reset(self):
         self.gt_list = list()
         self.pred_list = list()
         self.num_positive = list()
 
-        for i in range(self.configer.get('data', 'num_classes')):
+        for i in range(self.configer.get('datasets', 'num_classes')):
             self.gt_list.append(dict())
             self.pred_list.append(list())
             self.num_positive.append(1e-9)

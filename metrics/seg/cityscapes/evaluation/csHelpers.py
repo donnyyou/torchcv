@@ -79,7 +79,7 @@ def getColorEntry(val, args):
 # <city>_<sequenceNb>_<frameNb>_<type>[_<type2>].<ext>
 # This class contains the individual elements as members
 # For the sequence and frame number, the strings are returned, including leading zeros
-CsFile = namedtuple( 'csFile' , [ 'city' , 'sequenceNb' , 'frameNb' , 'type' , 'type2' , 'ext' ] )
+CsFile = namedtuple( 'csFile' , [ 'city' , 'sequenceNb' , 'frameNb' , 'type' , 'type2' , 'exts' ] )
 
 # Returns a CsFile object filled from the info in the given filename
 def getCsFileInfo(fileName):

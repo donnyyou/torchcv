@@ -136,7 +136,7 @@ class BaseEncLoss(nn.Module):
 
         targets = self._scale_target(targets, (preds.size(2), preds.size(3)))
         se_target = self._get_batch_label_vector(targets,
-                                                 self.configer.get('data', 'num_classes'),
+                                                 self.configer.get('datasets', 'num_classes'),
                                                  self.grid_size).type_as(preds)
         return self.bce_loss(F.sigmoid(preds), se_target)
 
@@ -173,7 +173,7 @@ class BaseEncLoss(nn.Module):
 class BaseEmbedLoss(nn.Module):
     def __init__(self, configer):
         super(BaseEmbedLoss, self).__init__()
-        self.num_classes = configer.get('data', 'num_classes')
+        self.num_classes = configer.get('datasets', 'num_classes')
         self.cosine_loss = nn.CosineEmbeddingLoss()
 
     def forward(self, inputs, targets):

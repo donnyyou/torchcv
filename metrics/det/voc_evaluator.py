@@ -294,12 +294,12 @@ class VOCEvaluator(object):
 
 if __name__ == "__main__":
     # Example:
-    # python coco_evaluator.py --hypes ../../../../hypes/pose/coco/openpose_vgg19_coco_pose.json
+    # python coco_evaluator.py --configs ../../../../configs/pose/coco/openpose_vgg19_coco_pose.conf
     #                          --json_dir ../../../results/pose/coco/test_dir/coco/json/
     #                          --gt_dir /home/donny/DataSet/MSCOCO/annotations/person_keypoints_val2017.json
     parser = argparse.ArgumentParser()
-    parser.add_argument('--hypes_file', default='../../../hypes/det/voc/ssd300_vgg16_voc_det.json', type=str,
-                        dest='hypes_file', help='The hypes file of pose.')
+    parser.add_argument('--hypes_file', default='../../../configs/det/voc/ssd300_vgg16_voc_det.conf', type=str,
+                        dest='hypes_file', help='The configs file of pose.')
     parser.add_argument('--gt_dir', default='/home/donny/DataSet/VOC/VOCdevkit/VOC2007', type=str,
                         dest='gt_dir', help='The groundtruth annotations file of voc dets.')
     parser.add_argument('--json_dir', default='../../../val/results/det/voc/test_dir/image/json', type=str,

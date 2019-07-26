@@ -33,7 +33,7 @@ class MobileNet(nn.Module):
         self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(32)
         self.layers = self._make_layers(in_planes=32)
-        self.linear = nn.Linear(1024, self.configer.get('data', 'num_classes'))
+        self.linear = nn.Linear(1024, self.configer.get('datasets', 'num_classes'))
 
     def _make_layers(self, in_planes):
         layers = []

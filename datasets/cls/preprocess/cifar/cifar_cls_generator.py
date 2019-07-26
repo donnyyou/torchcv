@@ -71,7 +71,7 @@ class Cifar10ClsGenerator(object):
                     entry = pickle.load(f)
                 else:
                     entry = pickle.load(f, encoding='latin1')
-                self.train_data.append(entry['data'])
+                self.train_data.append(entry['datasets'])
                 if 'labels' in entry:
                     self.train_targets.extend(entry['labels'])
                 else:
@@ -87,7 +87,7 @@ class Cifar10ClsGenerator(object):
                     entry = pickle.load(f)
                 else:
                     entry = pickle.load(f, encoding='latin1')
-                self.test_data.append(entry['data'])
+                self.test_data.append(entry['datasets'])
                 if 'labels' in entry:
                     self.test_targets.extend(entry['labels'])
                 else:
@@ -221,9 +221,9 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--save_dir', default=None, type=str,
-                        dest='save_dir', help='The directory to save the data.')
+                        dest='save_dir', help='The directory to save the datasets.')
     parser.add_argument('--root_dir', default=None, type=str,
-                        dest='root_dir', help='The directory of the image data.')
+                        dest='root_dir', help='The directory of the image datasets.')
     parser.add_argument('--dataset', default="cifar10", type=str,
                         dest='dataset', help='The dataset name.')
     args = parser.parse_args()

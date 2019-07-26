@@ -25,7 +25,7 @@ class ModuleHelper(object):
                 nn.ReLU()
             )
         elif norm_type == 'sync_batchnorm':
-            from extensions.ops.sync_bn.syncbn import BatchNorm2d
+            from exts.ops.sync_bn.syncbn import BatchNorm2d
             return nn.Sequential(
                 BatchNorm2d(num_features, **kwargs),
                 nn.ReLU()
@@ -54,7 +54,7 @@ class ModuleHelper(object):
             return nn.BatchNorm3d
 
         elif norm_type == 'sync_batchnorm':
-            from extensions.ops.sync_bn.syncbn import BatchNorm3d
+            from exts.ops.sync_bn.syncbn import BatchNorm3d
             return BatchNorm3d
 
         elif norm_type == 'encsync_batchnorm':
@@ -80,7 +80,7 @@ class ModuleHelper(object):
             return nn.BatchNorm2d
 
         elif norm_type == 'sync_batchnorm':
-            from extensions.ops.sync_bn.syncbn import BatchNorm2d
+            from exts.ops.sync_bn.syncbn import BatchNorm2d
             return BatchNorm2d
 
         elif norm_type == 'encsync_batchnorm':
@@ -106,7 +106,7 @@ class ModuleHelper(object):
             return nn.BatchNorm1d
 
         elif norm_type == 'sync_batchnorm':
-            from extensions.ops.sync_bn.syncbn import BatchNorm1d
+            from exts.ops.sync_bn.syncbn import BatchNorm1d
             return BatchNorm1d
 
         elif norm_type == 'encsync_batchnorm':

@@ -36,7 +36,7 @@ class MaskHelper(object):
     @staticmethod
     def polys2mask_wrt_box(polygons, box, target_size):
         """Convert from the COCO polygon segmentation format to a binary mask
-        encoded as a 2D array of data type numpy.float32. The polygon segmentation
+        encoded as a 2D array of datasets type numpy.float32. The polygon segmentation
         is understood to be enclosed in the given box and rasterized to an M x M
         mask. The resulting mask is therefore of shape (M, M).
         """
@@ -63,7 +63,7 @@ class MaskHelper(object):
     @staticmethod
     def rle_mask_voting(top_masks, all_masks, all_dets, iou_thresh, binarize_thresh, method='AVG'):
         """Returns new masks (in correspondence with `top_masks`) by combining
-        multiple overlapping masks coming from the pool of `all_masks`. Two methods
+        multiple overlapping masks coming from the pool of `all_masks`. Two runner
         for combining masks are supported: 'AVG' uses a weighted average of
         overlapping mask pixels; 'UNION' takes the union of all mask pixels.
         """

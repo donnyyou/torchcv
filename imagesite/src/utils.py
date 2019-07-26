@@ -48,9 +48,9 @@ def list_jsons():
     task_list = ['cls', 'seg', 'pose', 'det']
     for task in task_list:
         result_json[task] = dict()
-        for dataset in os.listdir(os.path.join(config.PROJECT_ROOT, 'hypes', task)):
+        for dataset in os.listdir(os.path.join(config.PROJECT_ROOT, 'configs', task)):
             result_json[task][dataset] = list()
-            for json_file in os.listdir(os.path.join(config.PROJECT_ROOT, 'hypes', task, dataset)):
+            for json_file in os.listdir(os.path.join(config.PROJECT_ROOT, 'configs', task, dataset)):
                 result_json[task][dataset].append(json_file)
 
     return result_json
