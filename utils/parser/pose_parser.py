@@ -72,7 +72,7 @@ class PoseParser(object):
 
     def draw_points(self, image_canvas, info_tree):
         for object in info_tree['objects']:
-            for i in range(self.configer.get('datasets', 'num_kpts')):
+            for i in range(self.configer.get('data', 'num_kpts')):
                 if object['kpts'][i][2] == -1:
                     continue
 

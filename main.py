@@ -42,15 +42,15 @@ if __name__ == "__main__":
 
     # ***********  Params for data.  **********
     parser.add_argument('--data_dir', default=None, type=str,
-                        dest='datasets.data_dir', help='The Directory of the datasets.')
+                        dest='data.data_dir', help='The Directory of the data.')
     parser.add_argument('--tag', default=None, type=str,
-                        dest='datasets.tag', help='The Tag of the datasets.')
+                        dest='data.tag', help='The Tag of the data.')
     parser.add_argument('--include_val', type=str2bool, nargs='?', default=False,
-                        dest='datasets.include_val', help='Include validation set for final training.')
+                        dest='data.include_val', help='Include validation set for final training.')
     parser.add_argument('--drop_last', type=str2bool, nargs='?', default=False,
-                        dest='datasets.drop_last', help='Fix bug for syncbn.')
+                        dest='data.drop_last', help='Fix bug for syncbn.')
     parser.add_argument('--workers', default=None, type=int,
-                        dest='datasets.workers', help='The number of workers to load datasets.')
+                        dest='data.workers', help='The number of workers to load data.')
     parser.add_argument('--train_batch_size', default=None, type=int,
                         dest='train.batch_size', help='The batch size of training.')
     parser.add_argument('--val_batch_size', default=None, type=int,
@@ -140,8 +140,8 @@ if __name__ == "__main__":
     cudnn.benchmark = args_parser.cudnn
 
     configer = Configer(args_parser=args_parser)
-    abs_data_dir = os.path.expanduser(configer.get('datasets', 'data_dir'))
-    configer.update('datasets.data_dir', abs_data_dir)
+    abs_data_dir = os.path.expanduser(configer.get('data', 'data_dir'))
+    configer.update('data.data_dir', abs_data_dir)
 
     if configer.get('gpu') is not None:
         os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(str(gpu_id) for gpu_id in configer.get('gpu'))

@@ -39,11 +39,11 @@ class ConvPoseMachineTest(object):
     def __test_img(self, image_path, save_path):
         Log.info('Image Path: {}'.format(image_path))
         ori_image = ImageHelper.read_image(image_path,
-                                           tool=self.configer.get('datasets', 'image_tool'),
-                                           mode=self.configer.get('datasets', 'input_mode'))
+                                           tool=self.configer.get('data', 'image_tool'),
+                                           mode=self.configer.get('data', 'input_mode'))
 
         ori_width, ori_height = ImageHelper.get_size(ori_image)
-        ori_img_bgr = ImageHelper.get_cv2_bgr(ori_image, mode=self.configer.get('datasets', 'input_mode'))
+        ori_img_bgr = ImageHelper.get_cv2_bgr(ori_image, mode=self.configer.get('data', 'input_mode'))
         heatmap_avg = np.zeros((ori_height, ori_width, self.configer.get('network', 'heatmap_out')))
         for i, scale in enumerate(self.configer.get('test', 'scale_search')):
             image = self.blob_helper.make_input(ori_image,

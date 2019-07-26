@@ -69,10 +69,10 @@ class FCNSegmentorTest(object):
                 ImageHelper.save(image_canvas,
                                  save_path=os.path.join(out_dir, 'vis/{}.png'.format(meta_list[i]['filename'])))
 
-                if self.configer.exists('datasets', 'label_list'):
+                if self.configer.exists('data', 'label_list'):
                     label_img = self.__relabel(label_img)
 
-                if self.configer.exists('datasets', 'reduce_zero_label') and self.configer.get('datasets', 'reduce_zero_label'):
+                if self.configer.exists('data', 'reduce_zero_label') and self.configer.get('data', 'reduce_zero_label'):
                     label_img = label_img + 1
                     label_img = label_img.astype(np.uint8)
 
@@ -88,7 +88,7 @@ class FCNSegmentorTest(object):
 
     def ms_test(self, in_data_dict, params_dict):
         total_logits = [np.zeros((meta['ori_img_size'][1], meta['ori_img_size'][0],
-                                  self.configer.get('datasets', 'num_classes')), np.float32)
+                                  self.configer.get('data', 'num_classes')), np.float32)
                         for meta in DCHelper.tolist(in_data_dict['meta'])]
         for scale in params_dict['scale_search']:
             data_dict = self.blob_helper.get_blob(in_data_dict, scale=scale)
@@ -116,7 +116,7 @@ class FCNSegmentorTest(object):
 
     def mscrop_test(self, in_data_dict, params_dict):
         total_logits = [np.zeros((meta['ori_img_size'][1], meta['ori_img_size'][0],
-                                  self.configer.get('datasets', 'num_classes')), np.float32)
+                                  self.configer.get('data', 'num_classes')), np.float32)
                         for meta in DCHelper.tolist(in_data_dict['meta'])]
         for scale in params_dict['scale_search']:
             data_dict = self.blob_helper.get_blob(in_data_dict, scale=scale)
@@ -172,9 +172,9 @@ class FCNSegmentorTest(object):
                 out_list.append(res['out'].permute(0, 2, 3, 1).cpu().numpy())
 
         total_logits = [np.zeros((hw[0], hw[1],
-                                  self.configer.get('datasets', 'num_classes')), np.float32) for hw in hw_list]
+                                  self.configer.get('data', 'num_classes')), np.float32) for hw in hw_list]
         count_predictions = [np.zeros((hw[0], hw[1],
-                                       self.configer.get('datasets', 'num_classes')), np.float32) for hw in hw_list]
+                                       self.configer.get('data', 'num_classes')), np.float32) for hw in hw_list]
         for i in range(len(height_starts_list)):
             index = 0
             for height in height_starts_list[i]:
@@ -222,8 +222,8 @@ class FCNSegmentorTest(object):
     def __relabel(self, label_map):
         height, width = label_map.shape
         label_dst = np.zeros((height, width), dtype=np.uint8)
-        for i in range(self.configer.get('datasets', 'num_classes')):
-            label_dst[label_map == i] = self.configer.get('datasets', 'label_list')[i]
+        for i in range(self.configer.get('data', 'num_classes')):
+            label_dst[label_map == i] = self.configer.get('data', 'label_list')[i]
 
         label_dst = np.array(label_dst, dtype=np.uint8)
 

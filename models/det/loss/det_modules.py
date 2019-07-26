@@ -18,7 +18,7 @@ from utils.tools.logger import Logger as Log
 class SSDFocalLoss(nn.Module):
     def __init__(self, configer):
         super(SSDFocalLoss, self).__init__()
-        self.num_classes = configer.get('datasets', 'num_classes')
+        self.num_classes = configer.get('data', 'num_classes')
 
     def _one_hot_embeding(self, labels):
         """Embeding labels to one-hot form.
@@ -103,7 +103,7 @@ class SSDMultiBoxLoss(nn.Module):
 
     def __init__(self, configer):
         super(SSDMultiBoxLoss, self).__init__()
-        self.num_classes = configer.get('datasets', 'num_classes')
+        self.num_classes = configer.get('data', 'num_classes')
         self.ssd_target_generator = SSDTargetGenerator(configer)
 
     def _cross_entropy_loss(self, x, y):
@@ -233,7 +233,7 @@ class YOLOv3Loss(nn.Module):
             tw = torch.zeros(batch_size, num_anchors, in_h, in_w)
             th = torch.zeros(batch_size, num_anchors, in_h, in_w)
             tconf = torch.zeros(batch_size, num_anchors, in_h, in_w)
-            tcls = torch.zeros(batch_size, num_anchors, in_h, in_w, self.configer.get('datasets', 'num_classes'))
+            tcls = torch.zeros(batch_size, num_anchors, in_h, in_w, self.configer.get('data', 'num_classes'))
 
             for b in range(batch_size):
                 for t in range(gt_bboxes[b].size(0)):
@@ -281,7 +281,7 @@ class YOLOv3Loss(nn.Module):
             tw = tw.view(batch_size, -1).unsqueeze(2)
             th = th.view(batch_size, -1).unsqueeze(2)
             tconf = tconf.view(batch_size, -1).unsqueeze(2)
-            tcls = tcls.view(batch_size, -1, self.configer.get('datasets', 'num_classes'))
+            tcls = tcls.view(batch_size, -1, self.configer.get('data', 'num_classes'))
             target = torch.cat((tx, ty, tw, th, tconf, tcls), -1)
             batch_target_list.append(target)
             batch_objmask_list.append(obj_mask)

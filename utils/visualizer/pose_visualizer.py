@@ -74,7 +74,7 @@ class PoseVisualizer(object):
         else:
             ori_img = ori_img_in.copy()
 
-        for j in range(self.configer.get('datasets', 'num_kpts')):
+        for j in range(self.configer.get('data', 'num_kpts')):
             peaks = self.__get_peaks(heatmap[:, :, j])
 
             for peak in peaks:

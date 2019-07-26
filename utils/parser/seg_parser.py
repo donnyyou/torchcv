@@ -59,7 +59,7 @@ class SegParser(object):
         height, width = label_map.shape
         color_dst = np.zeros((height, width, 3), dtype=np.uint8)
         color_list = self.configer.get('details', 'color_list')
-        for i in range(self.configer.get('datasets', 'num_classes')):
+        for i in range(self.configer.get('data', 'num_classes')):
             color_dst[label_map == i] = color_list[i % len(color_list)]
 
         color_img_rgb = np.array(color_dst, dtype=np.uint8)

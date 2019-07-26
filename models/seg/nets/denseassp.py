@@ -67,7 +67,7 @@ class DenseASPP(nn.Module):
 
         self.classification = nn.Sequential(
             nn.Dropout2d(p=dropout1),
-            nn.Conv2d(num_features, self.configer.get('datasets', 'num_classes'), kernel_size=1, padding=0)
+            nn.Conv2d(num_features, self.configer.get('data', 'num_classes'), kernel_size=1, padding=0)
         )
 
     def forward(self, data_dict):

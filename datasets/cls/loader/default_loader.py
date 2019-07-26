@@ -23,8 +23,8 @@ class DefaultLoader(data.Dataset):
 
     def __getitem__(self, index):
         img = ImageHelper.read_image(self.img_list[index],
-                                     tool=self.configer.get('datasets', 'image_tool'),
-                                     mode=self.configer.get('datasets', 'input_mode'))
+                                     tool=self.configer.get('data', 'image_tool'),
+                                     mode=self.configer.get('data', 'input_mode'))
         label = self.label_list[index]
 
         if self.aug_transform is not None:
@@ -57,7 +57,7 @@ class DefaultLoader(data.Dataset):
                 img_list.append(img_path)
                 label_list.append(item['label'])
 
-        if dataset == 'train' and self.configer.get('datasets', 'include_val'):
+        if dataset == 'train' and self.configer.get('data', 'include_val'):
             with open(os.path.join(root_dir, 'val', 'label.json'), 'r') as file_stream:
                 items = json.load(file_stream)
                 for item in items:

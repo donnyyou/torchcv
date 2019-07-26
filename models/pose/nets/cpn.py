@@ -18,7 +18,7 @@ class CPN(nn.Module):
         self.configer = configer
         self.backbone = BackboneSelector(configer).get_backbone()
 
-        input_size = self.configer.get('datasets', 'input_size')
+        input_size = self.configer.get('data', 'input_size')
         stride = self.configer.get('network', 'stride')
 
         output_shape = (input_size[0] // stride, input_size[1] // stride)

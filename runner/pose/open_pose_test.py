@@ -62,11 +62,11 @@ class OpenPoseTest(object):
 
         Log.info('Image Path: {}'.format(image_path))
         ori_image = ImageHelper.read_image(image_path,
-                                           tool=self.configer.get('datasets', 'image_tool'),
-                                           mode=self.configer.get('datasets', 'input_mode'))
+                                           tool=self.configer.get('data', 'image_tool'),
+                                           mode=self.configer.get('data', 'input_mode'))
 
         ori_width, ori_height = ImageHelper.get_size(ori_image)
-        ori_img_bgr = ImageHelper.get_cv2_bgr(ori_image, mode=self.configer.get('datasets', 'input_mode'))
+        ori_img_bgr = ImageHelper.get_cv2_bgr(ori_image, mode=self.configer.get('data', 'input_mode'))
         heatmap_avg = np.zeros((ori_height, ori_width, self.configer.get('network', 'heatmap_out')))
         paf_avg = np.zeros((ori_height, ori_width, self.configer.get('network', 'paf_out')))
         multiplier = [scale * self.configer.get('test', 'input_size')[1] / ori_height
@@ -121,8 +121,8 @@ class OpenPoseTest(object):
                 continue
 
             object_dict = dict()
-            object_dict['kpts'] = np.zeros((self.configer.get('datasets', 'num_kpts'), 3)).tolist()
-            for j in range(self.configer.get('datasets', 'num_kpts')):
+            object_dict['kpts'] = np.zeros((self.configer.get('data', 'num_kpts'), 3)).tolist()
+            for j in range(self.configer.get('data', 'num_kpts')):
                 index = subset[n][j]
                 if index == -1:
                     object_dict['kpts'][j][0] = -1
@@ -144,7 +144,7 @@ class OpenPoseTest(object):
         all_peaks = []
         peak_counter = 0
 
-        for part in range(self.configer.get('datasets', 'num_kpts')):
+        for part in range(self.configer.get('data', 'num_kpts')):
             map_ori = heatmap_avg[:, :, part]
             map_gau = gaussian_filter(map_ori, sigma=3)
 
@@ -247,7 +247,7 @@ class OpenPoseTest(object):
     def __get_subsets(self, connection_all, special_k, all_peaks):
         # last number in each row is the total parts number of that person
         # the second last number in each row is the score of the overall configuration
-        subset = -1 * np.ones((0, self.configer.get('datasets', 'num_kpts') + 2))
+        subset = -1 * np.ones((0, self.configer.get('data', 'num_kpts') + 2))
         candidate = np.array([item for sublist in all_peaks for item in sublist])
 
         for k in self.configer.get('details', 'mini_tree'):
@@ -285,7 +285,7 @@ class OpenPoseTest(object):
 
                     # if find no partA in the subset, create a new subset
                     elif not found:
-                        row = -1 * np.ones(self.configer.get('datasets', 'num_kpts') + 2)
+                        row = -1 * np.ones(self.configer.get('data', 'num_kpts') + 2)
                         row[indexA] = partAs[i]
                         row[indexB] = partBs[i]
                         row[-1] = 2

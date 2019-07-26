@@ -52,12 +52,10 @@ class BlobHelper(object):
     def tensor2bgr(self, tensor):
         assert len(tensor.size()) == 3
 
-        ori_img = DeNormalize(div_value=self.configer.get('datasets', 'normalize')['div_value'],
-                              mean=self.configer.get('datasets', 'normalize')['mean'],
-                              std=self.configer.get('datasets', 'normalize')['std'])(tensor.cpu())
+        ori_img = DeNormalize(**self.configer.get('data', 'normalize'))(tensor.cpu())
         ori_img = ori_img.numpy().transpose(1, 2, 0).astype(np.uint8)
 
-        if self.configer.get('datasets', 'input_mode') == 'BGR':
+        if self.configer.get('data', 'input_mode') == 'BGR':
             return ori_img
         else:
             image_bgr = cv2.cvtColor(ori_img, cv2.COLOR_RGB2BGR)

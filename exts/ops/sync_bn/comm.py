@@ -57,7 +57,7 @@ class SlavePipe(_SlavePipeBase):
 class SyncMaster(object):
     """An abstract `SyncMaster` object.
 
-    - During the replication, as the datasets parallel will trigger an callback of each module, all slave devices should
+    - During the replication, as the data parallel will trigger an callback of each module, all slave devices should
     call `register(id)` and obtain an `SlavePipe` to communicate with the master.
     - During the forward pass, master device invokes `run_master`, all messages from slave devices will be collected,
     and passed to a registered callback.

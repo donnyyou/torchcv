@@ -19,7 +19,7 @@ class ADE20KEvaluator(object):
         self.seg_running_score = SegRunningScore(configer)
 
     def relabel(self, labelmap):
-        if self.configer.get('datasets', 'reduce_zero_label'):
+        if self.configer.get('data', 'reduce_zero_label'):
             labelmap[labelmap == 0] = 255
             labelmap = (labelmap - 1).astype(np.uint8)
             labelmap[labelmap == 254] = 255
@@ -46,8 +46,8 @@ class ADE20KEvaluator(object):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--hypes_file', default=None, type=str,
-                        dest='hypes_file', help='The configs file of pose.')
+    parser.add_argument('--config_file', default=None, type=str,
+                        dest='config_file', help='The configs file of pose.')
     parser.add_argument('--gt_dir', default=None, type=str,
                         dest='gt_dir', help='The groundtruth annotations.')
     parser.add_argument('--pred_dir', default=None, type=str,

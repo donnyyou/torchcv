@@ -64,7 +64,7 @@ class DeepLabV3(nn.Module):
         self.inplanes = 128
         super(DeepLabV3, self).__init__()
         self.configer = configer
-        self.num_classes = self.configer.get('datasets', 'num_classes')
+        self.num_classes = self.configer.get('data', 'num_classes')
         self.backbone = BackboneSelector(configer).get_backbone()
 
         self.head = nn.Sequential(ASPPModule(self.backbone.get_num_features(), 

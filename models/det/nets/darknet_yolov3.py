@@ -37,7 +37,7 @@ class Yolov3Head(nn.Module):
     def __init__(self, configer, out_filters=None):
         super(Yolov3Head, self).__init__()
         self.configer = configer
-        self.num_classes = self.configer.get('datasets', 'num_classes')
+        self.num_classes = self.configer.get('data', 'num_classes')
 
         #  backbone
         _out_filters = out_filters

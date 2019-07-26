@@ -21,7 +21,7 @@ class VGG(nn.Module):
         super(VGG, self).__init__()
         self.configer = configer
         self.features = self._make_layers(cfg[self.configer.get('network', 'model_name')])
-        self.classifier = nn.Linear(512, self.configer.get('datasets', 'num_classes'))
+        self.classifier = nn.Linear(512, self.configer.get('data', 'num_classes'))
 
     def forward(self, x):
         out = self.features(x)

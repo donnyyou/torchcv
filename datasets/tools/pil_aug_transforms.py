@@ -1167,7 +1167,7 @@ class PILAugCompose(object):
             self.transforms[trans] = PIL_AUGMENTATIONS_DICT[trans](**aug_trans[trans])
 
     def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
-        assert self.configer.get('datasets', 'input_mode') == 'RGB'
+        assert self.configer.get('data', 'input_mode') == 'RGB'
         aug_trans = self.configer.get(self.split, 'aug_trans')
         shuffle_trans_seq = []
         if 'shuffle_trans_seq' in aug_trans:

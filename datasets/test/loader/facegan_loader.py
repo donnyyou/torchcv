@@ -24,8 +24,8 @@ class FaceGANLoader(data.Dataset):
 
     def __getitem__(self, index):
         img = ImageHelper.read_image(self.item_list[index][0],
-                                     tool=self.configer.get('datasets', 'image_tool'),
-                                     mode=self.configer.get('datasets', 'input_mode'))
+                                     tool=self.configer.get('data', 'image_tool'),
+                                     mode=self.configer.get('data', 'input_mode'))
 
         ori_img_size = ImageHelper.get_size(img)
         if self.aug_transform is not None:

@@ -70,7 +70,7 @@ class FastRCNNTest(object):
     @staticmethod
     def decode(roi_locs, roi_scores, indices_and_rois, test_rois_num, configer, metas):
         indices_and_rois = indices_and_rois
-        num_classes = configer.get('datasets', 'num_classes')
+        num_classes = configer.get('data', 'num_classes')
         mean = torch.Tensor(configer.get('roi', 'loc_normalize_mean')).repeat(num_classes)[None]
         std = torch.Tensor(configer.get('roi', 'loc_normalize_std')).repeat(num_classes)[None]
         mean = mean.to(roi_locs.device)

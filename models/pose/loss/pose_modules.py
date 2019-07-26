@@ -90,7 +90,7 @@ class EmbeddingLoss(nn.Module):
     def __init__(self, configer):
         super(EmbeddingLoss, self).__init__()
         self.configer = configer
-        self.num_keypoints = self.configer.get('datasets', 'num_keypoints')
+        self.num_keypoints = self.configer.get('data', 'num_keypoints')
         self.l_vec = self.configer.get('capsule', 'l_vec')
         self.mse_loss = nn.MSELoss(size_average=False)
 

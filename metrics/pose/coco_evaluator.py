@@ -41,7 +41,7 @@ class CocoEvaluator(object):
                     object_dict['category_id'] = 1
                     object_dict['score'] = object['score']
                     object_dict['keypoints'] = list()
-                    for j in range(self.configer.get('datasets', 'num_kpts') - 1):
+                    for j in range(self.configer.get('data', 'num_kpts') - 1):
                         keypoint = object['kpts'][self.configer.get('details', 'coco_to_ours')[j]]
                         object_dict['keypoints'].append(keypoint[0])
                         object_dict['keypoints'].append(keypoint[1])
@@ -68,12 +68,12 @@ class CocoEvaluator(object):
 
 if __name__ == "__main__":
     # Example:
-    # python coco_evaluator.py --configs ../../../../configs/pose/coco/openpose_vgg19_coco_pose.conf
+    # python coco_evaluator.py --config_file ../../../../configs/pose/coco/openpose_vgg19_coco_pose.conf
     #                          --json_dir ../../../results/pose/coco/test_dir/coco/json/
     #                          --gt_file /home/donny/DataSet/MSCOCO/annotations/person_keypoints_val2017.json
     parser = argparse.ArgumentParser()
-    parser.add_argument('--hypes_file', default=None, type=str,
-                        dest='hypes_file', help='The configs file of pose.')
+    parser.add_argument('--config_file', default=None, type=str,
+                        dest='config_file', help='The configs file of pose.')
     parser.add_argument('--gt_file', default=None, type=str,
                         dest='gt_file', help='The groundtruth annotations file of coco keypoints.')
     parser.add_argument('--json_dir', default=None, type=str,

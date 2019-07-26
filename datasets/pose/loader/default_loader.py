@@ -28,8 +28,8 @@ class DefaultLoader(data.Dataset):
 
     def __getitem__(self, index):
         img = ImageHelper.read_image(self.img_list[index],
-                                     tool=self.configer.get('datasets', 'image_tool'),
-                                     mode=self.configer.get('datasets', 'input_mode'))
+                                     tool=self.configer.get('data', 'image_tool'),
+                                     mode=self.configer.get('data', 'input_mode'))
 
         kpts, bboxes = self.__read_json_file(self.json_list[index])
 
@@ -84,7 +84,7 @@ class DefaultLoader(data.Dataset):
             json_list.append(json_path)
             img_list.append(img_path)
 
-        if dataset == 'train' and self.configer.get('datasets', 'include_val'):
+        if dataset == 'train' and self.configer.get('data', 'include_val'):
             image_dir = os.path.join(root_dir, 'val/image')
             json_dir = os.path.join(root_dir, 'val/json')
             for file_name in os.listdir(json_dir):

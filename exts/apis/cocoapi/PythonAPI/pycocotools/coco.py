@@ -386,7 +386,7 @@ class COCO:
 
     def loadNumpyAnnotations(self, data):
         """
-        Convert result datasets from a numpy array [Nx7] where each row contains {imageID,x1,y1,w,h,score,class}
+        Convert result data from a numpy array [Nx7] where each row contains {imageID,x1,y1,w,h,score,class}
         :param  data (numpy.ndarray)
         :return: annotations (python nested list)
         """

@@ -19,36 +19,36 @@ class DataLoader(object):
     def __init__(self, configer):
         self.configer = configer
 
-        if self.configer.get('datasets', 'image_tool') == 'pil':
+        if self.configer.get('data', 'image_tool') == 'pil':
             self.aug_train_transform = pil_aug_trans.PILAugCompose(self.configer, split='train')
-        elif self.configer.get('datasets', 'image_tool') == 'cv2':
+        elif self.configer.get('data', 'image_tool') == 'cv2':
             self.aug_train_transform = cv2_aug_trans.CV2AugCompose(self.configer, split='train')
         else:
-            Log.error('Not support {} image tool.'.format(self.configer.get('datasets', 'image_tool')))
+            Log.error('Not support {} image tool.'.format(self.configer.get('data', 'image_tool')))
             exit(1)
 
-        if self.configer.get('datasets', 'image_tool') == 'pil':
+        if self.configer.get('data', 'image_tool') == 'pil':
             self.aug_val_transform = pil_aug_trans.PILAugCompose(self.configer, split='val')
-        elif self.configer.get('datasets', 'image_tool') == 'cv2':
+        elif self.configer.get('data', 'image_tool') == 'cv2':
             self.aug_val_transform = cv2_aug_trans.CV2AugCompose(self.configer, split='val')
         else:
-            Log.error('Not support {} image tool.'.format(self.configer.get('datasets', 'image_tool')))
+            Log.error('Not support {} image tool.'.format(self.configer.get('data', 'image_tool')))
             exit(1)
 
         self.img_transform = trans.Compose([
             trans.ToTensor(),
-            trans.Normalize(**self.configer.get('datasets', 'normalize')), ])
+            trans.Normalize(**self.configer.get('data', 'normalize')), ])
 
     def get_trainloader(self):
         if not self.configer.exists('train', 'loader') or self.configer.get('train', 'loader') == 'default':
             trainloader = data.DataLoader(
-                DefaultLoader(root_dir=self.configer.get('datasets', 'data_dir'), dataset='train',
+                DefaultLoader(root_dir=self.configer.get('data', 'data_dir'), dataset='train',
                               aug_transform=self.aug_train_transform,
                               img_transform=self.img_transform,
                               configer=self.configer),
                 batch_size=self.configer.get('train', 'batch_size'), shuffle=True,
-                num_workers=self.configer.get('datasets', 'workers'), pin_memory=True,
-                drop_last=self.configer.get('datasets', 'drop_last'),
+                num_workers=self.configer.get('data', 'workers'), pin_memory=True,
+                drop_last=self.configer.get('data', 'drop_last'),
                 collate_fn=lambda *args: collate(
                     *args, trans_dict=self.configer.get('train', 'data_transformer')
                 )
@@ -58,13 +58,13 @@ class DataLoader(object):
 
         elif self.configer.get('train', 'loader') == 'fasterrcnn':
             trainloader = data.DataLoader(
-                FasterRCNNLoader(root_dir=self.configer.get('datasets', 'data_dir'), dataset='train',
+                FasterRCNNLoader(root_dir=self.configer.get('data', 'data_dir'), dataset='train',
                                  aug_transform=self.aug_train_transform,
                                  img_transform=self.img_transform,
                                  configer=self.configer),
                 batch_size=self.configer.get('train', 'batch_size'), shuffle=True,
-                num_workers=self.configer.get('datasets', 'workers'), pin_memory=True,
-                drop_last=self.configer.get('datasets', 'drop_last'),
+                num_workers=self.configer.get('data', 'workers'), pin_memory=True,
+                drop_last=self.configer.get('data', 'drop_last'),
                 collate_fn=lambda *args: collate(
                     *args, trans_dict=self.configer.get('train', 'data_transformer')
                 )
@@ -79,12 +79,12 @@ class DataLoader(object):
         dataset = 'val' if dataset is None else dataset
         if not self.configer.exists('val', 'loader') or self.configer.get('val', 'loader') == 'default':
             valloader = data.DataLoader(
-                DefaultLoader(root_dir=self.configer.get('datasets', 'data_dir'), dataset=dataset,
+                DefaultLoader(root_dir=self.configer.get('data', 'data_dir'), dataset=dataset,
                               aug_transform=self.aug_val_transform,
                               img_transform=self.img_transform,
                               configer=self.configer),
                 batch_size=self.configer.get('val', 'batch_size'), shuffle=False,
-                num_workers=self.configer.get('datasets', 'workers'), pin_memory=True,
+                num_workers=self.configer.get('data', 'workers'), pin_memory=True,
                 collate_fn=lambda *args: collate(
                     *args, trans_dict=self.configer.get('val', 'data_transformer')
                 )
@@ -94,12 +94,12 @@ class DataLoader(object):
 
         elif self.configer.get('val', 'loader') == 'fasterrcnn':
             valloader = data.DataLoader(
-                FasterRCNNLoader(root_dir=self.configer.get('datasets', 'data_dir'), dataset=dataset,
+                FasterRCNNLoader(root_dir=self.configer.get('data', 'data_dir'), dataset=dataset,
                                  aug_transform=self.aug_val_transform,
                                  img_transform=self.img_transform,
                                  configer=self.configer),
                 batch_size=self.configer.get('val', 'batch_size'), shuffle=False,
-                num_workers=self.configer.get('datasets', 'workers'), pin_memory=True,
+                num_workers=self.configer.get('data', 'workers'), pin_memory=True,
                 collate_fn=lambda *args: collate(
                     *args, trans_dict=self.configer.get('val', 'data_transformer')
                 )

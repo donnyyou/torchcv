@@ -97,7 +97,7 @@ if __name__ == '__main__':
     parser.add_argument('--resume', default=None, type=str,
                         dest='network.resume', help='The path of pretrained model.')
     parser.add_argument('--train_dir', default=None, type=str,
-                        dest='datasets.train_dir', help='The path of train datasets.')
+                        dest='data.train_dir', help='The path of train data.')
 
     args_parser = parser.parse_args()
 
@@ -109,4 +109,4 @@ if __name__ == '__main__':
     print (configer.get('project_dir'))
     print (configer.get('network.resume'))
     print (configer.get('logging', 'log_file'))
-    print(configer.get('datasets', 'train_dir'))
+    print(configer.get('data', 'train_dir'))

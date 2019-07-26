@@ -19,7 +19,7 @@ def nms(dets, iou_thr, device_id=None):
             is None, then cpu nms is used, otherwise gpu_nms will be used.
 
     Returns:
-        tuple: kept bboxes and indice, which is always the same datasets type as
+        tuple: kept bboxes and indice, which is always the same data type as
             the input.
     """
     # convert dets (tensor or numpy array) to tensor

@@ -35,7 +35,7 @@ class ImageClassifierTest(object):
             with open(os.path.join(self.configer.get('project_dir'),
                                    'datasets/cls/imagenet/imagenet_class_index.json')) as json_stream:
                 name_dict = json.load(json_stream)
-                name_seq = [name_dict[str(i)][1] for i in range(self.configer.get('datasets', 'num_classes'))]
+                name_seq = [name_dict[str(i)][1] for i in range(self.configer.get('data', 'num_classes'))]
                 self.configer.add(['details', 'name_seq'], name_seq)
 
         self._init_model()
@@ -48,12 +48,12 @@ class ImageClassifierTest(object):
     def __test_img(self, image_path, json_path, raw_path, vis_path):
         Log.info('Image Path: {}'.format(image_path))
         img = ImageHelper.read_image(image_path,
-                                     tool=self.configer.get('datasets', 'image_tool'),
-                                     mode=self.configer.get('datasets', 'input_mode'))
+                                     tool=self.configer.get('data', 'image_tool'),
+                                     mode=self.configer.get('data', 'input_mode'))
 
         trans = None
         if self.configer.get('dataset') == 'imagenet':
-            if self.configer.get('datasets', 'image_tool') == 'cv2':
+            if self.configer.get('data', 'image_tool') == 'cv2':
                 img = Image.fromarray(img)
 
             trans = transforms.Compose([
@@ -64,7 +64,7 @@ class ImageClassifierTest(object):
         assert trans is not None
         img = trans(img)
 
-        ori_img_bgr = ImageHelper.get_cv2_bgr(img, mode=self.configer.get('datasets', 'input_mode'))
+        ori_img_bgr = ImageHelper.get_cv2_bgr(img, mode=self.configer.get('data', 'input_mode'))
 
         inputs = self.blob_helper.make_input(img,
                                              input_size=self.configer.get('test', 'input_size'), scale=1.0)
@@ -105,8 +105,8 @@ class ImageClassifierTest(object):
         for i, data_dict in enumerate(self.cls_data_loader.get_trainloader()):
             inputs = data_dict['img']
             labels = data_dict['label']
-            eye_matrix = torch.eye(self.configer.get('datasets', 'num_classes'))
-            labels_target = eye_matrix[labels.view(-1)].view(inputs.size(0), self.configer.get('datasets', 'num_classes'))
+            eye_matrix = torch.eye(self.configer.get('data', 'num_classes'))
+            labels_target = eye_matrix[labels.view(-1)].view(inputs.size(0), self.configer.get('data', 'num_classes'))
 
             for j in range(inputs.size(0)):
                 count = count + 1

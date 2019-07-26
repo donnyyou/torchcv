@@ -100,7 +100,7 @@ class FasterRCNN(nn.Module):
                                                                      data_dict['meta'])
 
         sample_roi_locs, sample_roi_scores = self.bbox_head(x, sample_rois, data_dict['meta'])
-        sample_roi_locs = sample_roi_locs.contiguous().view(-1, self.configer.get('datasets', 'num_classes'), 4)
+        sample_roi_locs = sample_roi_locs.contiguous().view(-1, self.configer.get('data', 'num_classes'), 4)
         sample_roi_locs = sample_roi_locs[
             torch.arange(0, sample_roi_locs.size()[0]).long().to(sample_roi_locs.device),
             gt_roi_labels.long().to(sample_roi_locs.device)].contiguous().view(-1, 4)
@@ -146,8 +146,8 @@ class BBoxHead(nn.Module):
         super(BBoxHead, self).__init__()
         self.configer = configer
         self.classifier = classifier
-        self.cls_loc = nn.Linear(4096, self.configer.get('datasets', 'num_classes') * 4)
-        self.score = nn.Linear(4096, self.configer.get('datasets', 'num_classes'))
+        self.cls_loc = nn.Linear(4096, self.configer.get('data', 'num_classes') * 4)
+        self.score = nn.Linear(4096, self.configer.get('data', 'num_classes'))
         self.roi_pool = RoIPool(out_size=tuple(self.configer.get('roi', 'pooled_hw')),
                                 spatial_scale=1.0 / float(self.configer.get('roi', 'spatial_stride')))
 

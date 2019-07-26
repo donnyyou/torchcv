@@ -52,7 +52,7 @@ if __name__ == "__main__":
     parser.add_argument('--hypes_file', default=None, type=str,
                         dest='hypes_file', help='The file of the hyper parameters.')
     parser.add_argument('--data_dir', default=None, type=str,
-                        dest='data_dir', help='The datasets dir of Det Parser.')
+                        dest='data_dir', help='The data dir of Det Parser.')
     parser.add_argument('--json_file', default=None, type=str,
                         dest='json_file', help='The json file of Det Parser.')
 

@@ -38,9 +38,9 @@ class FaceGANTest(object):
 
     def test(self, test_dir, out_dir):
         if self.configer.exists('test', 'mode') and self.configer.get('test', 'mode') == 'nir2vis':
-            jsonA_path = os.path.join(test_dir, 'val_label{}A.json'.format(self.configer.get('datasets', 'tag')))
+            jsonA_path = os.path.join(test_dir, 'val_label{}A.json'.format(self.configer.get('data', 'tag')))
             test_loader_A = self.test_loader.get_testloader(json_path=jsonA_path) if os.path.exists(jsonA_path) else None
-            jsonB_path = os.path.join(test_dir, 'val_label{}B.json'.format(self.configer.get('datasets', 'tag')))
+            jsonB_path = os.path.join(test_dir, 'val_label{}B.json'.format(self.configer.get('data', 'tag')))
             test_loader_B = self.test_loader.get_testloader(json_path=jsonB_path) if os.path.exists(jsonB_path) else None
 
         else:

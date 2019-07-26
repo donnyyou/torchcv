@@ -15,7 +15,7 @@ class SSDDetectionLayer(nn.Module):
     def __init__(self, configer):
         super(SSDDetectionLayer, self).__init__()
         self.ssd_priorbox_layer = SSDPriorBoxLayer(configer)
-        self.num_classes = configer.get('datasets', 'num_classes')
+        self.num_classes = configer.get('data', 'num_classes')
         self.num_anchors = configer.get('anchor', 'num_anchor_list')
         self.num_features = configer.get('network', 'num_feature_list')
         self.ssd_head_index = configer.get('network', 'head_index_list')

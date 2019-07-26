@@ -26,13 +26,13 @@ class FaceGANLoader(data.Dataset):
 
     def __getitem__(self, index):
         imgA = ImageHelper.read_image(self.imgA_list[index],
-                                      tool=self.configer.get('datasets', 'image_tool'),
-                                      mode=self.configer.get('datasets', 'input_mode'))
+                                      tool=self.configer.get('data', 'image_tool'),
+                                      mode=self.configer.get('data', 'input_mode'))
 
         indexB = random.randint(0, len(self.imgB_list) - 1) % len(self.imgB_list)
         imgB = ImageHelper.read_image(self.imgB_list[indexB],
-                                      tool=self.configer.get('datasets', 'image_tool'),
-                                      mode=self.configer.get('datasets', 'input_mode'))
+                                      tool=self.configer.get('data', 'image_tool'),
+                                      mode=self.configer.get('data', 'input_mode'))
 
         if self.aug_transform is not None:
             imgA = self.aug_transform(imgA)
@@ -81,7 +81,7 @@ class FaceGANLoader(data.Dataset):
                 imgB_list.append(img_path)
                 labelB_list.append(item['label'])
 
-        if dataset == 'train' and self.configer.get('datasets', 'include_val'):
+        if dataset == 'train' and self.configer.get('data', 'include_val'):
             with open(os.path.join(root_dir, 'protocols/val_label{}A.json'.format(tag)), 'r') as file_stream:
                 items = json.load(file_stream)
                 for item in items:

@@ -70,7 +70,7 @@ class YOLOv3Test(object):
                 continue
 
             # Get score and class with highest confidence
-            class_conf, class_pred = torch.max(image_pred[:, 5:5 + configer.get('datasets', 'num_classes')], 1, keepdim=True)
+            class_conf, class_pred = torch.max(image_pred[:, 5:5 + configer.get('data', 'num_classes')], 1, keepdim=True)
             # Detections ordered as (x1, y1, x2, y2, obj_conf, class_conf, class_pred)
             detections = torch.cat((image_pred[:, :5], class_conf.float(), class_pred.float()), 1)
             valid_ind = DetHelper.cls_nms(detections[:, :5], labels=class_pred.squeeze(1),

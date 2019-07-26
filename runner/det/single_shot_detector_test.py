@@ -59,10 +59,10 @@ class SingleShotDetectorTest(object):
     @staticmethod
     def decode(loc, conf, configer, meta):
         batch_size, num_priors, _ = loc.size()
-        loc = loc.unsqueeze(2).repeat(1, 1, configer.get('datasets', 'num_classes'), 1)
+        loc = loc.unsqueeze(2).repeat(1, 1, configer.get('data', 'num_classes'), 1)
         loc = loc.contiguous().view(loc.size(0), -1, 4)
 
-        labels = torch.Tensor([i for i in range(configer.get('datasets', 'num_classes'))]).to(loc.device)
+        labels = torch.Tensor([i for i in range(configer.get('data', 'num_classes'))]).to(loc.device)
         labels = labels.view(1, 1, -1, 1).repeat(batch_size, num_priors, 1, 1).contiguous().view(batch_size, -1, 1)
         conf = conf.contiguous().view(batch_size, -1, 1)
 
