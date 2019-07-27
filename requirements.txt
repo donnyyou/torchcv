@@ -1,3 +1,5 @@
+pyhocon
+flask>=1.0.0
 sklearn
 cython
 numpy
