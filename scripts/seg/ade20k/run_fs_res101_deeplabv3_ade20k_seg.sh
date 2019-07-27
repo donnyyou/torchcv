@@ -17,7 +17,7 @@ PRETRAINED_MODEL="./pretrained_models/3x3resnet101-imagenet.pth"
 
 CONFIG_FILE='configs/seg/ade20k/fs_deeplabv3_ade20k_seg.conf'
 MAX_ITERS=150000
-LOSS_TYPE="seg_auxce_loss"
+LOSS_TYPE="auxce_loss"
 
 LOG_DIR="./log/seg/ade20k/"
 LOG_FILE="${LOG_DIR}${CHECKPOINTS_NAME}.log"

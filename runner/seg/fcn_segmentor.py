@@ -13,7 +13,7 @@ from datasets.seg.data_loader import DataLoader
 from runner.tools.runner_helper import RunnerHelper
 from runner.tools.trainer import Trainer
 from model.seg.model_manager import ModelManager
-from tools.util.average_meter import AverageMeter
+from tools.util.average_meter import AverageMeter, DictAverageMeter
 from tools.util.logger import Logger as Log
 from tools.helper.dc_helper import DCHelper
 from metric.seg.seg_running_score import SegRunningScore
@@ -28,8 +28,8 @@ class FCNSegmentor(object):
         self.configer = configer
         self.batch_time = AverageMeter()
         self.data_time = AverageMeter()
-        self.train_losses = AverageMeter()
-        self.val_losses = AverageMeter()
+        self.train_losses = DictAverageMeter()
+        self.val_losses = DictAverageMeter()
         self.seg_running_score = SegRunningScore(configer)
         self.seg_visualizer = SegVisualizer(configer)
         self.seg_model_manager = ModelManager(configer)
@@ -53,7 +53,7 @@ class FCNSegmentor(object):
         self.train_loader = self.seg_data_loader.get_trainloader()
         self.val_loader = self.seg_data_loader.get_valloader()
 
-        self.pixel_loss = self.seg_model_manager.get_seg_loss()
+        self.loss = self.seg_model_manager.get_seg_loss()
 
     def _get_parameters(self):
         lr_1 = []
@@ -82,12 +82,11 @@ class FCNSegmentor(object):
             self.data_time.update(time.time() - start_time)
 
             # Forward pass.
-            out_dict = self.seg_net(data_dict)
-            # outputs = self.module_utilizer.gather(outputs)
+            out = self.seg_net(data_dict)
             # Compute the loss of the train batch & backward.
-            loss_dict = self.pixel_loss(out_dict, data_dict, gathered=self.configer.get('network', 'gathered'))
+            loss_dict = self.loss(out)
             loss = loss_dict['loss']
-            self.train_losses.update(loss.item(), len(DCHelper.tolist(data_dict['meta'])))
+            self.train_losses.update({key: loss.item() for key, loss in loss_dict.items()}, data_dict['img'].size(0))
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
@@ -111,6 +110,9 @@ class FCNSegmentor(object):
                 self.data_time.reset()
                 self.train_losses.reset()
 
+            if self.runner_state['iters'] % self.configer.get('solver.save_iters') == 0:
+                RunnerHelper.save_net(self, self.seg_net)
+
             if self.configer.get('solver', 'lr')['metric'] == 'iters' \
                     and self.runner_state['iters'] == self.configer.get('solver', 'max_iters'):
                 break
@@ -133,10 +135,11 @@ class FCNSegmentor(object):
 
             with torch.no_grad():
                 # Forward pass.
-                out_dict = self.seg_net(data_dict)
+                out = self.seg_net(data_dict)
+                loss_dict = self.loss(out)
                 # Compute the loss of the val batch.
-                loss_dict = self.pixel_loss(out_dict, data_dict, gathered=self.configer.get('network', 'gathered'))
-                out_dict = RunnerHelper.gather(self, out_dict)
+                out_dict, _ = RunnerHelper.gather(self, out)
+                self.val_losses.update({key: loss.item() for key, loss in loss_dict.items()}, data_dict['img'].size(0))
 
             self.val_losses.update(loss_dict['loss'].item(), len(DCHelper.tolist(data_dict['meta'])))
             self._update_running_score(out_dict['out'], DCHelper.tolist(data_dict['meta']))
