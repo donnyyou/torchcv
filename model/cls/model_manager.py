@@ -10,7 +10,7 @@ from model.cls.nets.mobilenet import MobileNet
 from model.cls.nets.vgg import VGG
 from model.cls.nets.shufflenetv2 import ShuffleNetV2, ShuffleResNetV2
 from model.cls.loss.cls_modules import ICCELoss, ICCenterLoss
-from util.tools.logger import Logger as Log
+from tools.util.logger import Logger as Log
 
 CLS_MODEL_DICT = {
     'vgg11': VGG,

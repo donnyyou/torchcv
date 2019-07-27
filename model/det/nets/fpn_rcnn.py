@@ -12,7 +12,7 @@ from model.backbones.backbone_selector import BackboneSelector
 from model.det.layers.fr_roi_generator import FRROIGenerator
 from model.det.layers.fr_roi_sampler import FRROISampler
 from model.det.layers.rpn_detection_layer import RPNDetectionLayer
-from util.tools.logger import Logger as Log
+from tools.util.logger import Logger as Log
 
 
 class FpnRCNN(nn.Module):

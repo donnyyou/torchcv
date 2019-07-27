@@ -14,8 +14,8 @@ import torch.backends.cudnn as cudnn
 
 from runner.method_selector import MethodSelector
 from runner.tools.controller import Controller
-from util.tools.configer import Configer
-from util.tools.logger import Logger as Log
+from tools.util.configer import Configer
+from tools.util.logger import Logger as Log
 
 
 def str2bool(v):

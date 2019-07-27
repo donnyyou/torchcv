@@ -13,11 +13,11 @@ from datasets.seg.data_loader import DataLoader
 from runner.tools.runner_helper import RunnerHelper
 from runner.tools.trainer import Trainer
 from model.seg.model_manager import ModelManager
-from util.tools.average_meter import AverageMeter
-from util.tools.logger import Logger as Log
-from util.helpers.dc_helper import DCHelper
+from tools.util.average_meter import AverageMeter
+from tools.util.logger import Logger as Log
+from tools.helper.dc_helper import DCHelper
 from metric.seg.seg_running_score import SegRunningScore
-from util.visualizer.seg_visualizer import SegVisualizer
+from tools.vis.seg_visualizer import SegVisualizer
 
 
 class FCNSegmentor(object):

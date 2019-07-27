@@ -12,8 +12,8 @@ import time
 from PIL import Image
 
 from datasets.tools.transforms import DeNormalize
-from util.helpers.image_helper import ImageHelper
-from util.tools.logger import Logger as log
+from tools.helper.image_helper import ImageHelper
+from tools.util.logger import Logger as log
 
 
 DET_DIR = 'vis/results/det'

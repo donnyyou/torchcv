@@ -6,7 +6,7 @@
 import numpy as np
 import torch
 
-from util.tools.logger import Logger as Log
+from tools.util.logger import Logger as Log
 try:
     from exts.ops.nms.nms_wrapper import nms
 except ImportError:

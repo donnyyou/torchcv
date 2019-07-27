@@ -8,8 +8,8 @@ import numpy as np
 from torch.utils import data
 
 from exts.tools.parallel import DataContainer
-from util.helpers.image_helper import ImageHelper
-from util.tools.logger import Logger as Log
+from tools.helper.image_helper import ImageHelper
+from tools.util.logger import Logger as Log
 
 
 class DefaultLoader(data.Dataset):

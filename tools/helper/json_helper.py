@@ -7,7 +7,7 @@
 import os
 import json
 
-from util.tools.logger import Logger as Log
+from tools.util.logger import Logger as Log
 
 
 class JsonHelper(object):

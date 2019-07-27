@@ -10,7 +10,7 @@ import torch.nn.init as init
 
 from model.det.layers.ssd_detection_layer import SSDDetectionLayer
 from model.det.loss.det_modules import SSDMultiBoxLoss
-from util.tools.logger import Logger as Log
+from tools.util.logger import Logger as Log
 
 
 DETECTOR_CONFIG = {

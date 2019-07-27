@@ -14,9 +14,9 @@ from datasets.pose.data_loader import DataLoader
 from runner.tools.blob_helper import BlobHelper
 from runner.tools.runner_helper import RunnerHelper
 from model.pose.model_manager import ModelManager
-from util.helpers.image_helper import ImageHelper
-from util.tools.logger import Logger as Log
-from util.visualizer.pose_visualizer import PoseVisualizer
+from tools.helper.image_helper import ImageHelper
+from tools.util.logger import Logger as Log
+from tools.vis.pose_visualizer import PoseVisualizer
 
 
 class ConvPoseMachineTest(object):

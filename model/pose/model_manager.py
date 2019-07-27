@@ -10,7 +10,7 @@ from model.pose.nets.open_pose_org import get_open_pose_org
 from model.pose.nets.cpm import CPM
 from model.pose.nets.open_pose import OpenPose
 from model.pose.loss.pose_modules import OpenPoseLoss
-from util.tools.logger import Logger as Log
+from tools.util.logger import Logger as Log
 
 MULTI_POSE_MODEL_DICT = {
     'openpose': OpenPose,

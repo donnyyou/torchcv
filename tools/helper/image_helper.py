@@ -9,8 +9,8 @@ import cv2
 import numpy as np
 from PIL import Image
 
-from util.helpers.file_helper import FileHelper
-from util.tools.logger import Logger as Log
+from tools.helper.file_helper import FileHelper
+from tools.util.logger import Logger as Log
 
 
 PIL_INTER_DICT = {

@@ -12,17 +12,17 @@ from datasets.test.test_data_loader import TestDataLoader
 from runner.tools.blob_helper import BlobHelper
 from runner.tools.runner_helper import RunnerHelper
 from model.det.model_manager import ModelManager
-from util.helpers.det_helper import DetHelper
-from util.helpers.image_helper import ImageHelper
-from util.helpers.json_helper import JsonHelper
+from tools.helper.det_helper import DetHelper
+from tools.helper.image_helper import ImageHelper
+from tools.helper.json_helper import JsonHelper
 from model.det.layers.fr_priorbox_layer import FRPriorBoxLayer
 from model.det.layers.fr_roi_generator import FRROIGenerator
 from model.det.layers.fr_roi_sampler import FRROISampler
 from model.det.layers.rpn_target_assigner import RPNTargetAssigner
-from util.tools.logger import Logger as Log
-from util.parser.det_parser import DetParser
-from util.visualizer.det_visualizer import DetVisualizer
-from util.helpers.dc_helper import DCHelper
+from tools.util.logger import Logger as Log
+from tools.parser.det_parser import DetParser
+from tools.vis.det_visualizer import DetVisualizer
+from tools.helper.dc_helper import DCHelper
 
 
 class FastRCNNTest(object):

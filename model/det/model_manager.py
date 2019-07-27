@@ -11,7 +11,7 @@ from model.det.nets.vgg16_ssd300 import Vgg16SSD300
 from model.det.nets.vgg16_ssd512 import Vgg16SSD512
 from model.det.nets.faster_rcnn import FasterRCNN
 from model.det.loss.det_modules import SSDMultiBoxLoss, SSDFocalLoss, YOLOv3Loss, FasterRCNNLoss
-from util.tools.logger import Logger as Log
+from tools.util.logger import Logger as Log
 
 DET_MODEL_DICT = {
     'vgg16_ssd300': Vgg16SSD300,

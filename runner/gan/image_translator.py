@@ -11,9 +11,9 @@ from datasets.gan.data_loader import DataLoader
 from runner.tools.runner_helper import RunnerHelper
 from runner.tools.trainer import Trainer
 from model.gan.model_manager import ModelManager
-from util.tools.average_meter import AverageMeter
-from util.helpers.dc_helper import DCHelper
-from util.tools.logger import Logger as Log
+from tools.util.average_meter import AverageMeter
+from tools.helper.dc_helper import DCHelper
+from tools.util.logger import Logger as Log
 
 
 class ImageTranslator(object):

@@ -13,11 +13,11 @@ from runner.tools.runner_helper import RunnerHelper
 from runner.tools.trainer import Trainer
 from model.det.model_manager import ModelManager
 from model.det.layers.fr_priorbox_layer import FRPriorBoxLayer
-from util.tools.average_meter import AverageMeter
-from util.tools.logger import Logger as Log
+from tools.util.average_meter import AverageMeter
+from tools.util.logger import Logger as Log
 from metric.det.det_running_score import DetRunningScore
-from util.visualizer.det_visualizer import DetVisualizer
-from util.helpers.dc_helper import DCHelper
+from tools.vis.det_visualizer import DetVisualizer
+from tools.helper.dc_helper import DCHelper
 
 
 class FasterRCNN(object):

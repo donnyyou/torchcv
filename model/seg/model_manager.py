@@ -10,7 +10,7 @@ from model.seg.nets.denseassp import DenseASPP
 from model.seg.nets.deeplabv3 import DeepLabV3
 from model.seg.nets.pspnet import PSPNet
 from model.seg.loss.seg_modules import SegCELoss, SegOhemCELoss, SegAuxCELoss, SegAuxEncCELoss, SegAuxOhemCELoss
-from util.tools.logger import Logger as Log
+from tools.util.logger import Logger as Log
 
 
 SEG_MODEL_DICT = {

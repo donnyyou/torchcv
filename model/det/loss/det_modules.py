@@ -10,9 +10,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
 
-from util.helpers.det_helper import DetHelper
+from tools.helper.det_helper import DetHelper
 from model.det.layers.ssd_target_generator import SSDTargetGenerator
-from util.tools.logger import Logger as Log
+from tools.util.logger import Logger as Log
 
 
 class SSDFocalLoss(nn.Module):

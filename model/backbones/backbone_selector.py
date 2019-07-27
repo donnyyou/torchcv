@@ -9,7 +9,7 @@ from model.backbones.resnet.resnet_backbone import ResNetBackbone
 from model.backbones.mobilenet.mobilenet_backbone import MobileNetBackbone
 from model.backbones.densenet.densenet_backbone import DenseNetBackbone
 from model.backbones.squeezenet.squeezenet_backbone import SqueezeNetBackbone
-from util.tools.logger import Logger as Log
+from tools.util.logger import Logger as Log
 
 
 class BackboneSelector(object):

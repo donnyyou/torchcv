@@ -11,7 +11,7 @@ import torch
 import torch.nn as nn
 from torch.nn.parallel.scatter_gather import gather as torch_gather
 
-from util.tools.logger import Logger as Log
+from tools.util.logger import Logger as Log
 
 
 class RunnerHelper(object):

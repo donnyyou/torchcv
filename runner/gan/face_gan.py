@@ -12,9 +12,9 @@ from runner.tools.runner_helper import RunnerHelper
 from runner.tools.trainer import Trainer
 from runner.gan.face_gan_test import FaceGANTest
 from model.gan.model_manager import ModelManager
-from util.tools.average_meter import AverageMeter
-from util.helpers.dc_helper import DCHelper
-from util.tools.logger import Logger as Log
+from tools.util.average_meter import AverageMeter
+from tools.helper.dc_helper import DCHelper
+from tools.util.logger import Logger as Log
 
 
 class FaceGAN(object):

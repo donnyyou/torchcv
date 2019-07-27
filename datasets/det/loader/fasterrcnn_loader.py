@@ -10,9 +10,9 @@ import numpy as np
 import torch.utils.data as data
 
 from exts.tools.parallel import DataContainer
-from util.helpers.json_helper import JsonHelper
-from util.helpers.image_helper import ImageHelper
-from util.tools.logger import Logger as Log
+from tools.helper.json_helper import JsonHelper
+from tools.helper.image_helper import ImageHelper
+from tools.util.logger import Logger as Log
 
 
 class FasterRCNNLoader(data.Dataset):

@@ -10,8 +10,8 @@ from cv2 import (CAP_PROP_FRAME_WIDTH, CAP_PROP_FRAME_HEIGHT, CAP_PROP_FPS,
                  CAP_PROP_POS_FRAMES, VideoWriter_fourcc)
 
 
-from util.helpers.file_helper import FileHelper
-from util.tools.progressbar import track_progress
+from tools.helper.file_helper import FileHelper
+from tools.util.progressbar import track_progress
 
 
 class Cache(object):

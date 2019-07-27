@@ -11,7 +11,7 @@ import datasets.tools.transforms as trans
 from datasets.det.loader.fasterrcnn_loader import FasterRCNNLoader
 from datasets.det.loader.default_loader import DefaultLoader
 from datasets.tools.collate import collate
-from util.tools.logger import Logger as Log
+from tools.util.logger import Logger as Log
 
 
 class DataLoader(object):

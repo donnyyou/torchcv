@@ -10,8 +10,8 @@ import numpy as np
 import argparse
 from PIL import Image
 
-from util.tools.configer import Configer
-from util.tools.logger import Logger as Log
+from tools.util.configer import Configer
+from tools.util.logger import Logger as Log
 
 
 class SegParser(object):

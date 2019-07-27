@@ -7,7 +7,7 @@
 import torch
 
 from model.det.layers.fr_priorbox_layer import FRPriorBoxLayer
-from util.tools.logger import Logger as Log
+from tools.util.logger import Logger as Log
 
 try:
     from exts.ops.nms.nms_wrapper import nms

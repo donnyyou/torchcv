@@ -6,7 +6,7 @@
 
 import numpy as np
 
-from util.tools.logger import Logger as Log
+from tools.util.logger import Logger as Log
 try:
     import pycocotools.mask as mask_util
 except ImportError:

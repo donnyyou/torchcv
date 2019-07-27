@@ -15,11 +15,11 @@ from datasets.pose.data_loader import DataLoader
 from runner.tools.blob_helper import BlobHelper
 from runner.tools.runner_helper import RunnerHelper
 from model.pose.model_manager import ModelManager
-from util.helpers.image_helper import ImageHelper
-from util.helpers.json_helper import JsonHelper
-from util.tools.logger import Logger as Log
-from util.parser.pose_parser import PoseParser
-from util.visualizer.pose_visualizer import PoseVisualizer
+from tools.helper.image_helper import ImageHelper
+from tools.helper.json_helper import JsonHelper
+from tools.util.logger import Logger as Log
+from tools.parser.pose_parser import PoseParser
+from tools.vis.pose_visualizer import PoseVisualizer
 
 
 class OpenPoseTest(object):

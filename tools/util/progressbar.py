@@ -3,7 +3,7 @@ import sys
 from multiprocessing import Pool
 from shutil import get_terminal_size
 
-from util.tools.timer import Timer
+from tools.util.timer import Timer
 
 
 class ProgressBar(object):

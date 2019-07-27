@@ -9,7 +9,7 @@ import cv2
 import numpy as np
 
 from datasets.tools.transforms import DeNormalize
-from util.tools.logger import Logger as Log
+from tools.util.logger import Logger as Log
 
 
 TENSOR_DIR = 'vis/results/tensor'

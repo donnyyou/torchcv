@@ -13,7 +13,7 @@ from model.det.layers.fr_roi_generator import FRROIGenerator
 from model.det.layers.fr_roi_sampler import FRROISampler
 from model.det.layers.rpn_detection_layer import RPNDetectionLayer
 from model.det.layers.rpn_target_assigner import RPNTargetAssigner
-from util.tools.logger import Logger as Log
+from tools.util.logger import Logger as Log
 
 try:
     from exts.ops.roi_pool.modules.roi_pool import RoIPool

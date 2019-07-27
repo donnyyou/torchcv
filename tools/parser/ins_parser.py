@@ -10,9 +10,9 @@ import os
 import argparse
 import numpy as np
 
-from util.helpers.mask_helper import MaskHelper
-from util.tools.configer import Configer
-from util.tools.logger import Logger as Log
+from tools.helper.mask_helper import MaskHelper
+from tools.util.configer import Configer
+from tools.util.logger import Logger as Log
 
 
 class InsParser(object):

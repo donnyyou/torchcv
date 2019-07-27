@@ -12,7 +12,7 @@ try:
 except ImportError:
     from urllib.request import urlretrieve
 
-from util.tools.logger import Logger as Log
+from tools.util.logger import Logger as Log
 
 
 class ModuleHelper(object):

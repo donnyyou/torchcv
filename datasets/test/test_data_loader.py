@@ -13,7 +13,7 @@ from datasets.tools.collate import collate
 from datasets.tools.transforms import ToTensor, Normalize, Compose
 import datasets.tools.pil_aug_transforms as pil_aug_trans
 import datasets.tools.cv2_aug_transforms as cv2_aug_trans
-from util.tools.logger import Logger as Log
+from tools.util.logger import Logger as Log
 
 
 class TestDataLoader(object):

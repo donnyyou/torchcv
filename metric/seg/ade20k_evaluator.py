@@ -8,9 +8,9 @@ import numpy as np
 import argparse
 
 from metric.seg.seg_running_score import SegRunningScore
-from util.helpers.image_helper import ImageHelper
-from util.tools.logger import Logger as Log
-from util.tools.configer import Configer
+from tools.helper.image_helper import ImageHelper
+from tools.util.logger import Logger as Log
+from tools.util.configer import Configer
 
 
 class ADE20KEvaluator(object):

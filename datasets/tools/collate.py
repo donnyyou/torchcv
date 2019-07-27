@@ -12,8 +12,8 @@ from torch.utils.data.dataloader import default_collate
 from torch._six import string_classes, int_classes
 
 from exts.tools.parallel import DataContainer
-from util.helpers.tensor_helper import TensorHelper
-from util.tools.logger import Logger as Log
+from tools.helper.tensor_helper import TensorHelper
+from tools.util.logger import Logger as Log
 
 
 def stack(batch, data_key=None, device_ids=None):

@@ -15,7 +15,7 @@ from numpy import ma
 from scipy.ndimage.filters import gaussian_filter
 
 from datasets.tools.transforms import DeNormalize
-from util.tools.logger import Logger as Log
+from tools.util.logger import Logger as Log
 
 
 POSE_DIR = 'vis/results/pose'

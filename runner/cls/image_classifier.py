@@ -11,9 +11,9 @@ from datasets.cls.data_loader import DataLoader
 from runner.tools.runner_helper import RunnerHelper
 from runner.tools.trainer import Trainer
 from model.cls.model_manager import ModelManager
-from util.helpers.dc_helper import DCHelper
-from util.tools.average_meter import AverageMeter
-from util.tools.logger import Logger as Log
+from tools.helper.dc_helper import DCHelper
+from tools.util.average_meter import AverageMeter
+from tools.util.logger import Logger as Log
 from metric.cls.cls_running_score import ClsRunningScore
 
 

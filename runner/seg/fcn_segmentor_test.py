@@ -15,11 +15,11 @@ from datasets.test.test_data_loader import TestDataLoader
 from runner.tools.blob_helper import BlobHelper
 from runner.tools.runner_helper import RunnerHelper
 from model.seg.model_manager import ModelManager
-from util.helpers.image_helper import ImageHelper
-from util.tools.logger import Logger as Log
-from util.parser.seg_parser import SegParser
-from util.visualizer.seg_visualizer import SegVisualizer
-from util.helpers.dc_helper import DCHelper
+from tools.helper.image_helper import ImageHelper
+from tools.util.logger import Logger as Log
+from tools.parser.seg_parser import SegParser
+from tools.vis.seg_visualizer import SegVisualizer
+from tools.helper.dc_helper import DCHelper
 
 
 class FCNSegmentorTest(object):

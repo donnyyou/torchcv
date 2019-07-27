@@ -9,7 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
 
-from util.tools.logger import Logger as Log
+from tools.util.logger import Logger as Log
 
 
 class BasicBlock(nn.Module):

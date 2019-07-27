@@ -11,10 +11,10 @@ from datasets.pose.data_loader import DataLoader
 from runner.tools.runner_helper import RunnerHelper
 from runner.tools.trainer import Trainer
 from model.pose.model_manager import ModelManager
-from util.helpers.dc_helper import DCHelper
-from util.tools.average_meter import AverageMeter
-from util.tools.logger import Logger as Log
-from util.visualizer.pose_visualizer import PoseVisualizer
+from tools.helper.dc_helper import DCHelper
+from tools.util.average_meter import AverageMeter
+from tools.util.logger import Logger as Log
+from tools.vis.pose_visualizer import PoseVisualizer
 
 
 class OpenPose(object):
