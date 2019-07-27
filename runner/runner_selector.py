@@ -68,11 +68,11 @@ GAN_TEST_DICT = {
 }
 
 
-class MethodSelector(object):
+class RunnerSelector(object):
     def __init__(self, configer):
         self.configer = configer
 
-    def select_pose_method(self):
+    def pose_runner(self):
         key = self.configer.get('method')
         if key not in POSE_METHOD_DICT or key not in POSE_TEST_DICT:
             Log.error('Pose Method: {} is not valid.'.format(key))
@@ -83,7 +83,7 @@ class MethodSelector(object):
         else:
             return POSE_TEST_DICT[key](self.configer)
 
-    def select_det_method(self):
+    def det_runner(self):
         key = self.configer.get('method')
         if key not in DET_METHOD_DICT or key not in DET_TEST_DICT:
             Log.error('Det Method: {} is not valid.'.format(key))
@@ -94,7 +94,7 @@ class MethodSelector(object):
         else:
             return DET_TEST_DICT[key](self.configer)
 
-    def select_seg_method(self):
+    def seg_runner(self):
         key = self.configer.get('method')
         if key not in SEG_METHOD_DICT or key not in SEG_TEST_DICT:
             Log.error('Det Method: {} is not valid.'.format(key))
@@ -105,7 +105,7 @@ class MethodSelector(object):
         else:
             return SEG_TEST_DICT[key](self.configer)
 
-    def select_cls_method(self):
+    def cls_runner(self):
         key = self.configer.get('method')
         if key not in CLS_METHOD_DICT or key not in CLS_TEST_DICT:
             Log.error('Cls Method: {} is not valid.'.format(key))
@@ -116,7 +116,7 @@ class MethodSelector(object):
         else:
             return CLS_TEST_DICT[key](self.configer)
 
-    def select_gan_method(self):
+    def gan_runner(self):
         key = self.configer.get('method')
         if key not in GAN_METHOD_DICT or key not in GAN_TEST_DICT:
             Log.error('Cls Method: {} is not valid.'.format(key))

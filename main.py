@@ -12,7 +12,7 @@ import argparse
 import torch
 import torch.backends.cudnn as cudnn
 
-from runner.method_selector import MethodSelector
+from runner.runner_selector import RunnerSelector
 from runner.tools.controller import Controller
 from tools.util.configer import Configer
 from tools.util.logger import Logger as Log
@@ -170,18 +170,18 @@ if __name__ == "__main__":
 
     Log.info('BN Type is {}.'.format(configer.get('network', 'norm_type')))
     Log.info('Config Dict: {}'.format(json.dumps(configer.to_dict(), indent=2)))
-    method_selector = MethodSelector(configer)
+    runner_selector = RunnerSelector(configer)
     runner = None
     if configer.get('task') == 'pose':
-        runner = method_selector.select_pose_method()
+        runner = runner_selector.pose_runner()
     elif configer.get('task') == 'seg':
-        runner = method_selector.select_seg_method()
+        runner = runner_selector.seg_runner()
     elif configer.get('task') == 'det':
-        runner = method_selector.select_det_method()
+        runner = runner_selector.det_runner()
     elif configer.get('task') == 'cls':
-        runner = method_selector.select_cls_method()
+        runner = runner_selector.cls_runner()
     elif configer.get('task') == 'gan':
-        runner = method_selector.select_gan_method()
+        runner = runner_selector.gan_runner()
     else:
         Log.error('Task: {} is not valid.'.format(configer.get('task')))
         exit(1)
