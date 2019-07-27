@@ -11,7 +11,7 @@ import argparse
 
 from pyhocon import ConfigFactory
 
-from lib.utils.tools.logger import Logger as Log
+from tools.util.logger import Logger as Log
 
 
 class Configer(object):
