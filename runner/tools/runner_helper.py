@@ -32,8 +32,15 @@ class RunnerHelper(object):
         if len(runner.configer.get('gpu')) == 1 or len(range(torch.cuda.device_count())) == 1:
             runner.configer.update(['network', 'gathered'], True)
 
-        from exts.tools.parallel.data_parallel import DataParallelModel
-        return DataParallelModel(net, gather_=runner.configer.get('network', 'gathered'))
+        parallel_type = runner.configer.get('network.parallel', default='dp')
+        if parallel_type == 'dp':
+            from exts.tools.parallel.data_parallel import ParallelModel
+            return ParallelModel(net, gather_=runner.configer.get('network', 'gathered'))
+        elif parallel_type == 'ddp':
+            from exts.tools.parallel.data_parallel import DistributeParallelModel
+            return DistributeParallelModel(net, gather_=runner.configer.get('network', 'gathered'))
+        else:
+            raise ValueError('Not support DataParallel: {}'.format(parallel_type))
 
     @staticmethod
     def load_net(runner, net, model_path=None):
