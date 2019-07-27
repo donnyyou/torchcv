@@ -153,7 +153,7 @@ if __name__ == "__main__":
         assert len(configer.get('gpu')) > 1 or 'sync' not in configer.get('network', 'norm_type')
 
     project_dir = os.path.dirname(os.path.realpath(__file__))
-    configer.add(['project_dir'], project_dir)
+    configer.add('project_dir', project_dir)
 
     if configer.get('logging', 'log_to_file'):
         log_file = configer.get('logging', 'log_file')

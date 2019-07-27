@@ -113,9 +113,7 @@ class ResNetBackbone(object):
 
     def __call__(self):
         arch = self.configer.get('network', 'backbone')
-        multi_grid = None
-        if self.configer.exists('network', 'multi_grid'):
-            multi_grid = self.configer.get('network', 'multi_grid')
+        multi_grid = self.configer.get('network.multi_grid', default=None)
 
         if arch == 'resnet34':
             orig_resnet = self.resnet_models.resnet34()

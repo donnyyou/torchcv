@@ -13,19 +13,10 @@ class BaseCELoss(nn.Module):
     def __init__(self, configer=None):
         super(BaseCELoss, self).__init__()
         self.configer = configer
-        weight = None
-        if self.configer.exists('loss', 'params') and 'ce_weight' in self.configer.get('loss', 'params'):
-            weight = self.configer.get('loss', 'params')['ce_weight']
-            weight = torch.FloatTensor(weight).cuda()
-
-        reduction = 'mean'
-        if self.configer.exists('loss', 'params') and 'ce_reduction' in self.configer.get('loss', 'params'):
-            reduction = self.configer.get('loss', 'params')['ce_reduction']
-
-        ignore_index = -100
-        if self.configer.exists('loss', 'params') and 'ce_ignore_index' in self.configer.get('loss', 'params'):
-            ignore_index = self.configer.get('loss', 'params')['ce_ignore_index']
-
+        weight = self.configer.get('loss.params.ce_weight', default=None)
+        weight = torch.FloatTensor(weight).cuda() if weight is not None else weight
+        reduction = self.configer.get('loss.params.ce_reduction', default='mean')
+        ignore_index = self.configer.get('loss.params.ce_ignore_index', default=-100)
         self.ce_loss = nn.CrossEntropyLoss(weight=weight, ignore_index=ignore_index, reduction=reduction)
 
     def forward(self, input, target):
