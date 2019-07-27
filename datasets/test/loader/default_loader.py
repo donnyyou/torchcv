@@ -7,7 +7,7 @@
 import os
 import torch.utils.data as data
 
-from exts.tools.parallel import DataContainer
+from exts.tools.parallel.data_container import DataContainer
 from tools.helper.file_helper import FileHelper
 from tools.helper.image_helper import ImageHelper
 from tools.util.logger import Logger as Log

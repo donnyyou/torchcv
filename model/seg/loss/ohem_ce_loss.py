@@ -12,23 +12,13 @@ class OhemCELoss(nn.Module):
     def __init__(self, configer):
         super(OhemCELoss, self).__init__()
         self.configer = configer
-        self.thresh = self.configer.get('loss', 'params')['ohem_thresh']
-        self.min_kept = max(1, self.configer.get('loss', 'params')['ohem_minkeep'])
-        weight = None
-        if self.configer.exists('loss', 'params') and 'ce_weight' in self.configer.get('loss', 'params'):
-            weight = self.configer.get('loss', 'params')['ce_weight']
-            weight = torch.FloatTensor(weight).cuda()
-
-        self.reduction = 'mean'
-        if self.configer.exists('loss', 'params') and 'ce_reduction' in self.configer.get('loss', 'params'):
-            self.reduction = self.configer.get('loss', 'params')['ce_reduction']
-
-        ignore_index = -100
-        if self.configer.exists('loss', 'params') and 'ce_ignore_index' in self.configer.get('loss', 'params'):
-            ignore_index = self.configer.get('loss', 'params')['ce_ignore_index']
-
+        weight = self.configer.get('loss.params.ohem_ce_loss.weight', default=None)
+        weight = torch.FloatTensor(weight) if weight is not None else weight
+        reduction = self.configer.get('loss.params.ohem_ce_loss.reduction', default='mean')
+        ignore_index = self.configer.get('loss.params.ohem_ce_loss.ignore_index', default=-100)
+        self.thresh = self.configer.get('loss.params.ohem_ce_loss.thresh', default=0.7)
+        self.min_kept = max(1, self.configer.get('loss.params.ohem_ce_loss.minkeep', default=1))
         self.ignore_label = ignore_index
-        self.ce_loss = nn.CrossEntropyLoss(weight=weight, ignore_index=ignore_index, reduction='none')
 
     def forward(self, predict, target):
         """
@@ -47,7 +37,9 @@ class OhemCELoss(nn.Module):
         sort_prob, sort_indices = prob.contiguous().view(-1, )[mask].contiguous().sort()
         min_threshold = sort_prob[min(self.min_kept, sort_prob.numel() - 1)] if sort_prob.numel() > 0 else 0.0
         threshold = max(min_threshold, self.thresh)
-        loss_matirx = self.ce_loss(predict, target).contiguous().view(-1, )
+        loss_matrix = F.cross_entropy(predict, target, weight=self.weight.to(input.device),
+                                      ignore_index=self.ignore_index, reduction='none')
+        loss_matirx = loss_matrix.contiguous().view(-1, )
         sort_loss_matirx = loss_matirx[mask][sort_indices]
         select_loss_matrix = sort_loss_matirx[sort_prob < threshold]
         if self.reduction == 'sum' or select_loss_matrix.numel() == 0:

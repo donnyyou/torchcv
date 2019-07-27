@@ -13,16 +13,6 @@ from model.tools.module_helper import ModuleHelper
 from model.seg.loss.loss import BASE_LOSS_DICT
 
 
-LOSS_TYPE = {
-    'ce_loss': {
-        'ce_loss': 1.0
-    },
-    'ohem_ce_loss': {
-        'ce_loss': 1.0
-    }
-}
-
-
 MODEL_CONFIG = {
     'dropout0': 0.1,
     'dropout1': 0.1,
@@ -115,7 +105,7 @@ class DenseASPP(nn.Module):
             )
 
         if 'ohem_ce_loss' in self.valid_loss_dict:
-            loss_dict['ce_loss'] = dict(
+            loss_dict['ohem_ce_loss'] = dict(
                 params=[x, data_dict['labelmap']],
                 type=torch.cuda.LongTensor([BASE_LOSS_DICT['ohem_ce_loss']]),
                 weight=torch.cuda.FloatTensor([self.valid_loss_dict['ohem_ce_loss']])

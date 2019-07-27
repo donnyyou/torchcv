@@ -101,9 +101,9 @@ class FCNSegmentor(object):
                 Log.info('Train Epoch: {0}\tTrain Iteration: {1}\t'
                          'Time {batch_time.sum:.3f}s / {2}iters, ({batch_time.avg:.3f})\t'
                          'Data load {data_time.sum:.3f}s / {2}iters, ({data_time.avg:3f})\n'
-                         'Learning rate = {3}\tLoss = {loss.val:.8f} (ave = {loss.avg:.8f})\n'.format(
+                         'Learning rate = {4}\tLoss = {3}\n'.format(
                          self.runner_state['epoch'], self.runner_state['iters'],
-                         self.configer.get('solver', 'display_iter'),
+                         self.configer.get('solver', 'display_iter'), self.train_losses.info(),
                          RunnerHelper.get_lr(self.optimizer), batch_time=self.batch_time,
                          data_time=self.data_time, loss=self.train_losses))
                 self.batch_time.reset()
@@ -139,9 +139,8 @@ class FCNSegmentor(object):
                 loss_dict = self.loss(out)
                 # Compute the loss of the val batch.
                 out_dict, _ = RunnerHelper.gather(self, out)
-                self.val_losses.update({key: loss.item() for key, loss in loss_dict.items()}, data_dict['img'].size(0))
-
-            self.val_losses.update(loss_dict['loss'].item(), len(DCHelper.tolist(data_dict['meta'])))
+            
+            self.val_losses.update({key: loss.item() for key, loss in loss_dict.items()}, data_dict['img'].size(0))
             self._update_running_score(out_dict['out'], DCHelper.tolist(data_dict['meta']))
 
             # Update the vars of the val phase.
@@ -149,16 +148,15 @@ class FCNSegmentor(object):
             start_time = time.time()
 
         self.runner_state['performance'] = self.seg_running_score.get_mean_iou()
-        self.runner_state['val_loss'] = self.val_losses.avg
+        self.runner_state['val_loss'] = self.val_losses.avg['loss']
         RunnerHelper.save_net(self, self.seg_net,
                               performance=self.seg_running_score.get_mean_iou(),
-                              val_loss=self.val_losses.avg)
+                              val_loss=self.val_losses.avg['loss'])
 
         # Print the log info & reset the states.
         Log.info(
             'Test Time {batch_time.sum:.3f}s, ({batch_time.avg:.3f})\t'
-            'Loss {loss.avg:.8f}\n'.format(
-                batch_time=self.batch_time, loss=self.val_losses))
+            'Loss = {0}\n'.format(self.val_losses.info(), batch_time=self.batch_time))
         Log.info('Mean IOU: {}\n'.format(self.seg_running_score.get_mean_iou()))
         Log.info('Pixel ACC: {}\n'.format(self.seg_running_score.get_pixel_acc()))
         self.batch_time.reset()

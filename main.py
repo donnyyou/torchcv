@@ -77,10 +77,8 @@ if __name__ == "__main__":
                         dest='network.resume_continue', help='Whether to continue training.')
     parser.add_argument('--resume_val', type=str2bool, nargs='?', default=True,
                         dest='network.resume_val', help='Whether to validate during resume.')
-    parser.add_argument('--gathered', type=str2bool, nargs='?', default=True,
-                        dest='network.gathered', help='Whether to gather the output of model.')
-    parser.add_argument('--loss_balance', type=str2bool, nargs='?', default=False,
-                        dest='network.loss_balance', help='Whether to balance GPU usage.')
+    parser.add_argument('--gather', type=str2bool, nargs='?', default=True,
+                        dest='network.gather', help='Whether to gather the output of model.')
 
     # ***********  Params for solver.  **********
     parser.add_argument('--optim_method', default=None, type=str,
@@ -148,6 +146,9 @@ if __name__ == "__main__":
 
     if configer.get('network', 'norm_type') is None:
         configer.update('network.norm_type', 'batchnorm')
+
+    if len(configer.get('gpu')) == 1 or len(range(torch.cuda.device_count())) == 1:
+        configer.update('network.gather', True)
 
     if configer.get('phase') == 'train':
         assert len(configer.get('gpu')) > 1 or 'sync' not in configer.get('network', 'norm_type')

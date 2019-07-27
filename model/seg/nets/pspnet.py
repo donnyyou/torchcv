@@ -14,19 +14,6 @@ from model.tools.module_helper import ModuleHelper
 from model.seg.loss.loss import BASE_LOSS_DICT
 
 
-LOSS_TYPE = {
-    'ce_loss': {
-        'ce_loss': 1.0
-    },
-    'auxce_loss': {
-        'ce_loss': 1.0, 'dsn_loss': 0.4
-    },
-    'auxohemce_loss': {
-        'ohem_ce_loss': 1.0, 'dsn_loss': 0.4
-    },
-}
-
-
 class _ConvBatchNormReluBlock(nn.Module):
     def __init__(self, inplanes, outplanes, kernel_size, stride, padding=1, dilation=1, norm_type=None):
         super(_ConvBatchNormReluBlock, self).__init__()
@@ -106,11 +93,11 @@ class PSPNet(nn.Sequential):
                           mode="bilinear", align_corners=True)
         out_dict = dict(dsn_out=x_dsn, out=x)
         loss_dict = dict()
-        if 'dsn_loss' in self.valid_loss_dict:
-            loss_dict['ce_loss'] = dict(
+        if 'dsn_ce_loss' in self.valid_loss_dict:
+            loss_dict['dsn_ce_loss'] = dict(
                 params=[x, data_dict['labelmap']],
                 type=torch.cuda.LongTensor([BASE_LOSS_DICT['ce_loss']]),
-                weight=torch.cuda.FloatTensor([self.valid_loss_dict['dsn_loss']])
+                weight=torch.cuda.FloatTensor([self.valid_loss_dict['dsn_ce_loss']])
             )
 
         if 'ce_loss' in self.valid_loss_dict:
@@ -121,7 +108,7 @@ class PSPNet(nn.Sequential):
             )
 
         if 'ohem_ce_loss' in self.valid_loss_dict:
-            loss_dict['ce_loss'] = dict(
+            loss_dict['ohem_ce_loss'] = dict(
                 params=[x, data_dict['labelmap']],
                 type=torch.cuda.LongTensor([BASE_LOSS_DICT['ohem_ce_loss']]),
                 weight=torch.cuda.FloatTensor([self.valid_loss_dict['ohem_ce_loss']])

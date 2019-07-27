@@ -41,7 +41,7 @@ class ParallelModel(DataParallel):
         >>> y = net(x)
     """
     def __init__(self, module, device_ids=None, output_device=None, dim=0, gather_=True):
-        super(DataParallelModel, self).__init__(module, device_ids, output_device, dim)
+        super(ParallelModel, self).__init__(module, device_ids, output_device, dim)
         self.gather_ = gather_
 
     def gather(self, outputs, output_device):
@@ -63,7 +63,7 @@ class ParallelCriterion(DataParallel):
         >>> loss = criterion(y, target)
     """
     def __init__(self, module, device_ids=None, output_device=None, dim=0):
-        super(DataParallelCriterion, self).__init__(module, device_ids, output_device, dim)
+        super(ParallelCriterion, self).__init__(module, device_ids, output_device, dim)
 
     def scatter(self, inputs, kwargs, device_ids):
         return scatter_kwargs(inputs, kwargs, device_ids, dim=self.dim)

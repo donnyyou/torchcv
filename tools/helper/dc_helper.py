@@ -6,7 +6,7 @@
 import torch
 import itertools
 
-from exts.tools.parallel import DataContainer
+from exts.tools.parallel.data_container import DataContainer
 
 
 class DCHelper(object):

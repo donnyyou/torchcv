@@ -7,7 +7,7 @@ import os
 import numpy as np
 from torch.utils import data
 
-from exts.tools.parallel import DataContainer
+from exts.tools.parallel.data_container import DataContainer
 from tools.helper.image_helper import ImageHelper
 from tools.util.logger import Logger as Log
 

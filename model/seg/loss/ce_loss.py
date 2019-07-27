@@ -13,15 +13,15 @@ class CELoss(nn.Module):
     def __init__(self, configer=None):
         super(CELoss, self).__init__()
         self.configer = configer
-        weight = self.configer.get('loss.params.ce_weight', default=None)
-        weight = torch.FloatTensor(weight).cuda() if weight is not None else weight
-        reduction = self.configer.get('loss.params.ce_reduction', default='mean')
-        ignore_index = self.configer.get('loss.params.ce_ignore_index', default=-100)
-        self.ce_loss = nn.CrossEntropyLoss(weight=weight, ignore_index=ignore_index, reduction=reduction)
+        weight = self.configer.get('loss.params.ce_loss.weight', default=None)
+        self.weight = torch.FloatTensor(weight) if weight is not None else weight
+        self.reduction = self.configer.get('loss.params.ce_loss.reduction', default='mean')
+        self.ignore_index = self.configer.get('loss.params.ce_loss.ignore_index', default=-100)
 
     def forward(self, input, target):
         target = self._scale_target(target, (input.size(2), input.size(3)))
-        loss = self.ce_loss(input, target)
+        loss = F.cross_entropy(input, target, weight=self.weight.to(input.device),
+                               ignore_index=self.ignore_index, reduction=self.reduction)
         return loss
 
     @staticmethod

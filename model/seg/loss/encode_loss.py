@@ -13,17 +13,11 @@ class EncodeLoss(nn.Module):
     def __init__(self, configer):
         super(EncodeLoss, self).__init__()
         self.configer = configer
-        weight = None
-        if self.configer.exists('loss', 'params') and 'enc_weight' in self.configer.get('loss', 'params'):
-            weight = self.configer.get('loss', 'params')['enc_weight']
-            weight = torch.FloatTensor(weight).cuda()
-
-        reduction = 'mean'
-        if self.configer.exists('loss', 'params') and 'enc_reduction' in self.configer.get('loss', 'params'):
-            reduction = self.configer.get('loss', 'params')['enc_reduction']
-
+        weight = self.configer.get('loss.params.encode_loss.weight', default=None)
+        weight = torch.FloatTensor(weight).cuda() if weight is not None else weight
+        reduction = self.configer.get('loss.params.encode_loss.reduction', default='mean')
         self.bce_loss = nn.BCELoss(weight, reduction=reduction)
-        self.grid_size = self.configer.get('loss', 'params')['enc_grid_size']
+        self.grid_size = self.configer.get('loss.params.encode_loss.grid_size', default=[1, 1])
 
     def forward(self, preds, targets):
         if len(targets.size()) == 2:

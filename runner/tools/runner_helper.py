@@ -29,16 +29,13 @@ class RunnerHelper(object):
 
     @staticmethod
     def _make_parallel(runner, net):
-        if len(runner.configer.get('gpu')) == 1 or len(range(torch.cuda.device_count())) == 1:
-            runner.configer.update(['network', 'gathered'], True)
-
         parallel_type = runner.configer.get('network.parallel', default='dp')
         if parallel_type == 'dp':
             from exts.tools.parallel.data_parallel import ParallelModel
-            return ParallelModel(net, gather_=runner.configer.get('network', 'gathered'))
+            return ParallelModel(net, gather_=runner.configer.get('network', 'gather'))
         elif parallel_type == 'ddp':
             from exts.tools.parallel.data_parallel import DistributeParallelModel
-            return DistributeParallelModel(net, gather_=runner.configer.get('network', 'gathered'))
+            return DistributeParallelModel(net, gather_=runner.configer.get('network', 'gather'))
         else:
             raise ValueError('Not support DataParallel: {}'.format(parallel_type))
 
@@ -209,7 +206,7 @@ class RunnerHelper(object):
         Gathers tensors from different GPUs on a specified device
           (-1 means the CPU).
         """
-        if not runner.configer.get('network', 'gathered'):
+        if not runner.configer.get('network', 'gather'):
             if target_device is None:
                 target_device = list(range(torch.cuda.device_count()))[0]
 

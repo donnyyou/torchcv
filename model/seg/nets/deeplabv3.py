@@ -13,19 +13,6 @@ from model.tools.module_helper import ModuleHelper
 from model.seg.loss.loss import BASE_LOSS_DICT
 
 
-LOSS_TYPE = {
-    'ce_loss': {
-        'ce_loss': 1.0
-    },
-    'auxce_loss': {
-        'ce_loss': 1.0, 'dsn_loss': 0.4
-    },
-    'auxohemce_loss': {
-        'ohem_ce_loss': 1.0, 'dsn_loss': 0.4
-    },
-}
-
-
 class ASPPModule(nn.Module):
     """
     Reference:
@@ -90,7 +77,7 @@ class DeepLabV3(nn.Module):
             nn.Dropout2d(0.1),
             nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True)
         )
-        self.valid_loss_dict = LOSS_TYPE[configer.get('loss', 'loss_type')]
+        self.valid_loss_dict = configer.get('loss', 'loss_weights', configer.get('loss.loss_type'))
 
     def forward(self, data_dict):
         x = self.backbone(data_dict['img'])
@@ -102,11 +89,11 @@ class DeepLabV3(nn.Module):
                           mode="bilinear", align_corners=True)
         out_dict = dict(dsn_out=x_dsn, out=x)
         loss_dict = dict()
-        if 'dsn_loss' in self.valid_loss_dict:
-            loss_dict['ce_loss'] = dict(
+        if 'dsn_ce_loss' in self.valid_loss_dict:
+            loss_dict['dsn_ce_loss'] = dict(
                 params=[x, data_dict['labelmap']],
                 type=torch.cuda.LongTensor([BASE_LOSS_DICT['ce_loss']]),
-                weight=torch.cuda.FloatTensor([self.valid_loss_dict['dsn_loss']])
+                weight=torch.cuda.FloatTensor([self.valid_loss_dict['dsn_ce_loss']])
             )
 
         if 'ce_loss' in self.valid_loss_dict:
@@ -117,7 +104,7 @@ class DeepLabV3(nn.Module):
             )
 
         if 'ohem_ce_loss' in self.valid_loss_dict:
-            loss_dict['ce_loss'] = dict(
+            loss_dict['ohem_ce_loss'] = dict(
                 params=[x, data_dict['labelmap']],
                 type=torch.cuda.LongTensor([BASE_LOSS_DICT['ohem_ce_loss']]),
                 weight=torch.cuda.FloatTensor([self.valid_loss_dict['ohem_ce_loss']])

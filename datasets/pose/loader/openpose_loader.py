@@ -9,7 +9,7 @@ import torch
 import numpy as np
 import torch.utils.data as data
 
-from exts.tools.parallel import DataContainer
+from exts.tools.parallel.data_container import DataContainer
 from datasets.pose.utils.heatmap_generator import HeatmapGenerator
 from datasets.pose.utils.paf_generator import PafGenerator
 from tools.helper.json_helper import JsonHelper
