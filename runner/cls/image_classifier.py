@@ -10,11 +10,11 @@ import torch
 from datasets.cls.data_loader import DataLoader
 from runner.tools.runner_helper import RunnerHelper
 from runner.tools.trainer import Trainer
-from models.cls.model_manager import ModelManager
-from utils.helpers.dc_helper import DCHelper
-from utils.tools.average_meter import AverageMeter
-from utils.tools.logger import Logger as Log
-from metrics.cls.cls_running_score import ClsRunningScore
+from model.cls.model_manager import ModelManager
+from util.helpers.dc_helper import DCHelper
+from util.tools.average_meter import AverageMeter
+from util.tools.logger import Logger as Log
+from metric.cls.cls_running_score import ClsRunningScore
 
 
 class ImageClassifier(object):

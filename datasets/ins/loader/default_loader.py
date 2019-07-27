@@ -8,9 +8,9 @@ import numpy as np
 from torch.utils import data
 
 from exts.tools.parallel import DataContainer
-from utils.helpers.image_helper import ImageHelper
-from utils.helpers.json_helper import JsonHelper
-from utils.tools.logger import Logger as Log
+from util.helpers.image_helper import ImageHelper
+from util.helpers.json_helper import JsonHelper
+from util.tools.logger import Logger as Log
 
 
 class DefaultLoader(data.Dataset):

@@ -13,11 +13,11 @@ from sklearn.metrics import roc_curve
 
 from runner.tools.blob_helper import BlobHelper
 from runner.tools.runner_helper import RunnerHelper
-from models.gan.model_manager import ModelManager
+from model.gan.model_manager import ModelManager
 from datasets.test.test_data_loader import TestDataLoader
-from utils.helpers.dc_helper import DCHelper
-from utils.helpers.image_helper import ImageHelper
-from utils.tools.logger import Logger as Log
+from util.helpers.dc_helper import DCHelper
+from util.helpers.image_helper import ImageHelper
+from util.tools.logger import Logger as Log
 
 
 class FaceGANTest(object):
@@ -113,7 +113,7 @@ class FaceGANTest(object):
         # print('score.shape =', score.shape)
         # print('probe_names =', np.array(probe_names).shape)
         # print('gallery_names =', np.array(gallery_names).shape)
-        print('===> compute metrics')
+        print('===> compute metric')
         # print(probe_names[1], type(probe_names[1]))
         # exit()
         label = np.zeros_like(score)

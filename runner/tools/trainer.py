@@ -6,7 +6,7 @@
 
 from torch.optim import SGD, Adam, lr_scheduler
 
-from utils.tools.logger import Logger as Log
+from util.tools.logger import Logger as Log
 
 
 class Trainer(object):

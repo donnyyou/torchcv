@@ -10,10 +10,10 @@ import torch
 from datasets.gan.data_loader import DataLoader
 from runner.tools.runner_helper import RunnerHelper
 from runner.tools.trainer import Trainer
-from models.gan.model_manager import ModelManager
-from utils.tools.average_meter import AverageMeter
-from utils.helpers.dc_helper import DCHelper
-from utils.tools.logger import Logger as Log
+from model.gan.model_manager import ModelManager
+from util.tools.average_meter import AverageMeter
+from util.helpers.dc_helper import DCHelper
+from util.tools.logger import Logger as Log
 
 
 class ImageTranslator(object):

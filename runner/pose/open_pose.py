@@ -10,11 +10,11 @@ import torch
 from datasets.pose.data_loader import DataLoader
 from runner.tools.runner_helper import RunnerHelper
 from runner.tools.trainer import Trainer
-from models.pose.model_manager import ModelManager
-from utils.helpers.dc_helper import DCHelper
-from utils.tools.average_meter import AverageMeter
-from utils.tools.logger import Logger as Log
-from utils.visualizer.pose_visualizer import PoseVisualizer
+from model.pose.model_manager import ModelManager
+from util.helpers.dc_helper import DCHelper
+from util.tools.average_meter import AverageMeter
+from util.tools.logger import Logger as Log
+from util.visualizer.pose_visualizer import PoseVisualizer
 
 
 class OpenPose(object):

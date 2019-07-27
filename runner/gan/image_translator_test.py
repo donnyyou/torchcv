@@ -9,11 +9,11 @@ import torch
 
 from runner.tools.blob_helper import BlobHelper
 from runner.tools.runner_helper import RunnerHelper
-from models.gan.model_manager import ModelManager
+from model.gan.model_manager import ModelManager
 from datasets.test.test_data_loader import TestDataLoader
-from utils.helpers.dc_helper import DCHelper
-from utils.helpers.image_helper import ImageHelper
-from utils.tools.logger import Logger as Log
+from util.helpers.dc_helper import DCHelper
+from util.helpers.image_helper import ImageHelper
+from util.tools.logger import Logger as Log
 
 
 class ImageTranslatorTest(object):

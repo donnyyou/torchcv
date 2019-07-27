@@ -14,11 +14,11 @@ from PIL import Image
 from datasets.cls.data_loader import DataLoader
 from runner.tools.blob_helper import BlobHelper
 from runner.tools.runner_helper import RunnerHelper
-from models.cls.model_manager import ModelManager
-from utils.helpers.image_helper import ImageHelper
-from utils.helpers.json_helper import JsonHelper
-from utils.tools.logger import Logger as Log
-from utils.parser.cls_parser import ClsParser
+from model.cls.model_manager import ModelManager
+from util.helpers.image_helper import ImageHelper
+from util.helpers.json_helper import JsonHelper
+from util.tools.logger import Logger as Log
+from util.parser.cls_parser import ClsParser
 
 
 class ImageClassifierTest(object):

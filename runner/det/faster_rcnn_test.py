@@ -11,18 +11,18 @@ import torch.nn.functional as F
 from datasets.test.test_data_loader import TestDataLoader
 from runner.tools.blob_helper import BlobHelper
 from runner.tools.runner_helper import RunnerHelper
-from models.det.model_manager import ModelManager
-from utils.helpers.det_helper import DetHelper
-from utils.helpers.image_helper import ImageHelper
-from utils.helpers.json_helper import JsonHelper
-from models.det.layers.fr_priorbox_layer import FRPriorBoxLayer
-from models.det.layers.fr_roi_generator import FRROIGenerator
-from models.det.layers.fr_roi_sampler import FRROISampler
-from models.det.layers.rpn_target_assigner import RPNTargetAssigner
-from utils.tools.logger import Logger as Log
-from utils.parser.det_parser import DetParser
-from utils.visualizer.det_visualizer import DetVisualizer
-from utils.helpers.dc_helper import DCHelper
+from model.det.model_manager import ModelManager
+from util.helpers.det_helper import DetHelper
+from util.helpers.image_helper import ImageHelper
+from util.helpers.json_helper import JsonHelper
+from model.det.layers.fr_priorbox_layer import FRPriorBoxLayer
+from model.det.layers.fr_roi_generator import FRROIGenerator
+from model.det.layers.fr_roi_sampler import FRROISampler
+from model.det.layers.rpn_target_assigner import RPNTargetAssigner
+from util.tools.logger import Logger as Log
+from util.parser.det_parser import DetParser
+from util.visualizer.det_visualizer import DetVisualizer
+from util.helpers.dc_helper import DCHelper
 
 
 class FastRCNNTest(object):

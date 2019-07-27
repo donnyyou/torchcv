@@ -12,7 +12,7 @@ import datasets.tools.pil_aug_transforms as pil_aug_trans
 import datasets.tools.cv2_aug_transforms as cv2_aug_trans
 import datasets.tools.transforms as trans
 from datasets.tools.collate import collate
-from utils.tools.logger import Logger as Log
+from util.tools.logger import Logger as Log
 
 
 class DataLoader(object):

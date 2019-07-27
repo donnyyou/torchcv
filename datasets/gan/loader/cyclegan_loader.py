@@ -9,7 +9,7 @@ import random
 import torch.utils.data as data
 
 from exts.tools.parallel import DataContainer
-from utils.helpers.image_helper import ImageHelper
+from util.helpers.image_helper import ImageHelper
 
 
 class CycleGANLoader(data.Dataset):

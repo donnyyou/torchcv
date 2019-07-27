@@ -12,9 +12,9 @@ import torch.utils.data as data
 from exts.tools.parallel import DataContainer
 from datasets.pose.utils.heatmap_generator import HeatmapGenerator
 from datasets.pose.utils.paf_generator import PafGenerator
-from utils.helpers.json_helper import JsonHelper
-from utils.helpers.image_helper import ImageHelper
-from utils.tools.logger import Logger as Log
+from util.helpers.json_helper import JsonHelper
+from util.helpers.image_helper import ImageHelper
+from util.tools.logger import Logger as Log
 
 
 class OpenPoseLoader(data.Dataset):

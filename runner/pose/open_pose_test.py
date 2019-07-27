@@ -14,12 +14,12 @@ from scipy.ndimage.filters import gaussian_filter
 from datasets.pose.data_loader import DataLoader
 from runner.tools.blob_helper import BlobHelper
 from runner.tools.runner_helper import RunnerHelper
-from models.pose.model_manager import ModelManager
-from utils.helpers.image_helper import ImageHelper
-from utils.helpers.json_helper import JsonHelper
-from utils.tools.logger import Logger as Log
-from utils.parser.pose_parser import PoseParser
-from utils.visualizer.pose_visualizer import PoseVisualizer
+from model.pose.model_manager import ModelManager
+from util.helpers.image_helper import ImageHelper
+from util.helpers.json_helper import JsonHelper
+from util.tools.logger import Logger as Log
+from util.parser.pose_parser import PoseParser
+from util.visualizer.pose_visualizer import PoseVisualizer
 
 
 class OpenPoseTest(object):

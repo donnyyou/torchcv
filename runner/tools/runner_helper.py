@@ -11,7 +11,7 @@ import torch
 import torch.nn as nn
 from torch.nn.parallel.scatter_gather import gather as torch_gather
 
-from utils.tools.logger import Logger as Log
+from util.tools.logger import Logger as Log
 
 
 class RunnerHelper(object):
@@ -174,7 +174,7 @@ class RunnerHelper(object):
                 m.eval()
 
             if norm_type is not None:
-                from models.tools.module_helper import ModuleHelper
+                from model.tools.module_helper import ModuleHelper
                 if isinstance(m, ModuleHelper.BatchNorm2d(norm_type=norm_type, ret_cls=True)) \
                         or isinstance(m, ModuleHelper.BatchNorm1d(norm_type=norm_type, ret_cls=True)) \
                         or isinstance(m, ModuleHelper.BatchNorm3d(norm_type=norm_type, ret_cls=True)):

@@ -13,10 +13,10 @@ from scipy.ndimage.filters import gaussian_filter
 from datasets.pose.data_loader import DataLoader
 from runner.tools.blob_helper import BlobHelper
 from runner.tools.runner_helper import RunnerHelper
-from models.pose.model_manager import ModelManager
-from utils.helpers.image_helper import ImageHelper
-from utils.tools.logger import Logger as Log
-from utils.visualizer.pose_visualizer import PoseVisualizer
+from model.pose.model_manager import ModelManager
+from util.helpers.image_helper import ImageHelper
+from util.tools.logger import Logger as Log
+from util.visualizer.pose_visualizer import PoseVisualizer
 
 
 class ConvPoseMachineTest(object):

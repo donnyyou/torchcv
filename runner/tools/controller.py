@@ -6,8 +6,8 @@
 
 import os
 
-from utils.helpers.file_helper import FileHelper
-from utils.tools.logger import Logger as Log
+from util.helpers.file_helper import FileHelper
+from util.tools.logger import Logger as Log
 
 
 class Controller(object):

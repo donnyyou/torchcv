@@ -8,9 +8,9 @@ import os
 import torch.utils.data as data
 
 from exts.tools.parallel import DataContainer
-from utils.helpers.file_helper import FileHelper
-from utils.helpers.image_helper import ImageHelper
-from utils.tools.logger import Logger as Log
+from util.helpers.file_helper import FileHelper
+from util.helpers.image_helper import ImageHelper
+from util.tools.logger import Logger as Log
 
 
 class DefaultLoader(data.Dataset):

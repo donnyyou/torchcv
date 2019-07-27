@@ -11,12 +11,12 @@ from datasets.det.data_loader import DataLoader
 from runner.det.yolov3_test import YOLOv3Test
 from runner.tools.runner_helper import RunnerHelper
 from runner.tools.trainer import Trainer
-from models.det.model_manager import ModelManager
-from utils.tools.average_meter import AverageMeter
-from utils.tools.logger import Logger as Log
-from metrics.det.det_running_score import DetRunningScore
-from utils.visualizer.det_visualizer import DetVisualizer
-from utils.helpers.dc_helper import DCHelper
+from model.det.model_manager import ModelManager
+from util.tools.average_meter import AverageMeter
+from util.tools.logger import Logger as Log
+from metric.det.det_running_score import DetRunningScore
+from util.visualizer.det_visualizer import DetVisualizer
+from util.helpers.dc_helper import DCHelper
 
 
 class YOLOv3(object):

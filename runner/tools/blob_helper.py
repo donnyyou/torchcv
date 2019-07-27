@@ -9,9 +9,9 @@ import numpy as np
 import torch
 
 from datasets.tools.transforms import DeNormalize, ToTensor, Normalize
-from utils.helpers.image_helper import ImageHelper
-from utils.helpers.dc_helper import DCHelper
-from utils.helpers.tensor_helper import TensorHelper
+from util.helpers.image_helper import ImageHelper
+from util.helpers.dc_helper import DCHelper
+from util.helpers.tensor_helper import TensorHelper
 
 
 class BlobHelper(object):
