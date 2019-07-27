@@ -10,6 +10,17 @@ import torch.nn.functional as F
 
 from model.backbones.backbone_selector import BackboneSelector
 from model.tools.module_helper import ModuleHelper
+from model.seg.loss.loss import BASE_LOSS_DICT
+
+
+LOSS_TYPE = {
+    'ce_loss': {
+        'ce_loss': 1.0
+    },
+    'ohem_ce_loss': {
+        'ce_loss': 1.0
+    }
+}
 
 
 MODEL_CONFIG = {
@@ -69,6 +80,7 @@ class DenseASPP(nn.Module):
             nn.Dropout2d(p=dropout1),
             nn.Conv2d(num_features, self.configer.get('data', 'num_classes'), kernel_size=1, padding=0)
         )
+        self.valid_loss_dict = LOSS_TYPE[configer.get('loss', 'loss_type')]
 
     def forward(self, data_dict):
         x = self.backbone(data_dict['img'])
@@ -93,7 +105,22 @@ class DenseASPP(nn.Module):
 
         x = F.interpolate(x, size=(data_dict['img'].size(2), data_dict['img'].size(3)),
                           mode="bilinear", align_corners=True)
-        return dict(out=out)
+        out_dict = dict(out=x)
+        loss_dict = dict()
+        if 'ce_loss' in self.valid_loss_dict:
+            loss_dict['ce_loss'] = dict(
+                params=[x, data_dict['labelmap']],
+                type=torch.cuda.LongTensor([BASE_LOSS_DICT['ce_loss']]),
+                weight=torch.cuda.FloatTensor([self.valid_loss_dict['ce_loss']])
+            )
+
+        if 'ohem_ce_loss' in self.valid_loss_dict:
+            loss_dict['ce_loss'] = dict(
+                params=[x, data_dict['labelmap']],
+                type=torch.cuda.LongTensor([BASE_LOSS_DICT['ohem_ce_loss']]),
+                weight=torch.cuda.FloatTensor([self.valid_loss_dict['ohem_ce_loss']])
+            )
+        return out_dict, loss_dict
 
 
 class _DenseAsppBlock(nn.Sequential):
