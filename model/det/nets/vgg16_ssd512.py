@@ -84,6 +84,7 @@ def vgg_backbone(configer):
 class Vgg16SSD512(nn.Module):
     def __init__(self, configer):
         super(Vgg16SSD512, self).__init__()
+        self.configer = configer
         self.backbone = vgg_backbone(configer).named_modules()
         cnt = 0
         self.sub_backbone_1 = nn.ModuleList()

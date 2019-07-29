@@ -44,6 +44,7 @@ class SingleShotDetector(object):
         self._init_model()
 
     def _init_model(self):
+        # torch.multiprocessing.set_sharing_strategy('file_system')
         self.det_net = self.det_model_manager.object_detector()
         self.det_net = RunnerHelper.load_net(self, self.det_net)
         self.optimizer, self.scheduler = Trainer.init(self._get_parameters(), self.configer.get('solver'))
@@ -82,8 +83,9 @@ class SingleShotDetector(object):
                            solver_dict=self.configer.get('solver'))
             self.data_time.update(time.time() - start_time)
             # Forward pass.
-            out_dict = self.det_net(data_dict)
-            loss = out_dict['loss'].mean()
+            out = self.det_net(data_dict)
+            loss_dict = self.det_loss(out)
+            loss = loss_dict['loss']
             self.train_losses.update(loss.item(), len(DCHelper.tolist(data_dict['meta'])))
 
             self.optimizer.zero_grad()
@@ -127,9 +129,10 @@ class SingleShotDetector(object):
         with torch.no_grad():
             for j, data_dict in enumerate(self.val_loader):
                 # Forward pass.
-                out_dict = self.det_net(data_dict)
-
-                loss = out_dict['loss'].mean()
+                out = self.det_net(data_dict)
+                loss_dict = self.det_loss(out)
+                loss = loss_dict['loss']
+                out_dict, _ = RunnerHelper.gather(self, out)
                 # Compute the loss of the val batch.
                 self.val_losses.update(loss.item(), len(DCHelper.tolist(data_dict['meta'])))
 

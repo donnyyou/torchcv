@@ -68,7 +68,7 @@ class MultiBoxLoss(nn.Module):
         y = flag * (diff ** 2) * 0.5 + (1 - flag) * (abs_diff - 0.5)
         return y.sum()
 
-    def forward(self, loc_targets, conf_targets, loc_preds, conf_preds):
+    def forward(self, loc_preds, conf_preds, loc_targets, conf_targets):
         """Compute loss between (loc_preds, loc_targets) and (conf_preds, conf_targets).
 
         Args:
