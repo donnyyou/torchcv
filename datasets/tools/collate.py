@@ -11,9 +11,9 @@ import torch.nn.functional as F
 from torch.utils.data.dataloader import default_collate
 from torch._six import string_classes, int_classes
 
-from extensions.tools.parallel import DataContainer
-from utils.helpers.tensor_helper import TensorHelper
-from utils.tools.logger import Logger as Log
+from exts.tools.parallel.data_container import DataContainer
+from tools.helper.tensor_helper import TensorHelper
+from tools.util.logger import Logger as Log
 
 
 def stack(batch, data_key=None, device_ids=None):

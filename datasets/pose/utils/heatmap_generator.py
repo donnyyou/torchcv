@@ -6,7 +6,7 @@
 import numpy as np
 import torch
 
-from utils.tools.logger import Logger as Log
+from tools.util.logger import Logger as Log
 
 
 class HeatmapGenerator(object):

@@ -8,9 +8,9 @@ from skimage import io
 # https://github.com/1adrianb/face-alignment pip install face_alignment
 import face_alignment as fa
 
-from utils.helpers.file_helper import FileHelper
-from utils.helpers.image_helper import ImageHelper
-from utils.tools.logger import Logger as Log
+from tools.helper.file_helper import FileHelper
+from tools.helper.image_helper import ImageHelper
+from tools.util.logger import Logger as Log
 
 
 class FaceAlignmentor(object):

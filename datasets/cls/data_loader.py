@@ -15,7 +15,7 @@ import datasets.tools.cv2_aug_transforms as cv2_aug_trans
 import datasets.tools.transforms as trans
 from datasets.cls.loader.default_loader import DefaultLoader
 from datasets.tools.collate import collate
-from utils.tools.logger import Logger as Log
+from tools.util.logger import Logger as Log
 
 
 class DataLoader(object):
@@ -44,7 +44,7 @@ class DataLoader(object):
             trans.Normalize(**self.configer.get('data', 'normalize')), ])
 
     def get_trainloader(self):
-        if not self.configer.exists('train', 'loader') or self.configer.get('train', 'loader') == 'default':
+        if self.configer.get('train.loader', default=None) in [None, 'default']:
             trainloader = data.DataLoader(
                 DefaultLoader(root_dir=self.configer.get('data', 'data_dir'), dataset='train',
                               aug_transform=self.aug_train_transform,
@@ -65,7 +65,7 @@ class DataLoader(object):
 
     def get_valloader(self, dataset=None):
         dataset = 'val' if dataset is None else dataset
-        if not self.configer.exists('val', 'loader') or self.configer.get('val', 'loader') == 'default':
+        if self.configer.get('val.loader', default=None) in [None, 'default']:
             valloader = data.DataLoader(
                 DefaultLoader(root_dir=self.configer.get('data', 'data_dir'), dataset=dataset,
                               aug_transform=self.aug_val_transform,

@@ -7,10 +7,10 @@
 import os
 import torch.utils.data as data
 
-from extensions.tools.parallel import DataContainer
-from utils.helpers.file_helper import FileHelper
-from utils.helpers.image_helper import ImageHelper
-from utils.tools.logger import Logger as Log
+from exts.tools.parallel.data_container import DataContainer
+from tools.helper.file_helper import FileHelper
+from tools.helper.image_helper import ImageHelper
+from tools.util.logger import Logger as Log
 
 
 class DefaultLoader(data.Dataset):

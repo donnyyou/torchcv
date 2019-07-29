@@ -7,9 +7,9 @@ import os
 import numpy as np
 from torch.utils import data
 
-from extensions.tools.parallel import DataContainer
-from utils.helpers.image_helper import ImageHelper
-from utils.tools.logger import Logger as Log
+from exts.tools.parallel.data_container import DataContainer
+from tools.helper.image_helper import ImageHelper
+from tools.util.logger import Logger as Log
 
 
 class DefaultLoader(data.Dataset):
@@ -31,10 +31,10 @@ class DefaultLoader(data.Dataset):
         img_size = ImageHelper.get_size(img)
         labelmap = ImageHelper.read_image(self.label_list[index],
                                           tool=self.configer.get('data', 'image_tool'), mode='P')
-        if self.configer.exists('data', 'label_list'):
+        if self.configer.get('data.label_list', default=None):
             labelmap = self._encode_label(labelmap)
 
-        if self.configer.exists('data', 'reduce_zero_label'):
+        if self.configer.get('data.reduce_zero_label', default=None):
             labelmap = self._reduce_zero_label(labelmap)
 
         ori_target = ImageHelper.to_np(labelmap)

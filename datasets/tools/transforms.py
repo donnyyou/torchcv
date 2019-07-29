@@ -7,7 +7,7 @@ import numpy as np
 import torch
 from PIL import Image
 
-from utils.helpers.image_helper import ImageHelper
+from tools.helper.image_helper import ImageHelper
 
 
 class Normalize(object):

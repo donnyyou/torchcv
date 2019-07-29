@@ -8,8 +8,8 @@ import os
 import random
 import torch.utils.data as data
 
-from extensions.tools.parallel import DataContainer
-from utils.helpers.image_helper import ImageHelper
+from exts.tools.parallel.data_container import DataContainer
+from tools.helper.image_helper import ImageHelper
 
 
 class CycleGANLoader(data.Dataset):
