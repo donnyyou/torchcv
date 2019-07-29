@@ -82,6 +82,7 @@ class FCNSegmentor(object):
             self.data_time.update(time.time() - start_time)
 
             # Forward pass.
+            data_dict = RunnerHelper.to_device(self, data_dict)
             out = self.seg_net(data_dict)
             # Compute the loss of the train batch & backward.
             loss_dict = self.loss(out)
@@ -132,7 +133,7 @@ class FCNSegmentor(object):
 
         data_loader = self.val_loader if data_loader is None else data_loader
         for j, data_dict in enumerate(data_loader):
-
+            data_dict = RunnerHelper.to_device(self, data_dict)
             with torch.no_grad():
                 # Forward pass.
                 out = self.seg_net(data_dict)

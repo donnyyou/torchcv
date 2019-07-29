@@ -29,7 +29,7 @@ fi
 
 
 if [[ "$1"x == "train"x ]]; then
-  ${PYTHON} -u main.py --config_file ${CONFIG_FILE} --drop_last y --phase train --gather n \
+  ${PYTHON} -u main.py --config_file ${CONFIG_FILE} --drop_last y --phase train --gather n --workers 16 \
                        --backbone ${BACKBONE} --model_name ${MODEL_NAME} --gpu 0 1 2 3 \
                        --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --max_iters ${MAX_ITERS} \
                        --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL}  2>&1 | tee ${LOG_FILE}

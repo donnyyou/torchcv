@@ -69,10 +69,10 @@ class FCNSegmentorTest(object):
                 ImageHelper.save(image_canvas,
                                  save_path=os.path.join(out_dir, 'vis/{}.png'.format(meta_list[i]['filename'])))
 
-                if self.configer.exists('data', 'label_list'):
+                if self.configer.get('data.label_list', default=None) is not None:
                     label_img = self.__relabel(label_img)
 
-                if self.configer.exists('data', 'reduce_zero_label') and self.configer.get('data', 'reduce_zero_label'):
+                if self.configer.get('data.reduce_zero_label', default=False):
                     label_img = label_img + 1
                     label_img = label_img.astype(np.uint8)
 

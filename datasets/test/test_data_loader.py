@@ -34,7 +34,7 @@ class TestDataLoader(object):
             Normalize(**self.configer.get('data', 'normalize')), ])
 
     def get_testloader(self, test_dir=None, list_path=None, json_path=None):
-        if not self.configer.exists('test', 'loader') or self.configer.get('test', 'loader') == 'default':
+        if self.configer.get('test.loader', default=None) in [None, 'default']:
             test_dir = test_dir if test_dir is not None else self.configer.get('test', 'test_dir')
             testloader = data.DataLoader(
                 DefaultLoader(test_dir=test_dir,

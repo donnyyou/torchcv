@@ -30,7 +30,7 @@ class BlobHelper(object):
             if flip:
                 image = image.flip([2])
 
-            if self.configer.exists('test', 'fit_stride'):
+            if self.configer.get('test.fit_stride', default=0) > 0:
                 stride = self.configer.get('test', 'fit_stride')
 
                 pad_w = 0 if (border_hw[1] % stride == 0) else stride - (border_hw[1] % stride)  # right

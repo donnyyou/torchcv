@@ -24,12 +24,6 @@ class ModuleHelper(object):
                 nn.BatchNorm2d(num_features, **kwargs),
                 nn.ReLU()
             )
-        elif norm_type == 'sync_batchnorm':
-            from exts.ops.sync_bn.syncbn import BatchNorm2d
-            return nn.Sequential(
-                BatchNorm2d(num_features, **kwargs),
-                nn.ReLU()
-            )
         elif norm_type == 'encsync_batchnorm':
             from encoding.nn import BatchNorm2d
             return nn.Sequential(
@@ -41,9 +35,6 @@ class ModuleHelper(object):
                 nn.InstanceNorm2d(num_features, **kwargs),
                 nn.ReLU()
             )
-        # elif bn_type == 'inplace_abn':
-        #    from extensions.ops.inplace_abn.bn import InPlaceABNSync
-        #    return InPlaceABNSync(num_features, **kwargs)
         else:
             Log.error('Not support BN type: {}.'.format(norm_type))
             exit(1)
@@ -52,10 +43,6 @@ class ModuleHelper(object):
     def BatchNorm3d(norm_type=None, ret_cls=False):
         if norm_type == 'batchnorm':
             return nn.BatchNorm3d
-
-        elif norm_type == 'sync_batchnorm':
-            from exts.ops.sync_bn.syncbn import BatchNorm3d
-            return BatchNorm3d
 
         elif norm_type == 'encsync_batchnorm':
             from encoding.nn import BatchNorm3d
@@ -79,10 +66,6 @@ class ModuleHelper(object):
         if norm_type == 'batchnorm':
             return nn.BatchNorm2d
 
-        elif norm_type == 'sync_batchnorm':
-            from exts.ops.sync_bn.syncbn import BatchNorm2d
-            return BatchNorm2d
-
         elif norm_type == 'encsync_batchnorm':
             from encoding.nn import BatchNorm2d
             return BatchNorm2d
@@ -105,10 +88,6 @@ class ModuleHelper(object):
         if norm_type == 'batchnorm':
             return nn.BatchNorm1d
 
-        elif norm_type == 'sync_batchnorm':
-            from exts.ops.sync_bn.syncbn import BatchNorm1d
-            return BatchNorm1d
-
         elif norm_type == 'encsync_batchnorm':
             from encoding.nn import BatchNorm1d
             return BatchNorm1d
@@ -127,7 +106,7 @@ class ModuleHelper(object):
             exit(1)
 
     @staticmethod
-    def load_model(model, pretrained=None, all_match=True):
+    def load_model(model, pretrained=None, all_match=True, map_location='cpu'):
         if pretrained is None:
             return model
 
@@ -137,7 +116,7 @@ class ModuleHelper(object):
 
         Log.info('Loading pretrained model:{}'.format(pretrained))
         if all_match:
-            pretrained_dict = torch.load(pretrained)
+            pretrained_dict = torch.load(pretrained, map_location=map_location)
             model_dict = model.state_dict()
             load_dict = dict()
             for k, v in pretrained_dict.items():
@@ -146,7 +125,6 @@ class ModuleHelper(object):
                 else:
                     load_dict[k] = v
 
-            # load_dict = {k: v for k, v in pretrained_dict.items() if 'resinit.{}'.format(k) not in model_dict}
             model.load_state_dict(load_dict)
 
         else:
@@ -161,7 +139,7 @@ class ModuleHelper(object):
 
     @staticmethod
     def load_url(url, map_location=None):
-        model_dir = os.path.join('~', '.PyTorchCV', 'model')
+        model_dir = os.path.join('~', '.TorchCV', 'model')
         if not os.path.exists(model_dir):
             os.makedirs(model_dir)
 

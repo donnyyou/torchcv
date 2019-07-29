@@ -67,6 +67,8 @@ if __name__ == "__main__":
                         dest='network.backbone', help='The base network of model.')
     parser.add_argument('--norm_type', default=None, type=str,
                         dest='network.norm_type', help='The BN type of the network.')
+    parser.add_argument('--syncbn',  type=str2bool, nargs='?', default=False,
+                        dest='network.syncbn', help='Whether to sync BN.')
     parser.add_argument('--pretrained', type=str, default=None,
                         dest='network.pretrained', help='The path to pretrained model.')
     parser.add_argument('--resume', default=None, type=str,
@@ -79,6 +81,8 @@ if __name__ == "__main__":
                         dest='network.resume_val', help='Whether to validate during resume.')
     parser.add_argument('--gather', type=str2bool, nargs='?', default=True,
                         dest='network.gather', help='Whether to gather the output of model.')
+    parser.add_argument('--distributed', type=str2bool, nargs='?', default=False,
+                        dest='network.distributed', help='Whether to gather the output of model.')
 
     # ***********  Params for solver.  **********
     parser.add_argument('--optim_method', default=None, type=str,
@@ -127,27 +131,28 @@ if __name__ == "__main__":
     # ***********  Params for env.  **********
     parser.add_argument('--seed', default=None, type=int, help='manual seed')
     parser.add_argument('--cudnn', type=str2bool, nargs='?', default=True, help='Use CUDNN.')
+    parser.add_argument("--local_rank", default=0, type=int)
 
-    args_parser = parser.parse_args()
+    args = parser.parse_args()
+    configer = Configer(args_parser=args)
 
-    if args_parser.seed is not None:
-        random.seed(args_parser.seed)
-        torch.manual_seed(args_parser.seed)
+    if args.seed is not None:
+        random.seed(args.seed)
+        torch.manual_seed(args.seed)
 
     cudnn.enabled = True
-    cudnn.benchmark = args_parser.cudnn
+    cudnn.benchmark = args.cudnn
 
-    configer = Configer(args_parser=args_parser)
     abs_data_dir = os.path.expanduser(configer.get('data', 'data_dir'))
     configer.update('data.data_dir', abs_data_dir)
 
-    if configer.get('gpu') is not None:
+    if configer.get('gpu') is not None and not configer.get('network.distributed', default=False):
         os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(str(gpu_id) for gpu_id in configer.get('gpu'))
 
     if configer.get('network', 'norm_type') is None:
         configer.update('network.norm_type', 'batchnorm')
 
-    if len(configer.get('gpu')) == 1 or len(range(torch.cuda.device_count())) == 1:
+    if torch.cuda.device_count() <= 1 or configer.get('network.distributed', default=False):
         configer.update('network.gather', True)
 
     if configer.get('phase') == 'train':
@@ -171,6 +176,7 @@ if __name__ == "__main__":
 
     Log.info('BN Type is {}.'.format(configer.get('network', 'norm_type')))
     Log.info('Config Dict: {}'.format(json.dumps(configer.to_dict(), indent=2)))
+
     runner_selector = RunnerSelector(configer)
     runner = None
     if configer.get('task') == 'pose':
@@ -186,7 +192,6 @@ if __name__ == "__main__":
     else:
         Log.error('Task: {} is not valid.'.format(configer.get('task')))
         exit(1)
-
     if configer.get('phase') == 'train':
         if configer.get('network', 'resume') is None:
             Controller.init(runner)

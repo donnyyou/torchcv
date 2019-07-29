@@ -92,6 +92,9 @@ class PSPNet(nn.Sequential):
         x = F.interpolate(x, size=(data_dict['img'].size(2), data_dict['img'].size(3)),
                           mode="bilinear", align_corners=True)
         out_dict = dict(dsn_out=x_dsn, out=x)
+        if self.configer.get('phase') == 'test':
+            return out_dict
+
         loss_dict = dict()
         if 'dsn_ce_loss' in self.valid_loss_dict:
             loss_dict['dsn_ce_loss'] = dict(

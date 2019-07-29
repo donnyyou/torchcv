@@ -31,12 +31,18 @@ class Controller(object):
 
         if runner.configer.get('solver', 'lr')['metric'] == 'epoch':
             while runner.runner_state['epoch'] < runner.configer.get('solver', 'max_epoch'):
+                if runner.configer.get('network.distributed'):
+                    runner.train_loader.sampler.set_epoch(runner.runner_state['epoch'])
+
                 runner.train()
                 if runner.runner_state['epoch'] == runner.configer.get('solver', 'max_epoch'):
                     runner.val()
                     break
         else:
             while runner.runner_state['iters'] < runner.configer.get('solver', 'max_iters'):
+                if runner.configer.get('network.distributed'):
+                    runner.train_loader.sampler.set_epoch(runner.runner_state['epoch'])
+
                 runner.train()
                 if runner.runner_state['iters'] == runner.configer.get('solver', 'max_iters'):
                     runner.val()

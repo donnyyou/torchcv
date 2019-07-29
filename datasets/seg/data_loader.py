@@ -4,6 +4,7 @@
 # Class for the Semantic Segmentation Data Loader.
 
 
+import torch
 from torch.utils import data
 
 from datasets.seg.loader.default_loader import DefaultLoader
@@ -45,13 +46,18 @@ class DataLoader(object):
 
     def get_trainloader(self):
         if self.configer.get('train.loader', default=None) in [None, 'default']:
-            trainloader = data.DataLoader(
-                DefaultLoader(root_dir=self.configer.get('data', 'data_dir'), dataset='train',
+            dataset = DefaultLoader(root_dir=self.configer.get('data', 'data_dir'), dataset='train',
                               aug_transform=self.aug_train_transform,
                               img_transform=self.img_transform,
                               label_transform=self.label_transform,
-                              configer=self.configer),
-                batch_size=self.configer.get('train', 'batch_size'), shuffle=True,
+                              configer=self.configer)
+            sampler = None
+            if self.configer.get('network.distributed'):
+                sampler = torch.utils.data.distributed.DistributedSampler(dataset)
+
+            trainloader = data.DataLoader(
+                dataset, sampler=sampler,
+                batch_size=self.configer.get('train', 'batch_size'), shuffle=(sampler is None),
                 num_workers=self.configer.get('data', 'workers'), pin_memory=True,
                 drop_last=self.configer.get('data', 'drop_last'),
                 collate_fn=lambda *args: collate(
@@ -65,15 +71,19 @@ class DataLoader(object):
             Log.error('{} train loader is invalid.'.format(self.configer.get('train', 'loader')))
             exit(1)
 
-    def get_valloader(self, dataset=None):
-        dataset = 'val' if dataset is None else dataset
+    def get_valloader(self):
         if self.configer.get('val.loader', default=None) in [None, 'default']:
+            dataset = DefaultLoader(root_dir=self.configer.get('data', 'data_dir'), dataset='val',
+                                    aug_transform=self.aug_val_transform,
+                                    img_transform=self.img_transform,
+                                    label_transform=self.label_transform,
+                                    configer=self.configer)
+            sampler = None
+            if self.configer.get('network.distributed'):
+                sampler = torch.utils.data.distributed.DistributedSampler(dataset)
+
             valloader = data.DataLoader(
-                DefaultLoader(root_dir=self.configer.get('data', 'data_dir'), dataset=dataset,
-                              aug_transform=self.aug_val_transform,
-                              img_transform=self.img_transform,
-                              label_transform=self.label_transform,
-                              configer=self.configer),
+                dataset, sampler=sampler,
                 batch_size=self.configer.get('val', 'batch_size'), shuffle=False,
                 num_workers=self.configer.get('data', 'workers'), pin_memory=True,
                 collate_fn=lambda *args: collate(
