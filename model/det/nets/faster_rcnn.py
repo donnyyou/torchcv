@@ -8,11 +8,11 @@ from torch import nn
 from torch.nn import functional as F
 from torchvision.models import vgg16
 
-from model.det.loss.det_modules import FasterRCNNLoss
 from model.det.layers.fr_roi_generator import FRROIGenerator
 from model.det.layers.fr_roi_sampler import FRROISampler
 from model.det.layers.rpn_detection_layer import RPNDetectionLayer
 from model.det.layers.rpn_target_assigner import RPNTargetAssigner
+from model.det.loss.loss import BASE_LOSS_DICT
 from tools.util.logger import Logger as Log
 
 try:
@@ -67,7 +67,7 @@ class FasterRCNN(nn.Module):
         self.roi_generator = FRROIGenerator(configer)
         self.roi_sampler = FRROISampler(configer)
         self.bbox_head = BBoxHead(configer, self.classifier)
-        self.det_loss = FasterRCNNLoss(self.configer)
+        self.valid_loss_dict = configer.get('loss', 'loss_weights', configer.get('loss.loss_type'))
 
     def forward(self, data_dict):
         if 'testing' in data_dict and data_dict['testing']:
@@ -106,7 +106,15 @@ class FasterRCNN(nn.Module):
             gt_roi_labels.long().to(sample_roi_locs.device)].contiguous().view(-1, 4)
         train_group = [rpn_locs, rpn_scores, sample_roi_locs, sample_roi_scores]
         target_group = [gt_rpn_locs, gt_rpn_labels, gt_roi_bboxes, gt_roi_labels]
-        return dict(loss=self.det_loss(train_group, target_group), test_group=test_group)
+        out_dict = dict(test_group=test_group)
+        loss_dict = dict()
+        if 'rcnn_loss' in self.valid_loss_dict:
+            loss_dict['rcnn_loss'] = dict(
+                params=[train_group, target_group],
+                type=torch.cuda.LongTensor([BASE_LOSS_DICT['rcnn_loss']]),
+                weight=torch.cuda.FloatTensor([self.valid_loss_dict['rcnn_loss']])
+            )
+        return out_dict, loss_dict
 
 
 class NaiveRPN(nn.Module):

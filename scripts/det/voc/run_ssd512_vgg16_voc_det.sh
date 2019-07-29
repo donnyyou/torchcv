@@ -10,7 +10,7 @@ cd ../../../
 
 DATA_DIR="/home/donny/DataSet/VOC07+12_DET"
 MODEL_NAME="vgg16_ssd512"
-LOSS_TYPE="ssd_multibox_loss"
+LOSS_TYPE="multibox_loss"
 CHECKPOINTS_NAME="ssd512_vgg16_voc_det"$2
 PRETRAINED_MODEL="./pretrained_models/ssd_vgg16_caffe_pretrained.pth"
 CONFIG_FILE='configs/det/voc/ssd512_vgg16_voc_det.conf'

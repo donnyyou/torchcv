@@ -70,7 +70,7 @@ class DenseASPP(nn.Module):
             nn.Dropout2d(p=dropout1),
             nn.Conv2d(num_features, self.configer.get('data', 'num_classes'), kernel_size=1, padding=0)
         )
-        self.valid_loss_dict = LOSS_TYPE[configer.get('loss', 'loss_type')]
+        self.valid_loss_dict = configer.get('loss', 'loss_weights', configer.get('loss.loss_type'))
 
     def forward(self, data_dict):
         x = self.backbone(data_dict['img'])

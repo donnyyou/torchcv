@@ -9,7 +9,8 @@ from torch import nn
 import torch.nn.init as init
 
 from model.det.layers.ssd_detection_layer import SSDDetectionLayer
-from model.det.loss.det_modules import SSDMultiBoxLoss
+from model.det.layers.ssd_target_generator import SSDTargetGenerator
+from model.det.loss.loss import BASE_LOSS_DICT
 from tools.util.logger import Logger as Log
 
 
@@ -101,7 +102,8 @@ class Vgg16SSD512(nn.Module):
         self.norm4 = L2Norm(512, 20)
         self.ssd_head = SSDHead(configer)
         self.ssd_detection_layer = SSDDetectionLayer(configer)
-        self.ssd_loss = SSDMultiBoxLoss(configer)
+        self.ssd_target_generator = SSDTargetGenerator(configer)
+        self.valid_loss_dict = configer.get('loss', 'loss_weights', configer.get('loss.loss_type'))
 
     def forward(self, data_dict):
         x = data_dict['img']
@@ -118,11 +120,19 @@ class Vgg16SSD512(nn.Module):
         final_out = out + out_head
 
         pred_loc, pred_conf, dets_loc, dets_conf = self.ssd_detection_layer(final_out, data_dict)
-        if 'testing' in data_dict and data_dict['testing']:
-            return dict(loc=dets_loc, conf=dets_conf)
+        out_dict = dict(loc=dets_loc, conf=dets_conf)
+        if self.configer.get('phase') == 'test':
+            return out_dict
 
-        loss = self.ssd_loss(final_out, pred_loc, pred_conf, data_dict)
-        return dict(loc=dets_loc, conf=dets_conf, loss=loss)
+        loc_targets, conf_targets = self.ssd_target_generator(final_out, data_dict)
+        loss_dict = dict()
+        if 'multibox_loss' in self.valid_loss_dict:
+            loss_dict['multibox_loss'] = dict(
+                params=[pred_loc, pred_conf, loc_targets, conf_targets],
+                type=torch.cuda.LongTensor([BASE_LOSS_DICT['multibox_loss']]),
+                weight=torch.cuda.FloatTensor([self.valid_loss_dict['multibox_loss']])
+            )
+        return out_dict, loss_dict
 
 
 class SSDHead(nn.Module):

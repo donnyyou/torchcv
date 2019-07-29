@@ -10,7 +10,6 @@ from collections import OrderedDict
 
 from model.backbones.backbone_selector import BackboneSelector
 from model.det.layers.yolo_detection_layer import YOLODetectionLayer
-from model.det.loss.det_modules import YOLOv3Loss
 
 
 class DarkNetYolov3(nn.Module):
@@ -20,7 +19,6 @@ class DarkNetYolov3(nn.Module):
         self.backbone = BackboneSelector(configer).get_backbone()
         self.yolov3_head = Yolov3Head(configer, out_filters=self.backbone.num_features)
         self.yolo_detection_layer = YOLODetectionLayer(self.configer)
-        self.yolov3_loss = YOLOv3Loss(self.configer)
 
     def forward(self, data_dict):
         tuple_features = self.backbone(data_dict['img'])
