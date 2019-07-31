@@ -10,7 +10,7 @@ cd ../../../
 
 DATA_DIR="/home/donny/DataSet/VOC07+12_DET"
 MODEL_NAME="vgg16_ssd300"
-LOSS_TYPE="ssd_multibox_loss"
+LOSS_TYPE="multibox_loss"
 CHECKPOINTS_NAME="ssd300_vgg16_voc_det"$2
 PRETRAINED_MODEL="./pretrained_models/ssd_vgg16_caffe_pretrained.pth"
 CONFIG_FILE='configs/det/voc/ssd300_vgg16_voc_det.conf'
@@ -24,7 +24,7 @@ if [[ ! -d ${LOG_DIR} ]]; then
 fi
 
 if [[ "$1"x == "train"x ]]; then
-  ${PYTHON} -u main.py --config_file ${CONFIG_FILE} --phase train --log_to_file n --gpu 0 \
+  ${PYTHON} -u main.py --config_file ${CONFIG_FILE} --phase train --gpu 0 --workers 3 \
                        --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --model_name ${MODEL_NAME} \
                        --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL}  2>&1 | tee ${LOG_FILE}
 
