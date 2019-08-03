@@ -98,7 +98,7 @@ class PSPNet(nn.Sequential):
         loss_dict = dict()
         if 'dsn_ce_loss' in self.valid_loss_dict:
             loss_dict['dsn_ce_loss'] = dict(
-                params=[x, data_dict['labelmap']],
+                params=[x_dsn, data_dict['labelmap']],
                 type=torch.cuda.LongTensor([BASE_LOSS_DICT['ce_loss']]),
                 weight=torch.cuda.FloatTensor([self.valid_loss_dict['dsn_ce_loss']])
             )
