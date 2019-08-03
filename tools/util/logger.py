@@ -28,8 +28,6 @@ class Logger(object):
       Log level: CRITICAL>ERROR>WARNING>INFO>DEBUG.
       log format: The format of log messages.
     """
-    log_format = None
-    log_level = None
     logger = None
 
     @staticmethod
@@ -37,23 +35,20 @@ class Logger(object):
              log_level=DEFAULT_LOG_LEVEL,
              distributed_rank=0):
         assert Logger.logger is None
-        Logger.log_format = log_format
-        Logger.log_level = log_level
-
         Logger.logger = logging.getLogger()
         if distributed_rank > 0:
             return
 
-        fmt = logging.Formatter(Logger.log_format)
-        if log_level is not None:
-            console = logging.StreamHandler()
-            if Logger.log_level not in LOG_LEVEL_DICT:
-                print('Invalid logging level: {}'.format(Logger.log_level))
-                return
+        if log_level not in LOG_LEVEL_DICT:
+            print('Invalid logging level: {}'.format(log_level))
+            return
 
-            console.setLevel(LOG_LEVEL_DICT[Logger.log_level])
-            console.setFormatter(fmt)
-            Logger.logger.addHandler(console)
+        Logger.logger.setLevel(LOG_LEVEL_DICT[log_level])
+        fmt = logging.Formatter(log_format)
+        console = logging.StreamHandler()
+        console.setLevel(LOG_LEVEL_DICT[log_level])
+        console.setFormatter(fmt)
+        Logger.logger.addHandler(console)
 
     @staticmethod
     def check_logger():
