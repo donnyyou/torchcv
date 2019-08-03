@@ -31,25 +31,25 @@ class RunnerHelper(object):
     def _make_parallel(runner, net):
         if runner.configer.get('network.distributed', default=False):
             from apex.parallel import DistributedDataParallel
+            if runner.configer.get('network.syncbn', default=False):
+                Log.info('Converting syncbn model...')
+                from apex.parallel import convert_syncbn_model
+                net = convert_syncbn_model(net)
+
             torch.cuda.set_device(runner.configer.get('local_rank'))
             torch.distributed.init_process_group(backend='nccl', init_method='env://')
             net = DistributedDataParallel(net.cuda(), delay_allreduce=True)
             return net
-        else:
-            net = net.to(torch.device('cpu' if runner.configer.get('gpu') is None else 'cuda'))
+
+        net = net.to(torch.device('cpu' if runner.configer.get('gpu') is None else 'cuda'))
+        if len(runner.configer.get('gpu')) > 1:
             from exts.tools.parallel.data_parallel import ParallelModel
             return ParallelModel(net, gather_=runner.configer.get('network', 'gather'))
 
+        return net
+
     @staticmethod
     def load_net(runner, net, model_path=None):
-        if runner.configer.get('network.syncbn', default=False):
-            Log.info('Converting syncbn model...')
-            from apex.parallel import convert_syncbn_model
-            net = convert_syncbn_model(net)
-
-        if runner.configer.get('gpu') is not None:
-            net = RunnerHelper._make_parallel(runner, net)
-
         if model_path is not None or runner.configer.get('network', 'resume') is not None:
             resume_path = runner.configer.get('network', 'resume')
             resume_path = model_path if model_path is not None else resume_path
@@ -79,6 +79,7 @@ class RunnerHelper(object):
                 # runner.configer.resume(resume_dict['config_dict'])
                 runner.runner_state = resume_dict['runner_state']
 
+        net = RunnerHelper._make_parallel(runner, net)
         return net
 
     @staticmethod
