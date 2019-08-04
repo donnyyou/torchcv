@@ -49,7 +49,6 @@ class PPMBilinearDeepsup(nn.Module):
     def forward(self, x):
         input_size = x.size()
         ppm_out = [x]
-        assert not (self.norm_type == 'torchbn' and self.training and x.size(0) == 1)
         for pool_scale in self.ppm:
             ppm_out.append(F.interpolate(pool_scale(x), (input_size[2], input_size[3]),
                                          mode='bilinear', align_corners=True))
@@ -80,7 +79,7 @@ class PSPNet(nn.Sequential):
             nn.Dropout2d(0.1),
             nn.Conv2d(512, self.num_classes, kernel_size=1)
         )
-        self.valid_loss_dict = LOSS_TYPE[configer.get('loss', 'loss_type')]
+        self.valid_loss_dict = configer.get('loss', 'loss_weights', configer.get('loss.loss_type'))
 
     def forward(self, data_dict):
         x = self.backbone(data_dict['img'])
