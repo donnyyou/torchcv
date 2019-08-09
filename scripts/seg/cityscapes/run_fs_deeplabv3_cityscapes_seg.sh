@@ -17,7 +17,7 @@ PRETRAINED_MODEL="./pretrained_models/3x3resnet50-imagenet.pth"
 
 CONFIG_FILE='configs/seg/cityscapes/fs_deeplabv3_cityscapes_seg.conf'
 MAX_ITERS=40000
-LOSS_TYPE="dsnce_loss"
+LOSS_TYPE="dsnohemce_loss"
 
 LOG_DIR="./log/seg/cityscapes/"
 LOG_FILE="${LOG_DIR}${CHECKPOINTS_NAME}.log"
@@ -31,7 +31,7 @@ NGPUS=4
 
 if [[ "$1"x == "train"x ]]; then
   ${PYTHON} -m torch.distributed.launch --nproc_per_node=${NGPUS}  main.py --config_file ${CONFIG_FILE} --phase train --train_batch_size 1 --val_batch_size 1 \
-                       --backbone ${BACKBONE} --model_name ${MODEL_NAME} --drop_last y --syncbn y \
+                       --backbone ${BACKBONE} --model_name ${MODEL_NAME} --drop_last y --syncbn y --distributed y \
                        --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --max_iters ${MAX_ITERS} \
                        --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL} 2>&1 | tee ${LOG_FILE} 
 

@@ -8,7 +8,7 @@ export PYTHONPATH="/home/zzhu/experiments/torchcv_new":${PYTHONPATH}
 
 cd ../../../
 
-DATASET="pascal_context"
+DATASET="pcontext"
 DATA_DIR="/home/donny/DataSet/Cityscapes"
 
 BACKBONE="deepbase_resnet101_dilated8"
