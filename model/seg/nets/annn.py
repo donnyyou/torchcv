@@ -1,11 +1,12 @@
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 from model.backbones.backbone_selector import BackboneSelector
 from model.tools.module_helper import ModuleHelper
-
 from model.seg.utils.apnb import APNB
 from model.seg.utils.afnb import AFNB
+from model.seg.loss.loss import BASE_LOSS_DICT
 
 
 class asymmetric_non_local_network(nn.Sequential):
@@ -30,13 +31,40 @@ class asymmetric_non_local_network(nn.Sequential):
             nn.Dropout2d(0.05),
             nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True)
         )
+        self.valid_loss_dict = configer.get('loss', 'loss_weights', configer.get('loss.loss_type'))
 
-    def forward(self, x_):
+    def forward(self, data_dict):
+        x_ = data_dict['img']
         x = self.backbone(x_)
         aux_x = self.dsn(x[-2])
         x = self.fusion(x[-2], x[-1])
         x = self.context(x)
         x = self.cls(x)
-        aux_x = F.interpolate(aux_x, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=True)
+        x_dsn = F.interpolate(aux_x, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=True)
         x = F.interpolate(x, size=(x_.size(2), x_.size(3)), mode="bilinear", align_corners=True)
-        return aux_x, x
+        out_dict = dict(dsn_out=x_dsn, out=x)
+        if self.configer.get('phase') == 'test':
+            return out_dict
+
+        loss_dict = dict()
+        if 'dsn_ce_loss' in self.valid_loss_dict:
+            loss_dict['dsn_ce_loss'] = dict(
+                params=[x_dsn, data_dict['labelmap']],
+                type=torch.cuda.LongTensor([BASE_LOSS_DICT['ce_loss']]),
+                weight=torch.cuda.FloatTensor([self.valid_loss_dict['dsn_ce_loss']])
+            )
+
+        if 'ce_loss' in self.valid_loss_dict:
+            loss_dict['ce_loss'] = dict(
+                params=[x, data_dict['labelmap']],
+                type=torch.cuda.LongTensor([BASE_LOSS_DICT['ce_loss']]),
+                weight=torch.cuda.FloatTensor([self.valid_loss_dict['ce_loss']])
+            )
+
+        if 'ohem_ce_loss' in self.valid_loss_dict:
+            loss_dict['ohem_ce_loss'] = dict(
+                params=[x, data_dict['labelmap']],
+                type=torch.cuda.LongTensor([BASE_LOSS_DICT['ohem_ce_loss']]),
+                weight=torch.cuda.FloatTensor([self.valid_loss_dict['ohem_ce_loss']])
+            )
+        return out_dict, loss_dict
