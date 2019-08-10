@@ -49,12 +49,12 @@ class RunnerHelper(object):
         return net
 
     @staticmethod
-    def load_net(runner, net, model_path=None):
+    def load_net(runner, net, model_path=None, map_location='cpu'):
         if model_path is not None or runner.configer.get('network', 'resume') is not None:
             resume_path = runner.configer.get('network', 'resume')
             resume_path = model_path if model_path is not None else resume_path
             Log.info('Resuming from {}'.format(resume_path))
-            resume_dict = torch.load(resume_path)
+            resume_dict = torch.load(resume_path, map_location=map_location)
             if 'state_dict' in resume_dict:
                 checkpoint_dict = resume_dict['state_dict']
 
