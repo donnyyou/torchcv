@@ -7,6 +7,7 @@ import torch
 import torch.nn as nn
 
 from model.backbones.backbone_selector import BackboneSelector
+from model.pose.loss.loss import BASE_LOSS_DICT
 
 
 class OpenPose(nn.Module):
@@ -15,11 +16,33 @@ class OpenPose(nn.Module):
         self.configer = configer
         self.backbone = BackboneSelector(configer).get_backbone()
         self.pose_model = PoseModel(configer, self.backbone.get_num_features())
+        self.valid_loss_dict = configer.get('loss', 'loss_weights', configer.get('loss.loss_type'))
 
-    def forward(self, x):
-        x = self.backbone(x)
-        out = self.pose_model(x)
-        return out
+    def forward(self, data_dict):
+        x = self.backbone(data_dict['img'])
+        paf_out, heatmap_out = self.pose_model(x)
+        out_dict = dict(paf=paf_out[-1], heatmap=heatmap_out[-1])
+        if self.configer.get('phase') == 'test':
+            return out_dict
+
+        loss_dict = dict()
+        for i in range(len(paf_out)):
+            if 'paf_loss{}'.format(i) in self.valid_loss_dict:
+                loss_dict['paf_loss{}'.format(i)] = dict(
+                    params=[paf_out[i], data_dict['vecmap']],
+                    type=torch.cuda.LongTensor([BASE_LOSS_DICT['mse_loss']]),
+                    weight=torch.cuda.FloatTensor([self.valid_loss_dict['paf_loss{}'.format(i)]])
+                )
+
+        for i in range(len(heatmap_out)):
+            if 'heatmap_loss{}'.format(i) in self.valid_loss_dict:
+                loss_dict['heatmap_loss{}'.format(i)] = dict(
+                    params=[heatmap_out[i], data_dict['heatmap']],
+                    type=torch.cuda.LongTensor([BASE_LOSS_DICT['mse_loss']]),
+                    weight=torch.cuda.FloatTensor([self.valid_loss_dict['heatmap_loss{}'.format(i)]])
+                )
+
+        return out_dict, loss_dict
 
 
 class PoseModel(nn.Module):
