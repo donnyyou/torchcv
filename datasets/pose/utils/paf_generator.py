@@ -17,7 +17,7 @@ class PafGenerator(object):
         input_width, input_height = input_size
         vec_pair = self.configer.get('details', 'limb_seq')
         stride = self.configer.get('network', 'stride')
-        theta = self.configer.get('heatmap', 'theta')
+        theta = self.configer.get('target.paf.theta')
         width, height = input_width // stride, input_height // stride
         accumulate_vec_map = np.zeros((len(vec_pair) * 2, height, width), dtype=np.float32)
         cnt = np.zeros((len(vec_pair), height, width), dtype=np.int32)

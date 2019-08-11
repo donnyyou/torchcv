@@ -29,14 +29,14 @@ if [[ "$1"x == "train"x ]]; then
                        --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL}  2>&1 | tee ${LOG_FILE}
 
 elif [[ "$1"x == "resume"x ]]; then
-  ${PYTHON} -u main.py --config_file ${CONFIG_FILE} --phase train --log_to_file n --gpu 0 1 2 3 \
+  ${PYTHON} -u main.py --config_file ${CONFIG_FILE} --phase train --gpu 0 1 2 3 \
                        --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --model_name ${MODEL_NAME} \
-                       --resume_continue y --resume ./checkpoints/det/coco/${CHECKPOINTS_NAME}_latest.pth \
+                       --resume_continue y --resume ./checkpoints/pose/coco/${CHECKPOINTS_NAME}_latest.pth \
                        --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL}  2>&1 | tee -a ${LOG_FILE}
 
 elif [[ "$1"x == "val"x ]]; then
   ${PYTHON} -u main.py --config_file ${CONFIG_FILE} --phase test --model_name ${MODEL_NAME} \
-                       --phase test --gpu 0 --resume ./checkpoints/cityscapes/${CHECKPOINTS_NAME}_latest.pth \
+                       --phase test --gpu 0 --resume ./checkpoints/pose/coco/${CHECKPOINTS_NAME}_latest.pth \
                        --test_dir ${DATA_DIR}/val/image --out_dir val  2>&1 | tee -a ${LOG_FILE}
   cd metrics/det/
   ${PYTHON} -u voc_evaluator.py --config_file "../../../"${CONFIG_FILE} \

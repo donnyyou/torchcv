@@ -105,8 +105,7 @@ class FCNSegmentor(object):
                          'Learning rate = {4}\tLoss = {3}\n'.format(
                          self.runner_state['epoch'], self.runner_state['iters'],
                          self.configer.get('solver', 'display_iter'), self.train_losses.info(),
-                         RunnerHelper.get_lr(self.optimizer), batch_time=self.batch_time,
-                         data_time=self.data_time, loss=self.train_losses))
+                         RunnerHelper.get_lr(self.optimizer), batch_time=self.batch_time, data_time=self.data_time))
                 self.batch_time.reset()
                 self.data_time.reset()
                 self.train_losses.reset()
