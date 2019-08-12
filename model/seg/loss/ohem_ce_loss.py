@@ -38,7 +38,8 @@ class OhemCELoss(nn.Module):
         sort_prob, sort_indices = prob.contiguous().view(-1, )[mask].contiguous().sort()
         min_threshold = sort_prob[min(batch_kept, sort_prob.numel() - 1)] if sort_prob.numel() > 0 else 0.0
         threshold = max(min_threshold, self.thresh)
-        loss_matrix = F.cross_entropy(predict, target, weight=self.weight.to(predict.device),
+        loss_matrix = F.cross_entropy(predict, target,
+                                      weight=self.weight.to(predict.device) if self.weight is not None else None,
                                       ignore_index=self.ignore_index, reduction='none')
         loss_matirx = loss_matrix.contiguous().view(-1, )
         sort_loss_matirx = loss_matirx[mask][sort_indices]

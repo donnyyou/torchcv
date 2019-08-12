@@ -15,7 +15,7 @@ MODEL_NAME="deeplabv3"
 CHECKPOINTS_NAME="fs_res50_deeplabv3_ade20k_seg"$2
 PRETRAINED_MODEL="./pretrained_models/3x3resnet50-imagenet.pth"
 
-CONFIG_FILE='configs/seg/ade20k/fs_deeplabv3_ade20k_seg.conf'
+CONFIG_FILE='configs/seg/ade20k/base_fcn_ade20k_seg.conf'
 MAX_ITERS=150000
 LOSS_TYPE="dsnce_loss"
 
@@ -27,19 +27,21 @@ if [[ ! -d ${LOG_DIR} ]]; then
     mkdir -p ${LOG_DIR}
 fi
 
+NGPUS=4
+DIST_PYTHON="${PYTHON} -m torch.distributed.launch --nproc_per_node=${NGPUS}"
 
 if [[ "$1"x == "train"x ]]; then
-  ${PYTHON} -u main.py --config_file ${CONFIG_FILE} --drop_last y --phase train --gather n \
-                       --backbone ${BACKBONE} --model_name ${MODEL_NAME} --gpu 0 1 2 3 \
-                       --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --max_iters ${MAX_ITERS} \
-                       --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL}  2>&1 | tee ${LOG_FILE}
+  ${DIST_PYTHON} -u main.py --config_file ${CONFIG_FILE} --phase train --train_batch_size 1 --val_batch_size 1 \
+                            --backbone ${BACKBONE} --model_name ${MODEL_NAME} --drop_last y --syncbn y --distributed y \
+                            --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --max_iters ${MAX_ITERS} \
+                            --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL}  2>&1 | tee ${LOG_FILE}
 
 elif [[ "$1"x == "resume"x ]]; then
-  ${PYTHON} -u main.py --config_file ${CONFIG_FILE} --drop_last y --phase train --gather n \
-                       --backbone ${BACKBONE} --model_name ${MODEL_NAME} --gpu 0 1 2 3 \
-                       --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --max_iters ${MAX_ITERS} \
-                       --resume_continue y --resume ./checkpoints/seg/ade20k/${CHECKPOINTS_NAME}_latest.pth \
-                       --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL}  2>&1 | tee -a ${LOG_FILE}
+  ${DIST_PYTHON} -u main.py --config_file ${CONFIG_FILE} --phase train --train_batch_size 1 --val_batch_size 1 \
+                            --backbone ${BACKBONE} --model_name ${MODEL_NAME} --drop_last y --syncbn y --distributed y \
+                            --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --max_iters ${MAX_ITERS} \
+                            --resume_continue y --resume ./checkpoints/seg/ade20k/${CHECKPOINTS_NAME}_latest.pth \
+                            --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL}  2>&1 | tee -a ${LOG_FILE}
 
 elif [[ "$1"x == "val"x ]]; then
   ${PYTHON} -u main.py --config_file ${CONFIG_FILE} --phase test --gpu 0 1 2 3 --gather n \
