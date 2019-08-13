@@ -36,7 +36,6 @@ class DefaultLoader(data.Dataset):
         if self.aug_transform is not None:
             img, kpts, bboxes = self.aug_transform(img, kpts=kpts, bboxes=bboxes)
 
-        kpts = torch.from_numpy(kpts).float()
         heatmap = self.heatmap_generator(kpts, ImageHelper.get_size(img))
         if self.img_transform is not None:
             img = self.img_transform(img)
@@ -61,7 +60,7 @@ class DefaultLoader(data.Dataset):
         bboxes = list()
 
         for object in json_dict['objects']:
-            kpts.append(object['kpts'])
+            kpts.append(object['keypoints'])
             if 'bbox' in object:
                 bboxes.append(object['bbox'])
 

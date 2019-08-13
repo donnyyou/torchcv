@@ -1,6 +1,7 @@
 .DS_Store
 .reviewboardrc
 *.pyc
+*.conf_bk
 *.pth
 *.so
 *.bmp
@@ -22,5 +23,6 @@
 /build
 /dist
 /*.egg-info
-
+/exts/apis/cocoapi/PythonAPI/build/
 /docs/build
+/exts/ops/nms/src/soft_nms_cpu.cpp

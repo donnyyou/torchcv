@@ -56,18 +56,20 @@ class OpenPoseLoader(data.Dataset):
 
         maskmap = torch.from_numpy(np.array(maskmap, dtype=np.float32))
         maskmap = maskmap.unsqueeze(0)
-        kpts = torch.from_numpy(kpts).float()
-
         heatmap = self.heatmap_generator(kpts, [width, height], maskmap)
         vecmap = self.paf_generator(kpts, [width, height], maskmap)
         if self.img_transform is not None:
             img = self.img_transform(img)
 
+        meta = dict(
+            kpts=kpts,
+        )
         return dict(
             img=DataContainer(img, stack=True),
             heatmap=DataContainer(heatmap, stack=True),
             maskmap=DataContainer(maskmap, stack=True),
-            vecmap=DataContainer(vecmap, stack=True)
+            vecmap=DataContainer(vecmap, stack=True),
+            meta=DataContainer(meta, stack=False, cpu_only=True),
         )
 
     def __len__(self):
@@ -86,7 +88,7 @@ class OpenPoseLoader(data.Dataset):
         bboxes = list()
 
         for object in json_dict['objects']:
-            kpts.append(object['kpts'])
+            kpts.append(object['keypoints'])
             if 'bbox' in object:
                 bboxes.append(object['bbox'])
 

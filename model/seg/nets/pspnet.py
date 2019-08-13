@@ -49,7 +49,6 @@ class PPMBilinearDeepsup(nn.Module):
     def forward(self, x):
         input_size = x.size()
         ppm_out = [x]
-        assert not (self.norm_type == 'torchbn' and self.training and x.size(0) == 1)
         for pool_scale in self.ppm:
             ppm_out.append(F.interpolate(pool_scale(x), (input_size[2], input_size[3]),
                                          mode='bilinear', align_corners=True))
@@ -80,7 +79,7 @@ class PSPNet(nn.Sequential):
             nn.Dropout2d(0.1),
             nn.Conv2d(512, self.num_classes, kernel_size=1)
         )
-        self.valid_loss_dict = LOSS_TYPE[configer.get('loss', 'loss_type')]
+        self.valid_loss_dict = configer.get('loss', 'loss_weights', configer.get('loss.loss_type'))
 
     def forward(self, data_dict):
         x = self.backbone(data_dict['img'])
@@ -98,7 +97,7 @@ class PSPNet(nn.Sequential):
         loss_dict = dict()
         if 'dsn_ce_loss' in self.valid_loss_dict:
             loss_dict['dsn_ce_loss'] = dict(
-                params=[x, data_dict['labelmap']],
+                params=[x_dsn, data_dict['labelmap']],
                 type=torch.cuda.LongTensor([BASE_LOSS_DICT['ce_loss']]),
                 weight=torch.cuda.FloatTensor([self.valid_loss_dict['dsn_ce_loss']])
             )

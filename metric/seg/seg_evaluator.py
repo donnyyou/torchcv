@@ -13,16 +13,25 @@ from tools.util.logger import Logger as Log
 from tools.util.configer import Configer
 
 
-class ADE20KEvaluator(object):
+class SegEvaluator(object):
     def __init__(self, configer):
         self.configer = configer
         self.seg_running_score = SegRunningScore(configer)
 
     def relabel(self, labelmap):
-        if self.configer.get('data', 'reduce_zero_label'):
+        if self.configer.get('data.reduce_zero_label', default=False):
             labelmap[labelmap == 0] = 255
             labelmap = (labelmap - 1).astype(np.uint8)
             labelmap[labelmap == 254] = 255
+
+        if self.configer.get('data.label_list', default=None) is not None:
+            shape = labelmap.shape
+            encoded_labelmap = np.ones(shape=(shape[0], shape[1]), dtype=np.uint8) * 255
+            for i in range(len(self.configer.get('data', 'label_list'))):
+                class_id = self.configer.get('data', 'label_list')[i]
+                encoded_labelmap[labelmap == class_id] = i
+
+            labelmap = encoded_labelmap
 
         return labelmap
 
@@ -40,6 +49,7 @@ class ADE20KEvaluator(object):
             img_cnt += 1
 
         Log.info('Evaluate {} images'.format(img_cnt))
+        Log.info('Class mIOU: {}'.format(self.seg_running_score.get_cls_iou()))
         Log.info('mIOU: {}'.format(self.seg_running_score.get_mean_iou()))
         Log.info('Pixel ACC: {}'.format(self.seg_running_score.get_pixel_acc()))
 
@@ -54,5 +64,5 @@ if __name__ == "__main__":
                         dest='pred_dir', help='The label dir of predict annotations.')
     args = parser.parse_args()
 
-    ade20k_evaluator = ADE20KEvaluator(Configer(hypes_file=args.hypes_file))
-    ade20k_evaluator.evaluate(args.pred_dir, args.gt_dir)
+    seg_evaluator = SegEvaluator(Configer(config_file=args.config_file))
+    seg_evaluator.evaluate(args.pred_dir, args.gt_dir)

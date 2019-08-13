@@ -111,16 +111,10 @@ if __name__ == "__main__":
                         dest='loss.loss_type', help='The loss type of the network.')
 
     # ***********  Params for logging.  **********
-    parser.add_argument('--logfile_level', default=None, type=str,
-                        dest='logging.logfile_level', help='To set the log level to files.')
-    parser.add_argument('--stdout_level', default=None, type=str,
-                        dest='logging.stdout_level', help='To set the level to print to screen.')
-    parser.add_argument('--log_file', default=None, type=str,
-                        dest='logging.log_file', help='The path of log files.')
-    parser.add_argument('--rewrite', type=str2bool, nargs='?', default=True,
-                        dest='logging.rewrite', help='Whether to rewrite files.')
-    parser.add_argument('--log_to_file', type=str2bool, nargs='?', default=False,
-                        dest='logging.log_to_file', help='Whether to write logging into files.')
+    parser.add_argument('--log_level', default="info", type=str,
+                        dest='logging.log_level', help='To set the level to print to screen.')
+    parser.add_argument('--log_format', default="%(asctime)s %(levelname)-7s %(message)s", type=str,
+                        dest='logging.log_format', help='To set the format to print to screen.')
 
     # ***********  Params for test or submission.  **********
     parser.add_argument('--test_dir', default=None, type=str,
@@ -155,24 +149,12 @@ if __name__ == "__main__":
     if torch.cuda.device_count() <= 1 or configer.get('network.distributed', default=False):
         configer.update('network.gather', True)
 
-    if configer.get('phase') == 'train':
-        assert len(configer.get('gpu')) > 1 or 'sync' not in configer.get('network', 'norm_type')
-
     project_dir = os.path.dirname(os.path.realpath(__file__))
     configer.add('project_dir', project_dir)
 
-    if configer.get('logging', 'log_to_file'):
-        log_file = configer.get('logging', 'log_file')
-        new_log_file = '{}_{}'.format(log_file, time.strftime("%Y-%m-%d_%X", time.localtime()))
-        configer.update('logging.log_file', new_log_file)
-    else:
-        configer.update('logging.logfile_level', None)
-
-    Log.init(logfile_level=configer.get('logging', 'logfile_level'),
-             stdout_level=configer.get('logging', 'stdout_level'),
-             log_file=configer.get('logging', 'log_file'),
+    Log.init(log_level=configer.get('logging', 'log_level'),
              log_format=configer.get('logging', 'log_format'),
-             rewrite=configer.get('logging', 'rewrite'))
+             distributed_rank=configer.get('local_rank'))
 
     Log.info('BN Type is {}.'.format(configer.get('network', 'norm_type')))
     Log.info('Config Dict: {}'.format(json.dumps(configer.to_dict(), indent=2)))

@@ -20,7 +20,8 @@ class CELoss(nn.Module):
 
     def forward(self, input, target):
         target = self._scale_target(target, (input.size(2), input.size(3)))
-        loss = F.cross_entropy(input, target, weight=self.weight.to(input.device),
+        loss = F.cross_entropy(input, target,
+                               weight=self.weight.to(input.device) if self.weight is not None else None,
                                ignore_index=self.ignore_index, reduction=self.reduction)
         return loss
 

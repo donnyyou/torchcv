@@ -18,8 +18,8 @@ class HeatmapGenerator(object):
         width, height = input_size
         stride = self.configer.get('network', 'stride')
         num_keypoints = self.configer.get('data', 'num_kpts')
-        sigma = self.configer.get('heatmap', 'sigma')
-        method = self.configer.get('heatmap', 'method')
+        sigma = self.configer.get('target.heatmap.sigma')
+        method = self.configer.get('target.heatmap.method')
 
         heatmap = np.zeros((num_keypoints + 1, height // stride, width // stride), dtype=np.float32)
         start = stride / 2.0 - 0.5

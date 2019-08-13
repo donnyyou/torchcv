@@ -48,6 +48,9 @@ class SegRunningScore(object):
     def get_mean_iou(self):
         return self._get_scores()[3]
 
+    def get_cls_iou(self):
+        return self._get_scores()[4]
+
     def get_pixel_acc(self):
         return self._get_scores()[0]
 
