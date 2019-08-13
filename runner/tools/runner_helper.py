@@ -152,7 +152,7 @@ class RunnerHelper(object):
             checkpoints_dir = os.path.join(runner.configer.get('network', 'checkpoints_root'),
                                            runner.configer.get('network', 'checkpoints_dir'))
 
-        if not os.path.exists(checkpoints_dir):
+        if not os.path.exists(checkpoints_dir) and runner.configer.get('local_rank') == 0:
             os.makedirs(checkpoints_dir)
 
         latest_name = '{}_latest.pth'.format(runner.configer.get('network', 'checkpoints_name'))

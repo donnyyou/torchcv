@@ -118,7 +118,8 @@ class FCNSegmentor(object):
                 break
 
             # Check to val the current model.
-            if self.runner_state['iters'] % self.configer.get('solver', 'test_interval') == 0:
+            if self.runner_state['iters'] % self.configer.get('solver', 'test_interval') == 0 \
+                and not self.configer.get('network.distributed'):
                 self.val()
 
         self.runner_state['epoch'] += 1
@@ -127,6 +128,9 @@ class FCNSegmentor(object):
         """
           Validation function during the train phase.
         """
+        if self.configer.get('local_rank') != 0:
+            return
+
         self.seg_net.eval()
         start_time = time.time()
 
