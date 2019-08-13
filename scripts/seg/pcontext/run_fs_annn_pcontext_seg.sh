@@ -29,16 +29,16 @@ if [[ ! -d ${LOG_DIR} ]]; then
 fi
 
 NGPUS=4
-DIST_PYTHON="${PYTHON} -m torch.distributed.launch --nproc_per_node=${NGPUS}"
+DIST_PYTHON="${PYTHON} -u -m torch.distributed.launch --nproc_per_node=${NGPUS}"
 
 if [[ "$1"x == "train"x ]]; then
-  ${DIST_PYTHON} -u main.py --config_file ${CONFIG_FILE} --phase train --train_batch_size 1 --val_batch_size 1 \
+  ${DIST_PYTHON} main.py --config_file ${CONFIG_FILE} --phase train --train_batch_size 4 --val_batch_size 1 --workers 1 \
                             --backbone ${BACKBONE} --model_name ${MODEL_NAME} --drop_last y --syncbn y --distributed y \
                             --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --max_iters ${MAX_ITERS} \
                             --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL}  2>&1 | tee ${LOG_FILE}
 
 elif [[ "$1"x == "resume"x ]]; then
-  ${DIST_PYTHON} -u main.py --config_file ${CONFIG_FILE} --phase train --train_batch_size 1 --val_batch_size 1 \
+  ${DIST_PYTHON} main.py --config_file ${CONFIG_FILE} --phase train --train_batch_size 4 --val_batch_size 1 --workers 1 \
                             --backbone ${BACKBONE} --model_name ${MODEL_NAME} --drop_last y --syncbn y --distributed y \
                             --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --max_iters ${MAX_ITERS} \
                             --resume_continue y --resume ./checkpoints/seg/cityscapes/${CHECKPOINTS_NAME}_latest.pth \
