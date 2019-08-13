@@ -53,7 +53,7 @@ class DataLoader(object):
                               configer=self.configer)
             sampler = None
             if self.configer.get('network.distributed'):
-                sampler = torch.utils.data.distributed.DistributedSampler(dataset, shuffle=True)
+                sampler = torch.utils.data.distributed.DistributedSampler(dataset)
 
             trainloader = data.DataLoader(
                 dataset, sampler=sampler,

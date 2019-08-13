@@ -49,8 +49,9 @@ elif [[ "$1"x == "val"x ]]; then
                        --resume ./checkpoints/seg/cityscapes/${CHECKPOINTS_NAME}_latest.pth \
                        --test_dir ${DATA_DIR}/val/image --out_dir val  2>&1 | tee -a ${LOG_FILE}
   cd metric/seg/
-  ${PYTHON} -u cityscapes_evaluator.py --pred_dir ../../results/seg/cityscapes/${CHECKPOINTS_NAME}/val/label \
-                                       --gt_dir ${DATA_DIR}/val/label  2>&1 | tee -a "../../"${LOG_FILE}
+  ${PYTHON} -u seg_evaluator.py --config_file "../../"${CONFIG_FILE} \
+                                --pred_dir ../../results/seg/cityscapes/${CHECKPOINTS_NAME}/val/label \
+                                --gt_dir ${DATA_DIR}/val/label  2>&1 | tee -a "../../"${LOG_FILE}
 
 elif [[ "$1"x == "test"x ]]; then
   ${PYTHON} -u main.py --config_file ${CONFIG_FILE} --phase test --gpu 0 1 2 3 --gather n \
