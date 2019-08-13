@@ -19,10 +19,19 @@ class ADE20KEvaluator(object):
         self.seg_running_score = SegRunningScore(configer)
 
     def relabel(self, labelmap):
-        if self.configer.get('data', 'reduce_zero_label'):
+        if self.configer.get('data.reduce_zero_label', default=False):
             labelmap[labelmap == 0] = 255
             labelmap = (labelmap - 1).astype(np.uint8)
             labelmap[labelmap == 254] = 255
+
+        if self.configer.get('data.label_list', default=None) is not None:
+            shape = labelmap.shape
+            encoded_labelmap = np.ones(shape=(shape[0], shape[1]), dtype=np.float32) * 255
+            for i in range(len(self.configer.get('data', 'label_list'))):
+                class_id = self.configer.get('data', 'label_list')[i]
+                encoded_labelmap[labelmap == class_id] = i
+
+            labelmap = encoded_labelmap
 
         return labelmap
 
@@ -54,5 +63,5 @@ if __name__ == "__main__":
                         dest='pred_dir', help='The label dir of predict annotations.')
     args = parser.parse_args()
 
-    ade20k_evaluator = ADE20KEvaluator(Configer(hypes_file=args.hypes_file))
+    ade20k_evaluator = ADE20KEvaluator(Configer(config_file=args.config_file))
     ade20k_evaluator.evaluate(args.pred_dir, args.gt_dir)
