@@ -105,13 +105,13 @@ class FCNSegmentor(object):
                          'Learning rate = {4}\tLoss = {3}\n'.format(
                          self.runner_state['epoch'], self.runner_state['iters'],
                          self.configer.get('solver', 'display_iter'), self.train_losses.info(),
-                         RunnerHelper.get_lr(self.optimizer), batch_time=self.batch_time,
-                         data_time=self.data_time, loss=self.train_losses))
+                         RunnerHelper.get_lr(self.optimizer), batch_time=self.batch_time, data_time=self.data_time))
                 self.batch_time.reset()
                 self.data_time.reset()
                 self.train_losses.reset()
 
-            if self.runner_state['iters'] % self.configer.get('solver.save_iters') == 0:
+            if self.runner_state['iters'] % self.configer.get('solver.save_iters') == 0 \
+                    and self.configer.get('local_rank') == 0:
                 RunnerHelper.save_net(self, self.seg_net)
 
             if self.configer.get('solver', 'lr')['metric'] == 'iters' \
@@ -119,7 +119,8 @@ class FCNSegmentor(object):
                 break
 
             # Check to val the current model.
-            if self.runner_state['iters'] % self.configer.get('solver', 'test_interval') == 0:
+            if self.runner_state['iters'] % self.configer.get('solver', 'test_interval') == 0 \
+                    and not self.configer.get('network.distributed'):
                 self.val()
 
         self.runner_state['epoch'] += 1
@@ -128,6 +129,9 @@ class FCNSegmentor(object):
         """
           Validation function during the train phase.
         """
+        if self.configer.get('local_rank') != 0:
+            return
+
         self.seg_net.eval()
         start_time = time.time()
 

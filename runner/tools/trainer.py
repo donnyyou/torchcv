@@ -56,6 +56,17 @@ class Trainer(object):
 
             scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_poly)
 
+        elif lr_params['lr_policy'] == 'lambda_range':
+            if lr_params['metric'] == 'epoch':
+                lambda_poly = lambda epoch: pow((1.0 - epoch / solver_dict['max_epoch']),
+                                                lr_params['lambda_range']['max_power'] * epoch / solver_dict['max_epoch'])
+            else:
+                assert lr_params['metric'] == 'iters'
+                lambda_poly = lambda epoch: pow((1.0 - epoch / solver_dict['max_iters']),
+                                                lr_params['lambda_range']['max_power'] * epoch / solver_dict['max_iters'])
+
+            scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_poly)
+
         elif lr_params['lr_policy'] == 'lambda_linear':
             if lr_params['metric'] == 'epoch':
                 lambda_linear = lambda epoch: 1.0 - (epoch / solver_dict['max_epoch'])

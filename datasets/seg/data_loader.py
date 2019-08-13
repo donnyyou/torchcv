@@ -73,17 +73,12 @@ class DataLoader(object):
 
     def get_valloader(self):
         if self.configer.get('val.loader', default=None) in [None, 'default']:
-            dataset = DefaultLoader(root_dir=self.configer.get('data', 'data_dir'), dataset='val',
-                                    aug_transform=self.aug_val_transform,
-                                    img_transform=self.img_transform,
-                                    label_transform=self.label_transform,
-                                    configer=self.configer)
-            sampler = None
-            if self.configer.get('network.distributed'):
-                sampler = torch.utils.data.distributed.DistributedSampler(dataset)
-
             valloader = data.DataLoader(
-                dataset, sampler=sampler,
+                DefaultLoader(root_dir=self.configer.get('data', 'data_dir'), dataset='val',
+                              aug_transform=self.aug_val_transform,
+                              img_transform=self.img_transform,
+                              label_transform=self.label_transform,
+                              configer=self.configer),
                 batch_size=self.configer.get('val', 'batch_size'), shuffle=False,
                 num_workers=self.configer.get('data', 'workers'), pin_memory=True,
                 collate_fn=lambda *args: collate(

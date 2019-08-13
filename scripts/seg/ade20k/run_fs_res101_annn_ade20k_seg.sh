@@ -10,10 +10,10 @@ cd ../../../
 
 DATA_DIR="/home/donny/DataSet/ADE20K"
 
-BACKBONE="deepbase_resnet50_dilated8"
-MODEL_NAME="pspnet"
-CHECKPOINTS_NAME="fs_res50_pspnet_ade20k_seg"$2
-PRETRAINED_MODEL="./pretrained_models/3x3resnet50-imagenet.pth"
+BACKBONE="deepbase_resnet101_dilated8"
+MODEL_NAME="annn"
+CHECKPOINTS_NAME="fs_res101_annn_ade20k_seg"$2
+PRETRAINED_MODEL="./pretrained_models/3x3resnet101-imagenet.pth"
 
 CONFIG_FILE='configs/seg/ade20k/base_fcn_ade20k_seg.conf'
 MAX_ITERS=150000

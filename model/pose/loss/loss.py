@@ -6,19 +6,11 @@
 
 import torch.nn as nn
 
-from model.det.loss.focal_loss import FocalLoss
-from model.det.loss.multibox_loss import MultiBoxLoss
-from model.det.loss.smooth_l1_loss import SmoothL1Loss
-from model.det.loss.ce_loss import CELoss
-from model.det.loss.region_loss import RegionLoss
+from model.pose.loss.mse_loss import MseLoss
 
 
 BASE_LOSS_DICT = dict(
-    multibox_loss=0,
-    smooth_l1_loss=1,
-    ce_loss=2,
-    focal_loss=2,
-    region_loss=3,
+    mse_loss=0,
 )
 
 
@@ -26,8 +18,7 @@ class Loss(nn.Module):
     def __init__(self, configer):
         super(Loss, self).__init__()
         self.configer = configer
-        self.func_list = [MultiBoxLoss(self.configer), SmoothL1Loss(self.configer), CELoss(self.configer),
-                          FocalLoss(self.configer), RegionLoss(self.configer)]
+        self.func_list = [MseLoss(self.configer),]
 
     def forward(self, out_list):
         loss_dict = out_list[-1]

@@ -70,26 +70,21 @@ class FasterRCNN(nn.Module):
         self.valid_loss_dict = configer.get('loss', 'loss_weights', configer.get('loss.loss_type'))
 
     def forward(self, data_dict):
-        if 'testing' in data_dict and data_dict['testing']:
-            x = self.backbone(data_dict['img'])
-            feat_list, rpn_locs, rpn_scores = self.rpn(x)
+        out_dict = dict()
+        x = self.backbone(data_dict['img'])
+        feat_list, rpn_locs, rpn_scores = self.rpn(x)
+        if not self.training:
             indices_and_rois, test_rois_num = self.roi_generator(feat_list, rpn_locs, rpn_scores,
                                                                  self.configer.get('rpn', 'n_test_pre_nms'),
                                                                  self.configer.get('rpn', 'n_test_post_nms'),
                                                                  data_dict['meta'])
             roi_cls_locs, roi_scores = self.bbox_head(x, indices_and_rois, data_dict['meta'])
-            return dict(test_group=[indices_and_rois, roi_cls_locs, roi_scores, test_rois_num])
+            out_dict['test_group'] = [indices_and_rois, roi_cls_locs, roi_scores, test_rois_num]
 
-        x = self.backbone(data_dict['img'])
-        feat_list, rpn_locs, rpn_scores = self.rpn(x)
+        if self.configer.get('phase') == 'test':
+            return out_dict
+
         gt_rpn_locs, gt_rpn_labels = self.rpn_target_assigner(feat_list, data_dict['bboxes'], data_dict['meta'])
-
-        test_indices_and_rois, test_rois_num = self.roi_generator(feat_list, rpn_locs, rpn_scores,
-                                                                  self.configer.get('rpn', 'n_test_pre_nms'),
-                                                                  self.configer.get('rpn', 'n_test_post_nms'),
-                                                                  data_dict['meta'])
-        test_roi_cls_locs, test_roi_scores = self.bbox_head(x, test_indices_and_rois, data_dict['meta'])
-        test_group = [test_indices_and_rois, test_roi_cls_locs, test_roi_scores, test_rois_num]
         train_indices_and_rois, _ = self.roi_generator(feat_list, rpn_locs, rpn_scores,
                                                        self.configer.get('rpn', 'n_train_pre_nms'),
                                                        self.configer.get('rpn', 'n_train_post_nms'),
@@ -104,15 +99,31 @@ class FasterRCNN(nn.Module):
         sample_roi_locs = sample_roi_locs[
             torch.arange(0, sample_roi_locs.size()[0]).long().to(sample_roi_locs.device),
             gt_roi_labels.long().to(sample_roi_locs.device)].contiguous().view(-1, 4)
-        train_group = [rpn_locs, rpn_scores, sample_roi_locs, sample_roi_scores]
-        target_group = [gt_rpn_locs, gt_rpn_labels, gt_roi_bboxes, gt_roi_labels]
-        out_dict = dict(test_group=test_group)
+        out_dict['train_group'] = [sample_rois, sample_roi_locs, sample_roi_scores]
         loss_dict = dict()
-        if 'rcnn_loss' in self.valid_loss_dict:
-            loss_dict['rcnn_loss'] = dict(
-                params=[train_group, target_group],
-                type=torch.cuda.LongTensor([BASE_LOSS_DICT['rcnn_loss']]),
-                weight=torch.cuda.FloatTensor([self.valid_loss_dict['rcnn_loss']])
+        if 'rpn_loc_loss' in self.valid_loss_dict:
+            loss_dict['rpn_loc_loss'] = dict(
+                params=[rpn_locs, gt_rpn_locs, gt_rpn_labels, self.configer.get('loss.params.rpn_sigma')],
+                type=torch.cuda.LongTensor([BASE_LOSS_DICT['smooth_l1_loss']]),
+                weight=torch.cuda.FloatTensor([self.valid_loss_dict['rpn_loc_loss']])
+            )
+        if 'rpn_cls_loss' in self.valid_loss_dict:
+            loss_dict['rpn_cls_loss'] = dict(
+                params=[rpn_scores, gt_rpn_labels],
+                type=torch.cuda.LongTensor([BASE_LOSS_DICT['ce_loss']]),
+                weight=torch.cuda.FloatTensor([self.valid_loss_dict['rpn_cls_loss']])
+            )
+        if 'roi_loc_loss' in self.valid_loss_dict:
+            loss_dict['roi_loc_loss'] = dict(
+                params=[sample_roi_locs, gt_roi_bboxes, gt_roi_labels, self.configer.get('loss.params.roi_sigma')],
+                type=torch.cuda.LongTensor([BASE_LOSS_DICT['smooth_l1_loss']]),
+                weight=torch.cuda.FloatTensor([self.valid_loss_dict['roi_loc_loss']])
+            )
+        if 'roi_cls_loss' in self.valid_loss_dict:
+            loss_dict['roi_cls_loss'] = dict(
+                params=[sample_roi_scores, gt_roi_labels],
+                type=torch.cuda.LongTensor([BASE_LOSS_DICT['ce_loss']]),
+                weight=torch.cuda.FloatTensor([self.valid_loss_dict['roi_cls_loss']])
             )
         return out_dict, loss_dict
 
