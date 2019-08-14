@@ -49,7 +49,7 @@ elif [[ "$1"x == "val"x ]]; then
                        --backbone ${BACKBONE} --model_name ${MODEL_NAME} --checkpoints_name ${CHECKPOINTS_NAME} \
                        --resume ./checkpoints/seg/cityscapes/${CHECKPOINTS_NAME}_latest.pth \
                        --test_dir ${DATA_DIR}/val/image --out_dir val  2>&1 | tee -a ${LOG_FILE}
-  cd metrics/seg/
+  cd metric/seg/
   ${PYTHON} -u seg_evaluator.py --config_file "../../"${CONFIG_FILE} \
                                 --pred_dir ../../results/seg/ade20k/${CHECKPOINTS_NAME}/val/label \
                                 --gt_dir ${DATA_DIR}/val/label  2>&1 | tee -a "../../"${LOG_FILE}
