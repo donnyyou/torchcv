@@ -42,8 +42,8 @@ class SegEvaluator(object):
             gt_path = os.path.join(gt_dir, filename)
             predmap = ImageHelper.to_np(ImageHelper.read_image(pred_path, tool='pil', mode='P'))
             gtmap = ImageHelper.to_np(ImageHelper.read_image(gt_path, tool='pil', mode='P'))
-            predmap = self.relabel(predmap)
-            gtmap = self.relabel(gtmap)
+            predmap = self.relabel(np.copy(predmap))
+            gtmap = self.relabel(np.copy(gtmap))
 
             self.seg_running_score.update(predmap[np.newaxis, :, :], gtmap[np.newaxis, :, :])
             img_cnt += 1
