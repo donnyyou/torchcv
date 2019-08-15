@@ -77,7 +77,7 @@ if __name__ == "__main__":
                         dest='network.resume_strict', help='Fully match keys or not.')
     parser.add_argument('--resume_continue', type=str2bool, nargs='?', default=False,
                         dest='network.resume_continue', help='Whether to continue training.')
-    parser.add_argument('--resume_val', type=str2bool, nargs='?', default=True,
+    parser.add_argument('--resume_val', type=str2bool, nargs='?', default=False,
                         dest='network.resume_val', help='Whether to validate during resume.')
     parser.add_argument('--gather', type=str2bool, nargs='?', default=True,
                         dest='network.gather', help='Whether to gather the output of model.')
@@ -175,7 +175,7 @@ if __name__ == "__main__":
         Log.error('Task: {} is not valid.'.format(configer.get('task')))
         exit(1)
     if configer.get('phase') == 'train':
-        if configer.get('network', 'resume') is None:
+        if configer.get('network', 'resume') is None or not configer.get('network.resume_continue'):
             Controller.init(runner)
 
         Controller.train(runner)
