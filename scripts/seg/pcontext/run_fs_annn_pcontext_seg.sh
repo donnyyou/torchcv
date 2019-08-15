@@ -2,7 +2,7 @@
 
 # check the enviroment info
 nvidia-smi
-PYTHON="python"
+PYTHON="python -u"
 
 export PYTHONPATH="/home/zzhu/experiments/torchcv_new":${PYTHONPATH}
 
@@ -29,7 +29,7 @@ if [[ ! -d ${LOG_DIR} ]]; then
 fi
 
 NGPUS=4
-DIST_PYTHON="${PYTHON} -u -m torch.distributed.launch --nproc_per_node=${NGPUS}"
+DIST_PYTHON="${PYTHON} -m torch.distributed.launch --nproc_per_node=${NGPUS}"
 
 if [[ "$1"x == "train"x ]]; then
   ${DIST_PYTHON} main.py --config_file ${CONFIG_FILE} --phase train --train_batch_size 4 --val_batch_size 1 --workers 1 \
@@ -45,20 +45,20 @@ elif [[ "$1"x == "resume"x ]]; then
                             --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL}  2>&1 | tee -a ${LOG_FILE}
 
 elif [[ "$1"x == "val"x ]]; then
-  ${PYTHON} -u main.py --config_file ${CONFIG_FILE} --phase test --gpu 0 1 2 3 --gather n \
-                       --backbone ${BACKBONE} --model_name ${MODEL_NAME} --checkpoints_name ${CHECKPOINTS_NAME} \
-                       --resume ./checkpoints/seg/cityscapes/${CHECKPOINTS_NAME}_latest.pth \
-                       --test_dir ${DATA_DIR}/val/image --out_dir val  2>&1 | tee -a ${LOG_FILE}
+  ${PYTHON} main.py --config_file ${CONFIG_FILE} --phase test --gpu 0 1 2 3 --gather n \
+                    --backbone ${BACKBONE} --model_name ${MODEL_NAME} --checkpoints_name ${CHECKPOINTS_NAME} \
+                    --resume ./checkpoints/seg/cityscapes/${CHECKPOINTS_NAME}_latest.pth \
+                    --test_dir ${DATA_DIR}/val/image --out_dir val  2>&1 | tee -a ${LOG_FILE}
   cd metric/seg/
-  ${PYTHON} -u seg_evaluator.py --config_file "../../"${CONFIG_FILE} \
-                                --pred_dir ../../results/seg/ade20k/${CHECKPOINTS_NAME}/val/label \
-                                --gt_dir ${DATA_DIR}/val/label  2>&1 | tee -a "../../"${LOG_FILE}
+  ${PYTHON} seg_evaluator.py --config_file "../../"${CONFIG_FILE} \
+                             --pred_dir ../../results/seg/ade20k/${CHECKPOINTS_NAME}/val/label \
+                             --gt_dir ${DATA_DIR}/val/label  2>&1 | tee -a "../../"${LOG_FILE}
 
 elif [[ "$1"x == "test"x ]]; then
-  ${PYTHON} -u main.py --config_file ${CONFIG_FILE} --phase test --gpu 0 1 2 3 --gather n \
-                       --backbone ${BACKBONE} --model_name ${MODEL_NAME} --checkpoints_name ${CHECKPOINTS_NAME} \
-                       --resume ./checkpoints/seg/cityscapes/${CHECKPOINTS_NAME}_latest.pth \
-                       --test_dir ${DATA_DIR}/test --out_dir test  2>&1 | tee -a ${LOG_FILE}
+  ${PYTHON} main.py --config_file ${CONFIG_FILE} --phase test --gpu 0 1 2 3 --gather n \
+                    --backbone ${BACKBONE} --model_name ${MODEL_NAME} --checkpoints_name ${CHECKPOINTS_NAME} \
+                    --resume ./checkpoints/seg/cityscapes/${CHECKPOINTS_NAME}_latest.pth \
+                    --test_dir ${DATA_DIR}/test --out_dir test  2>&1 | tee -a ${LOG_FILE}
 
 else
   echo "$1"x" is invalid..."
