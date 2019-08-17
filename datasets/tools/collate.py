@@ -84,6 +84,13 @@ def collate(batch, trans_dict, device_ids=None):
         else:
             raise NotImplementedError('Size Mode {} is invalid!'.format(trans_dict['size_mode']))
 
+        if 'fit_stride' in trans_dict:
+            stride = trans_dict['fit_stride']
+            pad_w = 0 if (target_width % stride == 0) else stride - (target_width % stride)  # right
+            pad_h = 0 if (target_height % stride == 0) else stride - (target_height % stride)  # down
+            target_width = target_width + pad_w
+            target_height = target_height + pad_h
+
         for i in range(start, start + samples_per_gpu):
             if 'meta' in data_keys:
                 batch[i]['meta'].data['input_size'] = [target_width, target_height]
@@ -115,8 +122,8 @@ def collate(batch, trans_dict, device_ids=None):
                             batch[i]['polygons'].data[object_id][polygon_id][1::2] *= h_scale_ratio
 
                 scaled_size = (int(round(width * w_scale_ratio)), int(round(height * h_scale_ratio)))
-                if 'meta' in data_keys and 'border_size' in batch[i]['meta'].data:
-                    batch[i]['meta'].data['border_size'] = scaled_size
+                if 'meta' in data_keys and 'border_wh' in batch[i]['meta'].data:
+                    batch[i]['meta'].data['border_wh'] = scaled_size
 
                 scaled_size_hw = (scaled_size[1], scaled_size[0])
 
@@ -127,13 +134,6 @@ def collate(batch, trans_dict, device_ids=None):
 
                 if 'maskmap' in data_keys:
                     batch[i]['maskmap']._data = TensorHelper.resize(batch[i]['maskmap'].data, scaled_size_hw, mode='nearest')
-
-            if 'fit_stride' in trans_dict:
-                stride = trans_dict['fit_stride']
-                pad_w = 0 if (target_width % stride == 0) else stride - (target_width % stride)  # right
-                pad_h = 0 if (target_height % stride == 0) else stride - (target_height % stride)  # down
-                target_width = target_width + pad_w
-                target_height = target_height + pad_h
 
             pad_width = target_width - scaled_size[0]
             pad_height = target_height - scaled_size[1]
