@@ -33,17 +33,17 @@ class RunnerHelper(object):
             local_rank = runner.configer.get('local_rank')
             torch.cuda.set_device(local_rank)
             torch.distributed.init_process_group(backend='nccl', init_method='env://')
-            # if runner.configer.get('network.syncbn', default=False):
-            #    Log.info('Converting syncbn model...')
-            #    net = nn.SyncBatchNorm.convert_sync_batchnorm(net)
-            # net = nn.parallel.DistributedDataParallel(net.cuda(), device_ids=[local_rank], output_device=local_rank)
             if runner.configer.get('network.syncbn', default=False):
                 Log.info('Converting syncbn model...')
-                from apex.parallel import convert_syncbn_model
-                net = convert_syncbn_model(net)
+                net = nn.SyncBatchNorm.convert_sync_batchnorm(net)
 
-            from apex.parallel import DistributedDataParallel
-            net = DistributedDataParallel(net.cuda(), delay_allreduce=True)
+            net = nn.parallel.DistributedDataParallel(net.cuda(), device_ids=[local_rank], output_device=local_rank)
+            # if runner.configer.get('network.syncbn', default=False):
+            #     Log.info('Converting syncbn model...')
+            #     from apex.parallel import convert_syncbn_model
+            #     net = convert_syncbn_model(net)
+            # from apex.parallel import DistributedDataParallel
+            # net = DistributedDataParallel(net.cuda(), delay_allreduce=True)
             return net
 
         net = net.to(torch.device('cpu' if runner.configer.get('gpu') is None else 'cuda'))
