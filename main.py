@@ -131,8 +131,8 @@ if __name__ == "__main__":
     configer = Configer(args_parser=args)
 
     if args.seed is not None:
-        random.seed(args.seed)
-        torch.manual_seed(args.seed)
+        random.seed(args.seed + args.local_rank)
+        torch.manual_seed(args.seed + args.local_rank)
 
     cudnn.enabled = True
     cudnn.benchmark = args.cudnn

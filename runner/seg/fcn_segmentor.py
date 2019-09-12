@@ -129,9 +129,6 @@ class FCNSegmentor(object):
         """
           Validation function during the train phase.
         """
-        if self.configer.get('local_rank') != 0:
-            return
-
         self.seg_net.eval()
         start_time = time.time()
 
