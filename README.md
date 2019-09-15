@@ -24,6 +24,7 @@ This repository provides source code for most deep learning based cv problems. W
     - DeepLabV3: Rethinking Atrous Convolution for Semantic Image Segmentation
     - PSPNet: Pyramid Scene Parsing Network
     - DenseASPP: DenseASPP for Semantic Segmentation in Street Scenes
+    - Asymmetric Non-local Neural Networks for Semantic Segmentation
     
 - [Object Detection](https://github.com/youansheng/torchcv/tree/master/methods/det)
     - SSD: Single Shot MultiBox Detector
