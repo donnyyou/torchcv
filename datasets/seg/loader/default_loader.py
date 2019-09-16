@@ -51,8 +51,8 @@ class DefaultLoader(data.Dataset):
             labelmap = self.label_transform(labelmap)
 
         meta = dict(
-            ori_img_size=img_size,
-            border_size=border_size,
+            ori_img_wh=img_size,
+            border_wh=border_size,
             ori_target=ori_target
         )
         return dict(

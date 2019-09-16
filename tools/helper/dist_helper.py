@@ -105,16 +105,16 @@ class DistHelper(object):
             return input_dict
         with torch.no_grad():
             names = []
-        values = []
-        # sort the keys so that they are consistent across processes
-        for k in sorted(input_dict.keys()):
-            names.append(k)
-            values.append(input_dict[k])
-        values = torch.stack(values, dim=0)
-        dist.reduce(values, dst=0)
-        if dist.get_rank() == 0 and average:
-            # only main process gets accumulated, so only divide by
-            # world_size in this case
-            values /= world_size
-        reduced_dict = {k: v for k, v in zip(names, values)}
-        return reduced_dict
+            values = []
+            # sort the keys so that they are consistent across processes
+            for k in sorted(input_dict.keys()):
+                names.append(k)
+                values.append(input_dict[k])
+            values = torch.stack(values, dim=0)
+            dist.reduce(values, dst=0)
+            if dist.get_rank() == 0 and average:
+                # only main process gets accumulated, so only divide by
+                # world_size in this case
+                values /= world_size
+            reduced_dict = {k: v for k, v in zip(names, values)}
+            return reduced_dict

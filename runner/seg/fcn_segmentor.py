@@ -129,9 +129,6 @@ class FCNSegmentor(object):
         """
           Validation function during the train phase.
         """
-        if self.configer.get('local_rank') != 0:
-            return
-
         self.seg_net.eval()
         start_time = time.time()
 
@@ -172,11 +169,10 @@ class FCNSegmentor(object):
     def _update_running_score(self, pred, metas):
         pred = pred.permute(0, 2, 3, 1)
         for i in range(pred.size(0)):
-            ori_img_size = metas[i]['ori_img_size']
-            border_size = metas[i]['border_size']
+            border_size = metas[i]['border_wh']
             ori_target = metas[i]['ori_target']
             total_logits = cv2.resize(pred[i, :border_size[1], :border_size[0]].cpu().numpy(),
-                                      tuple(ori_img_size), interpolation=cv2.INTER_CUBIC)
+                                      tuple(metas[i]['ori_img_wh']), interpolation=cv2.INTER_CUBIC)
             labelmap = np.argmax(total_logits, axis=-1)
             self.seg_running_score.update(labelmap[None], ori_target[None])
 
