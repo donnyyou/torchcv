@@ -4,9 +4,9 @@
 nvidia-smi
 PYTHON="python"
 
-export PYTHONPATH="/home/donny/Projects/TorchCV":$PYTHONPATH
-
-cd ../../../
+WORK_DIR=$(cd $(dirname $0)/../../../;pwd)
+export PYTHONPATH=${WORK_DIR}:${PYTHONPATH}
+cd ${WORK_DIR}
 
 DATA_DIR="/home/donny/DataSet/VOC07+12_DET"
 MODEL_NAME="vgg16_ssd512"

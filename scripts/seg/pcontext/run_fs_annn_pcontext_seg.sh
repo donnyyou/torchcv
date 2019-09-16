@@ -4,11 +4,10 @@
 nvidia-smi
 PYTHON="python -u"
 
-export PYTHONPATH="/home/donny/Projects/TorchCV":${PYTHONPATH}
+WORK_DIR=$(cd $(dirname $0)/../../../;pwd)
+export PYTHONPATH=${WORK_DIR}:${PYTHONPATH}
+cd ${WORK_DIR}
 
-cd ../../../
-
-DATASET="pcontext"
 DATA_DIR="/home/donny/DataSet/PContext"
 
 BACKBONE="deepbase_resnet101_dilated8"
@@ -20,7 +19,7 @@ CONFIG_FILE='configs/seg/pcontext/base_fcn_pcontext_seg.conf'
 MAX_ITERS=28000
 LOSS_TYPE="dsnce_loss"
 
-LOG_DIR="./log/seg/cityscapes/"
+LOG_DIR="./log/seg/pcontext/"
 LOG_FILE="${LOG_DIR}${CHECKPOINTS_NAME}.log"
 
 if [[ ! -d ${LOG_DIR} ]]; then
@@ -35,31 +34,31 @@ DIST_PYTHON="${PYTHON} -m torch.distributed.launch --nproc_per_node=${NGPUS}"
 
 if [[ "$1"x == "train"x ]]; then
   ${DIST_PYTHON} main.py --config_file ${CONFIG_FILE} --phase train --train_batch_size 4 --val_batch_size 1 \
-                            --backbone ${BACKBONE} --model_name ${MODEL_NAME} --drop_last y --syncbn y --distributed y \
-                            --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --max_iters ${MAX_ITERS} \
-                            --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL}  2>&1 | tee ${LOG_FILE}
+                         --backbone ${BACKBONE} --model_name ${MODEL_NAME} --drop_last y --syncbn y --distributed y \
+                         --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --max_iters ${MAX_ITERS} \
+                         --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL}  2>&1 | tee ${LOG_FILE}
 
 elif [[ "$1"x == "resume"x ]]; then
   ${DIST_PYTHON} main.py --config_file ${CONFIG_FILE} --phase train --train_batch_size 4 --val_batch_size 1 \
-                            --backbone ${BACKBONE} --model_name ${MODEL_NAME} --drop_last y --syncbn y --distributed y \
-                            --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --max_iters ${MAX_ITERS} \
-                            --resume_continue y --resume ./checkpoints/seg/cityscapes/${CHECKPOINTS_NAME}_latest.pth \
-                            --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL}  2>&1 | tee -a ${LOG_FILE}
+                         --backbone ${BACKBONE} --model_name ${MODEL_NAME} --drop_last y --syncbn y --distributed y \
+                         --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --max_iters ${MAX_ITERS} \
+                         --resume_continue y --resume ./checkpoints/seg/pcontext/${CHECKPOINTS_NAME}_latest.pth \
+                         --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL}  2>&1 | tee -a ${LOG_FILE}
 
 elif [[ "$1"x == "val"x ]]; then
   ${PYTHON} main.py --config_file ${CONFIG_FILE} --phase test --gpu 0 1 2 3 --gather n \
                     --backbone ${BACKBONE} --model_name ${MODEL_NAME} --checkpoints_name ${CHECKPOINTS_NAME} \
-                    --resume ./checkpoints/seg/cityscapes/${CHECKPOINTS_NAME}_latest.pth \
+                    --resume ./checkpoints/seg/pcontext/${CHECKPOINTS_NAME}_latest.pth \
                     --test_dir ${DATA_DIR}/val/image --out_dir val  2>&1 | tee -a ${LOG_FILE}
   cd metric/seg/
   ${PYTHON} seg_evaluator.py --config_file "../../"${CONFIG_FILE} \
-                             --pred_dir ../../results/seg/ade20k/${CHECKPOINTS_NAME}/val/label \
+                             --pred_dir ../../results/seg/pcontext/${CHECKPOINTS_NAME}/val/label \
                              --gt_dir ${DATA_DIR}/val/label  2>&1 | tee -a "../../"${LOG_FILE}
 
 elif [[ "$1"x == "test"x ]]; then
   ${PYTHON} main.py --config_file ${CONFIG_FILE} --phase test --gpu 0 1 2 3 --gather n \
                     --backbone ${BACKBONE} --model_name ${MODEL_NAME} --checkpoints_name ${CHECKPOINTS_NAME} \
-                    --resume ./checkpoints/seg/cityscapes/${CHECKPOINTS_NAME}_latest.pth \
+                    --resume ./checkpoints/seg/pcontext/${CHECKPOINTS_NAME}_latest.pth \
                     --test_dir ${DATA_DIR}/test --out_dir test  2>&1 | tee -a ${LOG_FILE}
 
 else
