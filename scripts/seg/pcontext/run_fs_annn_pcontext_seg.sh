@@ -4,12 +4,12 @@
 nvidia-smi
 PYTHON="python -u"
 
-export PYTHONPATH="/home/zzhu/experiments/torchcv_new":${PYTHONPATH}
+export PYTHONPATH="/home/donny/Projects/TorchCV":${PYTHONPATH}
 
 cd ../../../
 
 DATASET="pcontext"
-DATA_DIR="/home/donny/DataSet/Cityscapes"
+DATA_DIR="/home/donny/DataSet/PContext"
 
 BACKBONE="deepbase_resnet101_dilated8"
 MODEL_NAME="annn"
@@ -17,7 +17,7 @@ CHECKPOINTS_NAME="fs_${MODEL_NAME}_seg"$2
 PRETRAINED_MODEL="./pretrained_models/3x3resnet101-imagenet.pth"
 
 CONFIG_FILE='configs/seg/pcontext/base_fcn_pcontext_seg.conf'
-MAX_ITERS=40000
+MAX_ITERS=28000
 LOSS_TYPE="dsnce_loss"
 
 LOG_DIR="./log/seg/cityscapes/"
