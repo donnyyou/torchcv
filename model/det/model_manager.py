@@ -7,6 +7,7 @@
 from model.det.nets.darknet_yolov3 import DarkNetYolov3
 from model.det.nets.vgg16_ssd300 import Vgg16SSD300
 from model.det.nets.vgg16_ssd512 import Vgg16SSD512
+from model.det.nets.lffdv2 import LFFDv2
 from model.det.nets.faster_rcnn import FasterRCNN
 from model.det.loss.loss import Loss
 from tools.util.logger import Logger as Log
@@ -14,6 +15,7 @@ from tools.util.logger import Logger as Log
 DET_MODEL_DICT = {
     'vgg16_ssd300': Vgg16SSD300,
     'vgg16_ssd512': Vgg16SSD512,
+    'lffdv2': LFFDv2,
     'darknet_yolov3': DarkNetYolov3,
     'faster_rcnn': FasterRCNN,
 }
