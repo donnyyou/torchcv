@@ -52,6 +52,12 @@ class SSDPriorBoxLayer(object):
                     for ar in self.configer.get('anchor', 'aspect_ratio_list'):
                         boxes.append((stride_offset_w, stride_offset_h, s_w * ar, s_h / ar))
 
+            elif self.configer.get('anchor', 'anchor_method') == 'naive':
+                s_w = self.configer.get('anchor', 'cur_anchor_sizes')[i]
+                s_h = self.configer.get('anchor', 'cur_anchor_sizes')[i]
+                for ar in self.configer.get('anchor', 'aspect_ratio_list')[i]:
+                    boxes.append((stride_offset_w, stride_offset_h, s_w * math.sqrt(ar), s_h / math.sqrt(ar)))
+
             else:
                 Log.error('Anchor Method {} not valid.'.format(self.configer.get('anchor', 'anchor_method')))
                 exit(1)
