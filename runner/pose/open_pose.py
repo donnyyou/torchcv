@@ -75,7 +75,7 @@ class OpenPose(object):
         # Adjust the learning rate after every epoch.
         self.runner_state['epoch'] += 1
         for i, data_dict in enumerate(self.train_loader):
-            Trainer.update(self, backbone_list=(0,), solver_dict=self.configer.get('solver'))
+            Trainer.update(self, warm_list=(0,), solver_dict=self.configer.get('solver'))
             self.data_time.update(time.time() - start_time)
             # Forward pass.
             out = self.pose_net(data_dict)
