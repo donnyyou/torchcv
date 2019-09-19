@@ -91,7 +91,7 @@ def collate(batch, trans_dict, device_ids=None):
             target_width = target_width + pad_w
             target_height = target_height + pad_h
 
-        for i in range(start, start + samples_per_gpu):
+        for i in range(start, min(len(batch), start + samples_per_gpu)):
             if 'meta' in data_keys:
                 batch[i]['meta'].data['input_size'] = [target_width, target_height]
 

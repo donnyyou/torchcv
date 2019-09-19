@@ -39,14 +39,14 @@ class DetectionLayer(nn.Module):
                 nn.Sequential(
                     nn.Conv2d(num_filters_list[2], num_filters_list[2], 1),
                     nn.ReLU(),
-                    nn.Conv2d(num_filters_list[2], self.num_anchors[i] * 4, kernel_size=1, padding=1)
+                    nn.Conv2d(num_filters_list[2], self.num_anchors[i] * 4, kernel_size=1, padding=0)
                 )
             )
             self.conf_layers.append(
                 nn.Sequential(
                     nn.Conv2d(num_filters_list[2], num_filters_list[2], 1),
                     nn.ReLU(),
-                    nn.Conv2d(num_filters_list[2], self.num_anchors[i] * self.num_classes, kernel_size=1, padding=1)
+                    nn.Conv2d(num_filters_list[2], self.num_anchors[i] * self.num_classes, kernel_size=1, padding=0)
                 )
             )
 

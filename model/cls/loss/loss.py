@@ -11,7 +11,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-from lib.models.loss import KLLoss, CELoss, HardTripletLoss, LiftedStructureLoss
+from model.cls.loss import KLLoss, CELoss, HardTripletLoss, LiftedStructureLoss
 
 
 BASE_LOSS_DICT = dict(
