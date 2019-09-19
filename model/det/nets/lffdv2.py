@@ -221,7 +221,7 @@ class LFFDv2(nn.Module):
         c20 = c18 + c20
         r20 = self.relu20(c20)
 
-        out = [r14, r17, r20]
+        out = [r14]
         pred_loc, pred_conf, dets_loc, dets_conf = self.ssd_detection_layer(out, data_dict)
         out_dict = dict(loc=dets_loc, conf=dets_conf)
         if self.configer.get('phase') == 'test':

@@ -13,7 +13,7 @@ from tools.util.logger import Logger as Log
 class SSDPriorBoxLayer(object):
     """Compute prior boxes coordinates in center-offset form for each source feature map."""
 
-    def __init__(self, configer, clip=True):
+    def __init__(self, configer, clip=False):
         self.configer = configer
         self.clip = clip
 
@@ -53,8 +53,8 @@ class SSDPriorBoxLayer(object):
                         boxes.append((stride_offset_w, stride_offset_h, s_w * ar, s_h / ar))
 
             elif self.configer.get('anchor', 'anchor_method') == 'naive':
-                s_w = self.configer.get('anchor', 'cur_anchor_sizes')[i]
-                s_h = self.configer.get('anchor', 'cur_anchor_sizes')[i]
+                s_w = self.configer.get('anchor', 'anchor_sizes_list')[i][0]
+                s_h = self.configer.get('anchor', 'anchor_sizes_list')[i][1]
                 for ar in self.configer.get('anchor', 'aspect_ratio_list')[i]:
                     boxes.append((stride_offset_w, stride_offset_h, s_w * math.sqrt(ar), s_h / math.sqrt(ar)))
 
