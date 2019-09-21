@@ -12,8 +12,8 @@ from runner.tools.runner_helper import RunnerHelper
 from runner.tools.trainer import Trainer
 from model.cls.model_manager import ModelManager
 from tools.util.average_meter import AverageMeter, DictAverageMeter
-from tools.util.logger import Logger as Log
 from metric.cls.cls_running_score import ClsRunningScore
+from tools.util.logger import Logger as Log
 
 
 class ImageClassifier(object):
@@ -57,7 +57,7 @@ class ImageClassifier(object):
         for key, value in params_dict.items():
             if value.requires_grad:
                 if 'backbone' in key:
-                    if self.configer.get('network', 'bb_lr_scale') == 0.0:
+                    if self.configer.get('solver.lr.bb_lr_scale') == 0.0:
                         value.requires_grad = False
                     else:
                         lr_1.append(value)
@@ -65,7 +65,7 @@ class ImageClassifier(object):
                     lr_2.append(value)
 
         params = [
-            {'params': lr_1, 'lr': self.solver_dict['lr']['base_lr'] * self.configer.get('network', 'bb_lr_scale')},
+            {'params': lr_1, 'lr': self.solver_dict['lr']['base_lr'] * self.configer.get('solver.lr.bb_lr_scale')},
             {'params': lr_2, 'lr': self.solver_dict['lr']['base_lr']}]
         return params
 
@@ -78,8 +78,9 @@ class ImageClassifier(object):
         # Adjust the learning rate after every epoch.
         self.runner_state['epoch'] += 1
         for i, data_dict in enumerate(self.train_loader):
-            Trainer.update(self, warm_list=(0, ),
-                           warm_lr_list=(self.solver_dict['lr']['base_lr']*self.configer.get('network', 'bb_lr_scale'),),
+            Trainer.update(self, warm_list=(0, 1),
+                           warm_lr_list=(self.solver_dict['lr']['base_lr']*self.configer.get('solver.lr.bb_lr_scale'),
+                                         self.solver_dict['lr']['base_lr']),
                            solver_dict=self.solver_dict)
             self.data_time.update(time.time() - start_time)
             data_dict = RunnerHelper.to_device(self, data_dict)
@@ -124,8 +125,7 @@ class ImageClassifier(object):
                 RunnerHelper.save_net(self, self.cls_net)
 
             # Check to val the current model.
-            if self.runner_state['iters'] % self.solver_dict['test_interval'] == 0 \
-                    and not self.configer.get('distributed'):
+            if self.runner_state['iters'] % self.solver_dict['test_interval'] == 0:
                 self.val()
 
     def val(self):
@@ -152,9 +152,9 @@ class ImageClassifier(object):
             # Print the log info & reset the states.
             Log.info('Test Time {batch_time.sum:.3f}s'.format(batch_time=self.batch_time))
             Log.info('TestLoss = {}'.format(self.val_losses.info()))
-            Log.info('Top1 ACC = {}'.format(self.running_score.get_top1_acc()))
-            Log.info('Top3 ACC = {}'.format(self.running_score.get_top3_acc()))
-            Log.info('Top5 ACC = {}'.format(self.running_score.get_top5_acc()))
+            Log.info('Top1 ACC = {}'.format(RunnerHelper.dist_avg(self, self.running_score.get_top1_acc())))
+            Log.info('Top3 ACC = {}'.format(RunnerHelper.dist_avg(self, self.running_score.get_top3_acc())))
+            Log.info('Top5 ACC = {}'.format(RunnerHelper.dist_avg(self, self.running_score.get_top5_acc())))
             self.batch_time.reset()
             self.batch_time.reset()
             self.val_losses.reset()

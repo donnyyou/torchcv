@@ -11,6 +11,7 @@ import torch
 import torch.nn as nn
 from torch.nn.parallel.scatter_gather import gather as torch_gather
 
+from tools.helper.dist_helper import DistHelper
 from tools.util.logger import Logger as Log
 
 
@@ -225,6 +226,14 @@ class RunnerHelper(object):
 
         else:
             return outputs
+
+    @staticmethod
+    def dist_avg(runner, data):
+        if runner.get('network.distributed'):
+            data_list = DistHelper.all_gather(data)
+            return sum(data_list) / len(data_list)
+
+        return data
 
     @staticmethod
     def get_lr(optimizer):
