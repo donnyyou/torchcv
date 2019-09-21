@@ -26,7 +26,7 @@ def stack(batch, data_key=None, device_ids=None):
                    isinstance(batch[0][data_key].data, collections.Mapping) or \
                    isinstance(batch[0][data_key].data, collections.Sequence)
             stacked = []
-            if batch[0][data_key].samples_per_gpu:
+            if batch[0][data_key].samples_per_gpu and len(device_ids) > 1:
                 samples_per_gpu = (len(batch) - 1 + len(device_ids)) // len(device_ids)
                 for i in range(0, len(batch), samples_per_gpu):
                     stacked.append(
@@ -35,7 +35,7 @@ def stack(batch, data_key=None, device_ids=None):
             else:
                 stacked = default_collate([sample[data_key].data for sample in batch])
 
-            if batch[0][data_key].return_dc:
+            if batch[0][data_key].return_dc and len(device_ids) > 1:
                 return DataContainer(stacked, stack=batch[0][data_key].stack,
                                      samples_per_gpu=batch[0][data_key].samples_per_gpu,
                                      cpu_only=batch[0][data_key].cpu_only)
@@ -43,14 +43,14 @@ def stack(batch, data_key=None, device_ids=None):
                 return stacked
         else:
             stacked = []
-            if batch[0][data_key].samples_per_gpu:
+            if batch[0][data_key].samples_per_gpu and len(device_ids) > 1:
                 samples_per_gpu = (len(batch) - 1 + len(device_ids)) // len(device_ids)
                 for i in range(0, len(batch), samples_per_gpu):
                     stacked.append([sample[data_key].data for sample in batch[i:i + samples_per_gpu]])
             else:
                 stacked = [sample[data_key].data for sample in batch]
 
-            if batch[0][data_key].return_dc:
+            if batch[0][data_key].return_dc and len(device_ids) > 1:
                 return DataContainer(stacked, stack=batch[0][data_key].stack,
                                      samples_per_gpu=batch[0][data_key].samples_per_gpu,
                                      cpu_only=batch[0][data_key].cpu_only)
