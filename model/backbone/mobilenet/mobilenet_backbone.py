@@ -4,7 +4,7 @@
 # Mobilenet models.
 
 
-from model.backbones.mobilenet.mobilenet_models import MobileNetModels
+from model.backbone.mobilenet.mobilenet_models import MobileNetModels
 
 
 class MobileNetBackbone(object):

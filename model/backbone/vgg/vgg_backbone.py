@@ -4,7 +4,7 @@
 # VGG models.
 
 
-from model.backbones.vgg.vgg_models import VGGModels
+from model.backbone.vgg.vgg_models import VGGModels
 
 
 class VGGBackbone(object):

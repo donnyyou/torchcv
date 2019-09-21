@@ -5,7 +5,7 @@
 
 import torch.nn as nn
 
-from model.backbones.darknet.darknet_models import DarkNetModels
+from model.backbone.darknet.darknet_models import DarkNetModels
 
 
 class NormalDarknetBackbone(nn.Module):

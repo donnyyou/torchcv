@@ -9,7 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from model.tools.module_helper import ModuleHelper
-from model.backbones.backbone_selector import BackboneSelector
+from model.backbone.backbone_selector import BackboneSelector
 from model.cls.loss.loss import BASE_LOSS_DICT
 from model.cls.utils.metric_linear import LINEAR_DICT
 

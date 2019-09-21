@@ -5,7 +5,7 @@
 
 import torch.nn as nn
 
-from model.backbones.densenet.densenet_models import DenseNetModels
+from model.backbone.densenet.densenet_models import DenseNetModels
 
 
 class NormalDensenetBackbone(nn.Module):

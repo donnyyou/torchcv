@@ -3,12 +3,12 @@
 # Author: Donny You(youansheng@gmail.com)
 
 
-from model.backbones.vgg.vgg_backbone import VGGBackbone
-from model.backbones.darknet.darknet_backbone import DarkNetBackbone
-from model.backbones.resnet.resnet_backbone import ResNetBackbone
-from model.backbones.mobilenet.mobilenet_backbone import MobileNetBackbone
-from model.backbones.densenet.densenet_backbone import DenseNetBackbone
-from model.backbones.squeezenet.squeezenet_backbone import SqueezeNetBackbone
+from model.backbone.vgg.vgg_backbone import VGGBackbone
+from model.backbone.darknet.darknet_backbone import DarkNetBackbone
+from model.backbone.resnet.resnet_backbone import ResNetBackbone
+from model.backbone.mobilenet.mobilenet_backbone import MobileNetBackbone
+from model.backbone.densenet.densenet_backbone import DenseNetBackbone
+from model.backbone.squeezenet.squeezenet_backbone import SqueezeNetBackbone
 from tools.util.logger import Logger as Log
 
 

@@ -8,7 +8,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from collections import OrderedDict
 
-from model.backbones.backbone_selector import BackboneSelector
+from model.backbone.backbone_selector import BackboneSelector
 from model.det.layers.yolo_detection_layer import YOLODetectionLayer
 
 

@@ -6,7 +6,7 @@
 import torch
 import torch.nn as nn
 
-from model.backbones.backbone_selector import BackboneSelector
+from model.backbone.backbone_selector import BackboneSelector
 from model.pose.loss.loss import BASE_LOSS_DICT
 
 

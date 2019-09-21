@@ -4,7 +4,7 @@
 # SqueezeNet models.
 
 
-from model.backbones.squeezenet.squeezenet_models import SqueezeNetModels
+from model.backbone.squeezenet.squeezenet_models import SqueezeNetModels
 
 
 class SqueezeNetBackbone(object):
