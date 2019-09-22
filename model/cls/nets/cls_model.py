@@ -4,6 +4,7 @@
 # ResNet in PyTorch.
 
 
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -52,10 +53,27 @@ class ClsModel(nn.Module):
 
         self.valid_loss_dict = configer.get('loss', 'loss_weights', configer.get('loss.loss_type'))
 
+    @staticmethod
+    def mixup_data(data_dict, alpha=0.2):
+        if alpha > 0.:
+            lam = np.random.beta(alpha, alpha)
+        else:
+            lam = 1.
+
+        batch_size = data_dict['img'].size(0)
+        index = torch.randperm(batch_size).to(data_dict['img'].device)
+        data_dict['img'] = lam * data_dict['img'] + (1 - lam) * data_dict[index, ...]
+        data_dict['label_a'], data_dict['label_b'] = data_dict['label'], data_dict['label'][index]
+        return data_dict, lam
+
     def forward(self, data_dict):
         out_dict = dict()
         label_dict = dict()
         loss_dict = dict()
+        lam = 1.0
+        if self.configer.get('data.mixup', default=False):
+            data_dict, lam = self.mixup_data(data_dict, self.configer.get('data.mixup_alpha'))
+
         x = self.backbone(data_dict['img'])
         x = F.adaptive_avg_pool2d(x, 1)
         x = self.reduction(x) if self.reduction else x
@@ -70,6 +88,27 @@ class ClsModel(nn.Module):
                     params=[sub_out, data_dict['label'][:, i]],
                     type=torch.cuda.LongTensor([BASE_LOSS_DICT['ce_loss']]),
                     weight=torch.cuda.FloatTensor([self.valid_loss_dict['ce_loss{}'.format(i)]])
+                )
+            if 'soft_ce_loss{}'.format(i) in self.valid_loss_dict:
+                loss_dict['{}soft_ce_loss{}'.format(self.flag, i)] = dict(
+                    params=[sub_out, data_dict['label'][:, i], self.configer.get('data.num_classes_list')[i]],
+                    type=torch.cuda.LongTensor([BASE_LOSS_DICT['soft_ce_loss']]),
+                    weight=torch.cuda.FloatTensor([self.valid_loss_dict['soft_ce_loss{}'.format(i)]])
+                )
+            if 'mixup_ce_loss{}'.format(i) in self.valid_loss_dict:
+                assert 'label_a' in data_dict and 'label_b' in data_dict
+                loss_dict['{}mixup_ce_loss{}'.format(self.flag, i)] = dict(
+                    params=[sub_out, data_dict['label_a'][:, i], data_dict['label_b'][:, i], lam],
+                    type=torch.cuda.LongTensor([BASE_LOSS_DICT['mixup_ce_loss']]),
+                    weight=torch.cuda.FloatTensor([self.valid_loss_dict['mixup_ce_loss{}'.format(i)]])
+                )
+            if 'mixup_soft_ce_loss{}'.format(i) in self.valid_loss_dict:
+                assert 'label_a' in data_dict and 'label_b' in data_dict
+                loss_dict['{}mixup_soft_ce_loss{}'.format(self.flag, i)] = dict(
+                    params=[sub_out, data_dict['label_a'][:, i], data_dict['label_b'][:, i],
+                            self.configer.get('data.num_classes_list')[i], lam],
+                    type=torch.cuda.LongTensor([BASE_LOSS_DICT['mixup_soft_ce_loss']]),
+                    weight=torch.cuda.FloatTensor([self.valid_loss_dict['mixup_soft_ce_loss{}'.format(i)]])
                 )
 
         feat = self.embed(x) if self.embed else x

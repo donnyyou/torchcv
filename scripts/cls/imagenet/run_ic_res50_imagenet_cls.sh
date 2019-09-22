@@ -10,7 +10,7 @@ cd ${WORK_DIR}
 
 DATA_DIR="/home/donny/DataSet/ImageNet"
 
-MODEL_NAME="resnet50"
+MODEL_NAME="cls_model"
 CHECKPOINTS_NAME="res50_imagenet_cls"$2
 
 CONFIG_FILE='configs/cls/imagenet/base_large_imagenet_cls.conf'

@@ -4,14 +4,9 @@
 # Loss function for Image Classification.
 
 
-from enum import Enum
-
-import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
-
-from model.cls.loss import KLLoss, CELoss, HardTripletLoss, LiftedStructureLoss
+from model.cls.loss import KLLoss, CELoss, HardTripletLoss, LiftedStructureLoss, SoftCELoss, MixupCELoss, MixupSoftCELoss
 
 
 BASE_LOSS_DICT = dict(
@@ -19,6 +14,9 @@ BASE_LOSS_DICT = dict(
     kl_loss=1,
     hard_triplet_loss=2,
     lifted_structure_loss=3,
+    soft_ce_loss=4,
+    mixup_ce_loss=5,
+    mixup_soft_ce_loss=6
 )
 
 
@@ -27,7 +25,9 @@ class Loss(nn.Module):
         super(Loss, self).__init__()
         self.configer = configer
         self.func_list = [CELoss(self.configer), KLLoss(self.configer),
-                          HardTripletLoss(self.configer), LiftedStructureLoss(self.configer),]
+                          HardTripletLoss(self.configer), LiftedStructureLoss(self.configer),
+                          SoftCELoss(self.configer), MixupCELoss(self.configer),
+                          MixupSoftCELoss(self.configer)]
 
     def forward(self, out_list):
         loss_dict = out_list[-1]
