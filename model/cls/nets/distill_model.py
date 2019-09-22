@@ -11,71 +11,11 @@ from model.cls.nets.cls_model import ClsModel
 from model.cls.loss.loss import BASE_LOSS_DICT
 
 
-LOSS_TYPE = {
-    'ts_klce_loss': { #teacher-student distillation
-        'main': {},
-        'peer': {'ce_loss0': 1.0},
-        'peer_kl_loss0': 100.0
-    },
-    'ce_loss': {
-        'main': {
-            'ce_loss0': 1.0, 'ce_loss1': 0.01
-        },
-        'peer': {
-            'ce_loss0': 1.0, 'ce_loss1': 0.01
-        },
-    },
-    'klce_loss': {
-        'main': {
-            'ce_loss0': 1.0, 'ce_loss1': 0.01
-        },
-        'peer': {
-            'ce_loss0': 1.0, 'ce_loss1': 0.01
-        },
-        'main_kl_loss0': 1.0, 'peer_kl_loss0': 1.0,
-    },
-    'trice_loss': {
-        'main': {
-            'ce_loss0': 1.0, 'ce_loss1': 0.01, 'tri_loss0': 0.1, 'tri_loss1': 0.01
-        },
-        'peer': {
-            'ce_loss0': 1.0, 'ce_loss1': 0.01, 'tri_loss0': 0.1, 'tri_loss1': 0.01
-        },
-    },
-    'lsce_loss': {
-        'main': {
-            'ce_loss0': 1.0, 'ce_loss1': 0.01, 'ls_loss0': 0.1, 'ls_loss1': 0.01
-        },
-        'peer': {
-            'ce_loss0': 1.0, 'ce_loss1': 0.01, 'ls_loss0': 0.1, 'ls_loss1': 0.01
-        },
-    },
-    'triklce_loss': {
-        'main': {
-            'ce_loss0': 1.0, 'ce_loss1': 0.01, 'tri_loss0': 0.1, 'tri_loss1': 0.01
-        },
-        'peer': {
-            'ce_loss0': 1.0, 'ce_loss1': 0.01, 'tri_loss0': 0.1, 'tri_loss1': 0.01
-        },
-        'main_kl_loss0': 1.0, 'peer_kl_loss0': 1.0,
-    },
-    'lsklce_loss': {
-        'main': {
-            'ce_loss0': 1.0, 'ce_loss1': 0.01, 'ls_loss0': 0.1, 'ls_loss1': 0.01
-        },
-        'peer': {
-            'ce_loss0': 1.0, 'ce_loss1': 0.01, 'ls_loss0': 0.1, 'ls_loss1': 0.01
-        },
-        'main_kl_loss0': 1.0, 'peer_kl_loss0': 1.0,
-    },
-}
-
-
 class DistillModel(nn.Module):
     def __init__(self, configer):
         super(DistillModel, self).__init__()
         self.configer = configer
-        self.valid_loss_dict = LOSS_TYPE[configer.get('loss', 'loss_type')]
+        self.valid_loss_dict = self.configer.get('loss', 'loss_weights', configer.get('loss.loss_type'))
         self.main = ClsModel(self.configer, loss_dict=self.valid_loss_dict['main'], flag="main")
         self.peer = ClsModel(self.configer, loss_dict=self.valid_loss_dict['peer'], flag="peer")
 

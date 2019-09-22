@@ -13,19 +13,6 @@ from model.cls.loss.loss import BASE_LOSS_DICT
 from model.cls.utils.metric_linear import LINEAR_DICT
 
 
-LOSS_TYPE = {
-    'ce_loss': {
-        'ce_loss0': 1.0, 'ce_loss1': 0.01
-    },
-    'trice_loss': {
-        'ce_loss0': 1.0, 'ce_loss1': 0.01, 'tri_loss0': 0.1, 'tri_loss1': 0.01
-    },
-    'lsce_loss': {
-        'ce_loss0': 1.0, 'ce_loss1': 0.01, 'ls_loss0': 0.1, 'ls_loss1': 0.01
-    }
-}
-
-
 class ClsModel(nn.Module):
     def __init__(self, configer, loss_dict=None, flag=""):
         super(ClsModel, self).__init__()
@@ -63,7 +50,7 @@ class ClsModel(nn.Module):
             nn.init.zeros_(self.bn.bias)
             self.bn.bias.requires_grad = False
 
-        self.valid_loss_dict = LOSS_TYPE[configer.get('loss', 'loss_type')] if loss_dict is None else loss_dict
+        self.valid_loss_dict = configer.get('loss', 'loss_weights', configer.get('loss.loss_type'))
 
     def forward(self, data_dict):
         out_dict = dict()
