@@ -11,6 +11,7 @@ cd ${WORK_DIR}
 DATA_DIR="/home/donny/DataSet/ImageNet"
 
 MODEL_NAME="cls_model"
+BACKBONE="resnet50"
 CHECKPOINTS_NAME="res50_imagenet_cls"$2
 
 CONFIG_FILE='configs/cls/imagenet/base_large_imagenet_cls.conf'
@@ -34,17 +35,17 @@ if [ -z $1 ]; then
 elif [ $1 == train ]; then
   ${DIST_PYTHON} main.py --config_file ${CONFIG_FILE} --phase train --gathered y --model_name ${MODEL_NAME} \
                          --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --max_epoch ${MAX_EPOCH} --dist y \
-                         --checkpoints_name ${CHECKPOINTS_NAME}  2>&1 | tee ${LOG_FILE}
+                         --backbone ${BACKBONE} --checkpoints_name ${CHECKPOINTS_NAME}  2>&1 | tee ${LOG_FILE}
 
 elif [ $1 == resume ]; then
   ${DIST_PYTHON} main.py --config_file ${CONFIG_FILE} --phase train --gathered y --model_name ${MODEL_NAME} \
                          --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --max_epoch ${MAX_EPOCH} --dist y \
                          --resume_continue y --resume ./checkpoints/cls/imagenet/${CHECKPOINTS_NAME}_latest.pth \
-                         --checkpoints_name ${CHECKPOINTS_NAME}  2>&1 | tee ${LOG_FILE}
+                         --backbone ${BACKBONE} --checkpoints_name ${CHECKPOINTS_NAME}  2>&1 | tee ${LOG_FILE}
 
 elif [ $1 == test ]; then
   ${PYTHON} main.py --config_file ${CONFIG_FILE} --phase test --gpu 0 1 2 3 --gathered n \
-                    --model_name ${MODEL_NAME} --checkpoints_name ${CHECKPOINTS_NAME} \
+                    --model_name ${MODEL_NAME} --backbone ${BACKBONE} --checkpoints_name ${CHECKPOINTS_NAME} \
                     --resume ./checkpoints/cls/imagenet/${CHECKPOINTS_NAME}_latest.pth \
                     --test_dir ${DATA_DIR}/test --out_dir test  2>&1 | tee -a ${LOG_FILE}
 
