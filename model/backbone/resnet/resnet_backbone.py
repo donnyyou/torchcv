@@ -111,71 +111,72 @@ class ResNetBackbone(object):
         self.configer = configer
         self.resnet_models = ResNetModels(self.configer)
 
-    def __call__(self):
-        arch = self.configer.get('network', 'backbone')
+    def __call__(self, backbone=None, pretrained=None):
+        arch = self.configer.get('network.backbone') if backbone is None else backbone
+        pretrained = self.configer.get('network.pretrained') if pretrained is None else pretrained
         multi_grid = self.configer.get('network.multi_grid', default=None)
 
         if arch == 'resnet34':
-            orig_resnet = self.resnet_models.resnet34()
+            orig_resnet = self.resnet_models.resnet34(pretrained=pretrained)
             arch_net = NormalResnetBackbone(orig_resnet)
             arch_net.num_features = 512
 
         elif arch == 'resnet34_dilated8':
-            orig_resnet = self.resnet_models.resnet34()
+            orig_resnet = self.resnet_models.resnet34(pretrained=pretrained)
             arch_net = DilatedResnetBackbone(orig_resnet, dilate_scale=8, multi_grid=multi_grid)
             arch_net.num_features = 512
 
         elif arch == 'resnet34_dilated16':
-            orig_resnet = self.resnet_models.resnet34()
+            orig_resnet = self.resnet_models.resnet34(pretrained=pretrained)
             arch_net = DilatedResnetBackbone(orig_resnet, dilate_scale=16, multi_grid=multi_grid)
             arch_net.num_features = 512
 
         elif arch == 'resnet50':
-            orig_resnet = self.resnet_models.resnet50()
+            orig_resnet = self.resnet_models.resnet50(pretrained=pretrained)
             arch_net = NormalResnetBackbone(orig_resnet)
 
         elif arch == 'resnet50_dilated8':
-            orig_resnet = self.resnet_models.resnet50()
+            orig_resnet = self.resnet_models.resnet50(pretrained=pretrained)
             arch_net = DilatedResnetBackbone(orig_resnet, dilate_scale=8, multi_grid=multi_grid)
 
         elif arch == 'resnet50_dilated16':
-            orig_resnet = self.resnet_models.resnet50()
+            orig_resnet = self.resnet_models.resnet50(pretrained=pretrained)
             arch_net = DilatedResnetBackbone(orig_resnet, dilate_scale=16, multi_grid=multi_grid)
 
         elif arch == 'deepbase_resnet50':
-            orig_resnet = self.resnet_models.deepbase_resnet50()
+            orig_resnet = self.resnet_models.deepbase_resnet50(pretrained=pretrained)
             arch_net = NormalResnetBackbone(orig_resnet)
 
         elif arch == 'deepbase_resnet50_dilated8':
-            orig_resnet = self.resnet_models.deepbase_resnet50()
+            orig_resnet = self.resnet_models.deepbase_resnet50(pretrained=pretrained)
             arch_net = DilatedResnetBackbone(orig_resnet, dilate_scale=8, multi_grid=multi_grid)
 
         elif arch == 'deepbase_resnet50_dilated16':
-            orig_resnet = self.resnet_models.deepbase_resnet50()
+            orig_resnet = self.resnet_models.deepbase_resnet50(pretrained=pretrained)
             arch_net = DilatedResnetBackbone(orig_resnet, dilate_scale=16, multi_grid=multi_grid)
 
         elif arch == 'resnet101':
-            orig_resnet = self.resnet_models.resnet101()
+            orig_resnet = self.resnet_models.resnet101(pretrained=pretrained)
             arch_net = NormalResnetBackbone(orig_resnet)
 
         elif arch == 'resnet101_dilated8':
-            orig_resnet = self.resnet_models.resnet101()
+            orig_resnet = self.resnet_models.resnet101(pretrained=pretrained)
             arch_net = DilatedResnetBackbone(orig_resnet, dilate_scale=8, multi_grid=multi_grid)
 
         elif arch == 'resnet101_dilated16':
-            orig_resnet = self.resnet_models.resnet101()
+            orig_resnet = self.resnet_models.resnet101(pretrained=pretrained)
             arch_net = DilatedResnetBackbone(orig_resnet, dilate_scale=16, multi_grid=multi_grid)
 
         elif arch == 'deepbase_resnet101':
-            orig_resnet = self.resnet_models.deepbase_resnet101()
+            orig_resnet = self.resnet_models.deepbase_resnet101(pretrained=pretrained)
             arch_net = NormalResnetBackbone(orig_resnet)
 
         elif arch == 'deepbase_resnet101_dilated8':
-            orig_resnet = self.resnet_models.deepbase_resnet101()
+            orig_resnet = self.resnet_models.deepbase_resnet101(pretrained=pretrained)
             arch_net = DilatedResnetBackbone(orig_resnet, dilate_scale=8, multi_grid=multi_grid)
 
         elif arch == 'deepbase_resnet101_dilated16':
-            orig_resnet = self.resnet_models.deepbase_resnet101()
+            orig_resnet = self.resnet_models.deepbase_resnet101(pretrained=pretrained)
             arch_net = DilatedResnetBackbone(orig_resnet, dilate_scale=16, multi_grid=multi_grid)
 
         else:

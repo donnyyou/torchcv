@@ -115,30 +115,31 @@ class DarkNetBackbone(object):
         self.configer = configer
         self.darknet_models = DarkNetModels(self.configer)
 
-    def __call__(self):
-        arch = self.configer.get('network', 'backbone')
+    def __call__(self, backbone=None, pretrained=None):
+        arch = self.configer.get('network.backbone') if backbone is None else backbone
+        pretrained = self.configer.get('network.pretrained') if pretrained is None else pretrained
         if arch == 'darknet21':
-            orig_darknet = self.darknet_models.darknet21()
+            orig_darknet = self.darknet_models.darknet21(pretrained=pretrained)
             arch_net = NormalDarknetBackbone(orig_darknet)
 
         elif arch == 'darknet21_dilated8':
-            orig_darknet = self.darknet_models.darknet21()
+            orig_darknet = self.darknet_models.darknet21(pretrained=pretrained)
             arch_net = DilatedDarknetBackbone(orig_darknet, dilate_scale=8)
 
         elif arch == 'darknet21_dilated16':
-            orig_darknet = self.darknet_models.darknet21()
+            orig_darknet = self.darknet_models.darknet21(pretrained=pretrained)
             arch_net = DilatedDarknetBackbone(orig_darknet, dilate_scale=16)
 
         elif arch == 'darknet53':
-            orig_darknet = self.darknet_models.darknet53()
+            orig_darknet = self.darknet_models.darknet53(pretrained=pretrained)
             arch_net = NormalDarknetBackbone(orig_darknet)
 
         elif arch == 'darknet53_dilated8':
-            orig_darknet = self.darknet_models.darknet53()
+            orig_darknet = self.darknet_models.darknet53(pretrained=pretrained)
             arch_net = DilatedDarknetBackbone(orig_darknet, dilate_scale=8)
 
         elif arch == 'darknet53_dilated16':
-            orig_darknet = self.darknet_models.darknet53()
+            orig_darknet = self.darknet_models.darknet53(pretrained=pretrained)
             arch_net = DilatedDarknetBackbone(orig_darknet, dilate_scale=16)
 
         else:

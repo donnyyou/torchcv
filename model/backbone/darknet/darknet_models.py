@@ -100,17 +100,17 @@ class DarkNetModels(object):
     def __init__(self, configer):
         self.configer = configer
 
-    def darknet21(self):
+    def darknet21(self, pretrained=None):
         """Constructs a darknet-21 model.
         """
         model = DarkNet([1, 1, 2, 2, 1])
-        model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'), all_match=False)
+        model = ModuleHelper.load_model(model, pretrained=pretrained, all_match=False)
         return model
 
 
-    def darknet53(self):
+    def darknet53(self, pretrained=None):
         """Constructs a darknet-53 model.
         """
         model = DarkNet([1, 2, 8, 8, 4])
-        model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'), all_match=False)
+        model = ModuleHelper.load_model(model, pretrained=pretrained, all_match=False)
         return model

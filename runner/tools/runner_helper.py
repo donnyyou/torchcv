@@ -38,7 +38,8 @@ class RunnerHelper(object):
                 Log.info('Converting syncbn model...')
                 net = nn.SyncBatchNorm.convert_sync_batchnorm(net)
 
-            net = nn.parallel.DistributedDataParallel(net.cuda(), device_ids=[local_rank], output_device=local_rank)
+            net = nn.parallel.DistributedDataParallel(net.cuda(), find_unused_parameters=True,
+                                                      device_ids=[local_rank], output_device=local_rank)
             # if runner.configer.get('network.syncbn', default=False):
             #     Log.info('Converting syncbn model...')
             #     from apex.parallel import convert_syncbn_model
@@ -231,9 +232,7 @@ class RunnerHelper(object):
     def dist_avg(runner, data):
         if runner.get('network.distributed'):
             data_list = DistHelper.all_gather(data)
-            return sum(data_list) / len(data_list)
-
-        return data
+            return sum(data_list) / len(da)
 
     @staticmethod
     def get_lr(optimizer):

@@ -20,9 +20,8 @@ class ClsModel(nn.Module):
         self.configer = configer
         self.flag = flag if len(flag) == 0 else "{}_".format(flag)
         self.backbone = BackboneSelector(configer).get_backbone(
-            backbone_type=configer.get('network.{}backbone'.format(self.flag)),
-            pretrained_model=configer.get('network.{}pretrained'.format(self.flag)),
-            rm_last_stride=configer.get('network.{}rm_last_stride'.format(self.flag), default=False)
+            backbone=configer.get('network.{}backbone'.format(self.flag)),
+            pretrained=configer.get('network.{}pretrained'.format(self.flag))
         )
 
         self.reduction = None
@@ -33,9 +32,8 @@ class ClsModel(nn.Module):
             fc_dim = fc_dim_out
 
         self.linear_list = nn.ModuleList()
-        linear_type = configer.get('network', '{}linear_type'.format(self.flag))
-        for num_classes in configer.get('data.num_classes_list'):
-            self.linear_list.append(LINEAR_DICT[linear_type](fc_dim, num_classes))
+        linear_type = configer.get('network', '{}linear_type'.format(self.flag), default='nobias_linear')
+        self.fc = LINEAR_DICT[linear_type](fc_dim, configer.get('data.num_classes'))
 
         self.embed = None
         if configer.get('network.{}embed'.format(self.flag), default=False):
@@ -51,7 +49,8 @@ class ClsModel(nn.Module):
             nn.init.zeros_(self.bn.bias)
             self.bn.bias.requires_grad = False
 
-        self.valid_loss_dict = configer.get('loss', 'loss_weights', configer.get('loss.loss_type'))
+        self.valid_loss_dict = configer.get('loss.loss_weights',
+                                            configer.get('loss.loss_type')) if loss_dict is None else loss_dict
 
     @staticmethod
     def mixup_data(data_dict, alpha=0.2):
@@ -75,55 +74,54 @@ class ClsModel(nn.Module):
             data_dict, lam = self.mixup_data(data_dict, self.configer.get('data.mixup_alpha'))
 
         x = self.backbone(data_dict['img'])
+        x = x[-1] if isinstance(x, (list, tuple)) else x
         x = F.adaptive_avg_pool2d(x, 1)
         x = self.reduction(x) if self.reduction else x
         x = x.view(x.size(0), -1)
         fc = self.bn(x) if self.bn else x
-        for i in range(len(self.linear_list)):
-            sub_out = self.linear_list[i](fc, data_dict['label'][:, i])
-            out_dict['{}out{}'.format(self.flag, i)] = sub_out
-            label_dict['{}out{}'.format(self.flag, i)] = data_dict['label'][:, i]
-            if 'ce_loss{}'.format(i) in self.valid_loss_dict:
-                loss_dict['{}ce_loss{}'.format(self.flag, i)] = dict(
-                    params=[sub_out, data_dict['label'][:, i]],
-                    type=torch.cuda.LongTensor([BASE_LOSS_DICT['ce_loss']]),
-                    weight=torch.cuda.FloatTensor([self.valid_loss_dict['ce_loss{}'.format(i)]])
-                )
-            if 'soft_ce_loss{}'.format(i) in self.valid_loss_dict:
-                loss_dict['{}soft_ce_loss{}'.format(self.flag, i)] = dict(
-                    params=[sub_out, data_dict['label'][:, i], self.configer.get('data.num_classes_list')[i]],
-                    type=torch.cuda.LongTensor([BASE_LOSS_DICT['soft_ce_loss']]),
-                    weight=torch.cuda.FloatTensor([self.valid_loss_dict['soft_ce_loss{}'.format(i)]])
-                )
-            if 'mixup_ce_loss{}'.format(i) in self.valid_loss_dict:
-                assert 'label_a' in data_dict and 'label_b' in data_dict
-                loss_dict['{}mixup_ce_loss{}'.format(self.flag, i)] = dict(
-                    params=[sub_out, data_dict['label_a'][:, i], data_dict['label_b'][:, i], lam],
-                    type=torch.cuda.LongTensor([BASE_LOSS_DICT['mixup_ce_loss']]),
-                    weight=torch.cuda.FloatTensor([self.valid_loss_dict['mixup_ce_loss{}'.format(i)]])
-                )
-            if 'mixup_soft_ce_loss{}'.format(i) in self.valid_loss_dict:
-                assert 'label_a' in data_dict and 'label_b' in data_dict
-                loss_dict['{}mixup_soft_ce_loss{}'.format(self.flag, i)] = dict(
-                    params=[sub_out, data_dict['label_a'][:, i], data_dict['label_b'][:, i],
-                            self.configer.get('data.num_classes_list')[i], lam],
-                    type=torch.cuda.LongTensor([BASE_LOSS_DICT['mixup_soft_ce_loss']]),
-                    weight=torch.cuda.FloatTensor([self.valid_loss_dict['mixup_soft_ce_loss{}'.format(i)]])
-                )
+        out = self.fc(fc, data_dict['label'])
+        out_dict['{}out'.format(self.flag)] = out
+        label_dict['{}out'.format(self.flag)] = data_dict['label']
+        if 'ce_loss' in self.valid_loss_dict:
+            loss_dict['{}ce_loss'.format(self.flag)] = dict(
+                params=[out, data_dict['label']],
+                type=torch.cuda.LongTensor([BASE_LOSS_DICT['ce_loss']]),
+                weight=torch.cuda.FloatTensor([self.valid_loss_dict['ce_loss']])
+            )
+        if 'soft_ce_loss' in self.valid_loss_dict:
+            loss_dict['{}soft_ce_loss'.format(self.flag)] = dict(
+                params=[out, data_dict['label'], self.configer.get('data.num_classes')],
+                type=torch.cuda.LongTensor([BASE_LOSS_DICT['soft_ce_loss']]),
+                weight=torch.cuda.FloatTensor([self.valid_loss_dict['soft_ce_loss']])
+            )
+        if 'mixup_ce_loss' in self.valid_loss_dict:
+            assert 'label_a' in data_dict and 'label_b' in data_dict
+            loss_dict['{}mixup_ce_loss'.format(self.flag)] = dict(
+                params=[out, data_dict['label_a'], data_dict['label_b'], lam],
+                type=torch.cuda.LongTensor([BASE_LOSS_DICT['mixup_ce_loss']]),
+                weight=torch.cuda.FloatTensor([self.valid_loss_dict['mixup_ce_loss']])
+            )
+        if 'mixup_soft_ce_loss' in self.valid_loss_dict:
+            assert 'label_a' in data_dict and 'label_b' in data_dict
+            loss_dict['{}mixup_soft_ce_loss'.format(self.flag)] = dict(
+                params=[out, data_dict['label_a'], data_dict['label_b'], self.configer.get('data.num_classes'), lam],
+                type=torch.cuda.LongTensor([BASE_LOSS_DICT['mixup_soft_ce_loss']]),
+                weight=torch.cuda.FloatTensor([self.valid_loss_dict['mixup_soft_ce_loss']])
+            )
 
         feat = self.embed(x) if self.embed else x
         for i in range(len(self.linear_list)):
-            if 'tri_loss{}'.format(i) in self.valid_loss_dict:
-                loss_dict['{}tri_loss{}'.format(self.flag, i)] = dict(
-                    params=[feat, data_dict['label'][:, i]],
+            if 'tri_loss' in self.valid_loss_dict:
+                loss_dict['{}tri_loss'.format(self.flag)] = dict(
+                    params=[feat, data_dict['label']],
                     type=torch.cuda.LongTensor([BASE_LOSS_DICT['hard_triplet_loss']]),
-                    weight=torch.cuda.FloatTensor([self.valid_loss_dict['tri_loss{}'.format(i)]])
+                    weight=torch.cuda.FloatTensor([self.valid_loss_dict['tri_loss']])
                 )
-            if 'ls_loss{}'.format(i) in self.valid_loss_dict:
-                loss_dict['{}ls_loss{}'.format(self.flag, i)] = dict(
-                    params=[feat, data_dict['label'][:, i]],
+            if 'ls_loss' in self.valid_loss_dict:
+                loss_dict['{}ls_loss'.format(self.flag)] = dict(
+                    params=[feat, data_dict['label']],
                     type=torch.cuda.LongTensor([BASE_LOSS_DICT['lifted_structure_loss']]),
-                    weight=torch.cuda.FloatTensor([self.valid_loss_dict['ls_loss{}'.format(i)]])
+                    weight=torch.cuda.FloatTensor([self.valid_loss_dict['ls_loss']])
                 )
 
         return out_dict, label_dict, loss_dict

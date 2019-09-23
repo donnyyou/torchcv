@@ -33,7 +33,7 @@ class ImageClassifier(object):
         self.running_score = ClsRunningScore(configer)
 
         self.cls_net = self.cls_model_manager.get_cls_model()
-        self.solver_dict = self.configer.get(self.configer.get('train', 'solver'))
+        self.solver_dict = self.configer.get('solver')
         self.cls_net = RunnerHelper.load_net(self, self.cls_net)
         self.optimizer, self.scheduler = Trainer.init(self._get_parameters(), self.solver_dict)
         self.train_loader = self.cls_data_loader.get_trainloader()
@@ -93,7 +93,7 @@ class ImageClassifier(object):
             self.train_losses.update({key: loss.item() for key, loss in loss_dict.items()}, data_dict['img'].size(0))
             self.optimizer.zero_grad()
             loss.backward()
-            if self.configer.get('network', 'clip_grad'):
+            if self.configer.get('network', 'clip_grad', default=False):
                 RunnerHelper.clip_grad(self.cls_net, 10.)
 
             self.optimizer.step()

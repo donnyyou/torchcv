@@ -29,7 +29,7 @@ class DenseNetModels(object):
     def __init__(self, configer):
         self.configer = configer
 
-    def densenet121(self, **kwargs):
+    def densenet121(self, pretrained=None, **kwargs):
         r"""Densenet-121 model from
         `"Densely Connected Convolutional Networks" <https://arxiv.org/pdf/1608.06993.pdf>`_
         Args:
@@ -37,10 +37,10 @@ class DenseNetModels(object):
         """
         model = DenseNet(num_init_features=64, growth_rate=32,
                          block_config=(6, 12, 24, 16), norm_type=self.configer.get('network', 'norm_type'), **kwargs)
-        model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'))
+        model = ModuleHelper.load_model(model, pretrained=pretrained)
         return model
 
-    def densenet169(self, **kwargs):
+    def densenet169(self, pretrained=None, **kwargs):
         r"""Densenet-169 model from
         `"Densely Connected Convolutional Networks" <https://arxiv.org/pdf/1608.06993.pdf>`_
         Args:
@@ -48,10 +48,10 @@ class DenseNetModels(object):
         """
         model = DenseNet(num_init_features=64, growth_rate=32,
                          block_config=(6, 12, 32, 32), norm_type=self.configer.get('network', 'norm_type'), **kwargs)
-        model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'))
+        model = ModuleHelper.load_model(model, pretrained=pretrained)
         return model
 
-    def densenet201(self, **kwargs):
+    def densenet201(self, pretrained=None, **kwargs):
         r"""Densenet-201 model from
         `"Densely Connected Convolutional Networks" <https://arxiv.org/pdf/1608.06993.pdf>`_
         Args:
@@ -59,10 +59,10 @@ class DenseNetModels(object):
         """
         model = DenseNet(num_init_features=64, growth_rate=32,
                          block_config=(6, 12, 48, 32), norm_type=self.configer.get('network', 'norm_type'), **kwargs)
-        model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'))
+        model = ModuleHelper.load_model(model, pretrained=pretrained)
         return model
 
-    def densenet161(self, **kwargs):
+    def densenet161(self, pretrained=None, **kwargs):
         r"""Densenet-161 model from
         `"Densely Connected Convolutional Networks" <https://arxiv.org/pdf/1608.06993.pdf>`_
         Args:
@@ -70,7 +70,7 @@ class DenseNetModels(object):
         """
         model = DenseNet(num_init_features=96, growth_rate=48,
                          block_config=(6, 12, 36, 24), norm_type=self.configer.get('network', 'norm_type'), **kwargs)
-        model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'))
+        model = ModuleHelper.load_model(model, pretrained=pretrained)
         return model
 
 

@@ -70,20 +70,18 @@ class VGGModels(object):
     def __init__(self, configer):
         self.configer = configer
 
-    def vgg(self, vgg_cfg=None):
+    def vgg(self, backbone=None, pretrained=None):
         """Constructs a ResNet-18 model.
         Args:
             pretrained (bool): If True, returns a model pre-trained on Places
         """
-        backbone = self.configer.get('network', 'backbone')
-        model = VGG(cfg_name=backbone, vgg_cfg=vgg_cfg, bn=False)
-        model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'), all_match=False)
+        model = VGG(cfg_name=backbone, bn=False)
+        model = ModuleHelper.load_model(model, pretrained=pretrained, all_match=False)
         return model
 
-    def vgg_bn(self, vgg_cfg=None):
-        backbone = self.configer.get('network', 'backbone')
-        model = VGG(cfg_name=backbone, vgg_cfg=vgg_cfg, bn=True)
-        model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'), all_match=False)
+    def vgg_bn(self, backbone=None, pretrained=None):
+        model = VGG(cfg_name=backbone, bn=True)
+        model = ModuleHelper.load_model(model, pretrained=pretrained, all_match=False)
         return model
 
 

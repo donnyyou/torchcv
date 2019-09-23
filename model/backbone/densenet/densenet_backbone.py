@@ -153,54 +153,55 @@ class DenseNetBackbone(object):
         self.configer = configer
         self.densenet_models = DenseNetModels(self.configer)
 
-    def __call__(self):
-        arch = self.configer.get('network', 'backbone')
+    def __call__(self, backbone=None, pretrained=None):
+        arch = self.configer.get('network.backbone') if backbone is None else backbone
+        pretrained = self.configer.get('network.pretrained') if pretrained is None else pretrained
         if arch == 'densenet121':
-            orig_densenet = self.densenet_models.densenet121()
+            orig_densenet = self.densenet_models.densenet121(pretrained=pretrained)
             arch_net = NormalDensenetBackbone(orig_densenet)
 
         elif arch == 'densenet121_dilated8':
-            orig_densenet = self.densenet_models.densenet121()
+            orig_densenet = self.densenet_models.densenet121(pretrained=pretrained)
             arch_net = DilatedDensenetBackbone(orig_densenet, dilate_scale=8)
 
         elif arch == 'densenet121_dilated16':
-            orig_densenet = self.densenet_models.densenet121()
+            orig_densenet = self.densenet_models.densenet121(pretrained=pretrained)
             arch_net = DilatedDensenetBackbone(orig_densenet, dilate_scale=16)
 
         elif arch == 'densenet169':
-            orig_densenet = self.densenet_models.densenet169()
+            orig_densenet = self.densenet_models.densenet169(pretrained=pretrained)
             arch_net = NormalDensenetBackbone(orig_densenet)
 
         elif arch == 'densenet169_dilated8':
-            orig_densenet = self.densenet_models.densenet169()
+            orig_densenet = self.densenet_models.densenet169(pretrained=pretrained)
             arch_net = DilatedDensenetBackbone(orig_densenet, dilate_scale=8)
 
         elif arch == 'densenet169_dilated16':
-            orig_densenet = self.densenet_models.densenet169()
+            orig_densenet = self.densenet_models.densenet169(pretrained=pretrained)
             arch_net = DilatedDensenetBackbone(orig_densenet, dilate_scale=16)
 
         elif arch == 'densenet201':
-            orig_densenet = self.densenet_models.densenet201()
+            orig_densenet = self.densenet_models.densenet201(pretrained=pretrained)
             arch_net = NormalDensenetBackbone(orig_densenet)
 
         elif arch == 'densenet201_dilated8':
-            orig_densenet = self.densenet_models.densenet201()
+            orig_densenet = self.densenet_models.densenet201(pretrained=pretrained)
             arch_net = DilatedDensenetBackbone(orig_densenet, dilate_scale=8)
 
         elif arch == 'densenet201_dilated16':
-            orig_densenet = self.densenet_models.densenet201()
+            orig_densenet = self.densenet_models.densenet201(pretrained=pretrained)
             arch_net = DilatedDensenetBackbone(orig_densenet, dilate_scale=16)
 
         elif arch == 'densenet161':
-            orig_densenet = self.densenet_models.densenet161()
+            orig_densenet = self.densenet_models.densenet161(pretrained=pretrained)
             arch_net = NormalDensenetBackbone(orig_densenet)
 
         elif arch == 'densenet161_dilated8':
-            orig_densenet = self.densenet_models.densenet161()
+            orig_densenet = self.densenet_models.densenet161(pretrained=pretrained)
             arch_net = DilatedDensenetBackbone(orig_densenet, dilate_scale=8)
 
         elif arch == 'densenet161_dilated16':
-            orig_densenet = self.densenet_models.densenet161()
+            orig_densenet = self.densenet_models.densenet161(pretrained=pretrained)
             arch_net = DilatedDensenetBackbone(orig_densenet, dilate_scale=16)
 
         else:

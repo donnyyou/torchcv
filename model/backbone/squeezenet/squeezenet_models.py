@@ -123,16 +123,16 @@ class SqueezeNetModels(object):
     def __init__(self, configer):
         self.configer = configer
 
-    def squeezenet(self):
+    def squeezenet(self, pretrained=None):
         """Constructs a ResNet-18 model.
         Args:
             pretrained (bool): If True, returns a model pre-trained on Places
         """
         model = SqueezeNet()
-        model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'), all_match=False)
+        model = ModuleHelper.load_model(model, pretrained=pretrained, all_match=False)
         return model
 
-    def squeezenet_dilated8(self):
+    def squeezenet_dilated8(self, pretrained):
         model = DilatedSqueezeNet()
-        model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'), all_match=False)
+        model = ModuleHelper.load_model(model, pretrained=pretrained, all_match=False)
         return model

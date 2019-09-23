@@ -12,8 +12,9 @@ class SqueezeNetBackbone(object):
         self.configer = configer
         self.squeeze_models = SqueezeNetModels(self.configer)
 
-    def __call__(self):
-        arch = self.configer.get('network', 'backbone')
+    def __call__(self, backbone=None, pretrained=None):
+        arch = self.configer.get('network.backbone') if backbone is None else backbone
+        pretrained = self.configer.get('network.pretrained') if pretrained is None else pretrained
         if arch == 'squeezenet':
             arch_net = self.squeeze_models.squeezenet()
 

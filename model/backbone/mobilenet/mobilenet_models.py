@@ -165,18 +165,18 @@ class MobileNetModels(object):
     def __init__(self, configer):
         self.configer = configer
 
-    def mobilenetv2(self):
+    def mobilenetv2(self, pretrained=None):
         model = MobileNetV2()
-        model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'), all_match=False)
+        model = ModuleHelper.load_model(model, pretrained=pretrained, all_match=False)
         return model
 
-    def mobilenetv2_dilated8(self):
+    def mobilenetv2_dilated8(self, pretrained=None):
         """Constructs a ResNet-18 model.
         Args:
             pretrained (bool): If True, returns a model pre-trained on Places
         """
         model = MobileNetV2Dilated8()
-        model = ModuleHelper.load_model(model, pretrained=self.configer.get('network', 'pretrained'), all_match=False)
+        model = ModuleHelper.load_model(model, pretrained=pretrained, all_match=False)
         return model
 
 
