@@ -13,7 +13,7 @@ class Linear(nn.Linear):
 
 class NobiasLinear(nn.Linear):
     def __init__(self, in_features, out_features, bias=False):
-        super(Linear, self).__init__()
+        super(NobiasLinear, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
         self.weight = Parameter(torch.Tensor(out_features, in_features))
