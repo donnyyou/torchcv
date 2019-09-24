@@ -172,109 +172,95 @@ class ResNet(nn.Module):
         return x
 
 
-class ResNetModels(object):
+def resnet18(pretrained=None, norm_type='batchnorm', **kwargs):
+    """Constructs a ResNet-18 model.
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on Places
+        norm_type (str): choose norm type
+    """
+    model = ResNet(BasicBlock, [2, 2, 2, 2], deep_base=False, norm_type=norm_type, **kwargs)
+    model = ModuleHelper.load_model(model, pretrained=pretrained)
+    return model
 
-    def __init__(self, configer):
-        self.configer = configer
+def deepbase_resnet18(pretrained=None, norm_type='batchnorm', **kwargs):
+    """Constructs a ResNet-18 model.
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on Places
+    """
+    model = ResNet(BasicBlock, [2, 2, 2, 2], deep_base=True, norm_type=norm_type, **kwargs)
+    model = ModuleHelper.load_model(model, pretrained=pretrained)
+    return model
 
-    def resnet18(self, pretrained=None, **kwargs):
-        """Constructs a ResNet-18 model.
-        Args:
-            pretrained (bool): If True, returns a model pre-trained on Places
-        """
-        model = ResNet(BasicBlock, [2, 2, 2, 2], deep_base=False,
-                       norm_type=self.configer.get('network', 'norm_type'), **kwargs)
-        model = ModuleHelper.load_model(model, pretrained=pretrained)
-        return model
+def resnet34(pretrained=None, norm_type='batchnorm', **kwargs):
+    """Constructs a ResNet-34 model.
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on Places
+    """
+    model = ResNet(BasicBlock, [3, 4, 6, 3], deep_base=False, norm_type=norm_type, **kwargs)
+    model = ModuleHelper.load_model(model, pretrained=pretrained)
+    return model
 
-    def deepbase_resnet18(self, pretrained=None, **kwargs):
-        """Constructs a ResNet-18 model.
-        Args:
-            pretrained (bool): If True, returns a model pre-trained on Places
-        """
-        model = ResNet(BasicBlock, [2, 2, 2, 2], deep_base=True,
-                       norm_type=self.configer.get('network', 'norm_type'), **kwargs)
-        model = ModuleHelper.load_model(model, pretrained=pretrained)
-        return model
+def deepbase_resnet34(pretrained=None, norm_type='batchnorm', **kwargs):
+    """Constructs a ResNet-34 model.
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on Places
+    """
+    model = ResNet(BasicBlock, [3, 4, 6, 3], deep_base=True, norm_type=norm_type, **kwargs)
+    model = ModuleHelper.load_model(model, pretrained=pretrained)
+    return model
 
-    def resnet34(self, pretrained=None, **kwargs):
-        """Constructs a ResNet-34 model.
-        Args:
-            pretrained (bool): If True, returns a model pre-trained on Places
-        """
-        model = ResNet(BasicBlock, [3, 4, 6, 3], deep_base=False,
-                       norm_type=self.configer.get('network', 'norm_type'), **kwargs)
-        model = ModuleHelper.load_model(model, pretrained=pretrained)
-        return model
+def resnet50(pretrained=None, norm_type='batchnorm', **kwargs):
+    """Constructs a ResNet-50 model.
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on Places
+    """
+    model = ResNet(Bottleneck, [3, 4, 6, 3], deep_base=False, norm_type=norm_type, **kwargs)
+    model = ModuleHelper.load_model(model, pretrained=pretrained)
+    return model
 
-    def deepbase_resnet34(self, pretrained=None, **kwargs):
-        """Constructs a ResNet-34 model.
-        Args:
-            pretrained (bool): If True, returns a model pre-trained on Places
-        """
-        model = ResNet(BasicBlock, [3, 4, 6, 3], deep_base=True,
-                       norm_type=self.configer.get('network', 'norm_type'), **kwargs)
-        model = ModuleHelper.load_model(model, pretrained=pretrained)
-        return model
+def deepbase_resnet50(pretrained=None, norm_type='batchnorm', **kwargs):
+    """Constructs a ResNet-50 model.
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on Places
+    """
+    model = ResNet(Bottleneck, [3, 4, 6, 3], deep_base=True, norm_type=norm_type, **kwargs)
+    model = ModuleHelper.load_model(model, pretrained=pretrained)
+    return model
 
-    def resnet50(self, pretrained=None, **kwargs):
-        """Constructs a ResNet-50 model.
-        Args:
-            pretrained (bool): If True, returns a model pre-trained on Places
-        """
-        model = ResNet(Bottleneck, [3, 4, 6, 3], deep_base=False,
-                       norm_type=self.configer.get('network', 'norm_type'), **kwargs)
-        model = ModuleHelper.load_model(model, pretrained=pretrained)
-        return model
+def resnet101(pretrained=None, norm_type='batchnorm', **kwargs):
+    """Constructs a ResNet-101 model.
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on Places
+    """
+    model = ResNet(Bottleneck, [3, 4, 23, 3], deep_base=False, norm_type=norm_type, **kwargs)
+    model = ModuleHelper.load_model(model, pretrained=pretrained)
+    return model
 
-    def deepbase_resnet50(self, pretrained=None, **kwargs):
-        """Constructs a ResNet-50 model.
-        Args:
-            pretrained (bool): If True, returns a model pre-trained on Places
-        """
-        model = ResNet(Bottleneck, [3, 4, 6, 3], deep_base=True,
-                       norm_type=self.configer.get('network', 'norm_type'), **kwargs)
-        model = ModuleHelper.load_model(model, pretrained=pretrained)
-        return model
+def deepbase_resnet101(pretrained=None, norm_type='batchnorm', **kwargs):
+    """Constructs a ResNet-101 model.
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on Places
+    """
+    model = ResNet(Bottleneck, [3, 4, 23, 3], deep_base=True, norm_type=norm_type, **kwargs)
+    model = ModuleHelper.load_model(model, pretrained=pretrained)
+    return model
 
-    def resnet101(self, pretrained=None, **kwargs):
-        """Constructs a ResNet-101 model.
-        Args:
-            pretrained (bool): If True, returns a model pre-trained on Places
-        """
-        model = ResNet(Bottleneck, [3, 4, 23, 3], deep_base=False,
-                       norm_type=self.configer.get('network', 'norm_type'), **kwargs)
-        model = ModuleHelper.load_model(model, pretrained=pretrained)
-        return model
+def resnet152(pretrained=None, norm_type='batchnorm', **kwargs):
+    """Constructs a ResNet-152 model.
 
-    def deepbase_resnet101(self, pretrained=None, **kwargs):
-        """Constructs a ResNet-101 model.
-        Args:
-            pretrained (bool): If True, returns a model pre-trained on Places
-        """
-        model = ResNet(Bottleneck, [3, 4, 23, 3], deep_base=True,
-                       norm_type=self.configer.get('network', 'norm_type'), **kwargs)
-        model = ModuleHelper.load_model(model, pretrained=pretrained)
-        return model
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on Places
+    """
+    model = ResNet(Bottleneck, [3, 8, 36, 3], deep_base=False, norm_type=norm_type, **kwargs)
+    model = ModuleHelper.load_model(model, pretrained=pretrained)
+    return model
 
-    def resnet152(self, pretrained=None, **kwargs):
-        """Constructs a ResNet-152 model.
+def deepbase_resnet152(pretrained=None, norm_type='batchnorm', **kwargs):
+    """Constructs a ResNet-152 model.
 
-        Args:
-            pretrained (bool): If True, returns a model pre-trained on Places
-        """
-        model = ResNet(Bottleneck, [3, 8, 36, 3], deep_base=False,
-                       norm_type=self.configer.get('network', 'norm_type'), **kwargs)
-        model = ModuleHelper.load_model(model, pretrained=pretrained)
-        return model
-
-    def deepbase_resnet152(self, pretrained=None, **kwargs):
-        """Constructs a ResNet-152 model.
-
-        Args:
-            pretrained (bool): If True, returns a model pre-trained on Places
-        """
-        model = ResNet(Bottleneck, [3, 8, 36, 3], deep_base=True,
-                       norm_type=self.configer.get('network', 'norm_type'), **kwargs)
-        model = ModuleHelper.load_model(model, pretrained=pretrained)
-        return model
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on Places
+    """
+    model = ResNet(Bottleneck, [3, 8, 36, 3], deep_base=True, norm_type=norm_type, **kwargs)
+    model = ModuleHelper.load_model(model, pretrained=pretrained)
+    return model
