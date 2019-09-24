@@ -51,22 +51,46 @@ class ImageClassifier(object):
         self.ce_loss = self.cls_model_manager.get_cls_loss()
 
     def _get_parameters(self):
-        lr_1 = []
-        lr_2 = []
-        params_dict = dict(self.cls_net.named_parameters())
-        for key, value in params_dict.items():
-            if value.requires_grad:
-                if 'backbone' in key:
-                    if self.configer.get('solver.lr.bb_lr_scale') == 0.0:
-                        value.requires_grad = False
+        if self.solver_dict.get('optim.wdall', default=True):
+            lr_1 = []
+            lr_2 = []
+            params_dict = dict(self.cls_net.named_parameters())
+            for key, value in params_dict.items():
+                if value.requires_grad:
+                    if 'backbone' in key:
+                        if self.configer.get('solver.lr.bb_lr_scale') == 0.0:
+                            value.requires_grad = False
+                        else:
+                            lr_1.append(value)
                     else:
-                        lr_1.append(value)
-                else:
-                    lr_2.append(value)
+                        lr_2.append(value)
 
-        params = [
-            {'params': lr_1, 'lr': self.solver_dict['lr']['base_lr'] * self.configer.get('solver.lr.bb_lr_scale')},
-            {'params': lr_2, 'lr': self.solver_dict['lr']['base_lr']}]
+            params = [
+                {'params': lr_1, 'lr': self.solver_dict['lr']['base_lr'] * self.configer.get('solver.lr.bb_lr_scale')},
+                {'params': lr_2, 'lr': self.solver_dict['lr']['base_lr']}]
+        else:
+            no_decay_list = []
+            decay_list = []
+            no_decay_name = []
+            decay_name = []
+            for m in self.cls_net.modules():
+                if (hasattr(m, 'groups') and m.groups > 1) or isinstance(m, torch.nn.BatchNorm2d) \
+                        or m.__class__.__name__ == 'GL':
+                    no_decay_list += m.parameters(recurse=False)
+                    for name, p in m.named_parameters(recurse=False):
+                        no_decay_name.append(m.__class__.__name__ + name)
+                else:
+                    for name, p in m.named_parameters(recurse=False):
+                        if 'bias' in name:
+                            no_decay_list.append(p)
+                            no_decay_name.append(m.__class__.__name__ + name)
+                        else:
+                            decay_list.append(p)
+                            decay_name.append(m.__class__.__name__ + name)
+            Log.info('no decay list = {}'.format(no_decay_name))
+            Log.info('decay list = {}'.format(decay_name))
+            params = [{'params': no_decay_list, 'weight_decay': 0}, {'params': decay_list}]
+
         return params
 
     def train(self):
