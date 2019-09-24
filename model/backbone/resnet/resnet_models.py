@@ -10,10 +10,6 @@ from collections import OrderedDict
 from model.tools.module_helper import ModuleHelper
 
 
-__all__ = ['ResNet', 'resnet18', 'resnet34', 'resnet50', 'resnet101',
-           'resnet152', 'deepbase_resnet18', 'deepbase_resnet34',
-           'deepbase_resnet50', 'deepbase_resnet101', 'deepbase_resnet152']
-
 model_urls = {
     'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
     'resnet34': 'https://download.pytorch.org/models/resnet34-333f7ec4.pth',
@@ -159,9 +155,7 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        x = self.conv1(x)
-        x = self.bn1(x)
-        x = self.relu(x)
+        x = self.prefix(x)
         x = self.maxpool(x)
 
         x = self.layer1(x)
