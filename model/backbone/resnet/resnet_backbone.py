@@ -5,7 +5,7 @@
 
 import torch.nn as nn
 
-from model.backbone.resnet.resnet import *
+from model.backbone.resnet.resnet_models import *
 
 
 class NormalResnetBackbone(nn.Module):
