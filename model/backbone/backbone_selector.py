@@ -9,6 +9,7 @@ from model.backbone.resnet.resnet_backbone import ResNetBackbone
 from model.backbone.mobilenet.mobilenet_backbone import MobileNetBackbone
 from model.backbone.densenet.densenet_backbone import DenseNetBackbone
 from model.backbone.squeezenet.squeezenet_backbone import SqueezeNetBackbone
+from model.backbone.shufflenet.shufflenetv2_backbone import ShuffleNetv2Backbone
 from tools.util.logger import Logger as Log
 
 
@@ -38,6 +39,9 @@ class BackboneSelector(object):
 
         elif 'squeezenet' in backbone:
             model = SqueezeNetBackbone(self.configer)(**params)
+
+        elif 'shufflenet' in backbone:
+            model = ShuffleNetv2Backbone(self.configer)(**params)
 
         else:
             Log.error('Backbone {} is invalid.'.format(backbone))

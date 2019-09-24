@@ -29,7 +29,6 @@ class ModelManager(object):
             exit(1)
 
         model = CLS_MODEL_DICT[model_name](self.configer)
-
         return model
 
     def get_cls_loss(self):
