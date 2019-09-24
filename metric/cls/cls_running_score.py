@@ -15,13 +15,13 @@ class ClsRunningScore(object):
         self.top5_acc = DictAverageMeter()
 
     def get_top1_acc(self):
-        return self.top1_acc.info()
+        return self.top1_acc.avg
 
     def get_top3_acc(self):
-        return self.top3_acc.info()
+        return self.top3_acc.avg
 
     def get_top5_acc(self):
-        return self.top5_acc.info()
+        return self.top5_acc.avg
 
     def update(self, out_dict, label_dict):
         """Computes the precision@k for the specified values of k"""
