@@ -78,7 +78,7 @@ class FCNSegmentor(object):
         # Adjust the learning rate after every epoch.
 
         for i, data_dict in enumerate(self.train_loader):
-            Trainer.update(self, backbone_list=(0, ), solver_dict=self.configer.get('solver'))
+            Trainer.update(self, warm_list=(0,), solver_dict=self.configer.get('solver'))
             self.data_time.update(time.time() - start_time)
 
             # Forward pass.

@@ -8,7 +8,7 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-from model.backbones.backbone_selector import BackboneSelector
+from model.backbone.backbone_selector import BackboneSelector
 from model.det.layers.fr_roi_generator import FRROIGenerator
 from model.det.layers.fr_roi_sampler import FRROISampler
 from model.det.layers.rpn_detection_layer import RPNDetectionLayer

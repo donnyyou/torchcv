@@ -46,10 +46,10 @@ class DefaultLoader(data.Dataset):
         img_list = list()
         label_list = list()
 
-        with open(os.path.join(root_dir, dataset, 'label.json'), 'r') as file_stream:
+        with open(os.path.join(root_dir, '{}.json'.format(dataset)), 'r') as file_stream:
             items = json.load(file_stream)
             for item in items:
-                img_path = os.path.join(root_dir, dataset, item['image_path'])
+                img_path = os.path.join(root_dir, 'dataset', item['image_path'])
                 if not os.path.exists(img_path):
                     Log.warn('Image Path: {} not exists.'.format(img_path))
                     continue
@@ -58,10 +58,10 @@ class DefaultLoader(data.Dataset):
                 label_list.append(item['label'])
 
         if dataset == 'train' and self.configer.get('data', 'include_val'):
-            with open(os.path.join(root_dir, 'val', 'label.json'), 'r') as file_stream:
+            with open(os.path.join(root_dir, 'val.json'), 'r') as file_stream:
                 items = json.load(file_stream)
                 for item in items:
-                    img_path = os.path.join(root_dir, 'val', item['image_path'])
+                    img_path = os.path.join(root_dir, 'dataset', item['image_path'])
                     if not os.path.exists(img_path):
                         Log.warn('Image Path: {} not exists.'.format(img_path))
                         continue

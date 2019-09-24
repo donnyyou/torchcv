@@ -8,7 +8,7 @@ import torch.nn as nn
 import torch
 import math
 
-from model.backbones.backbone_selector import BackboneSelector
+from model.backbone.backbone_selector import BackboneSelector
 
 
 class CPN(nn.Module):

@@ -8,7 +8,7 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 
-from model.backbones.backbone_selector import BackboneSelector
+from model.backbone.backbone_selector import BackboneSelector
 from model.tools.module_helper import ModuleHelper
 from model.seg.loss.loss import BASE_LOSS_DICT
 

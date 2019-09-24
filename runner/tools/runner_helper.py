@@ -11,6 +11,7 @@ import torch
 import torch.nn as nn
 from torch.nn.parallel.scatter_gather import gather as torch_gather
 
+from tools.helper.dist_helper import DistHelper
 from tools.util.logger import Logger as Log
 
 
@@ -37,7 +38,8 @@ class RunnerHelper(object):
                 Log.info('Converting syncbn model...')
                 net = nn.SyncBatchNorm.convert_sync_batchnorm(net)
 
-            net = nn.parallel.DistributedDataParallel(net.cuda(), device_ids=[local_rank], output_device=local_rank)
+            net = nn.parallel.DistributedDataParallel(net.cuda(), find_unused_parameters=True,
+                                                      device_ids=[local_rank], output_device=local_rank)
             # if runner.configer.get('network.syncbn', default=False):
             #     Log.info('Converting syncbn model...')
             #     from apex.parallel import convert_syncbn_model
@@ -225,6 +227,18 @@ class RunnerHelper(object):
 
         else:
             return outputs
+
+    @staticmethod
+    def dist_avg(runner, data):
+        if runner.configer.get('network.distributed'):
+            data_list = DistHelper.all_gather(data)
+            if isinstance(data, dict):
+                return {key:sum([item[key] for item in data_list]) / len(data_list) for key in data}
+
+            if isinstance(data, list):
+                return [sum(sub_list) / len(data_list) for sub_list in zip(data_list)]
+
+            return sum(data_list) / len(data_list)
 
     @staticmethod
     def get_lr(optimizer):

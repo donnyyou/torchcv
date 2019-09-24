@@ -81,7 +81,7 @@ if __name__ == "__main__":
                         dest='network.resume_val', help='Whether to validate during resume.')
     parser.add_argument('--gather', type=str2bool, nargs='?', default=True,
                         dest='network.gather', help='Whether to gather the output of model.')
-    parser.add_argument('--distributed', type=str2bool, nargs='?', default=False,
+    parser.add_argument('--dist', type=str2bool, nargs='?', default=False,
                         dest='network.distributed', help='Whether to gather the output of model.')
 
     # ***********  Params for solver.  **********
@@ -89,6 +89,8 @@ if __name__ == "__main__":
                         dest='solver.optim.optim_method', help='The optim method that used.')
     parser.add_argument('--base_lr', default=None, type=float,
                         dest='solver.lr.base_lr', help='The learning rate.')
+    parser.add_argument('--bb_lr_scale', default=1.0, type=float,
+                        dest='solver.lr.bb_lr_scale', help='The learning rate.')
     parser.add_argument('--nbb_mult', default=1.0, type=float,
                         dest='solver.lr.nbb_mult', help='The not backbone mult ratio of learning rate.')
     parser.add_argument('--lr_policy', default=None, type=str,

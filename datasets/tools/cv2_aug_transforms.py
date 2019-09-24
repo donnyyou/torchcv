@@ -369,8 +369,8 @@ class RandomResizedCrop(object):
         ratio: range of aspect ratio of the origin aspect ratio cropped
         interpolation: Default: PIL.Image.BILINEAR
     """
-    def __init__(self, size, scale_range=(0.08, 1.0), aspect_range=(3. / 4., 4. / 3.)):
-        self.size = tuple(size)
+    def __init__(self, crop_size, scale_range=(0.08, 1.0), aspect_range=(3. / 4., 4. / 3.)):
+        self.size = tuple(crop_size)
         self.scale = scale_range
         self.ratio = aspect_range
 

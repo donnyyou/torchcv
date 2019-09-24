@@ -87,13 +87,13 @@ if __name__ == "__main__":
                         dest='image_file', help='The image file of Det Parser.')
     parser.add_argument('--json_file', default=None, type=str,
                         dest='json_file', help='The json file of Det Parser.')
-    parser.add_argument('--image_dir', default='/home/donny/DataSet/COCO_INS/train/image', type=str,
+    parser.add_argument('--image_dir', default='/home/donny/DataSets/Pallet/train/image', type=str,
                         dest='image_dir', help='The image directory of Det Parser.')
-    parser.add_argument('--json_dir', default='/home/donny/DataSet/COCO_INS/train/json', type=str,
+    parser.add_argument('--json_dir', default='/home/donny/DataSets/Pallet/train/json', type=str,
                         dest='json_dir', help='The json directory of Det Parser.')
 
     args_parser = parser.parse_args()
 
-    det_parser = DetParser(Configer(hypes_file=args_parser.hypes_file))
+    det_parser = DetParser(Configer(config_file=args_parser.config_file))
     det_parser.parse_img_det(args_parser.image_file, args_parser.json_file)
     det_parser.parse_dir_det(args_parser.image_dir, args_parser.json_dir)

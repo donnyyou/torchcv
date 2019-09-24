@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from model.backbones.backbone_selector import BackboneSelector
+from model.backbone.backbone_selector import BackboneSelector
 from model.tools.module_helper import ModuleHelper
 from model.seg.utils.apnb import APNB
 from model.seg.utils.afnb import AFNB

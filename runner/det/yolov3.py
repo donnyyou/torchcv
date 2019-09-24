@@ -78,8 +78,8 @@ class YOLOv3(object):
 
         # data_tuple: (inputs, heatmap, maskmap, vecmap)
         for i, data_dict in enumerate(self.train_loader):
-            Trainer.update(self, backbone_list=(0, ),
-                           backbone_lr_list=(self.configer.get('solver', 'lr')['base_lr'], ),
+            Trainer.update(self, warm_list=(0,),
+                           warm_lr_list=(self.configer.get('solver', 'lr')['base_lr'],),
                            solver_dict=self.configer.get('solver'))
 
             self.data_time.update(time.time() - start_time)

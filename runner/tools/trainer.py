@@ -81,6 +81,11 @@ class Trainer(object):
                                                              / lr_params['lambda_fixlinear']['linear_value']))
             scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_fixlinear)
 
+        elif lr_params['lr_policy'] == 'lambda_cosine':
+            import math
+            lambda_cosine = lambda iters: (1 + math.cos(math.pi * iters / solver_dict['max_iters'])) / 2
+            scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_cosine)
+
         elif lr_params['lr_policy'] == 'plateau':
             scheduler = lr_scheduler.ReduceLROnPlateau(optimizer,
                                                        mode=lr_params['plateau']['mode'],
@@ -99,7 +104,7 @@ class Trainer(object):
         return optimizer, scheduler
 
     @staticmethod
-    def update(runner, backbone_list=(), backbone_lr_list=None, solver_dict=None):
+    def update(runner, warm_list=(), warm_lr_list=None, solver_dict=None):
         if solver_dict['lr']['metric'] == 'epoch':
             if runner.runner_state['last_epoch'] != runner.runner_state['epoch']:
                 runner.scheduler.step(runner.runner_state['epoch'])
@@ -113,14 +118,15 @@ class Trainer(object):
         if 'is_warm' in solver_dict['lr'] and solver_dict['lr']['is_warm']:
             if runner.runner_state['iters'] < solver_dict['lr']['warm']['warm_iters']:
                 if solver_dict['lr']['warm']['freeze_backbone']:
-                    for backbone_index in backbone_list:
-                        runner.optimizer.param_groups[backbone_index]['lr'] = 0.0
+                    for group_index in warm_list:
+                        runner.optimizer.param_groups[group_index]['lr'] = 0.0
 
                 else:
                     lr_ratio = (runner.runner_state['iters'] + 1) / solver_dict['lr']['warm']['warm_iters']
-                    for backbone_index, base_lr in zip(backbone_list, backbone_lr_list):
-                        runner.optimizer.param_groups[backbone_index]['lr'] = base_lr * (lr_ratio ** 4)
+                    lr_ratio = lr_ratio ** solver_dict['lr']['warm']['power']
+                    for group_index, base_lr in zip(warm_list, warm_lr_list):
+                        runner.optimizer.param_groups[group_index]['lr'] = base_lr * lr_ratio
 
             elif runner.runner_state['iters'] == solver_dict['lr']['warm']['warm_iters']:
-                for backbone_index, base_lr in zip(backbone_list, backbone_lr_list):
-                    runner.optimizer.param_groups[backbone_index]['lr'] = base_lr
+                for group_index, base_lr in zip(warm_list, warm_lr_list):
+                    runner.optimizer.param_groups[group_index]['lr'] = base_lr
