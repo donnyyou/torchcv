@@ -232,7 +232,7 @@ class RunnerHelper(object):
     def dist_avg(runner, data):
         if runner.get('network.distributed'):
             data_list = DistHelper.all_gather(data)
-            return sum(data_list) / len(da)
+            return sum(data_list) / len(data_list)
 
     @staticmethod
     def get_lr(optimizer):
