@@ -230,8 +230,14 @@ class RunnerHelper(object):
 
     @staticmethod
     def dist_avg(runner, data):
-        if runner.get('network.distributed'):
+        if runner.configer.get('network.distributed'):
             data_list = DistHelper.all_gather(data)
+            if isinstance(data, dict):
+                return {key:sum([item[key] for item in data_list]) / len(data_list) for key in data}
+
+            if isinstance(data, list):
+                return [sum(sub_list) / len(data_list) for sub_list in zip(data_list)]
+
             return sum(data_list) / len(data_list)
 
     @staticmethod
