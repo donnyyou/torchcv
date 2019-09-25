@@ -12,16 +12,8 @@ class Linear(nn.Linear):
 
 
 class NobiasLinear(nn.Linear):
-    def __init__(self, in_features, out_features, bias=False):
-        super(Linear, self).__init__()
-        self.in_features = in_features
-        self.out_features = out_features
-        self.weight = Parameter(torch.Tensor(out_features, in_features))
-        if bias:
-            self.bias = Parameter(torch.Tensor(out_features))
-        else:
-            self.register_parameter('bias', None)
-        self.reset_parameters()
+    def __init__(self, in_features, out_features):
+        super(NobiasLinear, self).__init__(in_features, out_features, False)
 
     def forward(self, input, *target):
 
