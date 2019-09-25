@@ -19,6 +19,7 @@ This repository provides source code for most deep learning based cv problems. W
     - DenseNet: Densely Connected Convolutional Networks
     - ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices
     - ShuffleNet V2: Practical Guidelines for Ecient CNN Architecture Design
+    - Partial Order Pruning: for Best Speed/Accuracy Trade-off in Neural Architecture Search
 
 - [Semantic Segmentation](https://github.com/youansheng/torchcv/tree/master/methods/seg)
     - DeepLabV3: Rethinking Atrous Convolution for Semantic Image Segmentation
@@ -57,7 +58,12 @@ sh make.sh
 All the performances showed below fully reimplemented the papers' results.
 
 #### Image Classification
-- ResNet: Deep Residual Learning for Image Recognition
+- ImageNet (Center Crop Test): 224x224
+
+| Model | Train | Test | Top-1 | Top-5 | BS | Iters | Scripts |
+|:--------|:---------|:------|:------|:------|:------|:------|:------|
+| ResNet50 | train | val | - | - | 512 | 30W | [ResNet50](https://github.com/youansheng/torchcv/blob/master/scripts/cls/imagenet/run_ic_res50_imagenet_cls.sh) |
+| ShuffleNetV2x0.5 | train | val | - | - | 1024 | 40W | [ShuffleNetV2x0.5](https://github.com/youansheng/torchcv/blob/master/scripts/cls/imagenet/run_ic_shufflenetv2x0.5_imagenet_cls.sh) |
 
 #### Semantic Segmentation
 - Cityscapes (Single Scale Whole Image Test): Base LR 0.01, Crop Size 769
