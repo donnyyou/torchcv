@@ -21,10 +21,10 @@ class RunnerHelper(object):
     def to_device(runner, in_data):
         device = torch.device('cpu' if runner.configer.get('gpu') is None else 'cuda')
         if isinstance(in_data, (list, tuple)):
-            return [item.to(device) if isinstance(item, torch.Tensor) else item for item in in_data]
+            return [RunnerHelper.to_device(runner, item) for item in in_data]
 
         if isinstance(in_data, dict):
-            return {k: v.to(device) if isinstance(v, torch.Tensor) else v for k, v in in_data.items()}
+            return {k: RunnerHelper.to_device(runner, v) for k, v in in_data.items()}
 
         return in_data.to(device) if isinstance(in_data, torch.Tensor) else in_data
 

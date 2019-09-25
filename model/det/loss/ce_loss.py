@@ -19,6 +19,8 @@ class CELoss(nn.Module):
         self.ignore_index = self.configer.get('loss.params.ce_loss.ignore_index', default=-100)
 
     def forward(self, input, target):
+        input = input.view(-1, input.size(-1))
+        target = target.view(-1)
         loss = F.cross_entropy(input, target,
                                weight=self.weight.to(input.device) if self.weight is not None else None,
                                ignore_index=self.ignore_index, reduction=self.reduction)

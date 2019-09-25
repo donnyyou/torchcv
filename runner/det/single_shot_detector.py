@@ -83,6 +83,7 @@ class SingleShotDetector(object):
                            solver_dict=self.configer.get('solver'))
             self.data_time.update(time.time() - start_time)
             # Forward pass.
+            data_dict = RunnerHelper.to_device(self, data_dict)
             out = self.det_net(data_dict)
             loss_dict = self.det_loss(out)
             loss = loss_dict['loss']
@@ -129,6 +130,7 @@ class SingleShotDetector(object):
         with torch.no_grad():
             for j, data_dict in enumerate(self.val_loader):
                 # Forward pass.
+                data_dict = RunnerHelper.to_device(self, data_dict)
                 out = self.det_net(data_dict)
                 loss_dict = self.det_loss(out)
                 loss = loss_dict['loss']
