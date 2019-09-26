@@ -50,6 +50,7 @@ class FastRCNNTest(object):
     def test(self, test_dir, out_dir):
         for _, data_dict in enumerate(self.test_loader.get_testloader(test_dir=test_dir)):
             data_dict['testing'] = True
+            data_dict = RunnerHelper.to_device(self, data_dict)
             out_dict = self.det_net(data_dict)
             meta_list = DCHelper.tolist(data_dict['meta'])
             test_indices_and_rois, test_roi_locs, test_roi_scores, test_rois_num = out_dict['test_group']
@@ -97,9 +98,9 @@ class FastRCNNTest(object):
         start_index = 0
         for i in range(test_rois_num.size(0)):
             tmp_dst_bbox = dst_bbox[start_index:start_index+test_rois_num[i]]
-            tmp_dst_bbox[:, :, 0::2] = tmp_dst_bbox[:, :, 0::2].clamp(min=0, max=metas[i]['border_size'][0] - 1)
-            tmp_dst_bbox[:, :, 1::2] = tmp_dst_bbox[:, :, 1::2].clamp(min=0, max=metas[i]['border_size'][1] - 1)
-            tmp_dst_bbox *= (metas[i]['ori_img_size'][0] / metas[i]['border_size'][0])
+            tmp_dst_bbox[:, :, 0::2] = tmp_dst_bbox[:, :, 0::2].clamp(min=0, max=metas[i]['border_wh'][0] - 1)
+            tmp_dst_bbox[:, :, 1::2] = tmp_dst_bbox[:, :, 1::2].clamp(min=0, max=metas[i]['border_wh'][1] - 1)
+            tmp_dst_bbox *= (metas[i]['ori_img_size'][0] / metas[i]['border_wh'][0])
 
             tmp_cls_prob = cls_prob[start_index:start_index+test_rois_num[i]]
             tmp_cls_label = cls_label[start_index:start_index+test_rois_num[i]]

@@ -38,7 +38,7 @@ class DefaultLoader(data.Dataset):
 
         meta = dict(
             ori_img_size=ori_img_size,
-            border_size=border_size,
+            border_wh=border_size,
             img_path=self.item_list[index][0],
             filename=self.item_list[index][1]
         )
