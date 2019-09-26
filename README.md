@@ -63,7 +63,8 @@ All the performances showed below fully reimplemented the papers' results.
 | Model | Train | Test | Top-1 | Top-5 | BS | Iters | Scripts |
 |:--------|:---------|:------|:------|:------|:------|:------|:------|
 | ResNet50 | train | val | - | - | 512 | 30W | [ResNet50](https://github.com/youansheng/torchcv/blob/master/scripts/cls/imagenet/run_ic_res50_imagenet_cls.sh) |
-| ShuffleNetV2x0.5 | train | val | - | - | 1024 | 40W | [ShuffleNetV2x0.5](https://github.com/youansheng/torchcv/blob/master/scripts/cls/imagenet/run_ic_shufflenetv2x0.5_imagenet_cls.sh) |
+| ShuffleNetV2x0.5 | train | val | 60.47 | 82.45 | 1024 | 40W | [ShuffleNetV2x0.5](https://github.com/youansheng/torchcv/blob/master/scripts/cls/imagenet/run_ic_shufflenetv2x0.5_imagenet_cls.sh) |
+| ShuffleNetV2x1.0 | train | val | - | - | 1024 | 40W | [ShuffleNetV2x1.0](https://github.com/youansheng/torchcv/blob/master/scripts/cls/imagenet/run_ic_shufflenetv2x1.0_imagenet_cls.sh) |
 
 #### Semantic Segmentation
 - Cityscapes (Single Scale Whole Image Test): Base LR 0.01, Crop Size 769
