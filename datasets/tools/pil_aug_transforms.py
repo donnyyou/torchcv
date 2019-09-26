@@ -1075,20 +1075,23 @@ class Resize(object):
         # width, height = img.size
         width, height = img.size if isinstance(img, Image.Image) else img[0].size
         if self.target_size is not None:
-            target_size = self.target_size
             w_scale_ratio = self.target_size[0] / width
             h_scale_ratio = self.target_size[1] / height
 
-        elif self.min_side_length is not None:
+        elif self.min_side_length is not None and self.max_side_length is None:
             scale_ratio = self.min_side_length / min(width, height)
             w_scale_ratio, h_scale_ratio = scale_ratio, scale_ratio
-            target_size = [int(round(width * w_scale_ratio)), int(round(height * h_scale_ratio))]
 
-        else:
+        elif self.min_side_length is None and self.max_side_length is not None:
             scale_ratio = self.max_side_length / max(width, height)
             w_scale_ratio, h_scale_ratio = scale_ratio, scale_ratio
-            target_size = [int(round(width * w_scale_ratio)), int(round(height * h_scale_ratio))]
 
+        else:
+            scale1 = self.min_side_length / min(width, height)
+            scale2 = self.max_side_length / max(width, height)
+            w_scale_ratio, h_scale_ratio = min(scale1, scale2), min(scale1, scale2)
+
+        target_size = [int(round(width * w_scale_ratio)), int(round(height * h_scale_ratio))]
         if kpts is not None and kpts.size > 0:
             kpts[:, :, 0] *= w_scale_ratio
             kpts[:, :, 1] *= h_scale_ratio
