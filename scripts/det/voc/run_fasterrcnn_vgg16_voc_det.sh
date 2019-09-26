@@ -36,12 +36,12 @@ elif [[ "$1"x == "resume"x ]]; then
 
 elif [[ "$1"x == "val"x ]]; then
   ${PYTHON} -u main.py --config_file ${CONFIG_FILE} --phase test --model_name ${MODEL_NAME} \
-                       --phase test --gpu 0 --resume ./checkpoints/det/voc/${CHECKPOINTS_NAME}_latest.pth \
+                       --phase test --gpu 0 1 2 3 --resume ./checkpoints/det/voc/${CHECKPOINTS_NAME}_latest.pth \
                        --test_dir ${DATA_DIR}/val/image --out_dir val  2>&1 | tee -a ${LOG_FILE}
-  cd metrics/det/
-  ${PYTHON} -u voc_evaluator.py --config_file "../../../"${CONFIG_FILE} \
-                                --json_dir ../../../out/results/voc/test_dir/${CHECKPOINTS_NAME}/val/json \
-                                --gt_dir ${DATA_DIR}/val/label  2>&1 | tee -a "../../"${LOG_FILE}
+  cd metric/det/
+  ${PYTHON} -u voc_evaluator.py --config_file "../../"${CONFIG_FILE} \
+                                --json_dir ../../results/det/voc/${CHECKPOINTS_NAME}/val/json \
+                                --gt_dir ${DATA_DIR}/VOCdevkit/VOC2007  2>&1 | tee -a "../../"${LOG_FILE}
 
 else
   echo "$1"x" is invalid..."

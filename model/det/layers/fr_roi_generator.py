@@ -106,14 +106,15 @@ class FRROIGenerator(object):
 
         for i in range(loc.size(0)):
             tmp_dst_bbox = dst_bbox[i]
-            tmp_dst_bbox[:, 0::2] = tmp_dst_bbox[:, 0::2].clamp_(min=0, max=meta[i]['border_size'][0] - 1)
-            tmp_dst_bbox[:, 1::2] = tmp_dst_bbox[:, 1::2].clamp_(min=0, max=meta[i]['border_size'][1] - 1)
+            tmp_dst_bbox[:, 0::2] = tmp_dst_bbox[:, 0::2].clamp_(min=0, max=meta[i]['border_wh'][0] - 1)
+            tmp_dst_bbox[:, 1::2] = tmp_dst_bbox[:, 1::2].clamp_(min=0, max=meta[i]['border_wh'][1] - 1)
             tmp_scores = rpn_fg_scores[i]
             # Remove predicted boxes with either height or width < threshold.
             ws = tmp_dst_bbox[:, 2] - tmp_dst_bbox[:, 0] + 1
             hs = tmp_dst_bbox[:, 3] - tmp_dst_bbox[:, 1] + 1
             min_size = self.configer.get('rpn', 'min_size')
-            keep = (hs >= meta[i]['img_scale'] * min_size) & (ws >= meta[i]['img_scale'] * min_size)
+            img_scale = meta[i]['border_wh'][0] / meta[i]['ori_img_size'][0]
+            keep = (hs >= img_scale * min_size) & (ws >= img_scale * min_size)
             rois = tmp_dst_bbox[keep]
             tmp_scores = tmp_scores[keep]
             # Sort all (proposal, score) pairs by score from highest to lowest.

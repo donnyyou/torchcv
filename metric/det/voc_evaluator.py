@@ -308,7 +308,7 @@ if __name__ == "__main__":
                         dest='dataset', help='The target dataset.')
     args = parser.parse_args()
 
-    coco_evaluator = VOCEvaluator(Configer(hypes_file=args.hypes_file))
+    coco_evaluator = VOCEvaluator(Configer(config_file=args.config_file))
     if args.gt_dir is not None:
         pred_dir = coco_evaluator.relabel(args.json_dir)
         coco_evaluator.evaluate(pred_dir, args.gt_dir, use_07=(args.dataset == 'VOC2007'))
