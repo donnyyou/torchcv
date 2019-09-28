@@ -32,7 +32,7 @@ class ClsModel(nn.Module):
             fc_dim = fc_dim_out
 
         self.linear_list = nn.ModuleList()
-        linear_type = configer.get('network', '{}linear_type'.format(self.flag), default='nobias_linear')
+        linear_type = configer.get('network', '{}linear_type'.format(self.flag), default='linear')
         self.fc = LINEAR_DICT[linear_type](fc_dim, configer.get('data.num_classes'))
 
         self.embed = None
