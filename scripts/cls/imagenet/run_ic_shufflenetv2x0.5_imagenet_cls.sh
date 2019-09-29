@@ -11,12 +11,12 @@ cd ${WORK_DIR}
 DATA_DIR="/home/donny/DataSets/ImageNet"
 
 MODEL_NAME="cls_model"
-BACKBONE="resnet50"
-CHECKPOINTS_NAME="res50_imagenet_cls"$2
+BACKBONE="shufflenet_v2_x0_5"
+CHECKPOINTS_NAME="${BACKBONE}_imagenet_cls"$2
 
-CONFIG_FILE='configs/cls/imagenet/base_large_imagenet_cls.conf'
-MAX_ITERS=300000
-LOSS_TYPE="ce_loss"
+CONFIG_FILE='configs/cls/imagenet/base_small_imagenet_cls.conf'
+MAX_ITERS=400000
+LOSS_TYPE="soft_ce_loss"
 
 LOG_DIR="./log/cls/imagenet/"
 LOG_FILE="${LOG_DIR}${CHECKPOINTS_NAME}.log"

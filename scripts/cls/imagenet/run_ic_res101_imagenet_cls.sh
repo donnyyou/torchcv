@@ -11,8 +11,8 @@ cd ${WORK_DIR}
 DATA_DIR="/home/donny/DataSets/ImageNet"
 
 MODEL_NAME="cls_model"
-BACKBONE="resnet50"
-CHECKPOINTS_NAME="res50_imagenet_cls"$2
+BACKBONE="resnet101"
+CHECKPOINTS_NAME="res101_imagenet_cls"$2
 
 CONFIG_FILE='configs/cls/imagenet/base_large_imagenet_cls.conf'
 MAX_ITERS=300000
@@ -26,19 +26,19 @@ if [ ! -d ${LOG_DIR} ]; then
     mkdir -p ${LOG_DIR}
 fi
 
-NGPUS=4
+NGPUS=8
 DIST_PYTHON="${PYTHON} -m torch.distributed.launch --nproc_per_node=${NGPUS}"
 
 if [ -z $1 ]; then
   echo "Phase is None..."
 
 elif [ $1 == train ]; then
-  ${DIST_PYTHON} main.py --config_file ${CONFIG_FILE} --phase train --gather y --model_name ${MODEL_NAME} \
+  ${DIST_PYTHON} main.py --config_file ${CONFIG_FILE} --phase train --gather y --model_name ${MODEL_NAME} --train_batch_size 64 \
                          --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --max_iters ${MAX_ITERS} --dist y \
                          --backbone ${BACKBONE} --checkpoints_name ${CHECKPOINTS_NAME}  2>&1 | tee ${LOG_FILE}
 
 elif [ $1 == resume ]; then
-  ${DIST_PYTHON} main.py --config_file ${CONFIG_FILE} --phase train --gather y --model_name ${MODEL_NAME} \
+  ${DIST_PYTHON} main.py --config_file ${CONFIG_FILE} --phase train --gather y --model_name ${MODEL_NAME} --train_batch_size 64 \
                          --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --max_iters ${MAX_ITERS} --dist y \
                          --resume_continue y --resume ./checkpoints/cls/imagenet/${CHECKPOINTS_NAME}_latest.pth \
                          --backbone ${BACKBONE} --checkpoints_name ${CHECKPOINTS_NAME}  2>&1 | tee ${LOG_FILE}
