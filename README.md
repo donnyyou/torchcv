@@ -65,8 +65,8 @@ All the performances showed below fully reimplemented the papers' results.
 | ResNet50 | train | val | 77.54 | 93.59 | 512 | 30W | [ResNet50](https://github.com/youansheng/torchcv/blob/master/scripts/cls/imagenet/run_ic_res50_imagenet_cls.sh) |
 | ShuffleNetV2x0.5 | train | val | 60.90 | 82.54 | 1024 | 40W | [ShuffleNetV2x0.5](https://github.com/youansheng/torchcv/blob/master/scripts/cls/imagenet/run_ic_shufflenetv2x0.5_imagenet_cls.sh) |
 | ShuffleNetV2x1.0 | train | val | 69.71 | 88.91 | 1024 | 40W | [ShuffleNetV2x1.0](https://github.com/youansheng/torchcv/blob/master/scripts/cls/imagenet/run_ic_shufflenetv2x1.0_imagenet_cls.sh) |
-| DFNetV1 | train | val | - | - | 1024 | 40W | [DFNetV1](https://github.com/youansheng/torchcv/blob/master/scripts/cls/imagenet/run_ic_dfnetv1_imagenet_cls.sh) |
-| DFNetV2 | train | val | - | - | 1024 | 40W | [DFNetV2](https://github.com/youansheng/torchcv/blob/master/scripts/cls/imagenet/run_ic_dfnetv2_imagenet_cls.sh) |
+| DFNetV1 | train | val | 70.99 | 89.68 | 1024 | 40W | [DFNetV1](https://github.com/youansheng/torchcv/blob/master/scripts/cls/imagenet/run_ic_dfnetv1_imagenet_cls.sh) |
+| DFNetV2 | train | val | 74.22 | 91.61 | 1024 | 40W | [DFNetV2](https://github.com/youansheng/torchcv/blob/master/scripts/cls/imagenet/run_ic_dfnetv2_imagenet_cls.sh) |
 
 #### Semantic Segmentation
 - Cityscapes (Single Scale Whole Image Test): Base LR 0.01, Crop Size 769
