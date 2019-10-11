@@ -25,9 +25,9 @@ class ModuleHelper(object):
                 nn.ReLU()
             )
         elif norm_type == 'encsync_batchnorm':
-            from encoding.nn import BatchNorm2d
+            from encoding.nn import SyncBatchNorm
             return nn.Sequential(
-                BatchNorm2d(num_features, **kwargs),
+                SyncBatchNorm(num_features, **kwargs),
                 nn.ReLU()
             )
         elif norm_type == 'instancenorm':
