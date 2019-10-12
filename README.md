@@ -63,6 +63,7 @@ All the performances showed below fully reimplemented the papers' results.
 | Model | Train | Test | Top-1 | Top-5 | BS | Iters | Scripts |
 |:--------|:---------|:------|:------|:------|:------|:------|:------|
 | ResNet50 | train | val | 77.54 | 93.59 | 512 | 30W | [ResNet50](https://github.com/youansheng/torchcv/blob/master/scripts/cls/imagenet/run_ic_res50_imagenet_cls.sh) |
+| ResNet101 | train | val | 78.94 | 94.56 | 512 | 30W | [ResNet101](https://github.com/youansheng/torchcv/blob/master/scripts/cls/imagenet/run_ic_res101_imagenet_cls.sh) |
 | ShuffleNetV2x0.5 | train | val | 60.90 | 82.54 | 1024 | 40W | [ShuffleNetV2x0.5](https://github.com/youansheng/torchcv/blob/master/scripts/cls/imagenet/run_ic_shufflenetv2x0.5_imagenet_cls.sh) |
 | ShuffleNetV2x1.0 | train | val | 69.71 | 88.91 | 1024 | 40W | [ShuffleNetV2x1.0](https://github.com/youansheng/torchcv/blob/master/scripts/cls/imagenet/run_ic_shufflenetv2x1.0_imagenet_cls.sh) |
 | DFNetV1 | train | val | 70.99 | 89.68 | 1024 | 40W | [DFNetV1](https://github.com/youansheng/torchcv/blob/master/scripts/cls/imagenet/run_ic_dfnetv1_imagenet_cls.sh) |
