@@ -49,7 +49,7 @@ This repository provides source code for most deep learning based cv problems. W
 Now only support Python3.x, pytorch 1.0.
 ```bash
 pip3 install -r requirements.txt
-cd extensions
+cd exts
 sh make.sh
 ```
 
