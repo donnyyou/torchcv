@@ -7,6 +7,8 @@
 from model.seg.nets.denseassp import DenseASPP
 from model.seg.nets.deeplabv3 import DeepLabV3
 from model.seg.nets.pspnet import PSPNet
+from model.seg.nets.nonlocalbn import NonLocalNet
+from model.seg.nets.gcnet import GCNet
 from model.seg.nets.annn import asymmetric_non_local_network
 from model.seg.loss.loss import Loss
 from tools.util.logger import Logger as Log
@@ -16,7 +18,9 @@ SEG_MODEL_DICT = {
     'deeplabv3': DeepLabV3,
     'pspnet': PSPNet,
     'denseaspp': DenseASPP,
-    'annn': asymmetric_non_local_network
+    'annn': asymmetric_non_local_network,
+    'nonlocalbn': NonLocalNet,
+    'gcnet': GCNet
 }
 
 
