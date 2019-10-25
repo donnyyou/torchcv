@@ -16,6 +16,9 @@ class DCHelper(object):
         if isinstance(dc, (list, tuple)):
             return dc
 
+        if isinstance(dc, torch.Tensor):
+            return [item for item in dc]
+
         assert isinstance(dc, DataContainer), type(dc)
         if dc.samples_per_gpu and not dc.stack:
             return list(itertools.chain(*dc.data))

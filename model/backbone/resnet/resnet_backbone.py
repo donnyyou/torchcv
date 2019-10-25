@@ -115,6 +115,15 @@ class ResNetBackbone(object):
         pretrained = self.configer.get('network.pretrained') if pretrained is None else pretrained
         multi_grid = self.configer.get('network.multi_grid', default=None)
 
+        if arch == 'resnet18':
+            orig_resnet = resnet18(pretrained=pretrained)
+            arch_net = NormalResnetBackbone(orig_resnet)
+            arch_net.num_features = 512
+
+        elif arch == 'deepbase_resnet18':
+            orig_resnet = deepbase_resnet18(pretrained=pretrained)
+            arch_net = NormalResnetBackbone(orig_resnet)
+
         if arch == 'resnet34':
             orig_resnet = resnet34(pretrained=pretrained)
             arch_net = NormalResnetBackbone(orig_resnet)
@@ -129,6 +138,10 @@ class ResNetBackbone(object):
             orig_resnet = resnet34(pretrained=pretrained)
             arch_net = DilatedResnetBackbone(orig_resnet, dilate_scale=16, multi_grid=multi_grid)
             arch_net.num_features = 512
+
+        elif arch == 'deepbase_resnet34':
+            orig_resnet = deepbase_resnet34(pretrained=pretrained)
+            arch_net = NormalResnetBackbone(orig_resnet)
 
         elif arch == 'resnet50':
             orig_resnet = resnet50(pretrained=pretrained)
