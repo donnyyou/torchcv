@@ -49,11 +49,8 @@ class RunnerHelper(object):
             return net
 
         net = net.to(torch.device('cpu' if runner.configer.get('gpu') is None else 'cuda'))
-        if len(runner.configer.get('gpu')) > 1:
-            from exts.tools.parallel.data_parallel import ParallelModel
-            return ParallelModel(net, gather_=runner.configer.get('network', 'gather'))
-
-        return net
+        from exts.tools.parallel.data_parallel import ParallelModel
+        return ParallelModel(net, gather_=runner.configer.get('network', 'gather'))
 
     @staticmethod
     def load_net(runner, net, model_path=None, map_location='cpu'):
