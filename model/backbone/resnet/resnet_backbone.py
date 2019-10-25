@@ -124,7 +124,7 @@ class ResNetBackbone(object):
             orig_resnet = deepbase_resnet18(pretrained=pretrained)
             arch_net = NormalResnetBackbone(orig_resnet)
 
-        if arch == 'resnet34':
+        elif arch == 'resnet34':
             orig_resnet = resnet34(pretrained=pretrained)
             arch_net = NormalResnetBackbone(orig_resnet)
             arch_net.num_features = 512

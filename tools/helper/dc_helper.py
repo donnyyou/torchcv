@@ -37,7 +37,7 @@ class DCHelper(object):
         return torch.cat(dc.data, 0)
 
     @staticmethod
-    def todc(data_list, samples_per_gpu=True, stack=False, cpu_only=False, device_ids=None):
+    def todc(data_list, samples_per_gpu=True, stack=False, cpu_only=False, device_ids=None, concat=False):
         if not samples_per_gpu:
              if not stack:
                  return DataContainer(data_list, stack=stack, samples_per_gpu=samples_per_gpu, cpu_only=cpu_only)
@@ -48,9 +48,11 @@ class DCHelper(object):
         samples = (len(data_list) - 1 + len(device_ids)) // len(device_ids)
         stacked = []
         for i in range(0, len(data_list), samples):
-            if not stack:
+            if not stack and not concat:
                 stacked.append(data_list[i:i + samples])
-            else:
+            elif stack:
                 stacked.append(torch.stack(data_list[i:i + samples], 0))
+            else:
+                stacked.append(torch.cat(data_list[i:i + samples], 0))
 
         return DataContainer(stacked, stack=stack, samples_per_gpu=samples_per_gpu, cpu_only=cpu_only)

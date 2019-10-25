@@ -163,11 +163,13 @@ class FCNSegmentorTest(object):
             width_starts_list.append(width_starts)
             split_crops = np.concatenate(split_crops, axis=0)  # (n, crop_image_size, crop_image_size, 3)
             inputs = torch.from_numpy(split_crops).permute(0, 3, 1, 2).to(self.device)
-            split_batch.extend(list(inputs))
+            split_batch.append(inputs)
 
+        assert len(split_batch) == torch.cuda.device_count(), 'Only support one image per gpu.'
         out_list = list()
         with torch.no_grad():
-            results = self.seg_net(dict(img=DCHelper.todc(split_batch, stack=True, samples_per_gpu=True)))
+            results = self.seg_net(dict(img=DCHelper.todc(split_batch, stack=False, samples_per_gpu=True, concat=True)))
+            results = results if isinstance(results, (list, tuple)) else [results]
             for res in results:
                 out_list.append(res['out'].permute(0, 2, 3, 1).cpu().numpy())
 
@@ -188,7 +190,7 @@ class FCNSegmentorTest(object):
 
         for i, meta in enumerate(DCHelper.tolist(data_dict['meta'])):
             total_logits[i] = cv2.resize(total_logits[i][:meta['border_wh'][1], :meta['border_wh'][0]],
-                                         tuple(meta['ori_img_wh']), interpolation=cv2.INTER_CUBIC)
+                                         tuple(meta['ori_img_size']), interpolation=cv2.INTER_CUBIC)
 
         return total_logits
 
@@ -208,12 +210,14 @@ class FCNSegmentorTest(object):
         with torch.no_grad():
             total_logits = list()
             results = self.seg_net(data_dict)
+            results = results if isinstance(results, (list, tuple)) else [results]
             for res in results:
+                assert res['out'].size(0) == 1, 'Only support one image per gpu.'
                 total_logits.append(res['out'].squeeze(0).permute(1, 2, 0).cpu().numpy())
 
             for i, meta in enumerate(DCHelper.tolist(data_dict['meta'])):
                 total_logits[i] = cv2.resize(total_logits[i][:meta['border_wh'][1], :meta['border_wh'][0]],
-                                             tuple(meta['ori_img_wh']), interpolation=cv2.INTER_CUBIC)
+                                             tuple(meta['ori_img_size']), interpolation=cv2.INTER_CUBIC)
 
         return total_logits
 
