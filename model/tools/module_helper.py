@@ -128,9 +128,15 @@ class ModuleHelper(object):
             model.load_state_dict(load_dict)
 
         else:
-            pretrained_dict = torch.load(pretrained)
+            pretrained_dict = torch.load(pretrained, map_location=map_location)
             model_dict = model.state_dict()
-            load_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
+            load_dict = dict()
+            for k, v in pretrained_dict.items():
+                if 'prefix.{}'.format(k) in model_dict:
+                    load_dict['prefix.{}'.format(k)] = v
+                elif k in model_dict:
+                    load_dict[k] = v
+
             Log.info('Matched Keys: {}'.format(load_dict.keys()))
             model_dict.update(load_dict)
             model.load_state_dict(model_dict)

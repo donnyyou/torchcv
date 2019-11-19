@@ -186,7 +186,7 @@ def deepbase_resnet18(num_classes=1000, pretrained=None, norm_type='batchnorm', 
         pretrained (bool): If True, returns a model pre-trained on Places
     """
     model = ResNet(BasicBlock, [2, 2, 2, 2], num_classes=num_classes, deep_base=True, norm_type=norm_type)
-    model = ModuleHelper.load_model(model, pretrained=pretrained)
+    model = ModuleHelper.load_model(model, all_match=False, pretrained=pretrained)
     return model
 
 def resnet34(num_classes=1000, pretrained=None, norm_type='batchnorm', **kwargs):

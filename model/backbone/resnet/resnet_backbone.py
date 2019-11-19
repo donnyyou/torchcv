@@ -123,6 +123,7 @@ class ResNetBackbone(object):
         elif arch == 'deepbase_resnet18':
             orig_resnet = deepbase_resnet18(pretrained=pretrained)
             arch_net = NormalResnetBackbone(orig_resnet)
+            arch_net.num_features = 512
 
         elif arch == 'resnet34':
             orig_resnet = resnet34(pretrained=pretrained)
@@ -142,6 +143,7 @@ class ResNetBackbone(object):
         elif arch == 'deepbase_resnet34':
             orig_resnet = deepbase_resnet34(pretrained=pretrained)
             arch_net = NormalResnetBackbone(orig_resnet)
+            arch_net.num_features = 512
 
         elif arch == 'resnet50':
             orig_resnet = resnet50(pretrained=pretrained)
