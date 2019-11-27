@@ -33,18 +33,18 @@ if [ -z $1 ]; then
   echo "Phase is None..."
 
 elif [ $1 == train ]; then
-  ${DIST_PYTHON} main.py --config_file ${CONFIG_FILE} --phase train --gathered y --model_name ${MODEL_NAME} \
+  ${DIST_PYTHON} main.py --config_file ${CONFIG_FILE} --phase train --gather y --model_name ${MODEL_NAME} \
                          --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --max_epoch ${MAX_EPOCH} --dist y \
                          --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL}  2>&1 | tee ${LOG_FILE}
 
 elif [ $1 == resume ]; then
-  ${DIST_PYTHON} main.py --config_file ${CONFIG_FILE} --phase train --gathered y --model_name ${MODEL_NAME} \
+  ${DIST_PYTHON} main.py --config_file ${CONFIG_FILE} --phase train --gather y --model_name ${MODEL_NAME} \
                          --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --max_epoch ${MAX_EPOCH} --dist y \
                          --resume_continue y --resume ./checkpoints/cls/cifar/${CHECKPOINTS_NAME}_latest.pth \
                          --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL}  2>&1 | tee ${LOG_FILE}
 
 elif [ $1 == test ]; then
-  ${PYTHON} main.py --config_file ${CONFIG_FILE} --phase test --gpu 0 1 2 3 --gathered n \
+  ${PYTHON} main.py --config_file ${CONFIG_FILE} --phase test --gpu 0 1 2 3 --gather n \
                     --model_name ${MODEL_NAME} --checkpoints_name ${CHECKPOINTS_NAME} \
                     --resume ./checkpoints/cls/cifar/${CHECKPOINTS_NAME}_latest.pth \
                     --test_dir ${DATA_DIR}/test --out_dir test  2>&1 | tee -a ${LOG_FILE}
