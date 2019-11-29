@@ -3,6 +3,7 @@
 # Author: Donny You(youansheng@gmail.com)
 
 
+import torch
 from torch.utils import data
 
 import datasets.tools.pil_aug_transforms as pil_aug_trans
@@ -41,12 +42,16 @@ class DataLoader(object):
 
     def get_trainloader(self):
         if self.configer.get('train.loader', default=None) in [None, 'default']:
-            trainloader = data.DataLoader(
-                DefaultLoader(root_dir=self.configer.get('data', 'data_dir'), dataset='train',
+            dataset = DefaultLoader(root_dir=self.configer.get('data', 'data_dir'), dataset='train',
                               aug_transform=self.aug_train_transform,
-                              img_transform=self.img_transform,
-                              configer=self.configer),
-                batch_size=self.configer.get('train', 'batch_size'), shuffle=True,
+                              img_transform=self.img_transform, configer=self.configer)
+            sampler = None
+            if self.configer.get('network.distributed'):
+                sampler = torch.utils.data.distributed.DistributedSampler(dataset)
+
+            trainloader = data.DataLoader(
+                dataset, sampler=sampler,
+                batch_size=self.configer.get('train', 'batch_size'), shuffle=(sampler is None),
                 num_workers=self.configer.get('data', 'workers'), pin_memory=True,
                 drop_last=self.configer.get('data', 'drop_last'),
                 collate_fn=lambda *args: collate(
