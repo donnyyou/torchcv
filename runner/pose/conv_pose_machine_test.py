@@ -10,7 +10,7 @@ import numpy as np
 import torch
 from scipy.ndimage.filters import gaussian_filter
 
-from datasets.pose.data_loader import DataLoader
+from data.pose.data_loader import DataLoader
 from runner.tools.blob_helper import BlobHelper
 from runner.tools.runner_helper import RunnerHelper
 from model.pose.model_manager import ModelManager

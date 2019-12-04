@@ -8,7 +8,7 @@ import os
 import cv2
 import numpy as np
 
-from datasets.tools.transforms import DeNormalize
+from data.tools.transforms import DeNormalize
 from tools.util.logger import Logger as Log
 
 

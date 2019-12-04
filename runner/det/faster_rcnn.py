@@ -7,7 +7,7 @@
 import time
 import torch
 
-from datasets.det.data_loader import DataLoader
+from data.det.data_loader import DataLoader
 from runner.det.faster_rcnn_test import FastRCNNTest
 from runner.tools.runner_helper import RunnerHelper
 from runner.tools.trainer import Trainer

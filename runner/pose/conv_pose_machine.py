@@ -7,7 +7,7 @@
 import time
 import torch
 
-from datasets.pose.data_loader import DataLoader
+from data.pose.data_loader import DataLoader
 from runner.tools.runner_helper import RunnerHelper
 from runner.tools.trainer import Trainer
 from model.pose.model_manager import ModelManager

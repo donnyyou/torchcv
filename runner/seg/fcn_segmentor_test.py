@@ -10,8 +10,7 @@ import numpy as np
 import torch
 from PIL import Image
 
-from datasets.seg.data_loader import DataLoader
-from datasets.test.test_data_loader import TestDataLoader
+from data.test.test_data_loader import TestDataLoader
 from runner.tools.blob_helper import BlobHelper
 from runner.tools.runner_helper import RunnerHelper
 from model.seg.model_manager import ModelManager
@@ -29,7 +28,6 @@ class FCNSegmentorTest(object):
         self.seg_visualizer = SegVisualizer(configer)
         self.seg_parser = SegParser(configer)
         self.seg_model_manager = ModelManager(configer)
-        self.seg_data_loader = DataLoader(configer)
         self.test_loader = TestDataLoader(configer)
         self.device = torch.device('cpu' if self.configer.get('gpu') is None else 'cuda')
         self.seg_net = None

@@ -14,7 +14,7 @@ from PIL import Image
 from numpy import ma
 from scipy.ndimage.filters import gaussian_filter
 
-from datasets.tools.transforms import DeNormalize
+from data.tools.transforms import DeNormalize
 from tools.util.logger import Logger as Log
 
 

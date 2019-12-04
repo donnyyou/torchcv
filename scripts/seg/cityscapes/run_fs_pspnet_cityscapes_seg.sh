@@ -8,7 +8,7 @@ WORK_DIR=$(cd $(dirname $0)/../../../;pwd)
 export PYTHONPATH=${WORK_DIR}:${PYTHONPATH}
 cd ${WORK_DIR}
 
-DATA_DIR="/home/donny/DataSet/Cityscapes"
+DATA_DIR="/nas/dataset/CityScapes"
 
 BACKBONE="deepbase_resnet101_dilated8"
 MODEL_NAME="pspnet"
@@ -33,7 +33,7 @@ NGPUS=4
 DIST_PYTHON="${PYTHON} -u -m torch.distributed.launch --nproc_per_node=${NGPUS}"
 
 if [[ "$1"x == "train"x ]]; then
-  ${DIST_PYTHON} main.py --config_file ${CONFIG_FILE} --phase train --train_batch_size 2 --val_batch_size 1 \
+  ${DIST_PYTHON} main.py --config_file ${CONFIG_FILE} --phase train --train_batch_size 1 --val_batch_size 1 \
                          --backbone ${BACKBONE} --model_name ${MODEL_NAME} --drop_last y --syncbn y --dist y \
                          --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --max_iters ${MAX_ITERS} \
                          --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL}  2>&1 | tee ${LOG_FILE}
