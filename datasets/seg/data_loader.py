@@ -8,6 +8,7 @@ import torch
 from torch.utils import data
 
 from datasets.seg.loader.default_loader import DefaultLoader
+from datasets.seg.loader.cityscapes_loader import CityscapesLoader
 import datasets.tools.pil_aug_transforms as pil_aug_trans
 import datasets.tools.cv2_aug_transforms as cv2_aug_trans
 import datasets.tools.transforms as trans
@@ -45,52 +46,71 @@ class DataLoader(object):
             trans.ReLabel(255, -1), ])
 
     def get_trainloader(self):
-        if self.configer.get('train.loader', default=None) in [None, 'default']:
+        if self.configer.get('dataset', default=None) in [None, 'default']:
             dataset = DefaultLoader(root_dir=self.configer.get('data', 'data_dir'), dataset='train',
                               aug_transform=self.aug_train_transform,
                               img_transform=self.img_transform,
                               label_transform=self.label_transform,
                               configer=self.configer)
-            sampler = None
-            if self.configer.get('network.distributed'):
-                sampler = torch.utils.data.distributed.DistributedSampler(dataset)
 
-            trainloader = data.DataLoader(
-                dataset, sampler=sampler,
-                batch_size=self.configer.get('train', 'batch_size'), shuffle=(sampler is None),
-                num_workers=self.configer.get('data', 'workers'), pin_memory=True,
-                drop_last=self.configer.get('data', 'drop_last'),
-                collate_fn=lambda *args: collate(
-                    *args, trans_dict=self.configer.get('train', 'data_transformer')
-                )
-            )
-
-            return trainloader
+        elif self.configer.get('dataset', default=None) == 'cityscapes':
+            dataset = CityscapesLoader(root_dir=self.configer.get('data', 'data_dir'), dataset='train',
+                                       aug_transform=self.aug_train_transform,
+                                       img_transform=self.img_transform,
+                                       label_transform=self.label_transform,
+                                       configer=self.configer)
 
         else:
-            Log.error('{} train loader is invalid.'.format(self.configer.get('train', 'loader')))
+            Log.error('{} dataset is invalid.'.format(self.configer.get('dataset')))
             exit(1)
+
+        sampler = None
+        if self.configer.get('network.distributed'):
+            sampler = torch.utils.data.distributed.DistributedSampler(dataset)
+
+        trainloader = data.DataLoader(
+            dataset, sampler=sampler,
+            batch_size=self.configer.get('train', 'batch_size'), shuffle=(sampler is None),
+            num_workers=self.configer.get('data', 'workers'), pin_memory=True,
+            drop_last=self.configer.get('data', 'drop_last'),
+            collate_fn=lambda *args: collate(
+                *args, trans_dict=self.configer.get('train', 'data_transformer')
+            )
+        )
+
+        return trainloader
+
 
     def get_valloader(self):
-        if self.configer.get('val.loader', default=None) in [None, 'default']:
-            valloader = data.DataLoader(
-                DefaultLoader(root_dir=self.configer.get('data', 'data_dir'), dataset='val',
-                              aug_transform=self.aug_val_transform,
-                              img_transform=self.img_transform,
-                              label_transform=self.label_transform,
-                              configer=self.configer),
-                batch_size=self.configer.get('val', 'batch_size'), shuffle=False,
-                num_workers=self.configer.get('data', 'workers'), pin_memory=True,
-                collate_fn=lambda *args: collate(
-                    *args, trans_dict=self.configer.get('val', 'data_transformer')
-                )
-            )
+        if self.configer.get('dataset', default=None) in [None, 'default']:
+            dataset = DefaultLoader(root_dir=self.configer.get('data', 'data_dir'), dataset='val',
+                                    aug_transform=self.aug_val_transform,
+                                    img_transform=self.img_transform,
+                                    label_transform=self.label_transform,
+                                    configer=self.configer)
 
-            return valloader
+        elif self.configer.get('dataset', default=None) == 'cityscapes':
+            dataset = CityscapesLoader(root_dir=self.configer.get('data', 'data_dir'), dataset='val',
+                                       aug_transform=self.aug_val_transform,
+                                       img_transform=self.img_transform,
+                                       label_transform=self.label_transform,
+                                       configer=self.configer)
 
         else:
-            Log.error('{} val loader is invalid.'.format(self.configer.get('val', 'loader')))
+            Log.error('{} dataset is invalid.'.format(self.configer.get('dataset')))
             exit(1)
+
+        valloader = data.DataLoader(
+            dataset,
+            batch_size=self.configer.get('val', 'batch_size'), shuffle=False,
+            num_workers=self.configer.get('data', 'workers'), pin_memory=True,
+            collate_fn=lambda *args: collate(
+                *args, trans_dict=self.configer.get('val', 'data_transformer')
+            )
+        )
+
+        return valloader
+
 
 
 if __name__ == "__main__":
