@@ -11,7 +11,7 @@ import torch
 import torchvision.transforms as transforms
 from PIL import Image
 
-from datasets.cls.data_loader import DataLoader
+from data.cls.data_loader import DataLoader
 from runner.tools.blob_helper import BlobHelper
 from runner.tools.runner_helper import RunnerHelper
 from model.cls.model_manager import ModelManager

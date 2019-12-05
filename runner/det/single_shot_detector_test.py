@@ -7,7 +7,7 @@
 import os
 import torch
 
-from datasets.test.test_data_loader import TestDataLoader
+from data.test.test_data_loader import TestDataLoader
 from runner.tools.blob_helper import BlobHelper
 from runner.tools.runner_helper import RunnerHelper
 from model.det.model_manager import ModelManager

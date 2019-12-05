@@ -10,7 +10,7 @@ import torch
 from runner.tools.blob_helper import BlobHelper
 from runner.tools.runner_helper import RunnerHelper
 from model.gan.model_manager import ModelManager
-from datasets.test.test_data_loader import TestDataLoader
+from data.test.test_data_loader import TestDataLoader
 from tools.helper.dc_helper import DCHelper
 from tools.helper.image_helper import ImageHelper
 from tools.util.logger import Logger as Log

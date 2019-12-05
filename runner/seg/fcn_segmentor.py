@@ -9,7 +9,7 @@ import time
 import numpy as np
 import torch
 
-from datasets.seg.data_loader import DataLoader
+from data.seg.data_loader import DataLoader
 from runner.tools.runner_helper import RunnerHelper
 from runner.tools.trainer import Trainer
 from model.seg.model_manager import ModelManager

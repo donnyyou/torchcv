@@ -7,7 +7,7 @@
 import time
 import torch
 
-from datasets.gan.data_loader import DataLoader
+from data.gan.data_loader import DataLoader
 from runner.tools.runner_helper import RunnerHelper
 from runner.tools.trainer import Trainer
 from runner.gan.face_gan_test import FaceGANTest

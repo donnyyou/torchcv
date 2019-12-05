@@ -8,7 +8,7 @@ import cv2
 import numpy as np
 import torch
 
-from datasets.tools.transforms import DeNormalize, ToTensor, Normalize
+from data.tools.transforms import DeNormalize, ToTensor, Normalize
 from tools.helper.image_helper import ImageHelper
 from tools.helper.dc_helper import DCHelper
 from tools.helper.tensor_helper import TensorHelper

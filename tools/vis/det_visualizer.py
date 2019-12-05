@@ -11,7 +11,7 @@ import torch
 import time
 from PIL import Image
 
-from datasets.tools.transforms import DeNormalize
+from data.tools.transforms import DeNormalize
 from tools.helper.image_helper import ImageHelper
 from tools.util.logger import Logger as log
 
