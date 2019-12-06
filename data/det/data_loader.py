@@ -78,6 +78,7 @@ class DataLoader(object):
             exit(1)
 
         valloader = data.DataLoader(
+            dataset,
             batch_size=self.configer.get('val', 'batch_size'), shuffle=False,
             num_workers=self.configer.get('data', 'workers'), pin_memory=True,
             collate_fn=lambda *args: collate(
