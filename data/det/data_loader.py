@@ -65,13 +65,12 @@ class DataLoader(object):
 
         return trainloader
 
-    def get_valloader(self, dataset=None):
-        dataset = 'val' if dataset is None else dataset
+    def get_valloader(self):
         if self.configer.get('dataset', default=None) in [None, 'default']:
-            dataset = DefaultDataset(root_dir=self.configer.get('data', 'data_dir'), dataset=dataset,
+            dataset = DefaultDataset(root_dir=self.configer.get('data', 'data_dir'), dataset='val',
                                      aug_transform=self.aug_val_transform,
                                      img_transform=self.img_transform,
-                                     configer=self.configer),
+                                     configer=self.configer)
 
         else:
             Log.error('{} dataset is invalid.'.format(self.configer.get('dataset')))
