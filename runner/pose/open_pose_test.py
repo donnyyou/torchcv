@@ -36,7 +36,7 @@ class OpenPoseTest(object):
         self._init_model()
 
     def _init_model(self):
-        self.pose_net = self.pose_model_manager.get_multi_pose_model()
+        self.pose_net = self.pose_model_manager.get_pose_model()
         self.pose_net = RunnerHelper.load_net(self, self.pose_net)
         self.pose_net.eval()
 

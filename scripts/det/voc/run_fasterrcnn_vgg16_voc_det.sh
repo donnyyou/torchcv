@@ -24,7 +24,7 @@ if [[ ! -d ${LOG_DIR} ]]; then
 fi
 
 if [[ "$1"x == "train"x ]]; then
-  ${PYTHON} -u main.py --config_file ${CONFIG_FILE} --phase train --gpu 0 --cudnn n \
+  ${PYTHON} -u main.py --config_file ${CONFIG_FILE} --phase train --gpu 2 --cudnn n \
                        --data_dir ${DATA_DIR} --loss_type ${LOSS_TYPE} --model_name ${MODEL_NAME} \
                        --checkpoints_name ${CHECKPOINTS_NAME} --pretrained ${PRETRAINED_MODEL}  2>&1 | tee ${LOG_FILE}
 

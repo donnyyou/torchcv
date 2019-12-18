@@ -4,19 +4,14 @@
 # Select Pose Model for pose detection.
 
 
-from model.pose.nets.open_pose_org import get_open_pose_org
 from model.pose.nets.cpm import CPM
 from model.pose.nets.open_pose import OpenPose
 from model.pose.loss.loss import Loss
 from tools.util.logger import Logger as Log
 
 
-MULTI_POSE_MODEL_DICT = {
+POSE_MODEL_DICT = {
     'openpose': OpenPose,
-    'openpose_org': get_open_pose_org,
-}
-
-SINGLE_POSE_MODEL_DICT = {
     'cpm': CPM
 }
 
@@ -28,22 +23,11 @@ class ModelManager(object):
     def get_multi_pose_model(self):
         model_name = self.configer.get('network', 'model_name')
 
-        if model_name not in MULTI_POSE_MODEL_DICT:
+        if model_name not in POSE_MODEL_DICT:
             Log.error('Model: {} not valid!'.format(model_name))
             exit(1)
 
-        model = MULTI_POSE_MODEL_DICT[model_name](self.configer)
-
-        return model
-
-    def get_single_pose_model(self):
-        model_name = self.configer.get('network', 'model_name')
-
-        if model_name not in SINGLE_POSE_MODEL_DICT:
-            Log.error('Model: {} not valid!'.format(model_name))
-            exit(1)
-
-        model = SINGLE_POSE_MODEL_DICT[model_name](self.configer)
+        model = POSE_MODEL_DICT[model_name](self.configer)
 
         return model
 
