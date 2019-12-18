@@ -3,6 +3,7 @@
 # Author: Donny You(youansheng@gmail.com)
 
 
+import torch
 from torch.utils import data
 
 from data.test.datasets.default_dataset import DefaultDataset
@@ -70,7 +71,8 @@ class TestDataLoader(object):
             exit(1)
 
         testloader = data.DataLoader(
-            batch_size=self.configer.get('test', 'batch_size'), shuffle=False,
+            dataset,
+            batch_size=self.configer.get('test.batch_size', default=torch.cuda.device_count()), shuffle=False,
             num_workers=self.configer.get('data', 'workers'), pin_memory=True,
             collate_fn=lambda *args: collate(
                 *args, trans_dict=self.configer.get('test', 'data_transformer')

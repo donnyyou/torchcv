@@ -71,7 +71,7 @@ class DataLoader(object):
     def get_valloader(self, dataset=None):
         dataset = 'val' if dataset is None else dataset
         if self.configer.get('dataset', default=None) == 'default_cpm':
-            dataset = DefaultDataset(root_dir=self.configer.get('data', 'data_dir'), dataset=dataset,
+            dataset = DefaultCPMDataset(root_dir=self.configer.get('data', 'data_dir'), dataset=dataset,
                                      aug_transform=self.aug_val_transform,
                                      img_transform=self.img_transform,
                                      configer=self.configer)
