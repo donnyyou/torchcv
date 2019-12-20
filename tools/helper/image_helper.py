@@ -46,10 +46,7 @@ class ImageHelper(object):
     @staticmethod
     def cv2_read_image(image_path, mode='RGB'):
         img_bgr = cv2.imread(image_path, cv2.IMREAD_COLOR)
-        if mode == 'RGB':
-            return ImageHelper.bgr2rgb(img_bgr)
-
-        elif mode == 'BGR':
+        if mode in ['BGR', 'RGB', 'GRAY']:
             return img_bgr
 
         elif mode == 'P':
@@ -63,7 +60,6 @@ class ImageHelper(object):
     def pil_read_image(image_path, mode='RGB'):
         with open(image_path, 'rb') as f:
             img = Image.open(f)
-
             if mode == 'RGB':
                 return img.convert('RGB')
 

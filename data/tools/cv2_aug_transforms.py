@@ -1119,10 +1119,6 @@ class CV2AugCompose(object):
                 self.transforms[trans] = CV2_AUGMENTATIONS_DICT[trans](**aug_trans[trans])
 
     def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
-
-        if self.configer.get('data', 'input_mode') == 'RGB':
-            img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-
         aug_trans = self.configer.get(self.split, 'aug_trans')
         shuffle_trans_seq = []
         if 'shuffle_trans_seq' in aug_trans:
@@ -1140,6 +1136,9 @@ class CV2AugCompose(object):
 
         if self.configer.get('data', 'input_mode') == 'RGB':
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+        if self.configer.get('data', 'input_mode') == 'GRAY':
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         out_list = [img]
         for elem in [labelmap, maskmap, kpts, bboxes, labels, polygons]:

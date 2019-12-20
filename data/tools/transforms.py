@@ -76,6 +76,7 @@ class ToTensor(object):
             inputs = inputs.reshape(inputs.shape[0], inputs.shape[1], channels)
             inputs = torch.from_numpy(inputs.transpose(2, 0, 1))
         else:
+            inputs = inputs[:, :, np.newaxis] if len(inputs.shape) == 2 else inputs
             inputs = torch.from_numpy(inputs.transpose(2, 0, 1))
 
         return inputs.float()
