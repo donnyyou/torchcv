@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from model.tools.module_helper import ModuleHelper
+from lib.model.module_helper import ModuleHelper
 
 
 class NLayerDiscriminator(nn.Module):

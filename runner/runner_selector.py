@@ -20,7 +20,7 @@ from runner.gan.image_translator import ImageTranslator
 from runner.gan.image_translator_test import ImageTranslatorTest
 from runner.gan.face_gan import FaceGAN
 from runner.gan.face_gan_test import FaceGANTest
-from tools.util.logger import Logger as Log
+from lib.tools.util.logger import Logger as Log
 
 
 POSE_METHOD_DICT = {

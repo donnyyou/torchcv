@@ -2,7 +2,7 @@ import torch.nn.init as init
 
 from model.gan.modules.generator import ResNetGenerator, UNetGenerator
 from model.gan.modules.discriminator import NLayerDiscriminator, FCDiscriminator, PixelDiscriminator
-from tools.util.logger import Logger as Log
+from lib.tools.util.logger import Logger as Log
 
 
 def init_weights(net, init_type='normal', init_gain=0.02):

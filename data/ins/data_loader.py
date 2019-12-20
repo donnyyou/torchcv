@@ -5,12 +5,12 @@
 
 from torch.utils import data
 
+import lib.data.pil_aug_transforms as pil_aug_trans
+import lib.data.cv2_aug_transforms as cv2_aug_trans
+import lib.data.transforms as trans
+from lib.data.collate import collate
+from lib.tools.util.logger import Logger as Log
 from datasets.ins.datasets.default_dataset import DefaultDataset
-import datasets.tools.pil_aug_transforms as pil_aug_trans
-import datasets.tools.cv2_aug_transforms as cv2_aug_trans
-import datasets.tools.transforms as trans
-from datasets.tools.collate import collate
-from tools.util.logger import Logger as Log
 
 
 class DataLoader(object):

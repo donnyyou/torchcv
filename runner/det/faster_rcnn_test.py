@@ -9,20 +9,20 @@ import torch
 import torch.nn.functional as F
 
 from data.test.test_data_loader import TestDataLoader
-from runner.tools.blob_helper import BlobHelper
-from runner.tools.runner_helper import RunnerHelper
+from lib.runner.blob_helper import BlobHelper
+from lib.runner.runner_helper import RunnerHelper
 from model.det.model_manager import ModelManager
-from tools.helper.det_helper import DetHelper
-from tools.helper.image_helper import ImageHelper
-from tools.helper.json_helper import JsonHelper
+from lib.tools.helper.det_helper import DetHelper
+from lib.tools.helper.image_helper import ImageHelper
+from lib.tools.helper.json_helper import JsonHelper
 from model.det.layers.fr_priorbox_layer import FRPriorBoxLayer
 from model.det.layers.fr_roi_generator import FRROIGenerator
 from model.det.layers.fr_roi_sampler import FRROISampler
 from model.det.layers.rpn_target_assigner import RPNTargetAssigner
-from tools.util.logger import Logger as Log
-from tools.parser.det_parser import DetParser
-from tools.vis.det_visualizer import DetVisualizer
-from tools.helper.dc_helper import DCHelper
+from lib.tools.util.logger import Logger as Log
+from lib.tools.parser.det_parser import DetParser
+from lib.tools.vis.det_visualizer import DetVisualizer
+from lib.tools.helper.dc_helper import DCHelper
 
 
 class FastRCNNTest(object):

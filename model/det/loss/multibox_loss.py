@@ -10,9 +10,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
 
-from tools.helper.det_helper import DetHelper
+from lib.tools.helper.det_helper import DetHelper
 from model.det.layers.ssd_target_generator import SSDTargetGenerator
-from tools.util.logger import Logger as Log
+from lib.tools.util.logger import Logger as Log
 
 
 class MultiBoxLoss(nn.Module):

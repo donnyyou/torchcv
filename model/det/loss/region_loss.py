@@ -8,7 +8,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from tools.helper.det_helper import DetHelper
+from lib.tools.helper.det_helper import DetHelper
 
 
 class RegionLoss(nn.Module):

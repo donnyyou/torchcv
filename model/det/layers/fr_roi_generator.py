@@ -7,10 +7,10 @@
 import torch
 
 from model.det.layers.fr_priorbox_layer import FRPriorBoxLayer
-from tools.util.logger import Logger as Log
+from lib.tools.util.logger import Logger as Log
 
 try:
-    from exts.ops.nms.nms_wrapper import nms
+    from lib.exts.ops.nms.nms_wrapper import nms
 except ImportError:
     print('FRROIiGenerator NMS ImportError.')
 

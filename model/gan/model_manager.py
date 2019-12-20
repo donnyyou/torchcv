@@ -6,7 +6,7 @@
 
 from model.gan.nets.pix2pix import Pix2Pix
 from model.gan.nets.cycle_gan import CycleGAN
-from tools.util.logger import Logger as Log
+from lib.tools.util.logger import Logger as Log
 
 GAN_MODEL_DICT = {
     'pix2pix': Pix2Pix,

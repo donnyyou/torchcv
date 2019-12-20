@@ -11,7 +11,7 @@ from model.backbone.densenet.densenet_backbone import DenseNetBackbone
 from model.backbone.squeezenet.squeezenet_backbone import SqueezeNetBackbone
 from model.backbone.shufflenet.shufflenetv2_backbone import ShuffleNetv2Backbone
 from model.backbone.dfnet.dfnet_backbone import DFNetBackbone
-from tools.util.logger import Logger as Log
+from lib.tools.util.logger import Logger as Log
 
 
 class BackboneSelector(object):

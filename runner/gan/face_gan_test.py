@@ -11,13 +11,13 @@ import torch
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.metrics import roc_curve
 
-from runner.tools.blob_helper import BlobHelper
-from runner.tools.runner_helper import RunnerHelper
+from lib.runner.blob_helper import BlobHelper
+from lib.runner.runner_helper import RunnerHelper
 from model.gan.model_manager import ModelManager
 from data.test.test_data_loader import TestDataLoader
-from tools.helper.dc_helper import DCHelper
-from tools.helper.image_helper import ImageHelper
-from tools.util.logger import Logger as Log
+from lib.tools.helper.dc_helper import DCHelper
+from lib.tools.helper.image_helper import ImageHelper
+from lib.tools.util.logger import Logger as Log
 
 
 class FaceGANTest(object):

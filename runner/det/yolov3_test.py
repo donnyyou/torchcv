@@ -8,15 +8,15 @@ import os
 import torch
 
 from data.test.test_data_loader import TestDataLoader
-from runner.tools.runner_helper import RunnerHelper
+from lib.runner.runner_helper import RunnerHelper
 from model.det.model_manager import ModelManager
-from tools.helper.det_helper import DetHelper
-from tools.helper.image_helper import ImageHelper
-from tools.helper.json_helper import JsonHelper
-from tools.helper.dc_helper import DCHelper
-from tools.util.logger import Logger as Log
-from tools.parser.det_parser import DetParser
-from tools.vis.det_visualizer import DetVisualizer
+from lib.tools.helper.det_helper import DetHelper
+from lib.tools.helper.image_helper import ImageHelper
+from lib.tools.helper.json_helper import JsonHelper
+from lib.tools.helper.dc_helper import DCHelper
+from lib.tools.util.logger import Logger as Log
+from lib.tools.parser.det_parser import DetParser
+from lib.tools.vis.det_visualizer import DetVisualizer
 
 
 class YOLOv3Test(object):

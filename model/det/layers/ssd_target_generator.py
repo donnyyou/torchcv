@@ -5,7 +5,7 @@
 
 import torch
 
-from tools.helper.det_helper import DetHelper
+from lib.tools.helper.det_helper import DetHelper
 from model.det.layers.ssd_priorbox_layer import SSDPriorBoxLayer
 
 

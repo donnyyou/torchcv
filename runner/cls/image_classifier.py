@@ -7,13 +7,13 @@
 import time
 import torch
 
-from data.cls.data_loader import DataLoader
-from runner.tools.runner_helper import RunnerHelper
-from runner.tools.trainer import Trainer
-from model.cls.model_manager import ModelManager
-from tools.util.average_meter import AverageMeter, DictAverageMeter
+from lib.runner.runner_helper import RunnerHelper
+from lib.runner.trainer import Trainer
+from lib.tools.util.average_meter import AverageMeter, DictAverageMeter
+from lib.tools.util.logger import Logger as Log
 from metric.cls.cls_running_score import ClsRunningScore
-from tools.util.logger import Logger as Log
+from model.cls.model_manager import ModelManager
+from data.cls.data_loader import DataLoader
 
 
 class ImageClassifier(object):

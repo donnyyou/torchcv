@@ -9,7 +9,7 @@ import torch.nn as nn
 from model.det.layers.ssd_priorbox_layer import SSDPriorBoxLayer
 from model.det.layers.ssd_target_generator import SSDTargetGenerator
 from model.det.loss.loss import BASE_LOSS_DICT
-from tools.util.logger import Logger as Log
+from lib.tools.util.logger import Logger as Log
 
 num_filters_list = [32, 64, 128, 256]
 

@@ -7,10 +7,10 @@ import os
 import numpy as np
 import argparse
 
+from lib.tools.helper.image_helper import ImageHelper
+from lib.tools.util.logger import Logger as Log
+from lib.tools.util.configer import Configer
 from metric.seg.seg_running_score import SegRunningScore
-from tools.helper.image_helper import ImageHelper
-from tools.util.logger import Logger as Log
-from tools.util.configer import Configer
 
 
 class SegEvaluator(object):

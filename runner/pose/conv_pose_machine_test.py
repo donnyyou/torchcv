@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 # Author: Donny You (youansheng@gmail.com)
-# Test class for convolutional pose machine.
 
 
 import os
@@ -10,22 +9,18 @@ import numpy as np
 import torch
 from scipy.ndimage.filters import gaussian_filter
 
-from data.pose.data_loader import DataLoader
-from runner.tools.blob_helper import BlobHelper
-from runner.tools.runner_helper import RunnerHelper
+from lib.runner.blob_helper import BlobHelper
+from lib.runner.runner_helper import RunnerHelper
 from model.pose.model_manager import ModelManager
-from tools.helper.image_helper import ImageHelper
-from tools.util.logger import Logger as Log
-from tools.vis.pose_visualizer import PoseVisualizer
+from lib.tools.helper.image_helper import ImageHelper
+from lib.tools.util.logger import Logger as Log
 
 
 class ConvPoseMachineTest(object):
     def __init__(self, configer):
         self.configer = configer
         self.blob_helper = BlobHelper(configer)
-        self.pose_vis = PoseVisualizer(configer)
         self.pose_model_manager = ModelManager(configer)
-        self.pose_data_loader = DataLoader(configer)
         self.device = torch.device('cpu' if self.configer.get('gpu') is None else 'cuda')
         self.pose_net = None
 
@@ -100,20 +95,4 @@ class ConvPoseMachineTest(object):
                            self.configer.get('details', 'color_list')[i], thickness=-1)
 
         return img_canvas
-
-    def debug(self, vis_dir):
-
-        for i, data_dict in enumerate(self.pose_data_loader.get_trainloader()):
-            inputs = data_dict['img']
-            heatmap = data_dict['heatmap']
-
-            for j in range(inputs.size(0)):
-                image_bgr = self.blob_helper.tensor2bgr(inputs[j])
-                heatmap_avg = heatmap[j].numpy().transpose(1, 2, 0)
-                heatmap_avg = cv2.resize(heatmap_avg, (0, 0), fx=self.configer.get('network', 'stride'),
-                                     fy=self.configer.get('network', 'stride'), interpolation=cv2.INTER_CUBIC)
-                all_peaks = self.__extract_heatmap_info(heatmap_avg)
-                image_save = self.__draw_key_point(all_peaks, image_bgr)
-                cv2.imwrite(os.path.join(vis_dir, '{}_{}_result.jpg'.format(i, j)), image_save)
-
 

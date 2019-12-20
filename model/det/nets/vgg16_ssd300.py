@@ -11,7 +11,7 @@ import torch.nn.init as init
 from model.det.layers.ssd_detection_layer import SSDDetectionLayer
 from model.det.layers.ssd_target_generator import SSDTargetGenerator
 from model.det.loss.loss import BASE_LOSS_DICT
-from tools.util.logger import Logger as Log
+from lib.tools.util.logger import Logger as Log
 
 
 DETECTOR_CONFIG = {

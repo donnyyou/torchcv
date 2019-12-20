@@ -18,9 +18,9 @@ from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval
 from pycocotools import mask as maskUtils
 
-from tools.util.configer import Configer
-from tools.helper.mask_helper import MaskHelper
-from tools.util.logger import Logger as Log
+from lib.tools.util.configer import Configer
+from lib.tools.helper.mask_helper import MaskHelper
+from lib.tools.util.logger import Logger as Log
 
 
 class CocoEvaluator(object):

@@ -9,14 +9,14 @@ import torch
 
 from data.det.data_loader import DataLoader
 from runner.det.yolov3_test import YOLOv3Test
-from runner.tools.runner_helper import RunnerHelper
-from runner.tools.trainer import Trainer
+from lib.runner.runner_helper import RunnerHelper
+from lib.runner.trainer import Trainer
 from model.det.model_manager import ModelManager
-from tools.util.average_meter import AverageMeter
-from tools.util.logger import Logger as Log
+from lib.tools.util.average_meter import AverageMeter
+from lib.tools.util.logger import Logger as Log
 from metric.det.det_running_score import DetRunningScore
-from tools.vis.det_visualizer import DetVisualizer
-from tools.helper.dc_helper import DCHelper
+from lib.tools.vis.det_visualizer import DetVisualizer
+from lib.tools.helper.dc_helper import DCHelper
 
 
 class YOLOv3(object):

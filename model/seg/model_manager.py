@@ -9,7 +9,7 @@ from model.seg.nets.deeplabv3 import DeepLabV3
 from model.seg.nets.pspnet import PSPNet
 from model.seg.nets.annn import asymmetric_non_local_network
 from model.seg.loss.loss import Loss
-from tools.util.logger import Logger as Log
+from lib.tools.util.logger import Logger as Log
 
 
 SEG_MODEL_DICT = {
@@ -40,5 +40,5 @@ class ModelManager(object):
         if self.configer.get('network', 'gather'):
             return Loss(self.configer)
 
-        from exts.tools.parallel.data_parallel import ParallelCriterion
+        from lib.exts.tools.parallel.data_parallel import ParallelCriterion
         return ParallelCriterion(Loss(self.configer))

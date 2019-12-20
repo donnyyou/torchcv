@@ -8,7 +8,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
 
-from tools.util.logger import Logger as Log
+from lib.tools.util.logger import Logger as Log
 
 
 class FocalLoss(nn.Module):

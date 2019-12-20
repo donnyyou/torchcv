@@ -13,9 +13,9 @@ import torch
 import torch.backends.cudnn as cudnn
 
 from runner.runner_selector import RunnerSelector
-from runner.tools.controller import Controller
-from tools.util.configer import Configer
-from tools.util.logger import Logger as Log
+from lib.runner.controller import Controller
+from lib.tools.util.configer import Configer
+from lib.tools.util.logger import Logger as Log
 
 
 def str2bool(v):

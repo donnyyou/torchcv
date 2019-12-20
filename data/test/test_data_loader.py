@@ -3,17 +3,18 @@
 # Author: Donny You(youansheng@gmail.com)
 
 
+import torch
 from torch.utils import data
 
+import lib.data.pil_aug_transforms as pil_aug_trans
+import lib.data.cv2_aug_transforms as cv2_aug_trans
+from lib.data.collate import collate
+from lib.data.transforms import ToTensor, Normalize, Compose
+from lib.tools.util.logger import Logger as Log
 from data.test.datasets.default_dataset import DefaultDataset
 from data.test.datasets.facegan_dataset import FaceGANDataset
 from data.test.datasets.list_dataset import ListDataset
 from data.test.datasets.json_dataset import JsonDataset
-from data.tools.collate import collate
-from data.tools.transforms import ToTensor, Normalize, Compose
-import data.tools.pil_aug_transforms as pil_aug_trans
-import data.tools.cv2_aug_transforms as cv2_aug_trans
-from tools.util.logger import Logger as Log
 
 
 class TestDataLoader(object):
@@ -70,7 +71,8 @@ class TestDataLoader(object):
             exit(1)
 
         testloader = data.DataLoader(
-            batch_size=self.configer.get('test', 'batch_size'), shuffle=False,
+            dataset,
+            batch_size=self.configer.get('test.batch_size', default=torch.cuda.device_count()), shuffle=False,
             num_workers=self.configer.get('data', 'workers'), pin_memory=True,
             collate_fn=lambda *args: collate(
                 *args, trans_dict=self.configer.get('test', 'data_transformer')

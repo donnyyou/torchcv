@@ -6,13 +6,13 @@
 
 from torch.utils import data
 
+import lib.data.pil_aug_transforms as pil_aug_trans
+import lib.data.cv2_aug_transforms as cv2_aug_trans
+import lib.data.transforms as trans
+from lib.data.collate import collate
+from lib.tools.util.logger import Logger as Log
 from data.pose.datasets.default_cpm_dataset import DefaultCPMDataset
 from data.pose.datasets.default_openpose_dataset import DefaultOpenPoseDataset
-import data.tools.pil_aug_transforms as pil_aug_trans
-import data.tools.cv2_aug_transforms as cv2_aug_trans
-import data.tools.transforms as trans
-from data.tools.collate import collate
-from tools.util.logger import Logger as Log
 
 
 class DataLoader(object):
@@ -71,7 +71,7 @@ class DataLoader(object):
     def get_valloader(self, dataset=None):
         dataset = 'val' if dataset is None else dataset
         if self.configer.get('dataset', default=None) == 'default_cpm':
-            dataset = DefaultDataset(root_dir=self.configer.get('data', 'data_dir'), dataset=dataset,
+            dataset = DefaultCPMDataset(root_dir=self.configer.get('data', 'data_dir'), dataset=dataset,
                                      aug_transform=self.aug_val_transform,
                                      img_transform=self.img_transform,
                                      configer=self.configer)

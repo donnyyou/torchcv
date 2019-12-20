@@ -3,7 +3,7 @@ from torch import nn
 from torch.nn import functional as F
 
 
-from model.tools.module_helper import ModuleHelper
+from lib.model.module_helper import ModuleHelper
 
 
 class PSPModule(nn.Module):
