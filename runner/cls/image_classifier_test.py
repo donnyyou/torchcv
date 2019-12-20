@@ -11,14 +11,14 @@ import torch
 import torchvision.transforms as transforms
 from PIL import Image
 
-from data.cls.data_loader import DataLoader
-from runner.tools.blob_helper import BlobHelper
-from runner.tools.runner_helper import RunnerHelper
+from lib.runner.blob_helper import BlobHelper
+from lib.runner.runner_helper import RunnerHelper
+from lib.tools.helper.image_helper import ImageHelper
+from lib.tools.helper.json_helper import JsonHelper
+from lib.tools.util.logger import Logger as Log
+from lib.tools.parser.cls_parser import ClsParser
 from model.cls.model_manager import ModelManager
-from tools.helper.image_helper import ImageHelper
-from tools.helper.json_helper import JsonHelper
-from tools.util.logger import Logger as Log
-from tools.parser.cls_parser import ClsParser
+from data.cls.data_loader import DataLoader
 
 
 class ImageClassifierTest(object):

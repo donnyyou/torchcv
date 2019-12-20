@@ -8,8 +8,8 @@ import numpy as np
 import torch
 import random
 
-from tools.helper.mask_helper import MaskHelper
-from tools.helper.det_helper import DetHelper
+from lib.tools.helper.mask_helper import MaskHelper
+from lib.tools.helper.det_helper import DetHelper
 
 
 class FRROISampler(object):

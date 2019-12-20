@@ -8,11 +8,11 @@ from torch.utils import data
 from data.gan.datasets.default_pix2pix_dataset import DefaultPix2pixDataset
 from data.gan.datasets.default_cyclegan_dataset import DefaultCycleGANDataset
 from data.gan.datasets.default_facegan_dataset import DefaultFaceGANDataset
-import data.tools.pil_aug_transforms as pil_aug_trans
-import data.tools.cv2_aug_transforms as cv2_aug_trans
-import data.tools.transforms as trans
-from data.tools.collate import collate
-from tools.util.logger import Logger as Log
+import lib.data.pil_aug_transforms as pil_aug_trans
+import lib.data.cv2_aug_transforms as cv2_aug_trans
+import lib.data.transforms as trans
+from lib.data.collate import collate
+from lib.tools.util.logger import Logger as Log
 
 
 class DataLoader(object):

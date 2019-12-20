@@ -7,7 +7,7 @@
 from model.cls.nets.cls_model import ClsModel
 from model.cls.nets.distill_model import DistillModel
 from model.cls.loss.loss import Loss
-from tools.util.logger import Logger as Log
+from lib.tools.util.logger import Logger as Log
 
 
 CLS_MODEL_DICT = {
@@ -35,5 +35,5 @@ class ModelManager(object):
         if self.configer.get('network', 'gather'):
             return Loss(self.configer)
 
-        from exts.tools.parallel.data_parallel import ParallelCriterion
+        from lib.exts.tools.parallel.data_parallel import ParallelCriterion
         return ParallelCriterion(Loss(self.configer))

@@ -10,8 +10,8 @@ import json
 
 from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval
-from tools.util.configer import Configer
-from tools.util.logger import Logger as Log
+from lib.tools.util.configer import Configer
+from lib.tools.util.logger import Logger as Log
 
 
 class CocoEvaluator(object):

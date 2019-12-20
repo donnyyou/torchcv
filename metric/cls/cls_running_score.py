@@ -4,7 +4,7 @@
 # Image classification running score.
 
 
-from tools.util.average_meter import DictAverageMeter
+from lib.tools.util.average_meter import DictAverageMeter
 
 
 class ClsRunningScore(object):

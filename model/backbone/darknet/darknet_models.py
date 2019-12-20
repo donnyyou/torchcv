@@ -7,7 +7,7 @@ import torch.nn as nn
 import math
 from collections import OrderedDict
 
-from model.tools.module_helper import ModuleHelper
+from lib.model.module_helper import ModuleHelper
 
 
 model_urls = {

@@ -8,12 +8,12 @@ import time
 import torch
 
 from data.gan.data_loader import DataLoader
-from runner.tools.runner_helper import RunnerHelper
-from runner.tools.trainer import Trainer
+from lib.runner.runner_helper import RunnerHelper
+from lib.runner.trainer import Trainer
 from model.gan.model_manager import ModelManager
-from tools.util.average_meter import AverageMeter
-from tools.helper.dc_helper import DCHelper
-from tools.util.logger import Logger as Log
+from lib.tools.util.average_meter import AverageMeter
+from lib.tools.helper.dc_helper import DCHelper
+from lib.tools.util.logger import Logger as Log
 
 
 class ImageTranslator(object):

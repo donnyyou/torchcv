@@ -10,7 +10,7 @@ from model.det.nets.vgg16_ssd512 import Vgg16SSD512
 from model.det.nets.lffdv2 import LFFDv2
 from model.det.nets.faster_rcnn import FasterRCNN
 from model.det.loss.loss import Loss
-from tools.util.logger import Logger as Log
+from lib.tools.util.logger import Logger as Log
 
 DET_MODEL_DICT = {
     'vgg16_ssd300': Vgg16SSD300,
@@ -41,5 +41,5 @@ class ModelManager(object):
         if self.configer.get('network', 'gather'):
             return Loss(self.configer)
 
-        from exts.tools.parallel.data_parallel import ParallelCriterion
+        from lib.exts.tools.parallel.data_parallel import ParallelCriterion
         return ParallelCriterion(Loss(self.configer))

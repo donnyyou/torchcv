@@ -16,8 +16,8 @@ if sys.version_info[0] == 2:
 else:
     import xml.etree.ElementTree as ET
 
-from tools.util.configer import Configer
-from tools.util.logger import Logger as Log
+from lib.tools.util.configer import Configer
+from lib.tools.util.logger import Logger as Log
 
 
 class VOCEvaluator(object):

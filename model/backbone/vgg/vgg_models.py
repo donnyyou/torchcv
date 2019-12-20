@@ -5,7 +5,7 @@
 
 import torch.nn as nn
 
-from model.tools.module_helper import ModuleHelper
+from lib.model.module_helper import ModuleHelper
 
 
 model_urls = {

@@ -8,13 +8,13 @@ import time
 import torch
 
 from data.pose.data_loader import DataLoader
-from runner.tools.runner_helper import RunnerHelper
-from runner.tools.trainer import Trainer
+from lib.runner.runner_helper import RunnerHelper
+from lib.runner.trainer import Trainer
 from model.pose.model_manager import ModelManager
-from tools.helper.dc_helper import DCHelper
-from tools.util.average_meter import AverageMeter, DictAverageMeter
-from tools.util.logger import Logger as Log
-from tools.vis.pose_visualizer import PoseVisualizer
+from lib.tools.helper.dc_helper import DCHelper
+from lib.tools.util.average_meter import AverageMeter, DictAverageMeter
+from lib.tools.util.logger import Logger as Log
+from lib.tools.vis.pose_visualizer import PoseVisualizer
 
 
 class PoseEstimator(object):
