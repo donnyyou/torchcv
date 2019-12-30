@@ -15,6 +15,9 @@ import torch.nn as nn
 from lib.model.module_helper import ModuleHelper
 
 
+__all__ = ['dfnetv1', 'dfnetv2']
+
+
 def conv3x3(in_planes, out_planes, stride=1):
     "3x3 convolution with padding"
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
@@ -165,19 +168,17 @@ class DFNetV2(nn.Module):
         return x
 
 
-def dfnetv1(pretrained=None):
+def dfnetv1():
     model = DFNetV1(num_classes=1000)
-    model = ModuleHelper.load_model(model, pretrained=pretrained, all_match=False)
     return model
 
 
-def dfnetv2(pretrained=None):
+def dfnetv2():
     """Constructs a ResNet-18 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on Places
     """
     model = DFNetV2(num_classes=1000)
-    model = ModuleHelper.load_model(model, pretrained=pretrained, all_match=False)
     return model
 
 if __name__ == "__main__":

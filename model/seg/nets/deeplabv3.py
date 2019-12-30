@@ -8,7 +8,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from model.backbone.backbone_selector import BackboneSelector
 from lib.model.module_helper import ModuleHelper
 from model.seg.loss.loss import BASE_LOSS_DICT
 
@@ -66,7 +65,10 @@ class DeepLabV3(nn.Module):
         super(DeepLabV3, self).__init__()
         self.configer = configer
         self.num_classes = self.configer.get('data', 'num_classes')
-        self.backbone = BackboneSelector(configer).get_backbone()
+        self.backbone = ModuleHelper.get_backbone(
+            backbone=self.configer.get('network.backbone'),
+            pretrained=self.configer.get('network.pretrained')
+        )
 
         self.head = nn.Sequential(ASPPModule(self.backbone.get_num_features(), 
                                              norm_type=self.configer.get('network', 'norm_type')),

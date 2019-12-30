@@ -8,15 +8,18 @@ import torch.nn as nn
 import torch.nn.functional as F
 from collections import OrderedDict
 
-from model.backbone.backbone_selector import BackboneSelector
 from model.det.layers.yolo_detection_layer import YOLODetectionLayer
+from lib.model.module_helper import ModuleHelper
 
 
 class DarkNetYolov3(nn.Module):
     def __init__(self, configer):
         super(DarkNetYolov3, self).__init__()
         self.configer = configer
-        self.backbone = BackboneSelector(configer).get_backbone()
+        self.backbone = ModuleHelper.get_backbone(
+            backbone=configer.get('network.backbone'),
+            pretrained=configer.get('network.pretrained', default=None)
+        )
         self.yolov3_head = Yolov3Head(configer, out_filters=self.backbone.num_features)
         self.yolo_detection_layer = YOLODetectionLayer(self.configer)
 
