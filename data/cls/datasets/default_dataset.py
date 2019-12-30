@@ -8,7 +8,7 @@ import json
 import os
 import torch.utils.data as data
 
-from lib.exts.tools.parallel.data_container import DataContainer
+from lib.parallel.data_container import DataContainer
 from lib.tools.helper.image_helper import ImageHelper
 from lib.tools.util.logger import Logger as Log
 

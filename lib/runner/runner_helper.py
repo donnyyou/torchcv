@@ -49,7 +49,7 @@ class RunnerHelper(object):
             return net
 
         net = net.to(torch.device('cpu' if runner.configer.get('gpu') is None else 'cuda'))
-        from lib.exts.tools.parallel.data_parallel import ParallelModel
+        from lib.parallel.data_parallel import ParallelModel
         return ParallelModel(net, gather_=runner.configer.get('network', 'gather'))
 
     @staticmethod
