@@ -1155,33 +1155,35 @@ class PILAugCompose(object):
         self.configer = configer
         self.transforms = dict()
         self.split = split
-        aug_trans = self.configer.get(split, 'aug_trans')
+        self.trans_dict = self.configer.get(split, 'aug_trans')
         shuffle_train_trans = []
-        if 'shuffle_trans_seq' in aug_trans:
-            if isinstance(aug_trans['shuffle_trans_seq'][0], list):
-                train_trans_seq_list = aug_trans['shuffle_trans_seq']
+        if 'shuffle_trans_seq' in self.trans_dict:
+            if isinstance(self.trans_dict['shuffle_trans_seq'][0], list):
+                train_trans_seq_list = self.trans_dict['shuffle_trans_seq']
                 for train_trans_seq in train_trans_seq_list:
                     shuffle_train_trans += train_trans_seq
 
             else:
-                shuffle_train_trans = aug_trans['shuffle_trans_seq']
+                shuffle_train_trans = self.trans_dict['shuffle_trans_seq']
 
-        for trans in aug_trans['trans_seq'] + shuffle_train_trans:
-            self.transforms[trans] = PIL_AUGMENTATIONS_DICT[trans](**aug_trans[trans])
+        for trans in self.trans_dict['trans_seq'] + shuffle_train_trans:
+            if 'func' in self.trans_dict[trans]:
+                self.transforms[trans] = PIL_AUGMENTATIONS_DICT[self.trans_dict[trans]['func']](**self.trans_dict[trans]['params'])
+            else:
+                self.transforms[trans] = PIL_AUGMENTATIONS_DICT[trans](**self.trans_dict[trans])
 
     def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
         assert self.configer.get('data', 'input_mode') == 'RGB'
-        aug_trans = self.configer.get(self.split, 'aug_trans')
         shuffle_trans_seq = []
-        if 'shuffle_trans_seq' in aug_trans:
-            if isinstance(aug_trans['shuffle_trans_seq'][0], list):
-                shuffle_trans_seq_list = aug_trans['shuffle_trans_seq']
+        if 'shuffle_trans_seq' in self.trans_dict:
+            if isinstance(self.trans_dict['shuffle_trans_seq'][0], list):
+                shuffle_trans_seq_list = self.trans_dict['shuffle_trans_seq']
                 shuffle_trans_seq = shuffle_trans_seq_list[random.randint(0, len(shuffle_trans_seq_list))]
             else:
-                shuffle_trans_seq = aug_trans['shuffle_trans_seq']
+                shuffle_trans_seq = self.trans_dict['shuffle_trans_seq']
                 random.shuffle(shuffle_trans_seq)
 
-        for trans_key in (shuffle_trans_seq + aug_trans['trans_seq']):
+        for trans_key in (shuffle_trans_seq + self.trans_dict['trans_seq']):
             (img, labelmap, maskmap, kpts,
              bboxes, labels, polygons) = self.transforms[trans_key](img, labelmap, maskmap,
                                                                     kpts, bboxes, labels, polygons)
