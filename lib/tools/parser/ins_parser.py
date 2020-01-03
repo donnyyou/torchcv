@@ -109,6 +109,6 @@ if __name__ == "__main__":
 
     args_parser = parser.parse_args()
 
-    ins_parser = InsParser(Configer(hypes_file=args_parser.hypes_file))
+    ins_parser = InsParser(Configer(config_file=args_parser.config_file))
     ins_parser.parse_img_det(args_parser.image_file, args_parser.json_file)
     ins_parser.parse_dir_det(args_parser.image_dir, args_parser.json_dir)
