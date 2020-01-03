@@ -1,5 +1,6 @@
 from .alexnet import *
 from .resnet import *
+from .deepbase_resnet import *
 from .vgg import *
 from .squeezenet import *
 from .inception import *
