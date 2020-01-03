@@ -9,6 +9,73 @@ import random
 import math
 import cv2
 import numpy as np
+import imgaug.augmenters as iaa
+
+
+class RandomBlur(object):
+    def __init__(self, ratio=0.5):
+        self.ratio = ratio
+        self.blur_list = [
+            iaa.GaussianBlur(sigma=(0.0, 3.0)),
+            iaa.AverageBlur(k=(2, 11)),
+            iaa.AverageBlur(k=((5, 11), (1, 3))),
+            iaa.MedianBlur(k=(3, 11)),
+        ]
+
+    def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
+        assert isinstance(img, (np.ndarray, list))
+        if random.random() > self.ratio:
+            return img, labelmap, maskmap, kpts, bboxes, labels, polygons
+
+        method = random.randint(0, len(self.blur_list)-1)
+        img = self.blur_list[method].augment_image(img)
+        return img, labelmap, maskmap, kpts, bboxes, labels, polygons
+
+
+class RandomErase(object):
+    """ Randomly selects a rectangle region in an image and erases its pixels.
+        'Random Erasing Data Augmentation' by Zhong et al.
+        See https://arxiv.org/pdf/1708.04896.pdf
+    Args:
+         probability: The probability that the Random Erasing operation will be performed.
+         sl: Minimum proportion of erased area against input image.
+         sh: Maximum proportion of erased area against input image.
+         r1: Minimum aspect ratio of erased area.
+         mean: Erasing value.
+    """
+
+    def __init__(self, ratio=0.5, erase_range=(0.02, 0.4), aspect=0.3, mean=[104, 117, 123]):
+        self.ratio = ratio
+        self.mean = mean
+        self.erase_range = erase_range
+        self.aspect = aspect
+
+    def __call__(self, img, labelmap=None, maskmap=None, kpts=None, bboxes=None, labels=None, polygons=None):
+        assert isinstance(img, (np.ndarray, list))
+        if random.random() > self.ratio:
+            return img, labelmap, maskmap, kpts, bboxes, labels, polygons
+
+        height, width, channels = img.shape
+        for _ in range(100):
+            area = height * width
+            target_area = random.uniform(self.erase_range[0], self.erase_range[1]) * area
+            aspect_ratio = random.uniform(self.aspect, 1 / self.aspect)
+
+            h = int(round(math.sqrt(target_area * aspect_ratio)))
+            w = int(round(math.sqrt(target_area / aspect_ratio)))
+
+            if w < width and h < height:
+                x1 = random.randint(0, height - h)
+                y1 = random.randint(0, width - w)
+                if channels == 3:
+                    img[x1:x1 + h, y1:y1 + w, 0] = self.mean[0]
+                    img[x1:x1 + h, y1:y1 + w, 1] = self.mean[1]
+                    img[x1:x1 + h, y1:y1 + w, 2] = self.mean[2]
+                else:
+                    img[x1:x1 + h, y1:y1 + w, 0] = self.mean[0]
+                return img, labelmap, maskmap, kpts, bboxes, labels, polygons
+
+        return img, labelmap, maskmap, kpts, bboxes, labels, polygons
 
 
 class RandomPad(object):
@@ -1071,11 +1138,13 @@ class Resize(object):
 
 
 CV2_AUGMENTATIONS_DICT = {
+    'random_blur': RandomBlur,
     'random_saturation': RandomSaturation,
     'random_hue': RandomHue,
     'random_perm': RandomPerm,
     'random_contrast': RandomContrast,
     'random_brightness': RandomBrightness,
+    'random_erase': RandomErase,
     'random_pad': RandomPad,
     'random_border': RandomBorder,
     'random_hflip': RandomHFlip,
