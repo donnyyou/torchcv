@@ -3,9 +3,9 @@ import torch.nn as nn
 from .utils import load_state_dict_from_url
 
 
-__all__ = ['ResNet', 'resnet18', 'resnet34', 'resnet50', 'resnet101',
-           'resnet152', 'resnext50_32x4d', 'resnext101_32x8d',
-           'wide_resnet50_2', 'wide_resnet101_2']
+__all__ = ['DeepbaseResNet', 'deepbase_resnet18', 'deepbase_resnet34', 'deepbase_resnet50', 'deepbase_resnet101',
+           'deepbaseresnet152', 'deepbase_resnext50_32x4d', 'deepbase_resnext101_32x8d',
+           'deepbase_wide_resnet50_2', 'deepbase_wide_resnet101_2']
 
 
 model_urls = {
@@ -117,18 +117,19 @@ class Bottleneck(nn.Module):
         return out
 
 
-class ResNet(nn.Module):
+class DeepbaseResNet(nn.Module):
 
     def __init__(self, block, layers, num_classes=1000, zero_init_residual=False,
                  groups=1, width_per_group=64, replace_stride_with_dilation=None,
-                 norm_layer=None):
-        super(ResNet, self).__init__()
+                 norm_layer=None, classifier=True):
+        super(DeepbaseResNet, self).__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
         self._norm_layer = norm_layer
 
         self.inplanes = 128
         self.dilation = 1
+        self.classifier = classifier
         if replace_stride_with_dilation is None:
             # each element in the tuple indicates if we should replace
             # the 2x2 stride with a dilated convolution instead
@@ -156,8 +157,9 @@ class ResNet(nn.Module):
                                        dilate=replace_stride_with_dilation[1])
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2,
                                        dilate=replace_stride_with_dilation[2])
-        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-        self.fc = nn.Linear(512 * block.expansion, num_classes)
+        if self.classifier:
+            self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+            self.fc = nn.Linear(512 * block.expansion, num_classes)
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -201,6 +203,7 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def _forward_impl(self, x):
+        out_dict = dict()
         # See note [TorchScript super()]
         x = self.conv1(x)
         x = self.bn1(x)
@@ -215,22 +218,28 @@ class ResNet(nn.Module):
         x = self.maxpool(x)
 
         x = self.layer1(x)
+        out_dict['layer1'] = x
         x = self.layer2(x)
+        out_dict['layer2'] = x
         x = self.layer3(x)
+        out_dict['layer3'] = x
         x = self.layer4(x)
+        out_dict['layer4'] = x
 
-        x = self.avgpool(x)
-        x = torch.flatten(x, 1)
-        x = self.fc(x)
+        if self.classifier:
+            x = self.avgpool(x)
+            x = torch.flatten(x, 1)
+            x = self.fc(x)
+            out_dict['fc'] = x
 
-        return x
+        return out_dict
 
     def forward(self, x):
         return self._forward_impl(x)
 
 
 def _resnet(arch, block, layers, pretrained, progress, **kwargs):
-    model = ResNet(block, layers, **kwargs)
+    model = DeepbaseResNet(block, layers, **kwargs)
     if pretrained:
         state_dict = load_state_dict_from_url(model_urls[arch],
                                               progress=progress)
@@ -239,7 +248,7 @@ def _resnet(arch, block, layers, pretrained, progress, **kwargs):
 
 
 def deepbase_resnet18(pretrained=False, progress=True, **kwargs):
-    r"""ResNet-18 model from
+    r"""DeepbaseResNet-18 model from
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
 
     Args:
@@ -251,7 +260,7 @@ def deepbase_resnet18(pretrained=False, progress=True, **kwargs):
 
 
 def deepbase_resnet34(pretrained=False, progress=True, **kwargs):
-    r"""ResNet-34 model from
+    r"""DeepbaseResNet-34 model from
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
 
     Args:
@@ -263,7 +272,7 @@ def deepbase_resnet34(pretrained=False, progress=True, **kwargs):
 
 
 def deepbase_resnet50(pretrained=False, progress=True, **kwargs):
-    r"""ResNet-50 model from
+    r"""DeepbaseResNet-50 model from
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
 
     Args:
@@ -274,8 +283,32 @@ def deepbase_resnet50(pretrained=False, progress=True, **kwargs):
                    **kwargs)
 
 
+def deepbase_resnet50_d8(pretrained=False, progress=True, **kwargs):
+    r"""DeepbaseResNet-50 model from
+    `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
+
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        progress (bool): If True, displays a progress bar of the download to stderr
+    """
+    return _resnet('resnet50', Bottleneck, [3, 4, 6, 3], pretrained, progress,
+                   replace_stride_with_dilation=[False, True, True], **kwargs)
+
+
+def deepbase_resnet50_d16(pretrained=False, progress=True, **kwargs):
+    r"""DeepbaseResNet-50 model from
+    `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
+
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        progress (bool): If True, displays a progress bar of the download to stderr
+    """
+    return _resnet('resnet50', Bottleneck, [3, 4, 6, 3], pretrained, progress,
+                   replace_stride_with_dilation=[False, False, True], **kwargs)
+
+
 def deepbase_resnet101(pretrained=False, progress=True, **kwargs):
-    r"""ResNet-101 model from
+    r"""DeepbaseResNet-101 model from
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
 
     Args:
@@ -286,8 +319,32 @@ def deepbase_resnet101(pretrained=False, progress=True, **kwargs):
                    **kwargs)
 
 
+def deepbase_resnet101_d8(pretrained=False, progress=True, **kwargs):
+    r"""DeepbaseResNet-101 model from
+    `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
+
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        progress (bool): If True, displays a progress bar of the download to stderr
+    """
+    return _resnet('resnet101', Bottleneck, [3, 4, 23, 3], pretrained, progress,
+                   replace_stride_with_dilation=[False, True, True], **kwargs)
+
+
+def deepbase_resnet101_d16(pretrained=False, progress=True, **kwargs):
+    r"""DeepbaseResNet-101 model from
+    `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
+
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        progress (bool): If True, displays a progress bar of the download to stderr
+    """
+    return _resnet('resnet101', Bottleneck, [3, 4, 23, 3], pretrained, progress,
+                   replace_stride_with_dilation=[False, False, True], **kwargs)
+
+
 def deepbase_resnet152(pretrained=False, progress=True, **kwargs):
-    r"""ResNet-152 model from
+    r"""DeepbaseResNet-152 model from
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
 
     Args:
@@ -327,13 +384,13 @@ def deepbase_resnext101_32x8d(pretrained=False, progress=True, **kwargs):
 
 
 def deepbase_wide_resnet50_2(pretrained=False, progress=True, **kwargs):
-    r"""Wide ResNet-50-2 model from
+    r"""Wide DeepbaseResNet-50-2 model from
     `"Wide Residual Networks" <https://arxiv.org/pdf/1605.07146.pdf>`_
 
-    The model is the same as ResNet except for the bottleneck number of channels
+    The model is the same as DeepbaseResNet except for the bottleneck number of channels
     which is twice larger in every block. The number of channels in outer 1x1
-    convolutions is the same, e.g. last block in ResNet-50 has 2048-512-2048
-    channels, and in Wide ResNet-50-2 has 2048-1024-2048.
+    convolutions is the same, e.g. last block in DeepbaseResNet-50 has 2048-512-2048
+    channels, and in Wide DeepbaseResNet-50-2 has 2048-1024-2048.
 
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -345,13 +402,13 @@ def deepbase_wide_resnet50_2(pretrained=False, progress=True, **kwargs):
 
 
 def deepbase_wide_resnet101_2(pretrained=False, progress=True, **kwargs):
-    r"""Wide ResNet-101-2 model from
+    r"""Wide DeepbaseResNet-101-2 model from
     `"Wide Residual Networks" <https://arxiv.org/pdf/1605.07146.pdf>`_
 
-    The model is the same as ResNet except for the bottleneck number of channels
+    The model is the same as DeepbaseResNet except for the bottleneck number of channels
     which is twice larger in every block. The number of channels in outer 1x1
-    convolutions is the same, e.g. last block in ResNet-50 has 2048-512-2048
-    channels, and in Wide ResNet-50-2 has 2048-1024-2048.
+    convolutions is the same, e.g. last block in DeepbaseResNet-50 has 2048-512-2048
+    channels, and in Wide DeepbaseResNet-50-2 has 2048-1024-2048.
 
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet

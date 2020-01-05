@@ -143,10 +143,11 @@ class DenseNet(nn.Module):
     __constants__ = ['features']
 
     def __init__(self, growth_rate=32, block_config=(6, 12, 24, 16),
-                 num_init_features=64, bn_size=4, drop_rate=0, num_classes=1000, memory_efficient=False):
+                 num_init_features=64, bn_size=4, drop_rate=0, num_classes=1000, memory_efficient=False, classifier=True):
 
         super(DenseNet, self).__init__()
 
+        self.classifier = classifier
         # First convolution
         self.features = nn.Sequential(OrderedDict([
             ('conv0', nn.Conv2d(3, num_init_features, kernel_size=7, stride=2,
@@ -178,8 +179,9 @@ class DenseNet(nn.Module):
         # Final batch norm
         self.features.add_module('norm5', nn.BatchNorm2d(num_features))
 
+        if self.classifier:
         # Linear layer
-        self.classifier = nn.Linear(num_features, num_classes)
+            self.classifier = nn.Linear(num_features, num_classes)
 
         # Official init from torch repo.
         for m in self.modules():
@@ -194,9 +196,11 @@ class DenseNet(nn.Module):
     def forward(self, x):
         features = self.features(x)
         out = F.relu(features, inplace=True)
-        out = F.adaptive_avg_pool2d(out, (1, 1))
-        out = torch.flatten(out, 1)
-        out = self.classifier(out)
+        if self.classifer:
+            out = F.adaptive_avg_pool2d(out, (1, 1))
+            out = torch.flatten(out, 1)
+            out = self.classifier(out)
+
         return out
 
 
