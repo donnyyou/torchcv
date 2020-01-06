@@ -50,7 +50,7 @@ class PPMBilinearDeepsup(nn.Module):
         ppm_out = [x]
         for pool_scale in self.ppm:
             ppm_out.append(F.interpolate(pool_scale(x), (input_size[2], input_size[3]),
-                                         mode='bilinear', align_corners=True))
+                                         mode='bilinear', align_corners=False))
 
         ppm_out = torch.cat(ppm_out, 1)
 
@@ -62,11 +62,16 @@ class PSPNet(nn.Sequential):
         super(PSPNet, self).__init__()
         self.configer = configer
         self.num_classes = self.configer.get('data', 'num_classes')
-        self.backbone = ModuleHelper.get_backbone(
+        base = ModuleHelper.get_backbone(
             backbone=self.configer.get('network.backbone'),
             pretrained=self.configer.get('network.pretrained')
         )
-        num_features = self.backbone.get_num_features()
+        self.stage1 = nn.Squential(
+            base.conv1, base.bn1, base.relu1, base.conv2, base.bn2, base.relu2, base.conv3, base.bn3,
+            base.relu3, base.max_pool, base.layer1, base.layer2, base.layer3
+        )
+        self.stage2 = base.layer4
+        num_features = 512 if 'resnet18' in self.configer.get('network.backbone') else 2048
         self.dsn = nn.Sequential(
             _ConvBatchNormReluBlock(num_features // 2, num_features // 4, 3, 1,
                                     norm_type=self.configer.get('network', 'norm_type')),
@@ -84,14 +89,15 @@ class PSPNet(nn.Sequential):
         self.valid_loss_dict = configer.get('loss', 'loss_weights', configer.get('loss.loss_type'))
 
     def forward(self, data_dict):
-        x = self.backbone(data_dict['img'])
-        aux_x = self.dsn(x[-2])
-        x = self.ppm(x[-1])
+        x = self.stage1(data_dict['img'])
+        aux_x = self.dsn(x)
+        x = self.stage2(x)
+        x = self.ppm(x)
         x = self.cls(x)
         x_dsn = F.interpolate(aux_x, size=(data_dict['img'].size(2), data_dict['img'].size(3)),
-                              mode="bilinear", align_corners=True)
+                              mode="bilinear", align_corners=False)
         x = F.interpolate(x, size=(data_dict['img'].size(2), data_dict['img'].size(3)),
-                          mode="bilinear", align_corners=True)
+                          mode="bilinear", align_corners=False)
         out_dict = dict(dsn_out=x_dsn, out=x)
         if self.configer.get('phase') == 'test':
             return out_dict
