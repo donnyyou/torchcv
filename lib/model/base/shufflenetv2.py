@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
-
-from lib.model.module_helper import ModuleHelper
+from .utils import load_state_dict_from_url
 
 
 __all__ = [
@@ -85,7 +84,7 @@ class InvertedResidual(nn.Module):
 
 
 class ShuffleNetV2(nn.Module):
-    def __init__(self, stages_repeats, stages_out_channels, num_classes=1000):
+    def __init__(self, stages_repeats, stages_out_channels, num_classes=1000, inverted_residual=InvertedResidual):
         super(ShuffleNetV2, self).__init__()
 
         if len(stages_repeats) != 3:
@@ -108,9 +107,9 @@ class ShuffleNetV2(nn.Module):
         stage_names = ['stage{}'.format(i) for i in [2, 3, 4]]
         for name, repeats, output_channels in zip(
                 stage_names, stages_repeats, self._stage_out_channels[1:]):
-            seq = [InvertedResidual(input_channels, output_channels, 2)]
+            seq = [inverted_residual(input_channels, output_channels, 2)]
             for i in range(repeats - 1):
-                seq.append(InvertedResidual(output_channels, output_channels, 1))
+                seq.append(inverted_residual(output_channels, output_channels, 1))
             setattr(self, name, nn.Sequential(*seq))
             input_channels = output_channels
 
@@ -123,7 +122,8 @@ class ShuffleNetV2(nn.Module):
 
         self.fc = nn.Linear(output_channels, num_classes)
 
-    def forward(self, x):
+    def _forward_impl(self, x):
+        # See note [TorchScript super()]
         x = self.conv1(x)
         x = self.maxpool(x)
         x = self.stage2(x)
@@ -134,18 +134,30 @@ class ShuffleNetV2(nn.Module):
         x = self.fc(x)
         return x
 
+    def forward(self, x):
+        return self._forward_impl(x)
+
 
 def _shufflenetv2(arch, pretrained, progress, *args, **kwargs):
     model = ShuffleNetV2(*args, **kwargs)
-    model = ModuleHelper.load_model(model, pretrained=pretrained)
+
+    if pretrained:
+        model_url = model_urls[arch]
+        if model_url is None:
+            raise NotImplementedError('pretrained {} is not supported as of now'.format(arch))
+        else:
+            state_dict = load_state_dict_from_url(model_url, progress=progress)
+            model.load_state_dict(state_dict)
+
     return model
 
 
-def shufflenet_v2_x0_5(pretrained=None, progress=True, **kwargs):
+def shufflenet_v2_x0_5(pretrained=False, progress=True, **kwargs):
     """
     Constructs a ShuffleNetV2 with 0.5x output channels, as described in
     `"ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design"
     <https://arxiv.org/abs/1807.11164>`_.
+
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
@@ -154,11 +166,12 @@ def shufflenet_v2_x0_5(pretrained=None, progress=True, **kwargs):
                          [4, 8, 4], [24, 48, 96, 192, 1024], **kwargs)
 
 
-def shufflenet_v2_x1_0(pretrained=None, progress=True, **kwargs):
+def shufflenet_v2_x1_0(pretrained=False, progress=True, **kwargs):
     """
     Constructs a ShuffleNetV2 with 1.0x output channels, as described in
     `"ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design"
     <https://arxiv.org/abs/1807.11164>`_.
+
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
@@ -167,11 +180,12 @@ def shufflenet_v2_x1_0(pretrained=None, progress=True, **kwargs):
                          [4, 8, 4], [24, 116, 232, 464, 1024], **kwargs)
 
 
-def shufflenet_v2_x1_5(pretrained=None, progress=True, **kwargs):
+def shufflenet_v2_x1_5(pretrained=False, progress=True, **kwargs):
     """
     Constructs a ShuffleNetV2 with 1.5x output channels, as described in
     `"ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design"
     <https://arxiv.org/abs/1807.11164>`_.
+
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
@@ -180,11 +194,12 @@ def shufflenet_v2_x1_5(pretrained=None, progress=True, **kwargs):
                          [4, 8, 4], [24, 176, 352, 704, 1024], **kwargs)
 
 
-def shufflenet_v2_x2_0(pretrained=None, progress=True, **kwargs):
+def shufflenet_v2_x2_0(pretrained=False, progress=True, **kwargs):
     """
     Constructs a ShuffleNetV2 with 2.0x output channels, as described in
     `"ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design"
     <https://arxiv.org/abs/1807.11164>`_.
+
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr

@@ -8,7 +8,6 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 
-from model.backbone.backbone_selector import BackboneSelector
 from lib.model.module_helper import ModuleHelper
 from model.seg.loss.loss import BASE_LOSS_DICT
 
@@ -34,7 +33,10 @@ class DenseASPP(nn.Module):
         d_feature0 = MODEL_CONFIG['d_feature0']
         d_feature1 = MODEL_CONFIG['d_feature1']
 
-        self.backbone = BackboneSelector(configer).get_backbone()
+        self.backbone = ModuleHelper.get_backbone(
+            backbone=self.configer.get('network.backbone'),
+            pretrained=self.configer.get('network.pretrained')
+        )
 
         num_features = self.backbone.get_num_features()
 

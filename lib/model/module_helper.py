@@ -12,11 +12,18 @@ try:
 except ImportError:
     from urllib.request import urlretrieve
 
+import lib.model.base as base
 from lib.tools.util.logger import Logger as Log
 
 
 class ModuleHelper(object):
 
+    @staticmethod
+    def get_backbone(backbone, pretrained=None, **kwargs):
+        model = base.__dict__[backbone](**kwargs)
+        model = ModuleHelper.load_model(model, pretrained=pretrained, all_match=False)
+        return model
+        
     @staticmethod
     def BNReLU(num_features, norm_type=None, **kwargs):
         if norm_type == 'batchnorm':

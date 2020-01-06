@@ -6,15 +6,18 @@
 import torch
 import torch.nn as nn
 
-from model.backbone.backbone_selector import BackboneSelector
 from model.pose.loss.loss import BASE_LOSS_DICT
+from lib.model.module_helper import ModuleHelper
 
 
 class OpenPose(nn.Module):
     def __init__(self, configer):
         super(OpenPose, self).__init__()
         self.configer = configer
-        self.backbone = BackboneSelector(configer).get_backbone()
+        self.backbone = ModuleHelper.get_backbone(
+            backbone=self.configer.get('network.backbone'),
+            pretrained=self.configer.get('network.pretrained')
+        )
         self.pose_model = PoseModel(configer, self.backbone.get_num_features())
         self.valid_loss_dict = configer.get('loss', 'loss_weights', configer.get('loss.loss_type'))
 

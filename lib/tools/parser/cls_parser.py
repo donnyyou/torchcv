@@ -49,8 +49,8 @@ class ClsParser(object):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--hypes_file', default=None, type=str,
-                        dest='hypes_file', help='The file of the hyper parameters.')
+    parser.add_argument('--config_file', default=None, type=str,
+                        dest='config_file', help='The file of the hyper parameters.')
     parser.add_argument('--data_dir', default=None, type=str,
                         dest='data_dir', help='The data dir of Det Parser.')
     parser.add_argument('--json_file', default=None, type=str,
@@ -58,5 +58,5 @@ if __name__ == "__main__":
 
     args_parser = parser.parse_args()
 
-    det_parser = ClsParser(Configer(hypes_file=args_parser.hypes_file))
+    det_parser = ClsParser(Configer(config_file=args_parser.config_file))
     det_parser.parse_dir_cls(args_parser.data_dir, args_parser.json_file)

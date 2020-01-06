@@ -9,9 +9,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from model.backbone.backbone_selector import BackboneSelector
 from model.cls.loss.loss import BASE_LOSS_DICT
 from model.cls.utils.metric_linear import LINEAR_DICT
+from lib.model.module_helper import ModuleHelper
 
 
 class ClsModel(nn.Module):
@@ -19,7 +19,7 @@ class ClsModel(nn.Module):
         super(ClsModel, self).__init__()
         self.configer = configer
         self.flag = flag if len(flag) == 0 else "{}_".format(flag)
-        self.backbone = BackboneSelector(configer).get_backbone(
+        self.backbone = ModuleHelper.get_backbone(
             backbone=configer.get('network.{}backbone'.format(self.flag)),
             pretrained=configer.get('network.{}pretrained'.format(self.flag))
         )

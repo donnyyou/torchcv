@@ -108,8 +108,8 @@ class PoseParser(object):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--hypes_file', default=None, type=str,
-                        dest='hypes_file', help='The file of the hyper parameters.')
+    parser.add_argument('--config_file', default=None, type=str,
+                        dest='config_file', help='The file of the hyper parameters.')
     parser.add_argument('--image_file', default=None, type=str,
                         dest='image_file', help='The image file of Pose Parser.')
     parser.add_argument('--json_file', default=None, type=str,
@@ -125,6 +125,6 @@ if __name__ == "__main__":
 
     args_parser = parser.parse_args()
 
-    pose_parser = PoseParser(Configer(hypes_file=args_parser.hypes_file))
+    pose_parser = PoseParser(Configer(config_file=args_parser.config_file))
     pose_parser.parse_img_pose(args_parser.image_file, args_parser.json_file, args_parser.mask_file)
     pose_parser.parse_dir_pose(args_parser.image_dir, args_parser.json_dir, args_parser.mask_dir)

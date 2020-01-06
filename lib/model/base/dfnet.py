@@ -12,7 +12,8 @@ import math
 import torch
 import torch.nn as nn
 
-from lib.model.module_helper import ModuleHelper
+
+__all__ = ['dfnetv1', 'dfnetv2']
 
 
 def conv3x3(in_planes, out_planes, stride=1):
@@ -71,6 +72,8 @@ class DFNetV1(nn.Module):
         self.stage4 = self._make_layer(256, 3, stride=2)
         self.stage5 = self._make_layer(512, 1, stride=1)
         self.num_features = 512 * BasicBlock.expansion
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+        self.fc = nn.Linear(512 * BasicBlock.expansion, num_classes)
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -104,6 +107,9 @@ class DFNetV1(nn.Module):
         x = self.stage3(x)  # 16x128
         x = self.stage4(x)  # 32x256
         x = self.stage5(x)  # 32x512
+        x = self.avgpool(x)
+        x = torch.flatten(x, 1)
+        x = self.fc(x)
         return x
 
 
@@ -127,6 +133,9 @@ class DFNetV2(nn.Module):
         self.stage4_1 = self._make_layer(256, 4, stride=2)
         self.stage4_2 = self._make_layer(512, 2, stride=1)
         self.num_features = 512 * BasicBlock.expansion
+
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+        self.fc = nn.Linear(512 * BasicBlock.expansion, num_classes)
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -162,22 +171,23 @@ class DFNetV2(nn.Module):
         x = self.stage3_2(x)  # 16x128
         x = self.stage4_1(x)  # 32x256
         x = self.stage4_2(x)  # 32x256
+        x = self.avgpool(x)
+        x = torch.flatten(x, 1)
+        x = self.fc(x)
         return x
 
 
-def dfnetv1(pretrained=None):
+def dfnetv1():
     model = DFNetV1(num_classes=1000)
-    model = ModuleHelper.load_model(model, pretrained=pretrained, all_match=False)
     return model
 
 
-def dfnetv2(pretrained=None):
+def dfnetv2():
     """Constructs a ResNet-18 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on Places
     """
     model = DFNetV2(num_classes=1000)
-    model = ModuleHelper.load_model(model, pretrained=pretrained, all_match=False)
     return model
 
 if __name__ == "__main__":

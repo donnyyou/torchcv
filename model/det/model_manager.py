@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!usr/bin/env python
 # -*- coding:utf-8 -*-
 # Author: Donny You(youansheng@gmail.com)
 # Select Det Model for object detection.
@@ -41,5 +41,5 @@ class ModelManager(object):
         if self.configer.get('network', 'gather'):
             return Loss(self.configer)
 
-        from lib.exts.tools.parallel.data_parallel import ParallelCriterion
+        from lib.parallel.data_parallel import ParallelCriterion
         return ParallelCriterion(Loss(self.configer))

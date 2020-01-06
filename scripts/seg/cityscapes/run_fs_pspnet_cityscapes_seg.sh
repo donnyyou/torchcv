@@ -10,7 +10,7 @@ cd ${WORK_DIR}
 
 DATA_DIR="/nas/dataset/CityScapes"
 
-BACKBONE="deepbase_resnet101_dilated8"
+BACKBONE="deepbase_resnet101_d8"
 MODEL_NAME="pspnet"
 CHECKPOINTS_NAME="fs_pspnet_cityscapes_seg"$2
 PRETRAINED_MODEL="./pretrained_models/3x3resnet101-imagenet.pth"

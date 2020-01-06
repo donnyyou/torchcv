@@ -1,4 +1,5 @@
 pyhocon
+imgaug
 flask>=1.0.0
 sklearn
 cython

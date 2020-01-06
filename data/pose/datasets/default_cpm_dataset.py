@@ -10,7 +10,7 @@ import torch
 import torch.utils.data as data
 
 from data.pose.utils.heatmap_generator import HeatmapGenerator
-from lib.exts.tools.parallel.data_container import DataContainer
+from lib.parallel.data_container import DataContainer
 from lib.tools.helper.json_helper import JsonHelper
 from lib.tools.helper.image_helper import ImageHelper
 from lib.tools.util.logger import Logger as Log

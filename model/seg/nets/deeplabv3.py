@@ -8,7 +8,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from model.backbone.backbone_selector import BackboneSelector
 from lib.model.module_helper import ModuleHelper
 from model.seg.loss.loss import BASE_LOSS_DICT
 
@@ -48,7 +47,7 @@ class ASPPModule(nn.Module):
     def forward(self, x):
         _, _, h, w = x.size()
 
-        feat1 = F.interpolate(self.conv1(x), size=(h, w), mode='bilinear', align_corners=True)
+        feat1 = F.interpolate(self.conv1(x), size=(h, w), mode='bilinear', align_corners=False)
 
         feat2 = self.conv2(x)
         feat3 = self.conv3(x)
@@ -66,10 +65,17 @@ class DeepLabV3(nn.Module):
         super(DeepLabV3, self).__init__()
         self.configer = configer
         self.num_classes = self.configer.get('data', 'num_classes')
-        self.backbone = BackboneSelector(configer).get_backbone()
-
-        self.head = nn.Sequential(ASPPModule(self.backbone.get_num_features(), 
-                                             norm_type=self.configer.get('network', 'norm_type')),
+        base = ModuleHelper.get_backbone(
+            backbone=self.configer.get('network.backbone'),
+            pretrained=self.configer.get('network.pretrained')
+        )
+        self.stage1 = nn.Sequential(
+            base.conv1, base.bn1, base.relu1, base.conv2, base.bn2, base.relu2, base.conv3, base.bn3,
+            base.relu3, base.maxpool, base.layer1, base.layer2, base.layer3
+        )
+        self.stage2 = base.layer4
+        num_features = 512 if 'resnet18' in self.configer.get('network.backbone') else 2048
+        self.head = nn.Sequential(ASPPModule(num_features, norm_type=self.configer.get('network', 'norm_type')),
                                   nn.Conv2d(512, self.num_classes, kernel_size=1, stride=1, padding=0, bias=True))
         self.dsn = nn.Sequential(
             nn.Conv2d(1024, 512, kernel_size=3, stride=1, padding=1),
@@ -80,13 +86,14 @@ class DeepLabV3(nn.Module):
         self.valid_loss_dict = configer.get('loss', 'loss_weights', configer.get('loss.loss_type'))
 
     def forward(self, data_dict):
-        x = self.backbone(data_dict['img'])
-        x_dsn = self.dsn(x[-2])
-        x = self.head(x[-1])
+        x = self.stage1(data_dict['img'])
+        x_dsn = self.dsn(x)
+        x = self.stage2(x)
+        x = self.head(x)
         x_dsn = F.interpolate(x_dsn, size=(data_dict['img'].size(2), data_dict['img'].size(3)),
-                              mode="bilinear", align_corners=True)
+                              mode="bilinear", align_corners=False)
         x = F.interpolate(x, size=(data_dict['img'].size(2), data_dict['img'].size(3)),
-                          mode="bilinear", align_corners=True)
+                          mode="bilinear", align_corners=False)
         out_dict = dict(dsn_out=x_dsn, out=x)
         if self.configer.get('phase') == 'test':
             return out_dict
