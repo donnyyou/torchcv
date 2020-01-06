@@ -121,7 +121,7 @@ class DeepbaseResNet(nn.Module):
 
     def __init__(self, block, layers, num_classes=1000, zero_init_residual=False,
                  groups=1, width_per_group=64, replace_stride_with_dilation=None,
-                 norm_layer=None, classifier=True):
+                 norm_layer=None):
         super(DeepbaseResNet, self).__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
@@ -129,7 +129,6 @@ class DeepbaseResNet(nn.Module):
 
         self.inplanes = 128
         self.dilation = 1
-        self.classifier = classifier
         if replace_stride_with_dilation is None:
             # each element in the tuple indicates if we should replace
             # the 2x2 stride with a dilated convolution instead
@@ -157,9 +156,8 @@ class DeepbaseResNet(nn.Module):
                                        dilate=replace_stride_with_dilation[1])
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2,
                                        dilate=replace_stride_with_dilation[2])
-        if self.classifier:
-            self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-            self.fc = nn.Linear(512 * block.expansion, num_classes)
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+        self.fc = nn.Linear(512 * block.expansion, num_classes)
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -203,7 +201,6 @@ class DeepbaseResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def _forward_impl(self, x):
-        out_dict = dict()
         # See note [TorchScript super()]
         x = self.conv1(x)
         x = self.bn1(x)
@@ -218,21 +215,14 @@ class DeepbaseResNet(nn.Module):
         x = self.maxpool(x)
 
         x = self.layer1(x)
-        out_dict['layer1'] = x
         x = self.layer2(x)
-        out_dict['layer2'] = x
         x = self.layer3(x)
-        out_dict['layer3'] = x
         x = self.layer4(x)
-        out_dict['layer4'] = x
 
-        if self.classifier:
-            x = self.avgpool(x)
-            x = torch.flatten(x, 1)
-            x = self.fc(x)
-            out_dict['fc'] = x
-
-        return out_dict
+        x = self.avgpool(x)
+        x = torch.flatten(x, 1)
+        x = self.fc(x)
+        return x
 
     def forward(self, x):
         return self._forward_impl(x)
