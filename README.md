@@ -13,7 +13,7 @@ This repository provides source code for most deep learning based cv problems. W
 
 ## Implemented Papers
 
-- [Image Classification](https://github.com/youansheng/torchcv/tree/master/methods/cls)
+- [Image Classification](https://github.com/youansheng/torchcv/tree/master/runner/cls)
     - VGG: Very Deep Convolutional Networks for Large-Scale Image Recognition
     - ResNet: Deep Residual Learning for Image Recognition
     - DenseNet: Densely Connected Convolutional Networks
@@ -21,35 +21,35 @@ This repository provides source code for most deep learning based cv problems. W
     - ShuffleNet V2: Practical Guidelines for Ecient CNN Architecture Design
     - Partial Order Pruning: for Best Speed/Accuracy Trade-off in Neural Architecture Search
 
-- [Semantic Segmentation](https://github.com/youansheng/torchcv/tree/master/methods/seg)
+- [Semantic Segmentation](https://github.com/youansheng/torchcv/tree/master/runner/seg)
     - DeepLabV3: Rethinking Atrous Convolution for Semantic Image Segmentation
     - PSPNet: Pyramid Scene Parsing Network
     - DenseASPP: DenseASPP for Semantic Segmentation in Street Scenes
     - Asymmetric Non-local Neural Networks for Semantic Segmentation
     
-- [Object Detection](https://github.com/youansheng/torchcv/tree/master/methods/det)
+- [Object Detection](https://github.com/youansheng/torchcv/tree/master/runner/det)
     - SSD: Single Shot MultiBox Detector
     - Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks
     - YOLOv3: An Incremental Improvement
     - FPN: Feature Pyramid Networks for Object Detection
 
-- [Pose Estimation](https://github.com/youansheng/torchcv/tree/master/methods/pose)
+- [Pose Estimation](https://github.com/youansheng/torchcv/tree/master/runner/pose)
     - CPM: Convolutional Pose Machines
     - OpenPose: Realtime Multi-Person 2D Pose Estimation using Part Affinity Fields
 
-- [Instance Segmentation](https://github.com/youansheng/torchcv/tree/master/methods/seg)
+- [Instance Segmentation](https://github.com/youansheng/torchcv/tree/master/runner/seg)
     - Mask R-CNN
 
-- [Generative Adversarial Networks](https://github.com/youansheng/torchcv/tree/master/methods/gan)
+- [Generative Adversarial Networks](https://github.com/youansheng/torchcv/tree/master/runner/gan)
     - Pix2pix: Image-to-Image Translation with Conditional Adversarial Nets
     - CycleGAN: Unpaired Image-to-Image Translation using Cycle-Consistent Adversarial Networks.
 
 
 ## QuickStart with TorchCV
-Now only support Python3.x, pytorch 1.0.
+Now only support Python3.x, pytorch 1.3.
 ```bash
 pip3 install -r requirements.txt
-cd exts
+cd lib/exts
 sh make.sh
 ```
 
@@ -107,9 +107,9 @@ All the performances showed below fully reimplemented the papers' results.
 
 
 ## DataSets with TorchCV
-TorchCV has defined the dataset format of all the tasks which you could check in the subdirs of [datasets](https://github.com/youansheng/torchcv/tree/master/datasets). Following is an example dataset directory trees for training semantic segmentation. You could preprocess the open datasets with the scripts in folder [datasets/seg/preprocess](https://github.com/youansheng/torchcv/tree/master/datasets/seg/preprocess)
+TorchCV has defined the dataset format of all the tasks which you could check in the subdirs of [data](https://github.com/youansheng/torchcv/tree/master/data). Following is an example dataset directory trees for training semantic segmentation. You could preprocess the open datasets with the scripts in folder [data/seg/preprocess](https://github.com/youansheng/torchcv/tree/master/data/seg/preprocess)
 ```
-DataSet
+Dataset
     train
         image
             00001.jpg/png
