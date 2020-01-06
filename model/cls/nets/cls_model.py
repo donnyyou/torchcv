@@ -9,7 +9,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-import model.util as util
 from model.cls.loss.loss import BASE_LOSS_DICT
 from model.cls.utils.metric_linear import LINEAR_DICT
 from lib.model.module_helper import ModuleHelper

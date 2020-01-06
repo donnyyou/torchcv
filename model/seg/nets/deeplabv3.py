@@ -69,9 +69,9 @@ class DeepLabV3(nn.Module):
             backbone=self.configer.get('network.backbone'),
             pretrained=self.configer.get('network.pretrained')
         )
-        self.stage1 = nn.Squential(
+        self.stage1 = nn.Sequential(
             base.conv1, base.bn1, base.relu1, base.conv2, base.bn2, base.relu2, base.conv3, base.bn3,
-            base.relu3, base.max_pool, base.layer1, base.layer2, base.layer3
+            base.relu3, base.maxpool, base.layer1, base.layer2, base.layer3
         )
         self.stage2 = base.layer4
         num_features = 512 if 'resnet18' in self.configer.get('network.backbone') else 2048

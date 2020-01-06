@@ -19,8 +19,8 @@ from lib.tools.util.logger import Logger as Log
 class ModuleHelper(object):
 
     @staticmethod
-    def get_backbone(model_name, pretrained=None, **kwargs):
-        model = base.__dict__[model_name](**kwargs)
+    def get_backbone(backbone, pretrained=None, **kwargs):
+        model = base.__dict__[backbone](**kwargs)
         model = ModuleHelper.load_model(model, pretrained=pretrained, all_match=False)
         return model
         

@@ -12,8 +12,6 @@ import math
 import torch
 import torch.nn as nn
 
-from lib.model.module_helper import ModuleHelper
-
 
 __all__ = ['dfnetv1', 'dfnetv2']
 
