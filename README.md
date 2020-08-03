@@ -9,10 +9,10 @@
 ```
 
 This repository provides source code for most deep learning based cv problems. We'll do our best to keep this repository up-to-date.  If you do find a problem about this repository, please raise an issue or submit a pull request.
-
-![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `Semantic Flow for Fast and Accurate Scene Parsing`
+```diff
+- Semantic Flow for Fast and Accurate Scene Parsing
 [Res18-SFNet(Code)](https://github.com/donnyyou/torchcv/blob/master/model/seg/nets/sfnet.py)
-
+```
 ## Implemented Papers
 
 - [Image Classification](https://github.com/youansheng/torchcv/tree/master/runner/cls)
