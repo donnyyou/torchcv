@@ -11,7 +11,7 @@
 This repository provides source code for most deep learning based cv problems. We'll do our best to keep this repository up-to-date.  If you do find a problem about this repository, please raise an issue or submit a pull request.
 ```diff
 - Semantic Flow for Fast and Accurate Scene Parsing
-- Code: Res18-SFNet (model/seg/nets/sfnet.py)
+- Code and models: https://github.com/lxtGH/SFSegNets
 ```
 ## Implemented Papers
 
